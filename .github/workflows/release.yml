@@ -3,12 +3,12 @@ name: Build and Release
 on:
   push:
     tags:
-      - 'v*.*.*'        # triggers on v1.0.0, v1.1.0, etc.
-  workflow_dispatch:    # allows manual trigger from GitHub UI
+      - 'v*.*.*'       # triggers on v1.0.0, v1.1.0, etc.
+  workflow_dispatch:   # allows manual trigger from GitHub UI
 
 jobs:
   build-windows:
-    runs-on: windows-latest
+    runs-on: windows-2022   # pinned — avoids VS 2026/node-gyp issues on windows-latest
 
     steps:
       - name: Checkout code
@@ -28,8 +28,8 @@ jobs:
         env:
           NODE_ENV: production
 
-      - name: Build Windows installer
-        run: npm run dist:win
+      - name: Build and publish Windows installer
+        run: npx electron-builder --win --x64 --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_ENV: production

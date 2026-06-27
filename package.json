@@ -99,6 +99,11 @@
       "createStartMenuShortcut": true,
       "shortcutName": "DericBI Instructor",
       "deleteAppDataOnUninstall": false
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "Deric254",
+      "repo": "dericbi-instructor"
     }
   }
 }
