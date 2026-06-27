@@ -1,0 +1,32 @@
+{
+  "module": "statistics",
+  "version": "1.0",
+  "lessons": [
+    {
+      "id": "stat-descriptive",
+      "title": "Descriptive Statistics",
+      "description": "Mean, median, std, variance — summarizing data numerically",
+      "level": "beginner",
+      "prerequisites": [],
+      "estimated_min": 35,
+      "sort_order": 1,
+      "theory_md": "## Descriptive Statistics\n\nDescriptive stats summarize what data looks like.\n\n**Measures of center:**\n- **Mean** — arithmetic average. Sensitive to outliers.\n- **Median** — middle value. Robust to outliers.\n- **Mode** — most frequent value.\n\n**Measures of spread:**\n- **Range** — max - min\n- **Variance** — average squared deviation from mean\n- **Std Dev** — square root of variance. In original units.\n- **IQR** — Q3 - Q1 (middle 50%)\n\n**In Python:**\n```python\nimport numpy as np\nimport pandas as pd\n\ndata = [12000, 15000, 11000, 85000, 13000, 14000]\nprint(f'Mean:   {np.mean(data):,.0f}')\nprint(f'Median: {np.median(data):,.0f}')\nprint(f'Std:    {np.std(data):,.0f}')\nprint(f'IQR:    {np.percentile(data,75)-np.percentile(data,25):,.0f}')\n```\n\n**In SQL:**\n```sql\nSELECT\n  AVG(bill_amount) as mean,\n  MIN(bill_amount) as min_val,\n  MAX(bill_amount) as max_val\nFROM billing;\n```\n\n**Business insight:** When mean >> median, the distribution is skewed (outliers pulling average up). Use median for 'typical' in those cases.",
+      "exercises": [
+        { "id": "stat-d1-e1", "title": "Detect Outlier Effect", "prompt": "sales = [15000, 18000, 12000, 14000, 250000, 16000, 13000]. Calculate mean and median. Print both, then print whether the distribution is skewed and why.", "hint_1": "import numpy as np. Use np.mean() and np.median()", "hint_2": "If mean >> median, skewed right (outlier pulling mean up).", "hint_3": "import numpy as np\nsales = [15000, 18000, 12000, 14000, 250000, 16000, 13000]\nm = np.mean(sales)\nmed = np.median(sales)\nprint(f'Mean: {m:,.0f}')\nprint(f'Median: {med:,.0f}')\nif m > med * 1.2:\n    print('Right-skewed: outlier is pulling the mean up. Use median for typical value.')\nelse:\n    print('Approximately symmetric.')", "solution": "import numpy as np\nsales = [15000, 18000, 12000, 14000, 250000, 16000, 13000]\nm = np.mean(sales)\nmed = np.median(sales)\nprint(f'Mean: {m:,.0f}')\nprint(f'Median: {med:,.0f}')\nif m > med * 1.2:\n    print('Right-skewed: outlier is pulling the mean up. Use median for typical value.')\nelse:\n    print('Approximately symmetric.')", "evaluation_mode": "ai_review", "points": 30 }
+      ]
+    },
+    {
+      "id": "stat-correlation",
+      "title": "Correlation Analysis",
+      "description": "Measure relationships between variables",
+      "level": "intermediate",
+      "prerequisites": ["stat-descriptive"],
+      "estimated_min": 40,
+      "sort_order": 2,
+      "theory_md": "## Correlation\n\nCorrelation measures the strength and direction of a linear relationship between two variables.\n\n**Pearson r:** -1 to +1\n- +1 = perfect positive\n- 0 = no linear relationship\n- -1 = perfect negative\n\n**Interpretation guide:**\n- |r| < 0.3 = weak\n- 0.3-0.7 = moderate\n- |r| > 0.7 = strong\n\n⚠️ **Correlation ≠ Causation**\n\n**In Python:**\n```python\nimport pandas as pd\nimport numpy as np\n\nnp.random.seed(42)\ndf = pd.DataFrame({\n    'advertising': np.random.normal(5000, 1000, 50),\n    'sales': np.random.normal(50000, 10000, 50)\n})\ndf['sales'] = df['sales'] + df['advertising'] * 8\n\ncorr = df.corr().round(2)\nprint(corr)\n\n# Single pair\nr = df['advertising'].corr(df['sales'])\nprint(f'r = {r:.3f}')\n```\n\n**In SQL (approximate via normalized covariance):**\n```sql\nSELECT\n  (AVG(age * bill_amount) - AVG(age) * AVG(bill_amount)) /\n  (stddev(age) * stddev(bill_amount)) AS correlation\nFROM patients p JOIN billing b ON p.patient_id = b.patient_id;\n```",
+      "exercises": [
+        { "id": "stat-co1-e1", "title": "Correlation Matrix", "prompt": "Create a DataFrame with 100 rows (np.random.seed(1)): ad_spend (normal 10000,2000), clicks (ad_spend/10 + normal noise 0,50), sales (clicks*500 + normal 0,5000). Print the correlation matrix rounded to 2 decimals.", "hint_1": "df.corr().round(2) gives the full matrix.", "hint_2": "np.random.seed(1)\nn=100\nad = np.random.normal(10000,2000,n)\nclicks = ad/10 + np.random.normal(0,50,n)\nsales = clicks*500 + np.random.normal(0,5000,n)", "hint_3": "import pandas as pd\nimport numpy as np\nnp.random.seed(1)\nn=100\nad = np.random.normal(10000,2000,n)\nclicks = ad/10 + np.random.normal(0,50,n)\nsales = clicks*500 + np.random.normal(0,5000,n)\ndf = pd.DataFrame({'ad_spend':ad.round(0),'clicks':clicks.round(0),'sales':sales.round(0)})\nprint(df.corr().round(2))", "solution": "import pandas as pd\nimport numpy as np\nnp.random.seed(1)\nn=100\nad = np.random.normal(10000,2000,n)\nclicks = ad/10 + np.random.normal(0,50,n)\nsales = clicks*500 + np.random.normal(0,5000,n)\ndf = pd.DataFrame({'ad_spend':ad.round(0),'clicks':clicks.round(0),'sales':sales.round(0)})\nprint(df.corr().round(2))", "evaluation_mode": "ai_review", "points": 35 }
+      ]
+    }
+  ]
+}

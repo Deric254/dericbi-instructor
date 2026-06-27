@@ -1,0 +1,165 @@
+{
+  "module": "sql",
+  "version": "1.0",
+  "lessons": [
+    {
+      "id": "sql-select",
+      "title": "SELECT & FROM",
+      "description": "Retrieve data from tables — your first SQL statement",
+      "level": "beginner",
+      "prerequisites": [],
+      "estimated_min": 20,
+      "sort_order": 1,
+      "theory_md": "## SELECT & FROM\n\nSQL retrieves data using SELECT and FROM.\n\n```sql\nSELECT column1, column2 FROM table_name;\nSELECT * FROM table_name;  -- all columns\n```\n\n**Key rules:**\n- `*` means all columns\n- Column names separated by commas\n- Semicolon ends the statement\n- SQL is case-insensitive (convention: KEYWORDS uppercase)\n\n**Business context:** Every report starts here. You're telling the database exactly what information to return.",
+      "exercises": [
+        { "id": "sql-s1-e1", "title": "Select All Columns", "prompt": "Retrieve all columns from the patients table.", "hint_1": "Use SELECT * to get all columns.", "hint_2": "SELECT * FROM table_name", "hint_3": "SELECT * FROM patients", "solution": "SELECT * FROM patients", "evaluation_mode": "exact", "points": 10 },
+        { "id": "sql-s1-e2", "title": "Select Two Columns", "prompt": "Retrieve only patient_name and age from the patients table.", "hint_1": "List column names separated by commas after SELECT.", "hint_2": "SELECT patient_name, age FROM patients", "hint_3": "SELECT patient_name, age FROM patients", "solution": "SELECT patient_name, age FROM patients", "evaluation_mode": "exact", "points": 10 },
+        { "id": "sql-s1-e3", "title": "Column Aliases", "prompt": "Select patient_name as 'Name' and age as 'Age' from patients.", "hint_1": "Use AS keyword: SELECT col AS 'Alias'", "hint_2": "SELECT patient_name AS 'Name', age AS 'Age' FROM patients", "hint_3": "SELECT patient_name AS 'Name', age AS 'Age' FROM patients", "solution": "SELECT patient_name AS 'Name', age AS 'Age' FROM patients", "evaluation_mode": "exact", "points": 15 },
+        { "id": "sql-s1-e4", "title": "LIMIT Results", "prompt": "Retrieve the first 10 rows from the patients table.", "hint_1": "Use LIMIT at the end of your query.", "hint_2": "SELECT * FROM patients LIMIT 10", "hint_3": "SELECT * FROM patients LIMIT 10", "solution": "SELECT * FROM patients LIMIT 10", "evaluation_mode": "exact", "points": 10 },
+        { "id": "sql-s1-e5", "title": "DISTINCT Values", "prompt": "Get a list of unique wards from the patients table. No duplicates.", "hint_1": "Use DISTINCT before the column name.", "hint_2": "SELECT DISTINCT ward FROM patients", "hint_3": "SELECT DISTINCT ward FROM patients", "solution": "SELECT DISTINCT ward FROM patients", "evaluation_mode": "exact", "points": 15 }
+      ]
+    },
+    {
+      "id": "sql-where",
+      "title": "WHERE Clause",
+      "description": "Filter rows using conditions",
+      "level": "beginner",
+      "prerequisites": ["sql-select"],
+      "estimated_min": 30,
+      "sort_order": 2,
+      "theory_md": "## WHERE Clause\n\nWHERE filters rows based on conditions.\n\n```sql\nSELECT * FROM patients WHERE age > 40;\nSELECT * FROM patients WHERE gender = 'Female';\nSELECT * FROM patients WHERE ward IN ('ICU', 'Emergency');\nSELECT * FROM patients WHERE age BETWEEN 20 AND 40;\nSELECT * FROM patients WHERE patient_name LIKE 'J%';\n```\n\n**Operators:**\n`=` `!=` `<` `>` `<=` `>=` `LIKE` `IN` `BETWEEN` `IS NULL` `IS NOT NULL`\n\n**Combine with:** `AND`, `OR`, `NOT`\n\n**Business context:** Segmentation. Instead of 50,000 records, isolate exactly the population relevant to the question.",
+      "exercises": [
+        { "id": "sql-w1-e1", "title": "Filter by Age", "prompt": "Find all patients older than 60.", "hint_1": "WHERE age > 60", "hint_2": "SELECT * FROM patients WHERE age > 60", "hint_3": "SELECT * FROM patients WHERE age > 60", "solution": "SELECT * FROM patients WHERE age > 60", "evaluation_mode": "exact", "points": 10 },
+        { "id": "sql-w1-e2", "title": "Filter by Ward", "prompt": "Find all patients in the ICU ward. Return patient_name, age, ward.", "hint_1": "WHERE ward = 'ICU'", "hint_2": "SELECT patient_name, age, ward FROM patients WHERE ward = 'ICU'", "hint_3": "SELECT patient_name, age, ward FROM patients WHERE ward = 'ICU'", "solution": "SELECT patient_name, age, ward FROM patients WHERE ward = 'ICU'", "evaluation_mode": "exact", "points": 10 },
+        { "id": "sql-w1-e3", "title": "AND Condition", "prompt": "Find female patients over age 50 in the ICU. Return patient_name, age, gender, ward.", "hint_1": "Combine conditions with AND.", "hint_2": "WHERE gender = 'Female' AND age > 50 AND ward = 'ICU'", "hint_3": "SELECT patient_name, age, gender, ward FROM patients WHERE gender = 'Female' AND age > 50 AND ward = 'ICU'", "solution": "SELECT patient_name, age, gender, ward FROM patients WHERE gender = 'Female' AND age > 50 AND ward = 'ICU'", "evaluation_mode": "exact", "points": 20 },
+        { "id": "sql-w1-e4", "title": "IN Operator", "prompt": "Find patients in either ICU or Emergency ward.", "hint_1": "Use WHERE ward IN ('value1', 'value2')", "hint_2": "WHERE ward IN ('ICU', 'Emergency')", "hint_3": "SELECT * FROM patients WHERE ward IN ('ICU', 'Emergency')", "solution": "SELECT * FROM patients WHERE ward IN ('ICU', 'Emergency')", "evaluation_mode": "exact", "points": 15 },
+        { "id": "sql-w1-e5", "title": "BETWEEN Range", "prompt": "Find patients aged between 30 and 50 (inclusive).", "hint_1": "Use BETWEEN low AND high", "hint_2": "WHERE age BETWEEN 30 AND 50", "hint_3": "SELECT * FROM patients WHERE age BETWEEN 30 AND 50", "solution": "SELECT * FROM patients WHERE age BETWEEN 30 AND 50", "evaluation_mode": "exact", "points": 15 },
+        { "id": "sql-w1-e6", "title": "LIKE Pattern", "prompt": "Find all patients whose name starts with 'J'. Return patient_name only.", "hint_1": "Use LIKE 'J%' — % is a wildcard for any characters.", "hint_2": "WHERE patient_name LIKE 'J%'", "hint_3": "SELECT patient_name FROM patients WHERE patient_name LIKE 'J%'", "solution": "SELECT patient_name FROM patients WHERE patient_name LIKE 'J%'", "evaluation_mode": "exact", "points": 15 },
+        { "id": "sql-w1-e7", "title": "IS NULL Check", "prompt": "Find patients who have not been discharged (discharge_date is NULL). Return patient_name and ward.", "hint_1": "Use IS NULL, not = NULL", "hint_2": "WHERE discharge_date IS NULL", "hint_3": "SELECT patient_name, ward FROM patients WHERE discharge_date IS NULL", "solution": "SELECT patient_name, ward FROM patients WHERE discharge_date IS NULL", "evaluation_mode": "exact", "points": 20 }
+      ]
+    },
+    {
+      "id": "sql-orderby",
+      "title": "ORDER BY & LIMIT",
+      "description": "Sort results and retrieve top N records",
+      "level": "beginner",
+      "prerequisites": ["sql-where"],
+      "estimated_min": 20,
+      "sort_order": 3,
+      "theory_md": "## ORDER BY\n\nSorts query results.\n\n```sql\nSELECT * FROM patients ORDER BY age;          -- ASC default\nSELECT * FROM patients ORDER BY age DESC;     -- descending\nSELECT * FROM patients ORDER BY ward, age;    -- multiple columns\n```\n\n**Top N pattern** — used in nearly every business report:\n```sql\nSELECT patient_name, age FROM patients\nORDER BY age DESC\nLIMIT 10;  -- top 10 oldest\n```\n\n**Business context:** 'Top 10 customers', 'Most expensive procedures', 'Oldest open tickets' — all ORDER BY + LIMIT.",
+      "exercises": [
+        { "id": "sql-o1-e1", "title": "Sort Ascending", "prompt": "List all patients ordered by age from youngest to oldest.", "hint_1": "ORDER BY age or ORDER BY age ASC", "hint_2": "SELECT * FROM patients ORDER BY age", "hint_3": "SELECT * FROM patients ORDER BY age ASC", "solution": "SELECT * FROM patients ORDER BY age", "evaluation_mode": "exact", "points": 10 },
+        { "id": "sql-o1-e2", "title": "Sort Descending", "prompt": "List patient_name and age, oldest patients first.", "hint_1": "Use ORDER BY age DESC", "hint_2": "SELECT patient_name, age FROM patients ORDER BY age DESC", "hint_3": "SELECT patient_name, age FROM patients ORDER BY age DESC", "solution": "SELECT patient_name, age FROM patients ORDER BY age DESC", "evaluation_mode": "exact", "points": 10 },
+        { "id": "sql-o1-e3", "title": "Top 5 Oldest", "prompt": "Find the 5 oldest patients. Return patient_name, ward, and age.", "hint_1": "Combine ORDER BY DESC with LIMIT", "hint_2": "ORDER BY age DESC LIMIT 5", "hint_3": "SELECT patient_name, ward, age FROM patients ORDER BY age DESC LIMIT 5", "solution": "SELECT patient_name, ward, age FROM patients ORDER BY age DESC LIMIT 5", "evaluation_mode": "exact", "points": 15 },
+        { "id": "sql-o1-e4", "title": "Multi-Column Sort", "prompt": "List all patients sorted by ward alphabetically, then by age descending within each ward.", "hint_1": "ORDER BY ward, age DESC", "hint_2": "SELECT * FROM patients ORDER BY ward, age DESC", "hint_3": "SELECT * FROM patients ORDER BY ward, age DESC", "solution": "SELECT * FROM patients ORDER BY ward, age DESC", "evaluation_mode": "exact", "points": 20 }
+      ]
+    },
+    {
+      "id": "sql-groupby",
+      "title": "GROUP BY & Aggregations",
+      "description": "Summarize data by category — the heart of analytical SQL",
+      "level": "beginner",
+      "prerequisites": ["sql-orderby"],
+      "estimated_min": 40,
+      "sort_order": 4,
+      "theory_md": "## GROUP BY & Aggregate Functions\n\nGroup rows and compute summaries per group.\n\n**Aggregate functions:**\n```sql\nCOUNT(*)          -- count rows\nCOUNT(column)     -- count non-null values\nSUM(column)       -- total\nAVG(column)       -- average\nMAX(column)       -- maximum\nMIN(column)       -- minimum\nROUND(value, 2)   -- round to 2 decimal places\n```\n\n**Pattern:**\n```sql\nSELECT category, COUNT(*) as count\nFROM table\nGROUP BY category\nORDER BY count DESC;\n```\n\n**Golden rule:** Every column in SELECT must either be in GROUP BY or inside an aggregate function.\n\n**Business context:** KPIs are GROUP BY queries. 'Revenue by region', 'Patients by diagnosis', 'Orders by month' — all of these.",
+      "exercises": [
+        { "id": "sql-g1-e1", "title": "Count by Ward", "prompt": "Count how many patients are in each ward. Return ward and patient_count, sorted by patient_count descending.", "hint_1": "SELECT ward, COUNT(*) as patient_count FROM patients GROUP BY ward", "hint_2": "Add ORDER BY patient_count DESC at the end.", "hint_3": "SELECT ward, COUNT(*) as patient_count FROM patients GROUP BY ward ORDER BY patient_count DESC", "solution": "SELECT ward, COUNT(*) as patient_count FROM patients GROUP BY ward ORDER BY patient_count DESC", "evaluation_mode": "exact", "points": 20 },
+        { "id": "sql-g1-e2", "title": "Average Age by Gender", "prompt": "Calculate the average age for each gender. Round to 1 decimal. Return gender and avg_age.", "hint_1": "Use ROUND(AVG(age), 1)", "hint_2": "SELECT gender, ROUND(AVG(age), 1) as avg_age FROM patients GROUP BY gender", "hint_3": "SELECT gender, ROUND(AVG(age), 1) as avg_age FROM patients GROUP BY gender", "solution": "SELECT gender, ROUND(AVG(age), 1) as avg_age FROM patients GROUP BY gender", "evaluation_mode": "exact", "points": 20 },
+        { "id": "sql-g1-e3", "title": "Total Revenue by Diagnosis", "prompt": "Find total bill_amount per diagnosis from the billing table. Return diagnosis and total_revenue, sorted highest first.", "hint_1": "SELECT diagnosis, SUM(bill_amount) as total_revenue FROM billing GROUP BY diagnosis", "hint_2": "Add ORDER BY total_revenue DESC", "hint_3": "SELECT diagnosis, SUM(bill_amount) as total_revenue FROM billing GROUP BY diagnosis ORDER BY total_revenue DESC", "solution": "SELECT diagnosis, SUM(bill_amount) as total_revenue FROM billing GROUP BY diagnosis ORDER BY total_revenue DESC", "evaluation_mode": "exact", "points": 25 },
+        { "id": "sql-g1-e4", "title": "Min and Max Age per Ward", "prompt": "For each ward, find the minimum and maximum patient age. Return ward, min_age, max_age.", "hint_1": "Use MIN(age) and MAX(age)", "hint_2": "SELECT ward, MIN(age) as min_age, MAX(age) as max_age FROM patients GROUP BY ward", "hint_3": "SELECT ward, MIN(age) as min_age, MAX(age) as max_age FROM patients GROUP BY ward", "solution": "SELECT ward, MIN(age) as min_age, MAX(age) as max_age FROM patients GROUP BY ward", "evaluation_mode": "exact", "points": 20 },
+        { "id": "sql-g1-e5", "title": "Count NULL Discharges", "prompt": "Count how many patients per ward are still admitted (discharge_date IS NULL). Return ward and still_admitted.", "hint_1": "Filter with WHERE discharge_date IS NULL, then GROUP BY ward.", "hint_2": "SELECT ward, COUNT(*) as still_admitted FROM patients WHERE discharge_date IS NULL GROUP BY ward", "hint_3": "SELECT ward, COUNT(*) as still_admitted FROM patients WHERE discharge_date IS NULL GROUP BY ward ORDER BY still_admitted DESC", "solution": "SELECT ward, COUNT(*) as still_admitted FROM patients WHERE discharge_date IS NULL GROUP BY ward ORDER BY still_admitted DESC", "evaluation_mode": "exact", "points": 25 }
+      ]
+    },
+    {
+      "id": "sql-having",
+      "title": "HAVING Clause",
+      "description": "Filter aggregated results — WHERE for GROUP BY",
+      "level": "intermediate",
+      "prerequisites": ["sql-groupby"],
+      "estimated_min": 25,
+      "sort_order": 5,
+      "theory_md": "## HAVING\n\nHAVING filters groups after aggregation. WHERE filters rows before aggregation.\n\n```sql\n-- WHERE: filters rows BEFORE grouping\nSELECT ward, COUNT(*) as cnt\nFROM patients\nWHERE gender = 'Female'   -- filter rows first\nGROUP BY ward\nHAVING cnt > 10;          -- then filter groups\n```\n\n**Rule:** Use WHERE for column conditions. Use HAVING for aggregate conditions.\n\n**Business context:** 'Show me only regions with sales > 100,000' — that's HAVING, not WHERE.",
+      "exercises": [
+        { "id": "sql-h1-e1", "title": "Wards with Many Patients", "prompt": "Find wards with more than 30 patients. Return ward and patient_count.", "hint_1": "GROUP BY ward, then use HAVING COUNT(*) > 30", "hint_2": "SELECT ward, COUNT(*) as patient_count FROM patients GROUP BY ward HAVING patient_count > 30", "hint_3": "SELECT ward, COUNT(*) as patient_count FROM patients GROUP BY ward HAVING COUNT(*) > 30", "solution": "SELECT ward, COUNT(*) as patient_count FROM patients GROUP BY ward HAVING COUNT(*) > 30", "evaluation_mode": "exact", "points": 25 },
+        { "id": "sql-h1-e2", "title": "High Revenue Diagnoses", "prompt": "Find diagnoses with total billing over 500,000. Return diagnosis and total_billed.", "hint_1": "SUM(bill_amount) > 500000 goes in HAVING, not WHERE.", "hint_2": "SELECT diagnosis, SUM(bill_amount) as total_billed FROM billing GROUP BY diagnosis HAVING total_billed > 500000", "hint_3": "SELECT diagnosis, SUM(bill_amount) as total_billed FROM billing GROUP BY diagnosis HAVING SUM(bill_amount) > 500000 ORDER BY total_billed DESC", "solution": "SELECT diagnosis, SUM(bill_amount) as total_billed FROM billing GROUP BY diagnosis HAVING SUM(bill_amount) > 500000 ORDER BY total_billed DESC", "evaluation_mode": "exact", "points": 30 },
+        { "id": "sql-h1-e3", "title": "WHERE and HAVING Together", "prompt": "Among female patients only, find wards with average age over 45. Return ward and avg_age.", "hint_1": "Use WHERE gender = 'Female' to filter rows, then HAVING AVG(age) > 45 to filter groups.", "hint_2": "SELECT ward, ROUND(AVG(age),1) as avg_age FROM patients WHERE gender = 'Female' GROUP BY ward HAVING AVG(age) > 45", "hint_3": "SELECT ward, ROUND(AVG(age),1) as avg_age FROM patients WHERE gender = 'Female' GROUP BY ward HAVING AVG(age) > 45 ORDER BY avg_age DESC", "solution": "SELECT ward, ROUND(AVG(age),1) as avg_age FROM patients WHERE gender = 'Female' GROUP BY ward HAVING AVG(age) > 45 ORDER BY avg_age DESC", "evaluation_mode": "exact", "points": 35 }
+      ]
+    },
+    {
+      "id": "sql-joins",
+      "title": "JOINs",
+      "description": "Combine data from multiple tables",
+      "level": "intermediate",
+      "prerequisites": ["sql-having"],
+      "estimated_min": 50,
+      "sort_order": 6,
+      "theory_md": "## JOINs\n\nReal databases split data across tables. JOINs combine them.\n\n**INNER JOIN** — only matched rows:\n```sql\nSELECT p.patient_name, b.bill_amount\nFROM patients p\nINNER JOIN billing b ON p.patient_id = b.patient_id;\n```\n\n**LEFT JOIN** — all left rows, NULL where no match:\n```sql\nSELECT p.patient_name, b.bill_amount\nFROM patients p\nLEFT JOIN billing b ON p.patient_id = b.patient_id;\n-- patients with no bill get NULL for bill_amount\n```\n\n**Aliases** (p, b) keep queries readable.\n\n**Business context:** Most reports require 3-5 tables. A patient report needs patients + billing + diagnoses. Mastering JOINs is the defining skill of a working analyst.",
+      "exercises": [
+        { "id": "sql-j1-e1", "title": "Basic INNER JOIN", "prompt": "Join patients and billing tables. Return patient_name, ward, diagnosis, and bill_amount.", "hint_1": "FROM patients p INNER JOIN billing b ON p.patient_id = b.patient_id", "hint_2": "SELECT p.patient_name, p.ward, b.diagnosis, b.bill_amount FROM patients p INNER JOIN billing b ON p.patient_id = b.patient_id", "hint_3": "SELECT p.patient_name, p.ward, b.diagnosis, b.bill_amount FROM patients p INNER JOIN billing b ON p.patient_id = b.patient_id", "solution": "SELECT p.patient_name, p.ward, b.diagnosis, b.bill_amount FROM patients p INNER JOIN billing b ON p.patient_id = b.patient_id", "evaluation_mode": "exact", "points": 30 },
+        { "id": "sql-j1-e2", "title": "JOIN with Filter", "prompt": "Find all ICU patients who have billing records. Return patient_name and bill_amount.", "hint_1": "JOIN the tables, then add WHERE p.ward = 'ICU'", "hint_2": "SELECT p.patient_name, b.bill_amount FROM patients p INNER JOIN billing b ON p.patient_id = b.patient_id WHERE p.ward = 'ICU'", "hint_3": "SELECT p.patient_name, b.bill_amount FROM patients p INNER JOIN billing b ON p.patient_id = b.patient_id WHERE p.ward = 'ICU'", "solution": "SELECT p.patient_name, b.bill_amount FROM patients p INNER JOIN billing b ON p.patient_id = b.patient_id WHERE p.ward = 'ICU'", "evaluation_mode": "exact", "points": 30 },
+        { "id": "sql-j1-e3", "title": "JOIN with Aggregation", "prompt": "For each ward, calculate the total billing amount. Return ward and total_billed, sorted highest first.", "hint_1": "Join the tables, then GROUP BY p.ward.", "hint_2": "SELECT p.ward, SUM(b.bill_amount) as total_billed FROM patients p INNER JOIN billing b ON p.patient_id = b.patient_id GROUP BY p.ward", "hint_3": "SELECT p.ward, SUM(b.bill_amount) as total_billed FROM patients p INNER JOIN billing b ON p.patient_id = b.patient_id GROUP BY p.ward ORDER BY total_billed DESC", "solution": "SELECT p.ward, SUM(b.bill_amount) as total_billed FROM patients p INNER JOIN billing b ON p.patient_id = b.patient_id GROUP BY p.ward ORDER BY total_billed DESC", "evaluation_mode": "exact", "points": 35 },
+        { "id": "sql-j1-e4", "title": "LEFT JOIN", "prompt": "List all patients and their bill_amount if they have one. Include patients with no billing records (show NULL). Return patient_name and bill_amount.", "hint_1": "Use LEFT JOIN so all patients appear even without a bill.", "hint_2": "SELECT p.patient_name, b.bill_amount FROM patients p LEFT JOIN billing b ON p.patient_id = b.patient_id", "hint_3": "SELECT p.patient_name, b.bill_amount FROM patients p LEFT JOIN billing b ON p.patient_id = b.patient_id", "solution": "SELECT p.patient_name, b.bill_amount FROM patients p LEFT JOIN billing b ON p.patient_id = b.patient_id", "evaluation_mode": "exact", "points": 30 },
+        { "id": "sql-j1-e5", "title": "Find Unbilled Patients", "prompt": "Find patients who have NO billing record. Return patient_name and ward.", "hint_1": "Use LEFT JOIN, then WHERE b.bill_id IS NULL to find unmatched rows.", "hint_2": "SELECT p.patient_name, p.ward FROM patients p LEFT JOIN billing b ON p.patient_id = b.patient_id WHERE b.bill_id IS NULL", "hint_3": "SELECT p.patient_name, p.ward FROM patients p LEFT JOIN billing b ON p.patient_id = b.patient_id WHERE b.bill_id IS NULL", "solution": "SELECT p.patient_name, p.ward FROM patients p LEFT JOIN billing b ON p.patient_id = b.patient_id WHERE b.bill_id IS NULL", "evaluation_mode": "exact", "points": 40 }
+      ]
+    },
+    {
+      "id": "sql-subqueries",
+      "title": "Subqueries",
+      "description": "Queries inside queries — powerful multi-step logic",
+      "level": "intermediate",
+      "prerequisites": ["sql-joins"],
+      "estimated_min": 40,
+      "sort_order": 7,
+      "theory_md": "## Subqueries\n\nA subquery is a query nested inside another query.\n\n**In WHERE:**\n```sql\n-- Patients older than the average age\nSELECT patient_name, age\nFROM patients\nWHERE age > (SELECT AVG(age) FROM patients);\n```\n\n**In FROM (derived table):**\n```sql\nSELECT ward, avg_age\nFROM (\n  SELECT ward, AVG(age) as avg_age\n  FROM patients\n  GROUP BY ward\n) ward_stats\nWHERE avg_age > 40;\n```\n\n**With IN:**\n```sql\n-- Patients who have a billing record\nSELECT patient_name\nFROM patients\nWHERE patient_id IN (\n  SELECT DISTINCT patient_id FROM billing\n);\n```\n\n**Business context:** Subqueries answer multi-step questions: 'Show me only the top-performing wards' where 'top-performing' itself requires a calculation.",
+      "exercises": [
+        { "id": "sql-sq1-e1", "title": "Above Average Age", "prompt": "Find patients older than the average patient age. Return patient_name and age.", "hint_1": "WHERE age > (SELECT AVG(age) FROM patients)", "hint_2": "SELECT patient_name, age FROM patients WHERE age > (SELECT AVG(age) FROM patients)", "hint_3": "SELECT patient_name, age FROM patients WHERE age > (SELECT AVG(age) FROM patients) ORDER BY age DESC", "solution": "SELECT patient_name, age FROM patients WHERE age > (SELECT AVG(age) FROM patients) ORDER BY age DESC", "evaluation_mode": "exact", "points": 35 },
+        { "id": "sql-sq1-e2", "title": "Subquery in FROM", "prompt": "Calculate the average bill amount per ward (via patient join), then show only wards with avg_bill above 20000.", "hint_1": "First write a subquery that calculates avg bill per ward, then wrap it in SELECT ... WHERE avg_bill > 20000.", "hint_2": "SELECT ward, avg_bill FROM (SELECT p.ward, AVG(b.bill_amount) as avg_bill FROM patients p JOIN billing b ON p.patient_id = b.patient_id GROUP BY p.ward) t WHERE avg_bill > 20000", "hint_3": "SELECT ward, avg_bill FROM (SELECT p.ward, ROUND(AVG(b.bill_amount),2) as avg_bill FROM patients p JOIN billing b ON p.patient_id = b.patient_id GROUP BY p.ward) t WHERE avg_bill > 20000 ORDER BY avg_bill DESC", "solution": "SELECT ward, avg_bill FROM (SELECT p.ward, ROUND(AVG(b.bill_amount),2) as avg_bill FROM patients p JOIN billing b ON p.patient_id = b.patient_id GROUP BY p.ward) t WHERE avg_bill > 20000 ORDER BY avg_bill DESC", "evaluation_mode": "exact", "points": 45 }
+      ]
+    },
+    {
+      "id": "sql-cte",
+      "title": "CTEs (WITH clause)",
+      "description": "Write readable, reusable query blocks",
+      "level": "intermediate",
+      "prerequisites": ["sql-subqueries"],
+      "estimated_min": 35,
+      "sort_order": 8,
+      "theory_md": "## Common Table Expressions (CTEs)\n\nCTEs are named subqueries defined before the main query using WITH. They make complex queries readable.\n\n```sql\nWITH ward_stats AS (\n  SELECT ward,\n         COUNT(*) as patient_count,\n         AVG(age) as avg_age\n  FROM patients\n  GROUP BY ward\n)\nSELECT *\nFROM ward_stats\nWHERE patient_count > 20\nORDER BY avg_age DESC;\n```\n\n**Multiple CTEs:**\n```sql\nWITH\nadmitted AS (\n  SELECT * FROM patients WHERE discharge_date IS NULL\n),\nhigh_risk AS (\n  SELECT * FROM admitted WHERE age > 65\n)\nSELECT * FROM high_risk;\n```\n\n**Business context:** CTEs are how professional analysts structure complex queries — each step is named, readable, and reusable in the same query.",
+      "exercises": [
+        { "id": "sql-c1-e1", "title": "Your First CTE", "prompt": "Use a CTE named ward_summary to calculate patient count per ward, then select only wards with more than 25 patients from it.", "hint_1": "WITH ward_summary AS (SELECT ward, COUNT(*) as cnt FROM patients GROUP BY ward) SELECT ...", "hint_2": "WITH ward_summary AS (SELECT ward, COUNT(*) as cnt FROM patients GROUP BY ward) SELECT * FROM ward_summary WHERE cnt > 25", "hint_3": "WITH ward_summary AS (SELECT ward, COUNT(*) as cnt FROM patients GROUP BY ward) SELECT ward, cnt FROM ward_summary WHERE cnt > 25 ORDER BY cnt DESC", "solution": "WITH ward_summary AS (SELECT ward, COUNT(*) as cnt FROM patients GROUP BY ward) SELECT ward, cnt FROM ward_summary WHERE cnt > 25 ORDER BY cnt DESC", "evaluation_mode": "exact", "points": 40 },
+        { "id": "sql-c1-e2", "title": "Chained CTEs", "prompt": "Write two CTEs: 'still_admitted' (patients with no discharge date), and 'elderly_admitted' (from still_admitted where age > 60). Return patient_name, ward, age from elderly_admitted.", "hint_1": "WITH still_admitted AS (...), elderly_admitted AS (SELECT * FROM still_admitted WHERE age > 60)", "hint_2": "WITH still_admitted AS (SELECT * FROM patients WHERE discharge_date IS NULL), elderly_admitted AS (SELECT * FROM still_admitted WHERE age > 60) SELECT patient_name, ward, age FROM elderly_admitted", "hint_3": "WITH still_admitted AS (SELECT * FROM patients WHERE discharge_date IS NULL), elderly_admitted AS (SELECT * FROM still_admitted WHERE age > 60) SELECT patient_name, ward, age FROM elderly_admitted ORDER BY age DESC", "solution": "WITH still_admitted AS (SELECT * FROM patients WHERE discharge_date IS NULL), elderly_admitted AS (SELECT * FROM still_admitted WHERE age > 60) SELECT patient_name, ward, age FROM elderly_admitted ORDER BY age DESC", "evaluation_mode": "exact", "points": 50 }
+      ]
+    },
+    {
+      "id": "sql-window",
+      "title": "Window Functions",
+      "description": "RANK, ROW_NUMBER, LAG, running totals — advanced analytical queries",
+      "level": "advanced",
+      "prerequisites": ["sql-cte"],
+      "estimated_min": 60,
+      "sort_order": 9,
+      "theory_md": "## Window Functions\n\nWindow functions compute values across a set of rows related to the current row — without collapsing rows like GROUP BY.\n\n```sql\nfunction() OVER (\n  PARTITION BY column   -- group within\n  ORDER BY column       -- order within group\n)\n```\n\n**Ranking:**\n```sql\nROW_NUMBER() OVER (PARTITION BY ward ORDER BY age DESC)\nRANK()       OVER (ORDER BY bill_amount DESC)  -- gaps on tie\nDENSE_RANK() OVER (ORDER BY bill_amount DESC)  -- no gaps\n```\n\n**Lag/Lead (compare to adjacent rows):**\n```sql\nLAG(bill_amount, 1) OVER (PARTITION BY patient_id ORDER BY bill_date)\nLEAD(bill_amount, 1) OVER (ORDER BY bill_date)\n```\n\n**Running totals:**\n```sql\nSUM(bill_amount) OVER (ORDER BY bill_date) as running_total\n```\n\n**Business context:** Month-over-month growth, running totals, customer ranking, top N per group — all window functions.",
+      "exercises": [
+        { "id": "sql-wf1-e1", "title": "Rank by Age in Ward", "prompt": "Rank patients within each ward by age (oldest = rank 1). Return patient_name, ward, age, and age_rank.", "hint_1": "ROW_NUMBER() OVER (PARTITION BY ward ORDER BY age DESC) as age_rank", "hint_2": "SELECT patient_name, ward, age, ROW_NUMBER() OVER (PARTITION BY ward ORDER BY age DESC) as age_rank FROM patients", "hint_3": "SELECT patient_name, ward, age, ROW_NUMBER() OVER (PARTITION BY ward ORDER BY age DESC) as age_rank FROM patients ORDER BY ward, age_rank", "solution": "SELECT patient_name, ward, age, ROW_NUMBER() OVER (PARTITION BY ward ORDER BY age DESC) as age_rank FROM patients ORDER BY ward, age_rank", "evaluation_mode": "exact", "points": 50 },
+        { "id": "sql-wf1-e2", "title": "Running Total of Bills", "prompt": "Show each billing record with a running total of bill_amount ordered by bill_date. Return bill_id, bill_date, bill_amount, and running_total.", "hint_1": "SUM(bill_amount) OVER (ORDER BY bill_date) as running_total", "hint_2": "SELECT bill_id, bill_date, bill_amount, SUM(bill_amount) OVER (ORDER BY bill_date) as running_total FROM billing", "hint_3": "SELECT bill_id, bill_date, bill_amount, ROUND(SUM(bill_amount) OVER (ORDER BY bill_date), 2) as running_total FROM billing ORDER BY bill_date", "solution": "SELECT bill_id, bill_date, bill_amount, ROUND(SUM(bill_amount) OVER (ORDER BY bill_date), 2) as running_total FROM billing ORDER BY bill_date", "evaluation_mode": "exact", "points": 55 },
+        { "id": "sql-wf1-e3", "title": "Top 3 per Ward", "prompt": "Find the top 3 oldest patients in each ward using ROW_NUMBER. Return only rows where row_num <= 3.", "hint_1": "Use a CTE with ROW_NUMBER, then filter WHERE row_num <= 3.", "hint_2": "WITH ranked AS (SELECT *, ROW_NUMBER() OVER (PARTITION BY ward ORDER BY age DESC) as row_num FROM patients) SELECT patient_name, ward, age FROM ranked WHERE row_num <= 3", "hint_3": "WITH ranked AS (SELECT *, ROW_NUMBER() OVER (PARTITION BY ward ORDER BY age DESC) as row_num FROM patients) SELECT patient_name, ward, age, row_num FROM ranked WHERE row_num <= 3 ORDER BY ward, row_num", "solution": "WITH ranked AS (SELECT *, ROW_NUMBER() OVER (PARTITION BY ward ORDER BY age DESC) as row_num FROM patients) SELECT patient_name, ward, age, row_num FROM ranked WHERE row_num <= 3 ORDER BY ward, row_num", "evaluation_mode": "exact", "points": 60 }
+      ]
+    },
+    {
+      "id": "sql-case",
+      "title": "CASE WHEN",
+      "description": "Conditional logic inside queries — build categories on the fly",
+      "level": "intermediate",
+      "prerequisites": ["sql-groupby"],
+      "estimated_min": 30,
+      "sort_order": 10,
+      "theory_md": "## CASE WHEN\n\nCASE WHEN adds conditional logic directly inside SQL — like IF/ELSE.\n\n```sql\nSELECT patient_name, age,\n  CASE\n    WHEN age < 18 THEN 'Pediatric'\n    WHEN age BETWEEN 18 AND 60 THEN 'Adult'\n    ELSE 'Senior'\n  END as age_group\nFROM patients;\n```\n\n**In aggregations:**\n```sql\nSELECT\n  COUNT(CASE WHEN gender = 'Male' THEN 1 END) as male_count,\n  COUNT(CASE WHEN gender = 'Female' THEN 1 END) as female_count\nFROM patients;\n```\n\n**Business context:** Categorizing continuous data (age groups, revenue tiers, risk levels), pivoting rows to columns, conditional counts.",
+      "exercises": [
+        { "id": "sql-ca1-e1", "title": "Age Groups", "prompt": "Classify patients: Under 18 = 'Child', 18-60 = 'Adult', over 60 = 'Senior'. Return patient_name, age, and age_group.", "hint_1": "Use CASE WHEN age < 18 THEN 'Child' WHEN age <= 60 THEN 'Adult' ELSE 'Senior' END as age_group", "hint_2": "SELECT patient_name, age, CASE WHEN age < 18 THEN 'Child' WHEN age BETWEEN 18 AND 60 THEN 'Adult' ELSE 'Senior' END as age_group FROM patients", "hint_3": "SELECT patient_name, age, CASE WHEN age < 18 THEN 'Child' WHEN age BETWEEN 18 AND 60 THEN 'Adult' ELSE 'Senior' END as age_group FROM patients", "solution": "SELECT patient_name, age, CASE WHEN age < 18 THEN 'Child' WHEN age BETWEEN 18 AND 60 THEN 'Adult' ELSE 'Senior' END as age_group FROM patients", "evaluation_mode": "exact", "points": 30 },
+        { "id": "sql-ca1-e2", "title": "Bill Risk Tier", "prompt": "From billing, classify each bill: under 10000 = 'Low', 10000-50000 = 'Medium', above 50000 = 'High'. Return bill_id, bill_amount, and risk_tier.", "hint_1": "CASE WHEN bill_amount < 10000 THEN 'Low' WHEN bill_amount <= 50000 THEN 'Medium' ELSE 'High' END", "hint_2": "SELECT bill_id, bill_amount, CASE WHEN bill_amount < 10000 THEN 'Low' WHEN bill_amount <= 50000 THEN 'Medium' ELSE 'High' END as risk_tier FROM billing", "hint_3": "SELECT bill_id, bill_amount, CASE WHEN bill_amount < 10000 THEN 'Low' WHEN bill_amount <= 50000 THEN 'Medium' ELSE 'High' END as risk_tier FROM billing", "solution": "SELECT bill_id, bill_amount, CASE WHEN bill_amount < 10000 THEN 'Low' WHEN bill_amount <= 50000 THEN 'Medium' ELSE 'High' END as risk_tier FROM billing", "evaluation_mode": "exact", "points": 30 },
+        { "id": "sql-ca1-e3", "title": "Conditional Count", "prompt": "Count male and female patients per ward in a single query using conditional aggregation. Return ward, male_count, female_count.", "hint_1": "COUNT(CASE WHEN gender = 'Male' THEN 1 END) counts only males.", "hint_2": "SELECT ward, COUNT(CASE WHEN gender='Male' THEN 1 END) as male_count, COUNT(CASE WHEN gender='Female' THEN 1 END) as female_count FROM patients GROUP BY ward", "hint_3": "SELECT ward, COUNT(CASE WHEN gender='Male' THEN 1 END) as male_count, COUNT(CASE WHEN gender='Female' THEN 1 END) as female_count FROM patients GROUP BY ward ORDER BY ward", "solution": "SELECT ward, COUNT(CASE WHEN gender='Male' THEN 1 END) as male_count, COUNT(CASE WHEN gender='Female' THEN 1 END) as female_count FROM patients GROUP BY ward ORDER BY ward", "evaluation_mode": "exact", "points": 40 }
+      ]
+    }
+  ]
+}

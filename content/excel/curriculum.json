@@ -1,0 +1,96 @@
+{
+  "module": "excel",
+  "lessons": [
+    {
+      "id": "excel-basics",
+      "module": "excel",
+      "title": "Excel Fundamentals",
+      "description": "Cells, ranges, basic arithmetic, and data entry best practices.",
+      "level": "beginner",
+      "prerequisites": [],
+      "estimated_min": 30,
+      "sort_order": 1,
+      "theory_md": "## Excel Fundamentals\n\nExcel organises data in **cells** arranged in rows and columns. Every cell has an address like `A1` (column A, row 1).\n\n### Basic arithmetic\n- Addition: `=A1+B1`\n- Subtraction: `=A1-B1`\n- Multiplication: `=A1*B1`\n- Division: `=A1/B1`\n\n### Best practices\n- Keep raw data in one sheet; analysis in another.\n- Avoid merging cells in data tables.\n- Use consistent date formats.",
+      "exercises": [
+        {
+          "id": "excel-basics-ex1",
+          "exercise_type": "formula",
+          "title": "SUM a range",
+          "prompt": "Write a formula to sum all values in the range A1:A10.",
+          "hint_1": "Use the SUM function.",
+          "hint_2": "SUM takes a range argument: SUM(range).",
+          "hint_3": "=SUM(A1:A10)",
+          "solution": "=SUM(A1:A10)",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "sort_order": 1
+        },
+        {
+          "id": "excel-basics-ex2",
+          "exercise_type": "formula",
+          "title": "Calculate an average",
+          "prompt": "Write a formula to calculate the average of values in B1:B20.",
+          "hint_1": "Use the AVERAGE function.",
+          "hint_2": "AVERAGE takes a range argument.",
+          "hint_3": "=AVERAGE(B1:B20)",
+          "solution": "=AVERAGE(B1:B20)",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "sort_order": 2
+        }
+      ]
+    },
+    {
+      "id": "excel-lookup",
+      "module": "excel",
+      "title": "Lookup Functions",
+      "description": "VLOOKUP, HLOOKUP, INDEX/MATCH and XLOOKUP for retrieving data across tables.",
+      "level": "intermediate",
+      "prerequisites": ["excel-basics"],
+      "estimated_min": 40,
+      "sort_order": 2,
+      "theory_md": "## Lookup Functions\n\n### VLOOKUP\n`=VLOOKUP(lookup_value, table_array, col_index, [range_lookup])`\n\nSearches the **first column** of a table and returns a value from the specified column.\n\n### INDEX / MATCH\nMore flexible alternative:\n`=INDEX(return_range, MATCH(lookup_value, lookup_range, 0))`\n\n### XLOOKUP (Excel 365)\n`=XLOOKUP(lookup_value, lookup_array, return_array)`\nReturns an entire row or column — the modern replacement for VLOOKUP.",
+      "exercises": [
+        {
+          "id": "excel-lookup-ex1",
+          "exercise_type": "formula",
+          "title": "VLOOKUP a product price",
+          "prompt": "A product table is in A1:C100. Column A has product IDs, column C has prices. Write a VLOOKUP to get the price for product ID in cell F1.",
+          "hint_1": "The first argument is the value you are looking for.",
+          "hint_2": "The col_index for column C in a 3-column table is 3.",
+          "hint_3": "=VLOOKUP(F1, A1:C100, 3, FALSE)",
+          "solution": "=VLOOKUP(F1, A1:C100, 3, FALSE)",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "sort_order": 1
+        }
+      ]
+    },
+    {
+      "id": "excel-pivots",
+      "module": "excel",
+      "title": "Pivot Tables",
+      "description": "Summarise, group and cross-tabulate data without writing formulas.",
+      "level": "intermediate",
+      "prerequisites": ["excel-basics"],
+      "estimated_min": 45,
+      "sort_order": 3,
+      "theory_md": "## Pivot Tables\n\nPivot tables let you quickly summarise thousands of rows of data.\n\n### Creating a pivot table\n1. Click anywhere inside your data table.\n2. **Insert → PivotTable**.\n3. Drag fields to Rows, Columns, Values and Filters.\n\n### Common value summarisations\n- Sum, Count, Average, Max, Min.\n- Right-click a value → **Value Field Settings** to change.\n\n### Slicers\nInsert slicers (**PivotTable Analyze → Insert Slicer**) for visual, clickable filters.",
+      "exercises": [
+        {
+          "id": "excel-pivots-ex1",
+          "exercise_type": "freeform",
+          "title": "Identify the correct pivot layout",
+          "prompt": "You have sales data with columns: Date, Region, Product, Revenue. You want to see total Revenue by Region, broken down by Product. Which fields go in Rows, Columns, and Values?",
+          "hint_1": "Rows should be the field you want to see on the left side.",
+          "hint_2": "Columns is the field you want to spread across the top.",
+          "hint_3": "Rows: Region, Columns: Product, Values: Sum of Revenue.",
+          "solution": "Rows: Region, Columns: Product, Values: Sum of Revenue",
+          "evaluation_mode": "ai_review",
+          "points": 20,
+          "sort_order": 1
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "module": "powerbi",
+  "lessons": [
+    {
+      "id": "powerbi-intro",
+      "module": "powerbi",
+      "title": "Power BI Fundamentals",
+      "description": "The Power BI workflow: Get Data, Transform, Model, Visualise, Share.",
+      "level": "beginner",
+      "prerequisites": [],
+      "estimated_min": 35,
+      "sort_order": 1,
+      "theory_md": "## Power BI Fundamentals\n\nPower BI has three main tools:\n- **Power BI Desktop** — build reports on your PC.\n- **Power BI Service** — publish and share in the browser.\n- **Power BI Mobile** — view reports on phones/tablets.\n\n### The workflow\n1. **Get Data** — connect to Excel, SQL, web, etc.\n2. **Power Query** — clean and transform data.\n3. **Data Model** — define relationships between tables.\n4. **Report View** — build visualisations.\n5. **Publish** — share to the Power BI Service.",
+      "exercises": [
+        {
+          "id": "powerbi-intro-ex1",
+          "exercise_type": "freeform",
+          "title": "Describe the Power BI workflow",
+          "prompt": "List the five stages of the Power BI workflow in the correct order and briefly describe what happens at each stage.",
+          "hint_1": "Start with how data enters the system.",
+          "hint_2": "The five stages are: Get Data, Transform, Model, Visualise, Share.",
+          "hint_3": "Get Data → Power Query (Transform) → Data Model → Report View → Publish/Share.",
+          "solution": "Get Data → Transform (Power Query) → Data Model (relationships) → Report View (visuals) → Publish (Service/Share)",
+          "evaluation_mode": "ai_review",
+          "points": 15,
+          "sort_order": 1
+        }
+      ]
+    },
+    {
+      "id": "powerbi-dax",
+      "module": "powerbi",
+      "title": "DAX Basics",
+      "description": "Calculated columns, measures and the most useful DAX functions.",
+      "level": "intermediate",
+      "prerequisites": ["powerbi-intro"],
+      "estimated_min": 50,
+      "sort_order": 2,
+      "theory_md": "## DAX — Data Analysis Expressions\n\nDAX is the formula language used in Power BI (and Excel Power Pivot).\n\n### Measures vs Calculated Columns\n| | Measure | Calculated Column |\n|---|---|---|\n| Evaluated | At query time | At data refresh |\n| Context | Filter context | Row context |\n| Stored | Not stored | Stored in model |\n\n### Essential functions\n- `SUM(table[column])` — total\n- `CALCULATE(expression, filter)` — change filter context\n- `DIVIDE(numerator, denominator, [alternate])` — safe division\n- `DATEYTD(date_column)` — year-to-date\n- `RELATED(column)` — look up a value from a related table",
+      "exercises": [
+        {
+          "id": "powerbi-dax-ex1",
+          "exercise_type": "freeform",
+          "title": "Write a DAX measure for Total Revenue",
+          "prompt": "Write a DAX measure called 'Total Revenue' that sums the Revenue column from the Sales table.",
+          "hint_1": "Measures are defined with: MeasureName = expression.",
+          "hint_2": "Use the SUM function.",
+          "hint_3": "Total Revenue = SUM(Sales[Revenue])",
+          "solution": "Total Revenue = SUM(Sales[Revenue])",
+          "evaluation_mode": "ai_review",
+          "points": 20,
+          "sort_order": 1
+        }
+      ]
+    }
+  ]
+}

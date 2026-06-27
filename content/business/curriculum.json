@@ -1,0 +1,57 @@
+{
+  "module": "business",
+  "lessons": [
+    {
+      "id": "business-thinking-intro",
+      "module": "business",
+      "title": "Business Thinking for Analysts",
+      "description": "How to frame analytical problems, ask the right questions, and communicate findings to stakeholders.",
+      "level": "beginner",
+      "prerequisites": [],
+      "estimated_min": 30,
+      "sort_order": 1,
+      "theory_md": "## Business Thinking for Analysts\n\nTechnical skills are only half the job. The other half is understanding the **business problem** before writing a single query.\n\n### The Analyst's problem-solving loop\n1. **Clarify the question** — what decision will this analysis support?\n2. **Identify the data** — what do we have, and what's missing?\n3. **Analyse** — SQL, Python, Excel, Power BI.\n4. **Insight, not just data** — what does this mean for the business?\n5. **Recommend** — a clear, actionable next step.\n\n### The 5 Whys\nWhen a stakeholder says \"sales are down\", ask *why* five times until you reach a root cause — not just a symptom.",
+      "exercises": [
+        {
+          "id": "business-thinking-ex1",
+          "exercise_type": "freeform",
+          "title": "Frame the business question",
+          "prompt": "A hospital manager tells you: 'We spend too much on supplies.' Before analysing any data, what are the first three clarifying questions you would ask?",
+          "hint_1": "Think about what 'too much' means — compared to what?",
+          "hint_2": "Consider time, department, and what decisions the manager wants to make.",
+          "hint_3": "Examples: (1) Which departments? (2) Too much vs last year or vs budget? (3) What decision will you make with this information?",
+          "solution": "Clarifying questions should cover: scope (which departments/supplies), baseline (compared to what: budget, last year, benchmarks), and intended decision (what action will follow the analysis).",
+          "evaluation_mode": "ai_review",
+          "points": 15,
+          "sort_order": 1
+        }
+      ]
+    },
+    {
+      "id": "business-metrics",
+      "module": "business",
+      "title": "Key Business Metrics",
+      "description": "Revenue, cost, margin, churn, conversion — the metrics every analyst must know cold.",
+      "level": "beginner",
+      "prerequisites": ["business-thinking-intro"],
+      "estimated_min": 35,
+      "sort_order": 2,
+      "theory_md": "## Key Business Metrics\n\n### Financial\n- **Revenue** — money earned from sales.\n- **Cost of Goods Sold (COGS)** — direct costs to produce what was sold.\n- **Gross Margin** = (Revenue − COGS) / Revenue × 100%.\n- **Net Profit Margin** = Net Profit / Revenue × 100%.\n\n### Customer\n- **Churn Rate** — % of customers lost in a period.\n- **Customer Lifetime Value (CLV)** — total revenue expected from one customer.\n- **Conversion Rate** — % of prospects who become customers.\n\n### Operational\n- **Average Handle Time** — avg time to process one unit of work.\n- **Throughput** — units processed per period.\n- **Utilisation Rate** — % of capacity being used.",
+      "exercises": [
+        {
+          "id": "business-metrics-ex1",
+          "exercise_type": "freeform",
+          "title": "Calculate Gross Margin",
+          "prompt": "A company has Revenue of KES 5,000,000 and COGS of KES 3,200,000. Calculate the Gross Margin percentage and explain what it means.",
+          "hint_1": "Gross Margin % = (Revenue - COGS) / Revenue × 100.",
+          "hint_2": "(5,000,000 - 3,200,000) / 5,000,000 × 100.",
+          "hint_3": "(1,800,000 / 5,000,000) × 100 = 36%. For every KES 100 of revenue, KES 36 is left after direct costs.",
+          "solution": "Gross Margin = (5,000,000 - 3,200,000) / 5,000,000 × 100 = 36%. This means 36 cents of every shilling of revenue remains after paying direct production costs.",
+          "evaluation_mode": "ai_review",
+          "points": 20,
+          "sort_order": 1
+        }
+      ]
+    }
+  ]
+}
