@@ -213,8 +213,11 @@ async function callGemini(apiKey: string, systemPrompt: string, history: ChatMes
     { role: 'user', parts: [{ text: userMessage }] },
   ]
 
+  // gemini-flash-latest is Google's own maintained alias — it always points
+  // at the current Flash model, so this stays correct even as Google
+  // retires specific dated model names (which is what broke this before).
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

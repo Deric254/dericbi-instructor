@@ -50,7 +50,7 @@ const JOURNEY: JourneyGroup[] = [
     phase: 'Practice',
     items: [
       { id: 'simulations', label: 'Simulations',    desc: 'Role-play real analyst scenarios under pressure.', icon: <Users size={16} />,        color: 'var(--sim-color)' },
-      { id: 'playground',  label: 'Data Playground', desc: 'Explore any dataset freely — no script needed.',   icon: <FlaskConical size={16} />, color: '#818cf8' },
+      { id: 'playground',  label: 'Data Playground', desc: 'Explore any dataset freely — no script needed.',   icon: <FlaskConical size={16} />, color: 'var(--playground-color)' },
       { id: 'datasets',    label: 'Datasets',       desc: 'Bundled business datasets, or import your own.',    icon: <Table2 size={16} />,       color: 'var(--text-secondary)' },
     ],
   },

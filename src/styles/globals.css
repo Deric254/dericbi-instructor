@@ -34,6 +34,7 @@
   --stats-color:    #a78bfa;    /* purple */
   --business-color: #f472b6;    /* pink */
   --sim-color:      #3B82F6;    /* blue — distinct from accent green and Playground's indigo */
+  --playground-color: #818cf8;  /* indigo */
 
   /* Status */
   --success:        #22c55e;
@@ -77,6 +78,64 @@
   /* Transitions */
   --transition: 150ms ease;
   --transition-slow: 300ms ease;
+}
+
+/* ─────────────────────────────────────────────
+   LIGHT THEME
+   Surfaces/text are inverted. Brand accent and module
+   colors are swapped for darker, more saturated variants
+   of the same hue — the dark-mode values (e.g. bright
+   yellow) don't have enough contrast as text on a white
+   background, so this isn't a simple invert.
+───────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg-base:        #f6f7fb;
+  --bg-surface:     #ffffff;
+  --bg-elevated:    #f1f3f9;
+  --bg-overlay:     #e8eaf2;
+  --bg-hover:       #dde1ec;
+
+  --border:         #e2e5ee;
+  --border-strong:  #cbd0e0;
+
+  --text-primary:   #1a1f2e;
+  --text-secondary: #5b6478;
+  --text-muted:     #8a93a8;
+  --text-inverse:   #ffffff;
+
+  --accent:         #2F7A57;
+  --accent-hover:   #256647;
+  --accent-dim:     rgba(47, 122, 87, 0.12);
+  --accent-glow:    rgba(47, 122, 87, 0.28);
+  --accent-deep:    #205a40;
+
+  --sql-color:      #0e7490;
+  --excel-color:    #4d7c0f;
+  --python-color:   #a16207;
+  --powerbi-color:  #c2410c;
+  --stats-color:    #7c3aed;
+  --business-color: #be185d;
+  --sim-color:      #1d4ed8;
+  --playground-color: #4338ca;
+
+  --success:        #16a34a;
+  --success-dim:    rgba(22, 163, 74, 0.12);
+  --error:          #dc2626;
+  --error-dim:      rgba(220, 38, 38, 0.10);
+  --warning:        #d97706;
+  --warning-dim:    rgba(217, 119, 6, 0.12);
+  --info:           #2563eb;
+  --info-dim:       rgba(37, 99, 235, 0.12);
+
+  --common:         #6b7280;
+  --rare:           #2563eb;
+  --epic:           #7c3aed;
+  --legendary:      #b45309;
+
+  --shadow-sm:   0 1px 3px rgba(15,23,42,0.08);
+  --shadow:      0 4px 12px rgba(15,23,42,0.10);
+  --shadow-lg:   0 8px 32px rgba(15,23,42,0.16);
+  --shadow-glow: 0 0 24px var(--accent-glow);
 }
 
 /* ─────────────────────────────────────────────

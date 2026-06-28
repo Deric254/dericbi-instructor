@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useAuthStore } from './store'
+import { useAuthStore, useUIStore } from './store'
 import AppShell from './components/layout/AppShell'
 import AuthScreen from './pages/AuthScreen'
 import UpdateBanner from './components/ui/UpdateBanner'
@@ -7,6 +7,13 @@ import './styles/globals.css'
 
 export default function App() {
   const { user, token, isLoading, setUser, setToken, setLoading } = useAuthStore()
+  const theme = useUIStore((s) => s.theme)
+
+  // Apply the persisted theme to the document root so the CSS variable
+  // overrides in globals.css take effect everywhere, immediately.
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
 
   // Restore session on mount
   useEffect(() => {

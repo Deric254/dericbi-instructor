@@ -5,6 +5,7 @@ node_modules/
 dist/
 dist-electron/
 release/
+.electron-builder-cache/
 
 # Generated datasets (created at runtime)
 content/datasets/

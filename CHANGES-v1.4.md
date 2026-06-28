@@ -45,6 +45,27 @@ two, every single page now has exactly one clear way to ask for help or
 advice — chat history, suggested questions, and code-aware coaching, same as
 before, just no longer locked to half the app.
 
+## 0d. AI Instructor — fixed the Gemini model error
+The error `models/gemini-1.5-flash is not found for API version v1beta` happens
+because Google retired that specific dated model name. Switched to
+`gemini-flash-latest` — Google's own maintained alias that always points at
+the current Flash model and gets hot-swapped (with advance notice) whenever
+Google rotates models, so this specific failure shouldn't recur. Also
+double-checked the OpenAI/OpenRouter path (`gpt-4o-mini`) against OpenAI's
+current model-deprecation list — confirmed still active on the API as of
+mid-2026 (the ChatGPT product retiring a model and the API retiring it are
+separate timelines), so no change needed there.
+
+## 0e. Light / dark theme toggle
+Small Sun/Moon button in the titlebar, next to the AI Instructor button.
+Preference is saved and restored automatically.
+
+This wasn't just a CSS invert — module colors tuned for a dark background
+(e.g. bright yellow for Python) don't have enough contrast as text on white,
+so light mode uses darker, equally-distinct variants of the same hues instead.
+Verified by actually rendering the real CSS in a headless browser and
+comparing screenshots side by side, not just by checking the color math.
+
 ## 1. Logout
 - Added a real, always-visible **"Log Out"** button to the sidebar (it previously only
   existed buried inside Settings). Click once to arm it, click again within 3 seconds

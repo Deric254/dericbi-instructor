@@ -12,7 +12,7 @@ const SIMULATIONS = [
     role: 'Hospital Analyst',
     domain: 'hospital',
     emoji: '🏥',
-    color: '#ef4444',
+    color: 'var(--error)',
     difficulty: 'Intermediate',
     est_min: 45,
     description: 'You join St. Anne Mission Hospital. The medical director needs answers before Friday\'s board meeting.',

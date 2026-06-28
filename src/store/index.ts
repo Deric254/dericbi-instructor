@@ -42,23 +42,35 @@ interface UIStore {
   activeSection: NavSection
   sidebarCollapsed: boolean
   instructorOpen: boolean
+  theme: 'dark' | 'light'
   setActiveSection: (section: NavSection) => void
   toggleSidebar: () => void
   setSidebarCollapsed: (collapsed: boolean) => void
   toggleInstructor: () => void
   setInstructorOpen: (open: boolean) => void
+  toggleTheme: () => void
 }
 
-export const useUIStore = create<UIStore>()((set) => ({
-  activeSection: 'dashboard',
-  sidebarCollapsed: false,
-  instructorOpen: false,
-  setActiveSection: (activeSection) => set({ activeSection }),
-  toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
-  setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
-  toggleInstructor: () => set((s) => ({ instructorOpen: !s.instructorOpen })),
-  setInstructorOpen: (instructorOpen) => set({ instructorOpen }),
-}))
+export const useUIStore = create<UIStore>()(
+  persist(
+    (set) => ({
+      activeSection: 'dashboard',
+      sidebarCollapsed: false,
+      instructorOpen: false,
+      theme: 'dark',
+      setActiveSection: (activeSection) => set({ activeSection }),
+      toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
+      setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
+      toggleInstructor: () => set((s) => ({ instructorOpen: !s.instructorOpen })),
+      setInstructorOpen: (instructorOpen) => set({ instructorOpen }),
+      toggleTheme: () => set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
+    }),
+    {
+      name: 'dericbi-ui',
+      partialize: (state) => ({ theme: state.theme }),
+    }
+  )
+)
 
 // ─────────────────────────────────────────────
 // NOTIFICATION STORE

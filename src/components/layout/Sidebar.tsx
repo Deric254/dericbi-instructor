@@ -29,7 +29,7 @@ const NAV_ITEMS: NavItem[] = [
 
   // Practice
   { id: 'simulations', label: 'Simulations',  icon: <Users size={16} />,          color: 'var(--sim-color)',      section: 'Practice' },
-  { id: 'playground',  label: 'Playground',   icon: <FlaskConical size={16} />,   color: '#818cf8' },
+  { id: 'playground',  label: 'Playground',   icon: <FlaskConical size={16} />,   color: 'var(--playground-color)' },
   { id: 'datasets',    label: 'Datasets',     icon: <Table2 size={16} /> },
 
   // Output

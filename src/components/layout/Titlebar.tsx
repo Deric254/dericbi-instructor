@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Minus, Square, X, Sparkles } from 'lucide-react'
+import { Minus, Square, X, Sparkles, Sun, Moon } from 'lucide-react'
 import { useAuthStore, useUIStore } from '../../store'
 import { LogoMark } from '../ui/AppLogo'
 import { SECTIONS_WITH_OWN_INSTRUCTOR } from '../ui/GlobalInstructor'
@@ -7,7 +7,7 @@ import { SECTIONS_WITH_OWN_INSTRUCTOR } from '../ui/GlobalInstructor'
 export default function Titlebar() {
   const [isMaximized, setIsMaximized] = useState(false)
   const { user } = useAuthStore()
-  const { activeSection, instructorOpen, toggleInstructor } = useUIStore()
+  const { activeSection, instructorOpen, toggleInstructor, theme, toggleTheme } = useUIStore()
   const showInstructorToggle = !!user && !SECTIONS_WITH_OWN_INSTRUCTOR.has(activeSection)
 
   useEffect(() => {
@@ -48,6 +48,13 @@ export default function Titlebar() {
 
       {/* Right side */}
       <div style={{ display: 'flex', alignItems: 'center', WebkitAppRegion: 'no-drag' } as any}>
+        <WinBtn
+          icon={theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
+          onClick={toggleTheme}
+          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          slim
+        />
+
         {showInstructorToggle && (
           <button
             onClick={toggleInstructor}
@@ -56,7 +63,7 @@ export default function Titlebar() {
               display: 'flex', alignItems: 'center', gap: 6,
               height: 26,
               padding: '0 10px',
-              marginRight: 8,
+              margin: '0 8px',
               borderRadius: 'var(--radius-full)',
               border: `1px solid ${instructorOpen ? 'var(--accent)' : 'var(--border)'}`,
               background: instructorOpen ? 'var(--accent-dim)' : 'transparent',
@@ -82,8 +89,8 @@ export default function Titlebar() {
   )
 }
 
-function WinBtn({ icon, onClick, danger }: {
-  icon: React.ReactNode; onClick: () => void; danger?: boolean
+function WinBtn({ icon, onClick, danger, title, slim }: {
+  icon: React.ReactNode; onClick: () => void; danger?: boolean; title?: string; slim?: boolean
 }) {
   const [hovered, setHovered] = useState(false)
   return (
@@ -91,10 +98,11 @@ function WinBtn({ icon, onClick, danger }: {
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      title={title}
       style={{
-        width: 42, height: 'var(--titlebar-height)',
+        width: slim ? 32 : 42, height: 'var(--titlebar-height)',
         border: 'none',
-        background: hovered ? (danger ? '#ef4444' : 'rgba(255,255,255,0.08)') : 'transparent',
+        background: hovered ? (danger ? 'var(--error)' : 'var(--bg-overlay)') : 'transparent',
         color: hovered && danger ? 'white' : 'var(--text-secondary)',
         cursor: 'pointer',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
