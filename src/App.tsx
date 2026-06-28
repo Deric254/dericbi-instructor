@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { useAuthStore } from './store'
 import AppShell from './components/layout/AppShell'
 import AuthScreen from './pages/AuthScreen'
+import UpdateBanner from './components/ui/UpdateBanner'
 import './styles/globals.css'
 
 export default function App() {
@@ -35,8 +36,9 @@ export default function App() {
     restore()
   }, []) // Run once on mount
 
+  let content: React.ReactNode
   if (isLoading) {
-    return (
+    content = (
       <div style={{
         height: '100vh',
         display: 'flex',
@@ -66,11 +68,16 @@ export default function App() {
         <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>DericBI Instructor</span>
       </div>
     )
+  } else if (!user) {
+    content = <AuthScreen />
+  } else {
+    content = <AppShell />
   }
 
-  if (!user) {
-    return <AuthScreen />
-  }
-
-  return <AppShell />
+  return (
+    <>
+      {content}
+      <UpdateBanner />
+    </>
+  )
 }

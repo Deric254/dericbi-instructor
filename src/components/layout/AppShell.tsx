@@ -3,6 +3,7 @@ import { useAuthStore, useUIStore } from '../../store'
 import Titlebar from './Titlebar'
 import Sidebar from './Sidebar'
 import NotificationStack from '../ui/NotificationStack'
+import GlobalInstructor from '../ui/GlobalInstructor'
 
 // Pages — all fully implemented
 import Dashboard from '../../pages/Dashboard'
@@ -61,6 +62,7 @@ export default function AppShell() {
         </main>
       </div>
       <NotificationStack />
+      <GlobalInstructor />
     </div>
   )
 }

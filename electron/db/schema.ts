@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS users (
   experience_level TEXT NOT NULL DEFAULT 'beginner',
   -- beginner | junior | analyst | senior | consultant
   learning_goals  TEXT NOT NULL DEFAULT '[]',  -- JSON array
-  avatar_color    TEXT NOT NULL DEFAULT '#6366f1',
+  avatar_color    TEXT NOT NULL DEFAULT '#49A078',
   created_at      TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
 );

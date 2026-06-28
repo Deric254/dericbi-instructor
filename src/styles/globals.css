@@ -17,20 +17,23 @@
   --text-muted:     #4d5673;
   --text-inverse:   #0a0d14;
 
-  /* Accent — electric indigo */
-  --accent:         #6366f1;
-  --accent-hover:   #7c7ff5;
-  --accent-dim:     rgba(99, 102, 241, 0.15);
-  --accent-glow:    rgba(99, 102, 241, 0.35);
+  /* Accent — dericBI signature teal-green (brand color from dericbi.vercel.app) */
+  --accent:         #49A078;
+  --accent-hover:   #5BB98D;
+  --accent-dim:     rgba(73, 160, 120, 0.15);
+  --accent-glow:    rgba(73, 160, 120, 0.35);
+
+  /* Secondary brand tone — deeper forest green, used for gradients/depth */
+  --accent-deep:    #2F7A57;
 
   /* Module colors */
   --sql-color:      #22d3ee;    /* cyan */
-  --excel-color:    #4ade80;    /* green */
+  --excel-color:    #84cc16;    /* lime — distinct from brand accent green */
   --python-color:   #facc15;    /* yellow */
   --powerbi-color:  #f97316;    /* orange */
   --stats-color:    #a78bfa;    /* purple */
   --business-color: #f472b6;    /* pink */
-  --sim-color:      #34d399;    /* emerald */
+  --sim-color:      #3B82F6;    /* blue — distinct from accent green and Playground's indigo */
 
   /* Status */
   --success:        #22c55e;
@@ -329,7 +332,7 @@ h5 { font-size: 13px; font-weight: 500; }
 .badge-legendary { background: rgba(251,191,36,0.15);  color: var(--legendary); }
 
 .badge-sql       { background: rgba(34,211,238,0.12);  color: var(--sql-color); }
-.badge-excel     { background: rgba(74,222,128,0.12);  color: var(--excel-color); }
+.badge-excel     { background: rgba(132,204,22,0.14);  color: var(--excel-color); }
 .badge-python    { background: rgba(250,204,21,0.12);  color: var(--python-color); }
 .badge-powerbi   { background: rgba(249,115,22,0.12);  color: var(--powerbi-color); }
 .badge-stats     { background: rgba(167,139,250,0.12); color: var(--stats-color); }

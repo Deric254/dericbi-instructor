@@ -1,14 +1,10 @@
 # Assets
 
-Place the following files here before building:
+Branding is already in place — generated from your DericBI brand color (#49A078):
 
-- `icon.ico` — Windows application icon (256x256 recommended, ICO format)
-- `icon.png` — PNG version (512x512)
-- `installer-header.bmp` — NSIS installer header banner (150x57 pixels, BMP format)
+- `icon.ico` — Windows installer/app icon (multi-resolution, wired into `package.json` → `build.win.icon`)
+- `logo.svg` / `logo.png` — app UI mark, used by `AppLogo`/`LogoMark` (see `LOGO-README.txt`)
 
-## Quick icon generation
+To swap in your own artwork, see `LOGO-README.txt` for the exact filenames and fallback order.
 
-If you don't have a custom icon, electron-builder will use a default.
-To create a simple icon from a PNG:
-  npm install -g png-to-ico
-  png-to-ico icon.png > icon.ico
+electron-builder doesn't use an NSIS header banner in this config, so no `installer-header.bmp` is needed.

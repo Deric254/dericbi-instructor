@@ -121,7 +121,7 @@ export default function InstructorPanel({
           <span style={{ fontWeight: 600 }}>AI Instructor requires an API key</span>
         </div>
         <p style={{ color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 10 }}>
-          Add a Gemini, OpenAI, or OpenRouter key in Settings to unlock personalized coaching.
+          Add a Gemini, OpenAI, or OpenRouter key in Settings to use it.
         </p>
         <div style={{ display: 'flex', gap: 8 }}>
           <button
@@ -303,7 +303,7 @@ export default function InstructorPanel({
           </button>
         </div>
         <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 5 }}>
-          Enter to send · Shift+Enter for newline · Coaching is personalized to your progress
+          Enter to send · Shift+Enter for newline
         </div>
       </div>
 
@@ -435,21 +435,15 @@ function EmptyInstructorState({ context, onPrompt }: {
 
   return (
     <div>
-      <div style={{ textAlign: 'center', padding: '16px 8px 20px', color: 'var(--text-muted)' }}>
+      <div style={{ textAlign: 'center', padding: '16px 8px 20px' }}>
         <div style={{
           width: 40, height: 40,
           borderRadius: 'var(--radius)',
           background: 'var(--accent-dim)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 10px',
+          margin: '0 auto',
         }}>
           <Sparkles size={18} color="var(--accent)" />
-        </div>
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 4 }}>
-          Your AI Instructor
-        </div>
-        <div style={{ fontSize: 11, lineHeight: 1.5 }}>
-          Personalized coaching based on your learning history. Ask anything.
         </div>
       </div>
 

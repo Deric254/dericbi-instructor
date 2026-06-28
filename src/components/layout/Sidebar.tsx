@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import {
   LayoutDashboard, Database, FileSpreadsheet, Terminal,
   BarChart3, TrendingUp, Briefcase, FlaskConical,
   Table2, FolderOpen, BookOpen, Trophy, Settings,
-  ChevronLeft, ChevronRight, Cpu, Users,
+  ChevronLeft, ChevronRight, Cpu, Users, LogOut,
 } from 'lucide-react'
 import { useAuthStore, useUIStore } from '../../store'
 import type { NavSection } from '../../types'
@@ -43,7 +43,21 @@ const NAV_ITEMS: NavItem[] = [
 
 export default function Sidebar() {
   const { activeSection, sidebarCollapsed, setActiveSection, toggleSidebar } = useUIStore()
-  const { user } = useAuthStore()
+  const { user, token, logout: storeLogout } = useAuthStore()
+  const [confirmingLogout, setConfirmingLogout] = useState(false)
+  const confirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleLogoutClick = async () => {
+    if (!confirmingLogout) {
+      setConfirmingLogout(true)
+      confirmTimer.current = setTimeout(() => setConfirmingLogout(false), 3000)
+      return
+    }
+    if (confirmTimer.current) clearTimeout(confirmTimer.current)
+    if (token) await window.api.auth.logout(token)
+    storeLogout()
+    setActiveSection('dashboard')
+  }
 
   const width = sidebarCollapsed ? 'var(--sidebar-collapsed)' : 'var(--sidebar-width)'
 
@@ -97,6 +111,15 @@ export default function Sidebar() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Log out */}
+      {user && (
+        <LogoutButton
+          collapsed={sidebarCollapsed}
+          confirming={confirmingLogout}
+          onClick={handleLogoutClick}
+        />
       )}
 
       {/* Collapse toggle */}
@@ -168,6 +191,49 @@ export default function Sidebar() {
 
     return elements
   }
+}
+
+function LogoutButton({ collapsed, confirming, onClick }: {
+  collapsed: boolean
+  confirming: boolean
+  onClick: () => void
+}) {
+  const [hovered, setHovered] = useState(false)
+
+  const active = confirming || hovered
+  const color = confirming ? 'var(--error)' : hovered ? 'var(--error)' : 'var(--text-secondary)'
+  const bg = confirming ? 'var(--error-dim)' : hovered ? 'var(--bg-overlay)' : 'transparent'
+
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      title={collapsed ? (confirming ? 'Click to confirm logout' : 'Log Out') : undefined}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 9,
+        margin: collapsed ? '0 6px 6px' : '0 8px 6px',
+        padding: collapsed ? '8px' : '7px 8px',
+        borderRadius: 'var(--radius)',
+        border: `1px solid ${confirming ? 'var(--error)' : 'transparent'}`,
+        background: bg,
+        color,
+        cursor: 'pointer',
+        transition: 'all var(--transition)',
+        justifyContent: collapsed ? 'center' : 'flex-start',
+        width: collapsed ? undefined : 'calc(100% - 16px)',
+      }}
+    >
+      <LogOut size={16} style={{ flexShrink: 0 }} />
+      {!collapsed && (
+        <span style={{ fontSize: 13, fontWeight: active ? 600 : 500, whiteSpace: 'nowrap' }}>
+          {confirming ? 'Click to confirm' : 'Log Out'}
+        </span>
+      )}
+    </button>
+  )
 }
 
 function NavBtn({ item, isActive, collapsed, onClick }: {

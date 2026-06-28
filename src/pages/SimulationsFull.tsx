@@ -101,7 +101,7 @@ export default function SimulationsFull() {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ padding: '14px 24px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 12, background: 'var(--bg-surface)', flexShrink: 0 }}>
-        <div style={{ width: 32, height: 32, borderRadius: 'var(--radius)', background: 'rgba(52,211,153,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sim-color)' }}>
+        <div style={{ width: 32, height: 32, borderRadius: 'var(--radius)', background: 'rgba(59,130,246,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--sim-color)' }}>
           <Users size={16} />
         </div>
         <div>
@@ -110,7 +110,7 @@ export default function SimulationsFull() {
         </div>
       </div>
       <div style={{ flex: 1, overflow: 'auto', padding: 24 }}>
-        <div style={{ padding: '12px 16px', background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 'var(--radius)', marginBottom: 24, fontSize: 12, color: 'var(--sim-color)', display: 'flex', gap: 8 }}>
+        <div style={{ padding: '12px 16px', background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: 'var(--radius)', marginBottom: 24, fontSize: 12, color: 'var(--sim-color)', display: 'flex', gap: 8 }}>
           <Info size={14} style={{ flexShrink: 0, marginTop: 1 }} />
           <span>Each simulation puts you in a real analyst role. You receive a stakeholder brief, run SQL queries against live data, and write an executive deliverable. AI mentor evaluates every step.</span>
         </div>

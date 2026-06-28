@@ -37,7 +37,7 @@ export default function ExcelAcademy() {
       }}>
         <div style={{
           width: 32, height: 32, borderRadius: 'var(--radius)',
-          background: 'rgba(74,222,128,0.15)',
+          background: 'rgba(132,204,22,0.15)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           color: 'var(--excel-color)',
         }}>
@@ -104,8 +104,8 @@ function LessonCard({ lesson, onClick }: { lesson: Lesson; onClick: () => void }
       disabled={locked}
       style={{
         padding: '14px', borderRadius: 'var(--radius)', width: '100%', textAlign: 'left',
-        border: `1px solid ${complete ? 'rgba(74,222,128,0.3)' : 'var(--border)'}`,
-        background: complete ? 'rgba(74,222,128,0.06)' : 'var(--bg-surface)',
+        border: `1px solid ${complete ? 'rgba(132,204,22,0.3)' : 'var(--border)'}`,
+        background: complete ? 'rgba(132,204,22,0.06)' : 'var(--bg-surface)',
         opacity: locked ? 0.45 : 1,
         cursor: locked ? 'not-allowed' : 'pointer',
         transition: 'all var(--transition)',
@@ -373,7 +373,7 @@ function SpreadsheetEnv() {
                           padding: 0,
                           border: `1px solid ${isSelected ? 'var(--excel-color)' : 'var(--border)'}`,
                           background: isSelected
-                            ? 'rgba(74,222,128,0.08)'
+                            ? 'rgba(132,204,22,0.08)'
                             : isHeader && cells[ref]
                             ? 'var(--bg-overlay)'
                             : 'var(--bg-base)',
@@ -396,7 +396,7 @@ function SpreadsheetEnv() {
                               width: '100%', height: '100%',
                               padding: '0 6px',
                               border: 'none', outline: 'none',
-                              background: 'rgba(74,222,128,0.12)',
+                              background: 'rgba(132,204,22,0.12)',
                               color: 'var(--text-primary)',
                               fontFamily: 'var(--font-mono)',
                               fontSize: 12,
@@ -527,7 +527,7 @@ function SpreadsheetEnv() {
                 <span style={{
                   fontSize: 10, fontWeight: 700,
                   color: 'var(--excel-color)',
-                  background: 'rgba(74,222,128,0.12)',
+                  background: 'rgba(132,204,22,0.12)',
                   padding: '1px 6px', borderRadius: 3,
                 }}>
                   {ex.label}

@@ -1,11 +1,13 @@
 import React, { useEffect, useState, type ReactNode } from 'react'
 import {
-  BookOpen, CheckCircle, Clock, Target, Zap, TrendingUp,
-  Award, Activity, ChevronRight, Flame, Database, FileSpreadsheet,
-  Terminal, BarChart3, Briefcase, ArrowUpRight,
+  BookOpen, CheckCircle, Clock, TrendingUp,
+  Award, ChevronRight, Database, FileSpreadsheet,
+  Terminal, BarChart3, Briefcase, Users, FlaskConical,
+  Table2, FolderOpen, Trophy, Sparkles,
 } from 'lucide-react'
 import { useAuthStore, useUIStore } from '../store'
-import type { DashboardStats, SkillRating } from '../types'
+import type { DashboardStats, SkillRating, NavSection } from '../types'
+import AppLogo from '../components/ui/AppLogo'
 
 const SKILL_META: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   sql:              { label: 'SQL',              color: 'var(--sql-color)',      icon: <Database size={14} /> },
@@ -15,6 +17,52 @@ const SKILL_META: Record<string, { label: string; color: string; icon: React.Rea
   statistics:       { label: 'Statistics',       color: 'var(--stats-color)',    icon: <TrendingUp size={14} /> },
   business_thinking:{ label: 'Business',         color: 'var(--business-color)', icon: <Briefcase size={14} /> },
 }
+
+// ─────────────────────────────────────────────
+// LEARNING JOURNEY — every section, in the order
+// a new analyst would naturally move through them.
+// ─────────────────────────────────────────────
+interface JourneyItem {
+  id: NavSection
+  label: string
+  desc: string
+  icon: React.ReactNode
+  color: string
+}
+interface JourneyGroup {
+  phase: string
+  items: JourneyItem[]
+}
+
+const JOURNEY: JourneyGroup[] = [
+  {
+    phase: 'Academies',
+    items: [
+      { id: 'sql',        label: 'SQL',        desc: 'Query real databases — SELECT, joins, subqueries.',     icon: <Database size={16} />,       color: 'var(--sql-color)' },
+      { id: 'excel',      label: 'Excel',      desc: 'Formulas, PivotTables, and dashboards.',                  icon: <FileSpreadsheet size={16} />, color: 'var(--excel-color)' },
+      { id: 'python',     label: 'Python',     desc: 'Data wrangling and automation with real code.',          icon: <Terminal size={16} />,       color: 'var(--python-color)' },
+      { id: 'powerbi',    label: 'Power BI',   desc: 'Interactive dashboards that tell a story.',              icon: <BarChart3 size={16} />,      color: 'var(--powerbi-color)' },
+      { id: 'statistics', label: 'Statistics', desc: 'The numbers behind the charts — tests & inference.',     icon: <TrendingUp size={16} />,     color: 'var(--stats-color)' },
+      { id: 'business',   label: 'Business',   desc: 'Think like an analyst — frame and recommend.',          icon: <Briefcase size={16} />,      color: 'var(--business-color)' },
+    ],
+  },
+  {
+    phase: 'Practice',
+    items: [
+      { id: 'simulations', label: 'Simulations',    desc: 'Role-play real analyst scenarios under pressure.', icon: <Users size={16} />,        color: 'var(--sim-color)' },
+      { id: 'playground',  label: 'Data Playground', desc: 'Explore any dataset freely — no script needed.',   icon: <FlaskConical size={16} />, color: '#818cf8' },
+      { id: 'datasets',    label: 'Datasets',       desc: 'Bundled business datasets, or import your own.',    icon: <Table2 size={16} />,       color: 'var(--text-secondary)' },
+    ],
+  },
+  {
+    phase: 'Output',
+    items: [
+      { id: 'projects',     label: 'Projects',     desc: 'Turn lessons into portfolio-ready deliverables.', icon: <FolderOpen size={16} />, color: 'var(--text-secondary)' },
+      { id: 'portfolio',    label: 'Portfolio',    desc: 'Showcase your completed work and case studies.',  icon: <BookOpen size={16} />,   color: 'var(--text-secondary)' },
+      { id: 'achievements', label: 'Achievements', desc: 'Badges and milestones as you level up.',          icon: <Trophy size={16} />,     color: 'var(--legendary)' },
+    ],
+  },
+]
 
 export default function Dashboard() {
   const { user } = useAuthStore()
@@ -34,17 +82,41 @@ export default function Dashboard() {
 
   const rank = stats?.rank
   const greeting = getGreeting()
+  const isNewcomer = (stats?.lessons_complete ?? 0) === 0 && (stats?.exercises_attempted ?? 0) === 0
 
   return (
     <div style={{ height: '100%', overflow: 'auto', padding: 24 }}>
-      {/* Header */}
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ marginBottom: 4 }}>
-          {greeting}, {user?.name?.split(' ')[0]} 👋
-        </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-          Here's where you stand today. Keep pushing.
-        </p>
+      {/* Hero / Welcome */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 16,
+        marginBottom: 22,
+        padding: '18px 20px',
+        borderRadius: 'var(--radius-lg)',
+        background: 'linear-gradient(135deg, var(--bg-elevated) 0%, var(--bg-surface) 100%)',
+        border: '1px solid var(--border)',
+      }}>
+        <AppLogo size={44} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h1 style={{ marginBottom: 2 }}>
+            {greeting}, {user?.name?.split(' ')[0]} 👋
+          </h1>
+          {isNewcomer && (
+            <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>
+              Your personal analytics mentor — SQL, Excel, Python, Power BI, Statistics, and Business.
+            </p>
+          )}
+        </div>
+        {isNewcomer && (
+          <button
+            className="btn btn-primary"
+            onClick={() => setActiveSection('sql')}
+            style={{ flexShrink: 0 }}
+          >
+            <Sparkles size={14} /> Start with SQL
+          </button>
+        )}
       </div>
 
       {/* Rank banner */}
@@ -125,6 +197,37 @@ export default function Dashboard() {
         />
       </div>
 
+      {/* Learning Journey — every page, chronologically organized */}
+      <div style={{ marginBottom: 24 }}>
+        <h3 style={{ marginBottom: 14 }}>Your Learning Journey</h3>
+
+        {(() => {
+          let counter = 0
+          return JOURNEY.map(group => (
+            <div key={group.phase} style={{ marginBottom: 16 }}>
+              <div style={{ marginBottom: 8 }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  {group.phase}
+                </span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 10 }}>
+                {group.items.map(item => {
+                  counter += 1
+                  return (
+                    <JourneyCard
+                      key={item.id}
+                      order={counter}
+                      item={item}
+                      onClick={() => setActiveSection(item.id)}
+                    />
+                  )
+                })}
+              </div>
+            </div>
+          ))
+        })()}
+      </div>
+
       {/* Two column layout */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 16 }}>
         {/* Skill Radar */}
@@ -147,41 +250,6 @@ export default function Dashboard() {
 
         {/* Right column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {/* Quick actions */}
-          <div className="card">
-            <h3 style={{ marginBottom: 12 }}>Jump Back In</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <QuickAction
-                label="SQL Academy"
-                desc="Continue lessons"
-                color="var(--sql-color)"
-                icon={<Database size={14} />}
-                onClick={() => setActiveSection('sql')}
-              />
-              <QuickAction
-                label="Python Playground"
-                desc="Run live code"
-                color="var(--python-color)"
-                icon={<Terminal size={14} />}
-                onClick={() => setActiveSection('python')}
-              />
-              <QuickAction
-                label="Data Playground"
-                desc="Explore a dataset"
-                color="var(--accent)"
-                icon={<Activity size={14} />}
-                onClick={() => setActiveSection('playground')}
-              />
-              <QuickAction
-                label="Simulations"
-                desc="Analyst role-play"
-                color="var(--sim-color)"
-                icon={<Zap size={14} />}
-                onClick={() => setActiveSection('simulations')}
-              />
-            </div>
-          </div>
-
           {/* Recent activity */}
           <div className="card" style={{ flex: 1 }}>
             <h3 style={{ marginBottom: 12 }}>Recent Activity</h3>
@@ -226,7 +294,8 @@ function StatCard({ icon, label, value, sub, color }: {
         <div style={{
           width: 30, height: 30,
           borderRadius: 'var(--radius)',
-          background: `${color}20`,
+          background: 'var(--bg-elevated)',
+          border: '1px solid var(--border)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           color,
         }}>
@@ -265,8 +334,8 @@ function SkillBar({ rating }: { rating: SkillRating }) {
   )
 }
 
-function QuickAction({ label, desc, color, icon, onClick }: {
-  label: string; desc: string; color: string; icon: React.ReactNode; onClick: () => void
+function JourneyCard({ order, item, onClick }: {
+  order: number; item: JourneyItem; onClick: () => void
 }) {
   const [hov, setHov] = useState(false)
   return (
@@ -275,30 +344,44 @@ function QuickAction({ label, desc, color, icon, onClick }: {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        display: 'flex', alignItems: 'center', gap: 10,
-        padding: '8px 10px',
-        borderRadius: 'var(--radius)',
-        border: `1px solid ${hov ? color + '50' : 'var(--border)'}`,
-        background: hov ? `${color}10` : 'transparent',
-        cursor: 'pointer',
-        transition: 'all var(--transition)',
+        display: 'flex', alignItems: 'flex-start', gap: 10,
         textAlign: 'left',
+        cursor: 'pointer',
+        background: hov ? 'var(--bg-overlay)' : 'var(--bg-surface)',
+        border: `1px solid ${hov ? item.color : 'var(--border)'}`,
+        borderRadius: 'var(--radius-lg)',
+        padding: '12px 14px',
+        transition: 'all var(--transition)',
       }}
     >
       <div style={{
-        width: 28, height: 28,
-        borderRadius: 'var(--radius-sm)',
-        background: `${color}20`,
+        width: 30, height: 30,
+        borderRadius: 'var(--radius)',
+        background: 'var(--bg-elevated)',
+        border: '1px solid var(--border)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color, flexShrink: 0,
+        color: item.color, flexShrink: 0, position: 'relative',
       }}>
-        {icon}
+        {item.icon}
+        <span style={{
+          position: 'absolute', top: -6, left: -6,
+          width: 16, height: 16, borderRadius: '50%',
+          background: 'var(--bg-base)', border: '1px solid var(--border-strong)',
+          fontSize: 9, fontWeight: 700, color: 'var(--text-muted)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          {order}
+        </span>
       </div>
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{label}</div>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{desc}</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>
+          {item.label}
+        </div>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.4 }}>
+          {item.desc}
+        </div>
       </div>
-      <ChevronRight size={13} color="var(--text-muted)" />
+      <ChevronRight size={14} color={hov ? item.color : 'var(--text-muted)'} style={{ flexShrink: 0, marginTop: 2 }} />
     </button>
   )
 }

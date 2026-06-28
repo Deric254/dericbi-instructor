@@ -22,10 +22,11 @@ export default function Datasets() {
   const handleImport = async () => {
     if (!user) return
     const picked = await window.api.files.pick()
-    if (picked.canceled) return
-    const fileName = picked.path.split(/[/\\]/).pop() ?? 'dataset'
+    if (picked.canceled || !picked.path) return
+    const filePath = picked.path
+    const fileName = filePath.split(/[/\\]/).pop() ?? 'dataset'
     notify.info('Importing…', fileName)
-    const result = await window.api.files.import(user.id, picked.path, fileName)
+    const result = await window.api.files.import(user.id, filePath, fileName)
     if (result.success) {
       notify.success('Dataset imported', `${result.dataset?.name} — ${result.profile?.row_count?.toLocaleString()} rows`)
       load()

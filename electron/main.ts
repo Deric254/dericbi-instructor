@@ -53,11 +53,11 @@ function createSplash(): void {
   }
   .logo {
     width: 60px; height: 60px;
-    background: #6366f1;
+    background: linear-gradient(135deg, #5FBA90 0%, #2F7A57 100%);
     border-radius: 16px;
     display: flex; align-items: center; justify-content: center;
     margin-bottom: 20px;
-    box-shadow: 0 0 40px rgba(99,102,241,0.4);
+    box-shadow: 0 0 40px rgba(73,160,120,0.4);
   }
   h1 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
   .sub { font-size: 12px; color: #4d5673; margin-bottom: 28px; }
@@ -67,7 +67,7 @@ function createSplash(): void {
     margin-bottom: 12px; overflow: hidden;
   }
   .bar-inner {
-    height: 100%; background: #6366f1; border-radius: 2px;
+    height: 100%; background: #49A078; border-radius: 2px;
     width: 0%; transition: width 0.3s ease;
   }
   .status { font-size: 11px; color: #4d5673; }

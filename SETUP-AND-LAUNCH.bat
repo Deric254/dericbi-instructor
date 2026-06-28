@@ -16,7 +16,7 @@ echo  First run downloads ~400MB of packages.
 echo  After that: launches in seconds.
 echo.
 
-:: ── Check Node.js ─────────────────────────────────
+:: -- Check Node.js ---------------------------------
 echo  [1/3] Checking Node.js...
 where node >nul 2>nul
 if %errorlevel% neq 0 (
@@ -25,10 +25,9 @@ if %errorlevel% neq 0 (
       "Invoke-WebRequest -Uri 'https://nodejs.org/dist/v20.18.0/node-v20.18.0-x64.msi' -OutFile '%TEMP%\nodejs.msi' -UseBasicParsing; Write-Host 'Downloaded.'"
     echo        Installing Node.js...
     msiexec /i "%TEMP%\nodejs.msi" /qn /norestart ADDLOCAL=ALL
-    for /f "tokens=*" %%p in ('powershell -NoProfile -Command ^
-      "[System.Environment]::GetEnvironmentVariable(\"PATH\",\"Machine\")"') do set "PATH=%%p;%PATH%"
+    for /f "tokens=*" %%p in ('powershell -NoProfile -Command "[System.Environment]::GetEnvironmentVariable('PATH','Machine')"') do set "PATH=%%p;%PATH%"
     where node >nul 2>nul
-    if %errorlevel% neq 0 (
+    if !errorlevel! neq 0 (
         echo.
         echo  Node.js installed. Please CLOSE this window and run again.
         echo  ^(Windows needs to reload PATH after first Node install^)
@@ -37,7 +36,7 @@ if %errorlevel% neq 0 (
 )
 for /f %%v in ('node -e "process.stdout.write(process.version)"') do echo        Found: %%v
 
-:: ── Install dependencies ──────────────────────────
+:: -- Install dependencies --------------------------
 echo.
 echo  [2/3] Installing dependencies...
 
@@ -60,7 +59,7 @@ echo.
 echo        All packages installed successfully.
 echo        SQLite: uses sql.js ^(WebAssembly^) - no compilation needed.
 
-:: ── Launch ────────────────────────────────────────
+:: -- Launch ----------------------------------------
 :launch
 echo.
 echo  [3/3] Launching DericBI Instructor...

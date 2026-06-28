@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { Minus, Square, X } from 'lucide-react'
-import { useAuthStore } from '../../store'
+import { Minus, Square, X, Sparkles } from 'lucide-react'
+import { useAuthStore, useUIStore } from '../../store'
 import { LogoMark } from '../ui/AppLogo'
+import { SECTIONS_WITH_OWN_INSTRUCTOR } from '../ui/GlobalInstructor'
 
 export default function Titlebar() {
   const [isMaximized, setIsMaximized] = useState(false)
   const { user } = useAuthStore()
+  const { activeSection, instructorOpen, toggleInstructor } = useUIStore()
+  const showInstructorToggle = !!user && !SECTIONS_WITH_OWN_INSTRUCTOR.has(activeSection)
 
   useEffect(() => {
     window.api?.window.isMaximized().then(setIsMaximized)
@@ -43,11 +46,37 @@ export default function Titlebar() {
         )}
       </div>
 
-      {/* Window controls */}
-      <div style={{ display: 'flex', WebkitAppRegion: 'no-drag' } as any}>
-        <WinBtn icon={<Minus size={12} />} onClick={() => window.api?.window.minimize()} />
-        <WinBtn icon={<Square size={10} />} onClick={handleMaximize} />
-        <WinBtn icon={<X size={12} />} onClick={() => window.api?.window.close()} danger />
+      {/* Right side */}
+      <div style={{ display: 'flex', alignItems: 'center', WebkitAppRegion: 'no-drag' } as any}>
+        {showInstructorToggle && (
+          <button
+            onClick={toggleInstructor}
+            title="Ask the AI Instructor"
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              height: 26,
+              padding: '0 10px',
+              marginRight: 8,
+              borderRadius: 'var(--radius-full)',
+              border: `1px solid ${instructorOpen ? 'var(--accent)' : 'var(--border)'}`,
+              background: instructorOpen ? 'var(--accent-dim)' : 'transparent',
+              color: instructorOpen ? 'var(--accent)' : 'var(--text-secondary)',
+              cursor: 'pointer',
+              fontSize: 11, fontWeight: 600,
+              transition: 'all var(--transition)',
+            }}
+          >
+            <Sparkles size={12} />
+            AI Instructor
+          </button>
+        )}
+
+        {/* Window controls */}
+        <div style={{ display: 'flex' }}>
+          <WinBtn icon={<Minus size={12} />} onClick={() => window.api?.window.minimize()} />
+          <WinBtn icon={<Square size={10} />} onClick={handleMaximize} />
+          <WinBtn icon={<X size={12} />} onClick={() => window.api?.window.close()} danger />
+        </div>
       </div>
     </div>
   )

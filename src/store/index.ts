@@ -41,17 +41,23 @@ export const useAuthStore = create<AuthStore>()(
 interface UIStore {
   activeSection: NavSection
   sidebarCollapsed: boolean
+  instructorOpen: boolean
   setActiveSection: (section: NavSection) => void
   toggleSidebar: () => void
   setSidebarCollapsed: (collapsed: boolean) => void
+  toggleInstructor: () => void
+  setInstructorOpen: (open: boolean) => void
 }
 
 export const useUIStore = create<UIStore>()((set) => ({
   activeSection: 'dashboard',
   sidebarCollapsed: false,
+  instructorOpen: false,
   setActiveSection: (activeSection) => set({ activeSection }),
   toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
   setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
+  toggleInstructor: () => set((s) => ({ instructorOpen: !s.instructorOpen })),
+  setInstructorOpen: (instructorOpen) => set({ instructorOpen }),
 }))
 
 // ─────────────────────────────────────────────

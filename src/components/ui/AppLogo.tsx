@@ -26,55 +26,43 @@ export default function AppLogo({ size = 40, showText = false, textSize = 18 }: 
 
 // ─────────────────────────────────────────────
 // LOGO MARK
-// Loads logo.png from assets/ if present.
-// Falls back to built-in SVG bar chart icon.
-//
-// TO USE YOUR OWN LOGO:
-// Place your file at:  assets/logo.png
+// Tries, in order:
+//   1. assets/logo.png   — drop your own file here to override the brand mark
+//   2. assets/logo.svg   — the bundled DericBI mark (always present)
+//   3. built-in inline SVG icon — final fallback, never fails
 // ─────────────────────────────────────────────
 
 export function LogoMark({ size = 40 }: { size?: number }) {
   const r = Math.round(size * 0.22)
-  const [imgFailed, setImgFailed] = React.useState(false)
+  const [stage, setStage] = React.useState<'png' | 'svg' | 'fallback'>('png')
 
-  // Resolve path: packaged app vs dev server
-  const logoSrc = (() => {
-    try {
-      // In Electron renderer, location.protocol is 'file:'
-      if (typeof window !== 'undefined' && window.location.protocol === 'file:') {
-        // Packaged: logo.png is in extraResources, accessible via process.resourcesPath
-        // We use a relative path from the app's index.html location
-        return '../logo.png'
-      }
-      // Dev server (Vite): served from public/ or assets/
-      return '/assets/logo.png'
-    } catch {
-      return '/assets/logo.png'
-    }
-  })()
+  const isPackaged = typeof window !== 'undefined' && window.location.protocol === 'file:'
+  // Packaged: assets live alongside index.html under dist/assets/
+  // Dev server (Vite): served from public/assets/
+  const base = isPackaged ? './assets/' : '/assets/'
 
-  if (!imgFailed) {
+  if (stage !== 'fallback') {
     return (
       <div style={{ width: size, height: size, borderRadius: r, overflow: 'hidden', flexShrink: 0 }}>
         <img
-          src={logoSrc}
+          src={`${base}logo.${stage}`}
           alt="DericBI"
           width={size}
           height={size}
           style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
-          onError={() => setImgFailed(true)}
+          onError={() => setStage(stage === 'png' ? 'svg' : 'fallback')}
         />
       </div>
     )
   }
 
-  // Fallback SVG icon (shown when logo.png not found)
+  // Fallback SVG icon (shown only if both logo.png and logo.svg fail to load)
   return (
     <div style={{
       width: size, height: size, borderRadius: r, flexShrink: 0,
-      background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+      background: 'linear-gradient(135deg, #5FBA90 0%, #2F7A57 100%)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      boxShadow: '0 0 20px rgba(99,102,241,0.35)',
+      boxShadow: '0 0 20px rgba(73,160,120,0.35)',
       position: 'relative', overflow: 'hidden',
     }}>
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '55%', background: 'linear-gradient(180deg, rgba(255,255,255,0.18) 0%, transparent 100%)', borderRadius: `${r}px ${r}px 0 0` }} />
