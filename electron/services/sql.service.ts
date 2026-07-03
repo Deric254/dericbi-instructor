@@ -112,11 +112,63 @@ export interface ValidationResult {
   actual_rows?: any[]; expected_rows?: any[]
 }
 
+// ─────────────────────────────────────────────
+// AUTO-LOAD DEFAULT DATASETS FOR EXERCISES
+// ─────────────────────────────────────────────
+// Every exercise in the built-in SQL curriculum queries the bundled
+// hospital dataset (patients / billing tables). Rather than requiring
+// every exercise JSON to declare a dataset_id (most future content will
+// use the same two tables), we auto-load them into any exercise sandbox
+// that doesn't have them yet. This only runs for exercise sandboxes
+// (sandboxId starting with "ex_") — the free-form Playground manages its
+// own dataset selection via loadBundledDataset and is untouched by this.
+
+let defaultDatasetsCache: { id: string; table_name: string; file_path: string }[] | null = null
+
+function getDefaultDatasetRows(): { id: string; table_name: string; file_path: string }[] {
+  if (defaultDatasetsCache) return defaultDatasetsCache
+  const mainDb = getDb()
+  defaultDatasetsCache = mainDb.prepare(`
+    SELECT id, table_name, file_path FROM bundled_datasets
+    WHERE id IN ('ds-hospital-patients', 'ds-hospital-billing')
+  `).all() as any[]
+  return defaultDatasetsCache
+}
+
+async function ensureDefaultDatasetsLoaded(sandboxId: string): Promise<void> {
+  if (!sandboxId.startsWith('ex_')) return // only auto-load for exercise sandboxes
+
+  const sandbox = await getSandbox(sandboxId)
+
+  // Skip if already loaded (e.g. retrying the same exercise in one session)
+  const existing = sandbox.exec(`SELECT name FROM sqlite_master WHERE type='table' AND name='patients'`)
+  if (existing && existing.length > 0) return
+
+  for (const ds of getDefaultDatasetRows()) {
+    const resourcePath = app.isPackaged
+      ? path.join(process.resourcesPath, 'content', 'datasets', ds.file_path)
+      : path.join(__dirname, '../../content/datasets', ds.file_path)
+
+    if (!fs.existsSync(resourcePath)) {
+      console.warn(`[SQL] Default dataset file missing: ${resourcePath}`)
+      continue
+    }
+    await loadFileIntoSandbox(sandboxId, resourcePath, ds.table_name)
+  }
+}
+
 export async function validateSQLAnswer(params: {
   sandboxId: string; userQuery: string; solutionQuery: string
   evaluationMode: string; expectedOutput?: any
 }): Promise<ValidationResult> {
   try {
+    // Every exercise in the built-in curriculum runs against the bundled
+    // hospital dataset (patients + billing tables). Exercise sandboxes are
+    // created fresh and empty — without this, every exercise fails with
+    // "no such table" the first time it's opened, or after any app restart
+    // (the sandbox pool is in-memory and doesn't survive a restart).
+    await ensureDefaultDatasetsLoaded(params.sandboxId)
+
     const sandbox = await getSandbox(params.sandboxId)
 
     const runQuery = (q: string): any[] => {

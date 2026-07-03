@@ -60,6 +60,12 @@ if %errorlevel% neq 0 (
 set "ELECTRON_BUILDER_CACHE=%~dp0.electron-builder-cache"
 set "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/"
 set "ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/"
+REM Disable code signing — no certificate present.
+REM Without this, electron-builder downloads winCodeSign and tries to
+REM create macOS symlinks inside a Windows 7z extraction, which fails
+REM with "Cannot create symbolic link: A required privilege is not held
+REM by the client" on any machine without Developer Mode enabled.
+set "CSC_IDENTITY_AUTO_DISCOVERY=false"
 
 echo.
 echo  [2/2] Packaging installer...

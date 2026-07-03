@@ -1,0 +1,69 @@
+name: Version Bump
+
+# Runs on every push to main.
+# Reads the current version from package.json, increments the patch number,
+# commits the change back, and pushes a vX.Y.Z tag.
+# That tag push then triggers release.yml automatically — no manual tagging needed.
+#
+# Push a commit → version bumps → tag created → installer built → users can download.
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      # Don't re-trigger when this workflow itself commits the version bump
+      - 'package.json'
+      - 'package-lock.json'
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to push the commit and tag back to the repo
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Use a PAT or the default token — fetch-depth 0 ensures we have
+          # full history so the push doesn't get rejected.
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set git identity
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump patch version and tag
+        id: bump
+        run: |
+          # Read current version
+          CURRENT=$(node -p "require('./package.json').version")
+          echo "Current version: $CURRENT"
+
+          # Increment patch (1.4.0 -> 1.4.1, 1.4.9 -> 1.4.10, etc.)
+          NEW=$(node -p "
+            const [major, minor, patch] = '$CURRENT'.split('.').map(Number);
+            \`\${major}.\${minor}.\${patch + 1}\`
+          ")
+          echo "New version: $NEW"
+
+          # Write new version into package.json (in-place, no extra deps needed)
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.version = '$NEW';
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+          # Commit and tag
+          git add package.json
+          git commit -m "chore: bump version to $NEW [skip ci]"
+          git tag "v$NEW"
+          git push origin main
+          git push origin "v$NEW"
+
+          echo "new_version=$NEW" >> "$GITHUB_OUTPUT"
+          echo "tag=v$NEW"        >> "$GITHUB_OUTPUT"

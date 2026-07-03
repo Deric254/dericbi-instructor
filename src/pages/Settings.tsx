@@ -17,15 +17,69 @@ export default function Settings() {
   const [appSettings, setAppSettings] = useState<Record<string, string>>({})
 
   const PROVIDERS = [
-    { id: 'gemini',     label: 'Google Gemini',  desc: 'Gemini 1.5 Flash — best cost/speed balance. Recommended.',   link: 'https://aistudio.google.com/app/apikey' },
-    { id: 'openai',     label: 'OpenAI',         desc: 'GPT-4o Mini — high quality, moderate cost.',                  link: 'https://platform.openai.com/api-keys' },
-    { id: 'openrouter', label: 'OpenRouter',     desc: 'Access 100+ models through one key.',                         link: 'https://openrouter.ai/keys' },
+    { id: 'gemini',      label: 'Google Gemini',  desc: 'Gemini Flash — best cost/speed balance. Recommended.',                                          link: 'https://aistudio.google.com/app/apikey' },
+    { id: 'groq',        label: 'Groq',           desc: 'Free — extremely fast inference (LPU hardware). Llama 3.3 70B and more.',                       link: 'https://console.groq.com/keys' },
+    { id: 'nvidia',      label: 'Nvidia NIM',     desc: 'Free — 100+ models including Llama 4, DeepSeek R1, MiniMax M2.7. No credit card required.',      link: 'https://build.nvidia.com/settings/api-keys' },
+    { id: 'cerebras',    label: 'Cerebras',       desc: 'Free — 1M tokens/day, the most generous free daily volume of any provider.',                    link: 'https://cloud.cerebras.ai/platform/apikeys' },
+    { id: 'mistral',     label: 'Mistral AI',     desc: 'Free — ~1B tokens/month on the Experiment tier (opts in to training).',                          link: 'https://console.mistral.ai/api-keys' },
+    { id: 'cohere',      label: 'Cohere',         desc: 'Free — Command A / Command R+. Non-commercial use only.',                                        link: 'https://dashboard.cohere.com/api-keys' },
+    { id: 'huggingface', label: 'Hugging Face',   desc: 'Free — access to thousands of open-weight models via one key.',                                  link: 'https://huggingface.co/settings/tokens' },
+    { id: 'github',      label: 'GitHub Models',  desc: 'Free with any GitHub account — GPT-4o, Llama, Phi, DeepSeek-R1 and more.',                       link: 'https://github.com/settings/tokens' },
+    { id: 'openai',      label: 'OpenAI',         desc: 'GPT-4o Mini — high quality, paid (no permanent free tier).',                                     link: 'https://platform.openai.com/api-keys' },
+    { id: 'openrouter',  label: 'OpenRouter',     desc: 'Access 100+ models through one key — includes free-tier models.',                                link: 'https://openrouter.ai/keys' },
   ]
+
+  const ALL_PROVIDER_IDS = PROVIDERS.map(p => p.id)
+
+  // Curated free model lists — shown only for providers with more than one
+  // worthwhile free option. Providers not listed here use their built-in
+  // default model (set in electron/services/ai.service.ts) and need no
+  // extra selection from the user.
+  const MODEL_LISTS: Record<string, { id: string; label: string; note: string }[]> = {
+    nvidia: [
+      { id: 'meta/llama-3.3-70b-instruct',                 label: 'Llama 3.3 70B',          note: 'Best all-round free model' },
+      { id: 'meta/llama-4-maverick-17b-128e-instruct',     label: 'Llama 4 Maverick',        note: 'Most popular on NIM' },
+      { id: 'minimaxai/minimax-m2.7',                      label: 'MiniMax M2.7',            note: 'Strong reasoning' },
+      { id: 'deepseek-ai/deepseek-r1',                     label: 'DeepSeek R1',             note: 'Step-by-step reasoning' },
+      { id: 'mistralai/mistral-nemotron-mini-4b-instruct', label: 'Mistral Nemotron Mini',   note: 'Fastest responses' },
+      { id: 'qwen/qwen3-coder-480b-a22b-instruct',         label: 'Qwen3 Coder 480B',        note: 'Best for code questions' },
+      { id: 'nvidia/llama-3.1-nemotron-ultra-253b-v1',     label: 'Nemotron Ultra 253B',     note: 'Highest quality' },
+    ],
+    groq: [
+      { id: 'llama-3.3-70b-versatile',  label: 'Llama 3.3 70B',       note: 'Best all-round, very fast' },
+      { id: 'llama-3.1-8b-instant',     label: 'Llama 3.1 8B Instant', note: 'Fastest, lightest' },
+      { id: 'gemma2-9b-it',             label: 'Gemma 2 9B',          note: 'Google open model' },
+    ],
+    cerebras: [
+      { id: 'llama-3.3-70b', label: 'Llama 3.3 70B', note: '1M tokens/day — highest free daily volume' },
+      { id: 'llama3.1-8b',   label: 'Llama 3.1 8B',  note: 'Lighter, faster' },
+    ],
+    mistral: [
+      { id: 'mistral-small-latest', label: 'Mistral Small',  note: 'Best all-round free option' },
+      { id: 'open-mistral-nemo',    label: 'Mistral Nemo',   note: 'Open-weight, efficient' },
+      { id: 'codestral-latest',     label: 'Codestral',      note: 'Best for code questions' },
+    ],
+    cohere: [
+      { id: 'command-a-03-2025', label: 'Command A',    note: 'Latest, most capable' },
+      { id: 'command-r-plus',    label: 'Command R+',   note: 'Strong general-purpose' },
+    ],
+    huggingface: [
+      { id: 'meta-llama/Llama-3.3-70B-Instruct', label: 'Llama 3.3 70B',   note: 'Best all-round free model' },
+      { id: 'Qwen/Qwen2.5-72B-Instruct',         label: 'Qwen 2.5 72B',    note: 'Strong reasoning' },
+      { id: 'google/gemma-2-27b-it',             label: 'Gemma 2 27B',    note: 'Google open model' },
+    ],
+    github: [
+      { id: 'openai/gpt-4o-mini',       label: 'GPT-4o Mini',       note: 'Fast, high quality — free via GitHub' },
+      { id: 'openai/gpt-4o',            label: 'GPT-4o',            note: 'Highest quality, lower rate limit' },
+      { id: 'meta/llama-3.3-70b-instruct', label: 'Llama 3.3 70B',  note: 'Open-weight alternative' },
+      { id: 'deepseek/deepseek-r1',     label: 'DeepSeek R1',       note: 'Step-by-step reasoning' },
+    ],
+  }
 
   useEffect(() => {
     if (!user) return
     window.api.ai.getProvider(user.id).then((r: any) => setProvider(r.provider))
-    for (const p of ['gemini', 'openai', 'openrouter']) {
+    for (const p of ALL_PROVIDER_IDS) {
       window.api.ai.hasKey(user.id, p).then((r: any) => {
         if (r.has_key) setKeySaved(prev => ({ ...prev, [p]: true }))
       })
@@ -108,6 +162,46 @@ export default function Settings() {
               {PROVIDERS.find(p => p.id === provider)?.desc}
             </p>
           </div>
+
+          {/* Model selector — shown for any provider with more than one free model worth choosing between */}
+          {MODEL_LISTS[provider] && (
+            <div style={{ marginBottom: 18 }}>
+              <label className="input-label">{PROVIDERS.find(p => p.id === provider)?.label} Model</label>
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>
+                All models below are on the free tier. Availability can change — see the provider's own model page for the current list.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {MODEL_LISTS[provider].map(m => {
+                  const settingKey = `${provider}_model`
+                  const isSelected = (appSettings[settingKey] ?? MODEL_LISTS[provider][0].id) === m.id
+                  return (
+                    <button
+                      key={m.id}
+                      onClick={() => saveSetting(settingKey, m.id)}
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        padding: '8px 12px',
+                        borderRadius: 'var(--radius)',
+                        border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`,
+                        background: isSelected ? 'var(--accent-dim)' : 'transparent',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        transition: 'all var(--transition)',
+                      }}
+                    >
+                      <div>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: isSelected ? 'var(--accent)' : 'var(--text-primary)' }}>
+                          {m.label}
+                        </span>
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8 }}>{m.note}</span>
+                      </div>
+                      {isSelected && <CheckCircle size={13} color="var(--accent)" />}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Key inputs */}
           {PROVIDERS.map(p => (

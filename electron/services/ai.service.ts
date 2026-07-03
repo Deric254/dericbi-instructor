@@ -147,13 +147,31 @@ export async function chat(params: {
   // Call AI provider
   let response: string
 
+  // ── OpenAI-compatible providers ──────────────────────────────────────
+  // Every provider below exposes the same /v1/chat/completions shape as
+  // OpenAI, so they all reuse callOpenAI() — only the base URL and default
+  // model differ. Model can be overridden per-provider via app_settings
+  // (key: "{provider}_model"), which is how the Settings model pickers work.
+  const OPENAI_COMPATIBLE: Record<string, { baseUrl: string; defaultModel: string }> = {
+    openai:      { baseUrl: 'https://api.openai.com/v1',              defaultModel: 'gpt-4o-mini' },
+    openrouter:  { baseUrl: 'https://openrouter.ai/api/v1',           defaultModel: 'openai/gpt-4o-mini' },
+    nvidia:      { baseUrl: 'https://integrate.api.nvidia.com/v1',    defaultModel: 'meta/llama-3.3-70b-instruct' },
+    groq:        { baseUrl: 'https://api.groq.com/openai/v1',        defaultModel: 'llama-3.3-70b-versatile' },
+    cerebras:    { baseUrl: 'https://api.cerebras.ai/v1',             defaultModel: 'llama-3.3-70b' },
+    mistral:     { baseUrl: 'https://api.mistral.ai/v1',              defaultModel: 'mistral-small-latest' },
+    cohere:      { baseUrl: 'https://api.cohere.ai/compatibility/v1', defaultModel: 'command-a-03-2025' },
+    huggingface: { baseUrl: 'https://api-inference.huggingface.co/v1', defaultModel: 'meta-llama/Llama-3.3-70B-Instruct' },
+    github:      { baseUrl: 'https://models.github.ai/inference',     defaultModel: 'openai/gpt-4o-mini' },
+  }
+
   try {
     if (provider === 'gemini') {
       response = await callGemini(apiKey, systemPrompt, params.history, params.message)
-    } else if (provider === 'openai') {
-      response = await callOpenAI(apiKey, systemPrompt, params.history, params.message, 'https://api.openai.com/v1')
-    } else if (provider === 'openrouter') {
-      response = await callOpenAI(apiKey, systemPrompt, params.history, params.message, 'https://openrouter.ai/api/v1')
+    } else if (OPENAI_COMPATIBLE[provider]) {
+      const { baseUrl, defaultModel } = OPENAI_COMPATIBLE[provider]
+      const modelRow = db.prepare('SELECT value FROM app_settings WHERE key = ?').get(`${provider}_model`) as any
+      const model = modelRow?.value ?? defaultModel
+      response = await callOpenAI(apiKey, systemPrompt, params.history, params.message, baseUrl, model)
     } else {
       return { success: false, error: `Unknown provider: ${provider}` }
     }
@@ -238,7 +256,7 @@ async function callGemini(apiKey: string, systemPrompt: string, history: ChatMes
   return data.candidates?.[0]?.content?.parts?.[0]?.text ?? 'No response from Gemini.'
 }
 
-async function callOpenAI(apiKey: string, systemPrompt: string, history: ChatMessage[], userMessage: string, baseUrl: string): Promise<string> {
+async function callOpenAI(apiKey: string, systemPrompt: string, history: ChatMessage[], userMessage: string, baseUrl: string, model: string): Promise<string> {
   const messages = [
     { role: 'system', content: systemPrompt },
     ...history.map(m => ({ role: m.role, content: m.content })),
@@ -252,7 +270,7 @@ async function callOpenAI(apiKey: string, systemPrompt: string, history: ChatMes
       'Authorization': `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: baseUrl.includes('openrouter') ? 'openai/gpt-4o-mini' : 'gpt-4o-mini',
+      model,
       messages,
       max_tokens: 1024,
       temperature: 0.7,

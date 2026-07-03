@@ -10,14 +10,14 @@
       "prerequisites": [],
       "estimated_min": 30,
       "sort_order": 1,
-      "theory_md": "## Business Thinking for Analysts\n\nTechnical skills are only half the job. The other half is understanding the **business problem** before writing a single query.\n\n### The Analyst's problem-solving loop\n1. **Clarify the question** — what decision will this analysis support?\n2. **Identify the data** — what do we have, and what's missing?\n3. **Analyse** — SQL, Python, Excel, Power BI.\n4. **Insight, not just data** — what does this mean for the business?\n5. **Recommend** — a clear, actionable next step.\n\n### The 5 Whys\nWhen a stakeholder says \"sales are down\", ask *why* five times until you reach a root cause — not just a symptom.",
+      "theory_md": "## Business Thinking for Analysts\n\nTechnical skills are only half the job. The other half is understanding the **business problem** before writing a single query.\n\n### The Analyst's problem-solving loop\n1. **Clarify the question** \u2014 what decision will this analysis support?\n2. **Identify the data** \u2014 what do we have, and what's missing?\n3. **Analyse** \u2014 SQL, Python, Excel, Power BI.\n4. **Insight, not just data** \u2014 what does this mean for the business?\n5. **Recommend** \u2014 a clear, actionable next step.\n\n### The 5 Whys\nWhen a stakeholder says \"sales are down\", ask *why* five times until you reach a root cause \u2014 not just a symptom.",
       "exercises": [
         {
           "id": "business-thinking-ex1",
           "exercise_type": "freeform",
           "title": "Frame the business question",
           "prompt": "A hospital manager tells you: 'We spend too much on supplies.' Before analysing any data, what are the first three clarifying questions you would ask?",
-          "hint_1": "Think about what 'too much' means — compared to what?",
+          "hint_1": "Think about what 'too much' means \u2014 compared to what?",
           "hint_2": "Consider time, department, and what decisions the manager wants to make.",
           "hint_3": "Examples: (1) Which departments? (2) Too much vs last year or vs budget? (3) What decision will you make with this information?",
           "solution": "Clarifying questions should cover: scope (which departments/supplies), baseline (compared to what: budget, last year, benchmarks), and intended decision (what action will follow the analysis).",
@@ -31,25 +31,208 @@
       "id": "business-metrics",
       "module": "business",
       "title": "Key Business Metrics",
-      "description": "Revenue, cost, margin, churn, conversion — the metrics every analyst must know cold.",
+      "description": "Revenue, cost, margin, churn, conversion \u2014 the metrics every analyst must know cold.",
       "level": "beginner",
-      "prerequisites": ["business-thinking-intro"],
+      "prerequisites": [
+        "business-thinking-intro"
+      ],
       "estimated_min": 35,
       "sort_order": 2,
-      "theory_md": "## Key Business Metrics\n\n### Financial\n- **Revenue** — money earned from sales.\n- **Cost of Goods Sold (COGS)** — direct costs to produce what was sold.\n- **Gross Margin** = (Revenue − COGS) / Revenue × 100%.\n- **Net Profit Margin** = Net Profit / Revenue × 100%.\n\n### Customer\n- **Churn Rate** — % of customers lost in a period.\n- **Customer Lifetime Value (CLV)** — total revenue expected from one customer.\n- **Conversion Rate** — % of prospects who become customers.\n\n### Operational\n- **Average Handle Time** — avg time to process one unit of work.\n- **Throughput** — units processed per period.\n- **Utilisation Rate** — % of capacity being used.",
+      "theory_md": "## Key Business Metrics\n\n### Financial\n- **Revenue** \u2014 money earned from sales.\n- **Cost of Goods Sold (COGS)** \u2014 direct costs to produce what was sold.\n- **Gross Margin** = (Revenue \u2212 COGS) / Revenue \u00d7 100%.\n- **Net Profit Margin** = Net Profit / Revenue \u00d7 100%.\n\n### Customer\n- **Churn Rate** \u2014 % of customers lost in a period.\n- **Customer Lifetime Value (CLV)** \u2014 total revenue expected from one customer.\n- **Conversion Rate** \u2014 % of prospects who become customers.\n\n### Operational\n- **Average Handle Time** \u2014 avg time to process one unit of work.\n- **Throughput** \u2014 units processed per period.\n- **Utilisation Rate** \u2014 % of capacity being used.",
       "exercises": [
         {
           "id": "business-metrics-ex1",
           "exercise_type": "freeform",
           "title": "Calculate Gross Margin",
           "prompt": "A company has Revenue of KES 5,000,000 and COGS of KES 3,200,000. Calculate the Gross Margin percentage and explain what it means.",
-          "hint_1": "Gross Margin % = (Revenue - COGS) / Revenue × 100.",
-          "hint_2": "(5,000,000 - 3,200,000) / 5,000,000 × 100.",
-          "hint_3": "(1,800,000 / 5,000,000) × 100 = 36%. For every KES 100 of revenue, KES 36 is left after direct costs.",
-          "solution": "Gross Margin = (5,000,000 - 3,200,000) / 5,000,000 × 100 = 36%. This means 36 cents of every shilling of revenue remains after paying direct production costs.",
+          "hint_1": "Gross Margin % = (Revenue - COGS) / Revenue \u00d7 100.",
+          "hint_2": "(5,000,000 - 3,200,000) / 5,000,000 \u00d7 100.",
+          "hint_3": "(1,800,000 / 5,000,000) \u00d7 100 = 36%. For every KES 100 of revenue, KES 36 is left after direct costs.",
+          "solution": "Gross Margin = (5,000,000 - 3,200,000) / 5,000,000 \u00d7 100 = 36%. This means 36 cents of every shilling of revenue remains after paying direct production costs.",
           "evaluation_mode": "ai_review",
           "points": 20,
           "sort_order": 1
+        }
+      ]
+    },
+    {
+      "id": "business-storytelling",
+      "title": "Data Storytelling",
+      "description": "Turn analysis into decisions \u2014 the structure that makes stakeholders act.",
+      "level": "intermediate",
+      "prerequisites": [
+        "business-fundamentals"
+      ],
+      "estimated_min": 40,
+      "sort_order": 3,
+      "theory_md": "## Data Storytelling\n\nData without a narrative is just noise. Storytelling is the skill that converts analysis into action.\n\n### The Pyramid Principle (Barbara Minto)\nStart with the **conclusion**, then support it with evidence.\n\n```\n\u274c \"We analysed sales across 5 regions over 12 months.\n    We found that revenue declined in Q3. This was driven by\n    the North region. North's top product, Widget A, dropped 40%.\"\n\n\u2713 \"Widget A sales in the North must be investigated urgently.\n    North revenue fell 40% in Q3, dragging the company below target.\n    Here is the root cause and our recommendation.\"\n```\n\n### SCQA Framework\n- **S**ituation \u2014 context everyone agrees on.\n- **C**omplication \u2014 what changed or what's wrong.\n- **Q**uestion \u2014 what decision does this force?\n- **A**nswer \u2014 your recommendation.\n\n### What to show vs tell\n- **Show** data when the pattern itself is the insight (a chart of a 40% drop).\n- **Tell** the implication when it's not obvious from the chart.\n\n### The \"So what?\" test\nAfter every chart or table, ask: \"So what should the audience do differently?\"\nIf you can't answer, that slide should not be in the deck.\n\n**Business context:** The most technically correct analysis in the world does nothing if it doesn't lead to a decision. Storytelling is the bridge.",
+      "exercises": [
+        {
+          "id": "biz-story-e1",
+          "title": "Pyramid principle",
+          "prompt": "Rewrite this opening using the Pyramid Principle (conclusion first): 'We reviewed 12 months of churn data, segmented by plan type, and analysed cohorts. We found that monthly-plan customers churn 3x more than annual-plan customers.'",
+          "hint_1": "Lead with the insight that requires action.",
+          "hint_2": "Monthly customers churn 3x more \u2014 that is the conclusion.",
+          "hint_3": "Monthly-plan customers churn 3x more than annual customers \u2014 switching monthly customers to annual plans should be an immediate retention priority.",
+          "solution": "Monthly-plan customers churn 3x more",
+          "evaluation_mode": "contains",
+          "points": 20
+        },
+        {
+          "id": "biz-story-e2",
+          "title": "So what test",
+          "prompt": "Your chart shows average customer age by product category. The 'So what?' question gets no clear answer. What should you do?",
+          "hint_1": "If there's no actionable implication, reconsider whether to include it.",
+          "hint_2": "Every visual needs to serve the narrative.",
+          "hint_3": "Remove or replace the chart \u2014 if it doesn't support a decision or recommendation, it dilutes the story and wastes the audience's attention.",
+          "solution": "Remove or replace the chart",
+          "evaluation_mode": "contains",
+          "points": 15
+        }
+      ]
+    },
+    {
+      "id": "business-presentations",
+      "title": "Stakeholder Presentations",
+      "description": "Present to executives and non-technical audiences without losing the insight.",
+      "level": "intermediate",
+      "prerequisites": [
+        "business-storytelling"
+      ],
+      "estimated_min": 35,
+      "sort_order": 4,
+      "theory_md": "## Stakeholder Presentations\n\n### Know your audience\n| Audience | They want | They don't want |\n|---|---|---|\n| C-suite | The decision and the risk | Methodology details |\n| Finance | Numbers, assumptions, sensitivity | Raw data |\n| Operations | What to do | Why it was calculated |\n| Data team | Methodology, caveats | High-level summary |\n\n### Slide structure\nEach slide should have **one message** in the title \u2014 a full sentence, not a label.\n\n```\n\u274c \"Revenue by Region\"\n\u2713  \"North and West are the only regions exceeding target\"\n```\n\n### The executive summary slide\nLeads the deck. Contains:\n1. The situation (1 line).\n2. The recommendation (1 line).\n3. Supporting evidence (3 bullets max).\n4. What you need from this audience (1 line).\n\n### Handling the \"can you add...\" request\nStakeholders often ask for more data. The right response is:\n- \"What decision would that data help you make?\"\nIf there's no answer, the data isn't needed.\n\n### Anticipate questions\nList the 5 hardest questions your audience will ask. Have backup slides ready for each.",
+      "exercises": [
+        {
+          "id": "biz-pres-e1",
+          "title": "Slide title rewrite",
+          "prompt": "Rewrite this slide title as an insight: 'Customer Satisfaction Scores Q1-Q4'",
+          "hint_1": "What did customer satisfaction actually do?",
+          "hint_2": "The title should tell the story, not just label the data.",
+          "hint_3": "Customer satisfaction declined 18 points in Q3 and has not recovered",
+          "solution": "declined",
+          "evaluation_mode": "contains",
+          "points": 15
+        },
+        {
+          "id": "biz-pres-e2",
+          "title": "Audience adaptation",
+          "prompt": "You have a detailed regression model explaining churn. Your audience is the VP of Sales with 10 minutes. What do you present?",
+          "hint_1": "What does a VP of Sales actually need to act?",
+          "hint_2": "Methodology won't help them. Action will.",
+          "hint_3": "Lead with which customer segments are highest churn risk, the recommended action (e.g. outreach campaign), and the expected revenue impact. Skip the regression details entirely.",
+          "solution": "Which segments are at risk and what action to take",
+          "evaluation_mode": "contains",
+          "points": 20
+        }
+      ]
+    },
+    {
+      "id": "business-financial-modelling",
+      "title": "Financial Modelling Basics",
+      "description": "Build models that support real business decisions: forecasts, scenarios, and sensitivity.",
+      "level": "intermediate",
+      "prerequisites": [
+        "business-metrics"
+      ],
+      "estimated_min": 50,
+      "sort_order": 5,
+      "theory_md": "## Financial Modelling Basics\n\n### What is a financial model?\nA structured, quantitative framework for making a business decision. It's always a simplification of reality \u2014 the goal is to be useful, not perfect.\n\n### The three-statement model\n- **Income Statement** \u2014 Revenue, Costs, EBITDA, Net Profit.\n- **Balance Sheet** \u2014 Assets = Liabilities + Equity.\n- **Cash Flow Statement** \u2014 Operating, Investing, Financing cash flows.\n\nFor most analyst work, you only need to model the Income Statement.\n\n### Revenue model\n```\nRevenue = Price \u00d7 Volume\nVolume = Market size \u00d7 Market share \u00d7 Conversion rate\n```\nBreak revenue into its component drivers. Each driver gets its own assumption cell (coloured yellow by convention).\n\n### Scenario analysis\nAlways build three scenarios:\n| Scenario | Driver assumptions |\n|---|---|\n| Base | Most likely |\n| Bull (upside) | Best-case drivers |\n| Bear (downside) | Worst-case drivers |\n\n### Sensitivity table (Excel)\nData \u2192 What-If Analysis \u2192 Data Table\nVary two key assumptions simultaneously to show the range of outcomes.\n\n**Business context:** A model with explicit assumptions is far more valuable than a number with no explanation. It lets you update when reality changes.",
+      "exercises": [
+        {
+          "id": "biz-fin-e1",
+          "title": "Revenue decomposition",
+          "prompt": "A SaaS company has 1,000 customers paying $200/month. Write the formula to calculate Annual Recurring Revenue (ARR).",
+          "hint_1": "ARR = monthly revenue \u00d7 12",
+          "hint_2": "Monthly revenue = customers \u00d7 monthly price",
+          "hint_3": "ARR = 1000 \u00d7 200 \u00d7 12 = $2,400,000",
+          "solution": "2400000",
+          "evaluation_mode": "contains",
+          "points": 20
+        },
+        {
+          "id": "biz-fin-e2",
+          "title": "Scenario analysis purpose",
+          "prompt": "Why do financial models always include base, bull, and bear scenarios rather than just a single forecast?",
+          "hint_1": "What is the risk of a single-point forecast?",
+          "hint_2": "Reality rarely matches exactly one number.",
+          "hint_3": "A single forecast creates false precision. Scenarios show the range of plausible outcomes and let decision-makers understand the risk on both sides, not just the central estimate.",
+          "solution": "Show range of outcomes and quantify risk",
+          "evaluation_mode": "contains",
+          "points": 20
+        }
+      ]
+    },
+    {
+      "id": "business-kpi",
+      "title": "KPI Design & Dashboards",
+      "description": "Choose the right metrics, set targets that drive behaviour, and design KPI dashboards.",
+      "level": "intermediate",
+      "prerequisites": [
+        "business-metrics"
+      ],
+      "estimated_min": 40,
+      "sort_order": 6,
+      "theory_md": "## KPI Design & Dashboards\n\n### What makes a good KPI?\n- **Measurable** \u2014 you can calculate it from data you actually have.\n- **Actionable** \u2014 someone can change their behaviour based on it.\n- **Leading or lagging** \u2014 leading predicts future results; lagging confirms past results.\n\n| KPI type | Example |\n|---|---|\n| Leading | Calls made, demos booked, proposals sent |\n| Lagging | Revenue, churn rate, NPS |\n\n### The SMART framework for KPIs\n- **S**pecific, **M**easurable, **A**chievable, **R**elevant, **T**ime-bound.\n\n\u274c \"Improve customer satisfaction\"\n\u2713 \"Increase NPS from 32 to 45 by end of Q4\"\n\n### KPI hierarchy\n- **North Star metric** \u2014 the one metric that captures overall business health.\n- **Input metrics** \u2014 the driver metrics your team controls.\n- **Guardrail metrics** \u2014 metrics that must not worsen when optimising for North Star.\n\n### Dashboard design for KPIs\n- One number per KPI card, with vs target (\u25b3) and vs last period (%).\n- Traffic light colouring: green = on track, amber = at risk, red = off track.\n- No more than 10 KPIs on a single page \u2014 if everything is important, nothing is.\n\n**Business context:** Companies that measure the wrong things optimise for the wrong things. KPI design is strategic, not just technical.",
+      "exercises": [
+        {
+          "id": "biz-kpi-e1",
+          "title": "Leading vs lagging",
+          "prompt": "Classify each metric: (A) Number of sales calls made this week (B) Revenue this quarter. Which is leading and which is lagging?",
+          "hint_1": "Leading metrics predict; lagging metrics confirm.",
+          "hint_2": "Can you use metric A to predict metric B?",
+          "hint_3": "A) Leading \u2014 calls predict future revenue. B) Lagging \u2014 revenue confirms past performance.",
+          "solution": "A is leading, B is lagging",
+          "evaluation_mode": "contains",
+          "points": 15
+        },
+        {
+          "id": "biz-kpi-e2",
+          "title": "SMART KPI rewrite",
+          "prompt": "Rewrite this KPI as a SMART goal: 'Increase website traffic'",
+          "hint_1": "Add specific numbers, a deadline, and a current baseline.",
+          "hint_2": "Use the SMART framework.",
+          "hint_3": "Increase monthly website sessions from 25,000 to 40,000 by 31 March (Specific, Measurable, Achievable, Relevant, Time-bound)",
+          "solution": "specific number and deadline",
+          "evaluation_mode": "contains",
+          "points": 20
+        }
+      ]
+    },
+    {
+      "id": "business-project-analytics",
+      "title": "Project Analytics",
+      "description": "Track, measure, and communicate the impact of an analytics project from brief to delivery.",
+      "level": "advanced",
+      "prerequisites": [
+        "business-storytelling",
+        "business-kpi"
+      ],
+      "estimated_min": 45,
+      "sort_order": 7,
+      "theory_md": "## Project Analytics\n\nAnalytics projects fail more often from poor scoping and communication than from technical mistakes.\n\n### Scoping an analytics project\n**Five questions before you start:**\n1. What decision will this analysis inform?\n2. Who is the decision-maker?\n3. What is the deadline?\n4. What data is available?\n5. What is good enough (vs perfect)?\n\n### Project brief template\n```\nProblem statement: [One sentence]\nDecision it supports: [Who decides what]\nSuccess metric: [How we know the project worked]\nData needed: [Sources, tables, fields]\nDeliverable: [Dashboard / report / model / presentation]\nDeadline: [Date]\nAssumptions and constraints: [List]\n```\n\n### Estimating effort\nBreak the project into phases:\n| Phase | Typical % of effort |\n|---|---|\n| Data discovery & cleaning | 40% |\n| Analysis | 25% |\n| Visualisation & communication | 20% |\n| Stakeholder review & iteration | 15% |\n\nAnalysts consistently underestimate data cleaning. Always add a buffer.\n\n### Stakeholder sign-off checkpoints\n- **Brief sign-off** \u2014 before any analysis. Prevents scope creep.\n- **Data availability check** \u2014 before promising a deadline.\n- **Draft review** \u2014 before final delivery. Surface misalignments early.\n\n### Measuring your own impact\nTrack the decision that was made because of your analysis and the outcome. Over time, this builds a portfolio of business impact, not just technical output.",
+      "exercises": [
+        {
+          "id": "biz-proj-e1",
+          "title": "Scoping question",
+          "prompt": "A manager says: 'I want a dashboard showing everything about customer behaviour.' What is the most important clarifying question to ask first?",
+          "hint_1": "What is missing from this request?",
+          "hint_2": "Without knowing the decision, you can't scope the work.",
+          "hint_3": "What decision will this dashboard support, and who is the primary decision-maker?",
+          "solution": "What decision will this support",
+          "evaluation_mode": "contains",
+          "points": 20
+        },
+        {
+          "id": "biz-proj-e2",
+          "title": "Effort distribution",
+          "prompt": "You estimate an analysis project will take 10 days. According to typical project effort distribution, how many days should you allocate to data discovery and cleaning?",
+          "hint_1": "Data cleaning typically takes about 40% of project effort.",
+          "hint_2": "40% of 10 days.",
+          "hint_3": "4 days \u2014 data cleaning and discovery accounts for roughly 40% of analytics project effort.",
+          "solution": "4",
+          "evaluation_mode": "contains",
+          "points": 15
         }
       ]
     }

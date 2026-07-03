@@ -5,14 +5,24 @@
     {
       "id": "stat-descriptive",
       "title": "Descriptive Statistics",
-      "description": "Mean, median, std, variance — summarizing data numerically",
+      "description": "Mean, median, std, variance \u2014 summarizing data numerically",
       "level": "beginner",
       "prerequisites": [],
       "estimated_min": 35,
       "sort_order": 1,
-      "theory_md": "## Descriptive Statistics\n\nDescriptive stats summarize what data looks like.\n\n**Measures of center:**\n- **Mean** — arithmetic average. Sensitive to outliers.\n- **Median** — middle value. Robust to outliers.\n- **Mode** — most frequent value.\n\n**Measures of spread:**\n- **Range** — max - min\n- **Variance** — average squared deviation from mean\n- **Std Dev** — square root of variance. In original units.\n- **IQR** — Q3 - Q1 (middle 50%)\n\n**In Python:**\n```python\nimport numpy as np\nimport pandas as pd\n\ndata = [12000, 15000, 11000, 85000, 13000, 14000]\nprint(f'Mean:   {np.mean(data):,.0f}')\nprint(f'Median: {np.median(data):,.0f}')\nprint(f'Std:    {np.std(data):,.0f}')\nprint(f'IQR:    {np.percentile(data,75)-np.percentile(data,25):,.0f}')\n```\n\n**In SQL:**\n```sql\nSELECT\n  AVG(bill_amount) as mean,\n  MIN(bill_amount) as min_val,\n  MAX(bill_amount) as max_val\nFROM billing;\n```\n\n**Business insight:** When mean >> median, the distribution is skewed (outliers pulling average up). Use median for 'typical' in those cases.",
+      "theory_md": "## Descriptive Statistics\n\nDescriptive stats summarize what data looks like.\n\n**Measures of center:**\n- **Mean** \u2014 arithmetic average. Sensitive to outliers.\n- **Median** \u2014 middle value. Robust to outliers.\n- **Mode** \u2014 most frequent value.\n\n**Measures of spread:**\n- **Range** \u2014 max - min\n- **Variance** \u2014 average squared deviation from mean\n- **Std Dev** \u2014 square root of variance. In original units.\n- **IQR** \u2014 Q3 - Q1 (middle 50%)\n\n**In Python:**\n```python\nimport numpy as np\nimport pandas as pd\n\ndata = [12000, 15000, 11000, 85000, 13000, 14000]\nprint(f'Mean:   {np.mean(data):,.0f}')\nprint(f'Median: {np.median(data):,.0f}')\nprint(f'Std:    {np.std(data):,.0f}')\nprint(f'IQR:    {np.percentile(data,75)-np.percentile(data,25):,.0f}')\n```\n\n**In SQL:**\n```sql\nSELECT\n  AVG(bill_amount) as mean,\n  MIN(bill_amount) as min_val,\n  MAX(bill_amount) as max_val\nFROM billing;\n```\n\n**Business insight:** When mean >> median, the distribution is skewed (outliers pulling average up). Use median for 'typical' in those cases.",
       "exercises": [
-        { "id": "stat-d1-e1", "title": "Detect Outlier Effect", "prompt": "sales = [15000, 18000, 12000, 14000, 250000, 16000, 13000]. Calculate mean and median. Print both, then print whether the distribution is skewed and why.", "hint_1": "import numpy as np. Use np.mean() and np.median()", "hint_2": "If mean >> median, skewed right (outlier pulling mean up).", "hint_3": "import numpy as np\nsales = [15000, 18000, 12000, 14000, 250000, 16000, 13000]\nm = np.mean(sales)\nmed = np.median(sales)\nprint(f'Mean: {m:,.0f}')\nprint(f'Median: {med:,.0f}')\nif m > med * 1.2:\n    print('Right-skewed: outlier is pulling the mean up. Use median for typical value.')\nelse:\n    print('Approximately symmetric.')", "solution": "import numpy as np\nsales = [15000, 18000, 12000, 14000, 250000, 16000, 13000]\nm = np.mean(sales)\nmed = np.median(sales)\nprint(f'Mean: {m:,.0f}')\nprint(f'Median: {med:,.0f}')\nif m > med * 1.2:\n    print('Right-skewed: outlier is pulling the mean up. Use median for typical value.')\nelse:\n    print('Approximately symmetric.')", "evaluation_mode": "ai_review", "points": 30 }
+        {
+          "id": "stat-d1-e1",
+          "title": "Detect Outlier Effect",
+          "prompt": "sales = [15000, 18000, 12000, 14000, 250000, 16000, 13000]. Calculate mean and median. Print both, then print whether the distribution is skewed and why.",
+          "hint_1": "import numpy as np. Use np.mean() and np.median()",
+          "hint_2": "If mean >> median, skewed right (outlier pulling mean up).",
+          "hint_3": "import numpy as np\nsales = [15000, 18000, 12000, 14000, 250000, 16000, 13000]\nm = np.mean(sales)\nmed = np.median(sales)\nprint(f'Mean: {m:,.0f}')\nprint(f'Median: {med:,.0f}')\nif m > med * 1.2:\n    print('Right-skewed: outlier is pulling the mean up. Use median for typical value.')\nelse:\n    print('Approximately symmetric.')",
+          "solution": "import numpy as np\nsales = [15000, 18000, 12000, 14000, 250000, 16000, 13000]\nm = np.mean(sales)\nmed = np.median(sales)\nprint(f'Mean: {m:,.0f}')\nprint(f'Median: {med:,.0f}')\nif m > med * 1.2:\n    print('Right-skewed: outlier is pulling the mean up. Use median for typical value.')\nelse:\n    print('Approximately symmetric.')",
+          "evaluation_mode": "ai_review",
+          "points": 30
+        }
       ]
     },
     {
@@ -20,12 +30,204 @@
       "title": "Correlation Analysis",
       "description": "Measure relationships between variables",
       "level": "intermediate",
-      "prerequisites": ["stat-descriptive"],
+      "prerequisites": [
+        "stat-descriptive"
+      ],
       "estimated_min": 40,
       "sort_order": 2,
-      "theory_md": "## Correlation\n\nCorrelation measures the strength and direction of a linear relationship between two variables.\n\n**Pearson r:** -1 to +1\n- +1 = perfect positive\n- 0 = no linear relationship\n- -1 = perfect negative\n\n**Interpretation guide:**\n- |r| < 0.3 = weak\n- 0.3-0.7 = moderate\n- |r| > 0.7 = strong\n\n⚠️ **Correlation ≠ Causation**\n\n**In Python:**\n```python\nimport pandas as pd\nimport numpy as np\n\nnp.random.seed(42)\ndf = pd.DataFrame({\n    'advertising': np.random.normal(5000, 1000, 50),\n    'sales': np.random.normal(50000, 10000, 50)\n})\ndf['sales'] = df['sales'] + df['advertising'] * 8\n\ncorr = df.corr().round(2)\nprint(corr)\n\n# Single pair\nr = df['advertising'].corr(df['sales'])\nprint(f'r = {r:.3f}')\n```\n\n**In SQL (approximate via normalized covariance):**\n```sql\nSELECT\n  (AVG(age * bill_amount) - AVG(age) * AVG(bill_amount)) /\n  (stddev(age) * stddev(bill_amount)) AS correlation\nFROM patients p JOIN billing b ON p.patient_id = b.patient_id;\n```",
+      "theory_md": "## Correlation\n\nCorrelation measures the strength and direction of a linear relationship between two variables.\n\n**Pearson r:** -1 to +1\n- +1 = perfect positive\n- 0 = no linear relationship\n- -1 = perfect negative\n\n**Interpretation guide:**\n- |r| < 0.3 = weak\n- 0.3-0.7 = moderate\n- |r| > 0.7 = strong\n\n\u26a0\ufe0f **Correlation \u2260 Causation**\n\n**In Python:**\n```python\nimport pandas as pd\nimport numpy as np\n\nnp.random.seed(42)\ndf = pd.DataFrame({\n    'advertising': np.random.normal(5000, 1000, 50),\n    'sales': np.random.normal(50000, 10000, 50)\n})\ndf['sales'] = df['sales'] + df['advertising'] * 8\n\ncorr = df.corr().round(2)\nprint(corr)\n\n# Single pair\nr = df['advertising'].corr(df['sales'])\nprint(f'r = {r:.3f}')\n```\n\n**In SQL (approximate via normalized covariance):**\n```sql\nSELECT\n  (AVG(age * bill_amount) - AVG(age) * AVG(bill_amount)) /\n  (stddev(age) * stddev(bill_amount)) AS correlation\nFROM patients p JOIN billing b ON p.patient_id = b.patient_id;\n```",
       "exercises": [
-        { "id": "stat-co1-e1", "title": "Correlation Matrix", "prompt": "Create a DataFrame with 100 rows (np.random.seed(1)): ad_spend (normal 10000,2000), clicks (ad_spend/10 + normal noise 0,50), sales (clicks*500 + normal 0,5000). Print the correlation matrix rounded to 2 decimals.", "hint_1": "df.corr().round(2) gives the full matrix.", "hint_2": "np.random.seed(1)\nn=100\nad = np.random.normal(10000,2000,n)\nclicks = ad/10 + np.random.normal(0,50,n)\nsales = clicks*500 + np.random.normal(0,5000,n)", "hint_3": "import pandas as pd\nimport numpy as np\nnp.random.seed(1)\nn=100\nad = np.random.normal(10000,2000,n)\nclicks = ad/10 + np.random.normal(0,50,n)\nsales = clicks*500 + np.random.normal(0,5000,n)\ndf = pd.DataFrame({'ad_spend':ad.round(0),'clicks':clicks.round(0),'sales':sales.round(0)})\nprint(df.corr().round(2))", "solution": "import pandas as pd\nimport numpy as np\nnp.random.seed(1)\nn=100\nad = np.random.normal(10000,2000,n)\nclicks = ad/10 + np.random.normal(0,50,n)\nsales = clicks*500 + np.random.normal(0,5000,n)\ndf = pd.DataFrame({'ad_spend':ad.round(0),'clicks':clicks.round(0),'sales':sales.round(0)})\nprint(df.corr().round(2))", "evaluation_mode": "ai_review", "points": 35 }
+        {
+          "id": "stat-co1-e1",
+          "title": "Correlation Matrix",
+          "prompt": "Create a DataFrame with 100 rows (np.random.seed(1)): ad_spend (normal 10000,2000), clicks (ad_spend/10 + normal noise 0,50), sales (clicks*500 + normal 0,5000). Print the correlation matrix rounded to 2 decimals.",
+          "hint_1": "df.corr().round(2) gives the full matrix.",
+          "hint_2": "np.random.seed(1)\nn=100\nad = np.random.normal(10000,2000,n)\nclicks = ad/10 + np.random.normal(0,50,n)\nsales = clicks*500 + np.random.normal(0,5000,n)",
+          "hint_3": "import pandas as pd\nimport numpy as np\nnp.random.seed(1)\nn=100\nad = np.random.normal(10000,2000,n)\nclicks = ad/10 + np.random.normal(0,50,n)\nsales = clicks*500 + np.random.normal(0,5000,n)\ndf = pd.DataFrame({'ad_spend':ad.round(0),'clicks':clicks.round(0),'sales':sales.round(0)})\nprint(df.corr().round(2))",
+          "solution": "import pandas as pd\nimport numpy as np\nnp.random.seed(1)\nn=100\nad = np.random.normal(10000,2000,n)\nclicks = ad/10 + np.random.normal(0,50,n)\nsales = clicks*500 + np.random.normal(0,5000,n)\ndf = pd.DataFrame({'ad_spend':ad.round(0),'clicks':clicks.round(0),'sales':sales.round(0)})\nprint(df.corr().round(2))",
+          "evaluation_mode": "ai_review",
+          "points": 35
+        }
+      ]
+    },
+    {
+      "id": "stats-probability",
+      "title": "Probability & Distributions",
+      "description": "Understand the randomness behind data: probability rules and key distributions.",
+      "level": "intermediate",
+      "prerequisites": [
+        "stats-descriptive"
+      ],
+      "estimated_min": 40,
+      "sort_order": 3,
+      "theory_md": "## Probability & Distributions\n\n### Probability basics\n- **P(A)** = favourable outcomes / total outcomes.\n- **P(A and B)** = P(A) \u00d7 P(B) if independent.\n- **P(A or B)** = P(A) + P(B) \u2212 P(A and B).\n- **Complement**: P(not A) = 1 \u2212 P(A).\n\n### Normal distribution\n- Bell-shaped, symmetric around the mean.\n- **68-95-99.7 rule**: 68% of data within 1\u03c3, 95% within 2\u03c3, 99.7% within 3\u03c3.\n- Many real metrics (heights, test scores, measurement errors) approximate normal.\n\n### Z-score \u2014 standardise any value\n```\nz = (x \u2212 \u03bc) / \u03c3\n```\nz = 2 means the value is 2 standard deviations above average.\n\n### Other distributions\n| Distribution | When to use |\n|---|---|\n| Binomial | Count of successes in n trials |\n| Poisson | Count of events in a time window |\n| Uniform | Each outcome equally likely |\n| Exponential | Time between events |\n\n**Business context:** A product manager asking \"how often does response time exceed 2 seconds?\" is asking about a tail probability from a distribution.",
+      "exercises": [
+        {
+          "id": "stats-prob-e1",
+          "title": "Complement",
+          "prompt": "The probability a customer churns in month 1 is 0.08. What is the probability they do NOT churn?",
+          "hint_1": "P(not A) = 1 - P(A)",
+          "hint_2": "1 - 0.08 = ?",
+          "hint_3": "0.92",
+          "solution": "0.92",
+          "evaluation_mode": "exact",
+          "points": 10
+        },
+        {
+          "id": "stats-prob-e2",
+          "title": "68-95-99.7 rule",
+          "prompt": "A call centre's average handle time is 5 minutes with a standard deviation of 1 minute. What % of calls fall between 3 and 7 minutes?",
+          "hint_1": "3 and 7 are how many standard deviations from 5?",
+          "hint_2": "3 = 5-2\u03c3 and 7 = 5+2\u03c3. This is \u00b12 standard deviations.",
+          "hint_3": "95%",
+          "solution": "95%",
+          "evaluation_mode": "exact",
+          "points": 15
+        }
+      ]
+    },
+    {
+      "id": "stats-hypothesis",
+      "title": "Hypothesis Testing",
+      "description": "Test claims about data rigorously \u2014 p-values, significance levels, and what they really mean.",
+      "level": "intermediate",
+      "prerequisites": [
+        "stats-probability"
+      ],
+      "estimated_min": 50,
+      "sort_order": 4,
+      "theory_md": "## Hypothesis Testing\n\n### The framework\n1. **H\u2080 (null hypothesis)** \u2014 the default assumption (no effect, no difference).\n2. **H\u2081 (alternative hypothesis)** \u2014 what you're trying to prove.\n3. Choose **\u03b1** (significance level) \u2014 typically 0.05.\n4. Calculate the **test statistic** from your data.\n5. Find the **p-value** \u2014 probability of seeing this result if H\u2080 were true.\n6. **p < \u03b1 \u2192 reject H\u2080** (result is statistically significant).\n\n### p-value misconception\nA p-value is NOT the probability that H\u2080 is true.\nIt is the probability of seeing data this extreme **assuming H\u2080 is true**.\np = 0.03 means: \"If there were truly no effect, we'd see this result only 3% of the time.\"\n\n### t-test \u2014 compare two means\n```python\nfrom scipy import stats\nt_stat, p_value = stats.ttest_ind(group_a, group_b)\nif p_value < 0.05:\n    print(\"Significant difference\")\n```\n\n### Type I and Type II errors\n| | H\u2080 true | H\u2080 false |\n|---|---|---|\n| Reject H\u2080 | \u274c Type I (false positive) | \u2713 Correct |\n| Fail to reject | \u2713 Correct | \u274c Type II (false negative) |\n\n**Business context:** \"Is the new checkout flow actually faster or did we just get lucky?\" Hypothesis testing gives you a defensible answer.",
+      "exercises": [
+        {
+          "id": "stats-hyp-e1",
+          "title": "p-value decision",
+          "prompt": "You run an A/B test. p-value = 0.03, significance level = 0.05. Do you reject the null hypothesis?",
+          "hint_1": "Compare p-value to alpha.",
+          "hint_2": "If p < alpha, reject H0.",
+          "hint_3": "Yes \u2014 p = 0.03 < 0.05, so you reject the null hypothesis. The result is statistically significant.",
+          "solution": "Yes",
+          "evaluation_mode": "contains",
+          "points": 15
+        },
+        {
+          "id": "stats-hyp-e2",
+          "title": "Type of error",
+          "prompt": "Your test concludes the new feature improves conversion, but it actually doesn't. What type of error is this?",
+          "hint_1": "You rejected H0 when it was true.",
+          "hint_2": "Rejecting a true null hypothesis.",
+          "hint_3": "Type I error (false positive)",
+          "solution": "Type I",
+          "evaluation_mode": "contains",
+          "points": 15
+        }
+      ]
+    },
+    {
+      "id": "stats-regression",
+      "title": "Regression Analysis",
+      "description": "Predict a continuous outcome and understand the relationship between variables.",
+      "level": "intermediate",
+      "prerequisites": [
+        "stats-correlation"
+      ],
+      "estimated_min": 55,
+      "sort_order": 5,
+      "theory_md": "## Regression Analysis\n\n### Simple Linear Regression\nPredict Y from one variable X:\n```\nY = \u03b2\u2080 + \u03b2\u2081X + \u03b5\n```\n- **\u03b2\u2080** = intercept (Y when X=0)\n- **\u03b2\u2081** = slope (change in Y per unit change in X)\n- **\u03b5** = error term\n\n```python\nfrom sklearn.linear_model import LinearRegression\nmodel = LinearRegression()\nmodel.fit(X_train, y_train)\nprint(f\"Slope: {model.coef_[0]:.2f}\")\nprint(f\"Intercept: {model.intercept_:.2f}\")\n```\n\n### R\u00b2 \u2014 how well does the model fit?\n- R\u00b2 = 1 \u2192 perfect fit.\n- R\u00b2 = 0 \u2192 X explains nothing about Y.\n- R\u00b2 = 0.75 \u2192 X explains 75% of the variance in Y.\n\n### Multiple Regression\n```python\n# Multiple predictors\nX = df[['advertising_spend', 'price', 'num_stores']]\ny = df['sales']\nmodel.fit(X, y)\n```\n\n### Assumptions (LINE)\n- **L**inearity \u2014 relationship is linear.\n- **I**ndependence \u2014 observations are independent.\n- **N**ormality \u2014 residuals are normally distributed.\n- **E**qual variance \u2014 residuals have constant spread (homoscedasticity).\n\n**Business context:** \"For every $1,000 more we spend on ads, we expect $8,200 more in revenue\" \u2014 that is a regression coefficient in plain English.",
+      "exercises": [
+        {
+          "id": "stats-reg-e1",
+          "title": "Interpret slope",
+          "prompt": "A regression model predicts Sales from Advertising. The slope coefficient is 8.2. What does this mean in plain English?",
+          "hint_1": "The slope is change in Y per 1 unit increase in X.",
+          "hint_2": "1 unit more advertising \u2192 8.2 units more sales.",
+          "hint_3": "For every 1 unit increase in advertising spend, sales are expected to increase by 8.2 units, holding other factors constant.",
+          "solution": "For every 1 unit increase in advertising, sales increase by 8.2 units",
+          "evaluation_mode": "contains",
+          "points": 20
+        },
+        {
+          "id": "stats-reg-e2",
+          "title": "R-squared interpretation",
+          "prompt": "Your model has R\u00b2 = 0.62. What does this mean?",
+          "hint_1": "R-squared measures explained variance.",
+          "hint_2": "62% of something is explained by the model.",
+          "hint_3": "The model explains 62% of the variance in the outcome variable. The remaining 38% is unexplained by the predictors.",
+          "solution": "62% of the variance is explained",
+          "evaluation_mode": "contains",
+          "points": 15
+        }
+      ]
+    },
+    {
+      "id": "stats-abtesting",
+      "title": "A/B Testing for Analysts",
+      "description": "Design and analyse experiments correctly \u2014 the skill every product and marketing team needs.",
+      "level": "intermediate",
+      "prerequisites": [
+        "stats-hypothesis"
+      ],
+      "estimated_min": 50,
+      "sort_order": 6,
+      "theory_md": "## A/B Testing for Analysts\n\n### What is an A/B test?\nA controlled experiment where you split users randomly into:\n- **Control (A)** \u2014 current experience.\n- **Treatment (B)** \u2014 the change you want to test.\n\nRandomisation ensures any difference in outcomes is caused by the change, not by who happened to be in each group.\n\n### Sample size planning\nUnderpowered tests are the #1 mistake. Run a sample size calculation **before** starting.\n\nRule of thumb for conversion rates:\n```\nn \u2248 16 \u00d7 \u03c3\u00b2 / \u03b4\u00b2\n```\nwhere \u03b4 is the minimum detectable effect you care about.\n\nOnline calculators: statsig.com, evan.miller.org/ab-testing\n\n### Key metrics to track\n- **Primary metric** \u2014 the one that determines success/failure (e.g. conversion rate).\n- **Guardrail metrics** \u2014 metrics that must not get worse (e.g. page load time, error rate).\n- **Secondary metrics** \u2014 directional signals (session length, pages per visit).\n\n### Common mistakes\n1. **Peeking** \u2014 stopping early when you see a significant result inflates false positives.\n2. **Multiple testing** \u2014 testing 20 metrics at \u03b1=0.05 will produce 1 false positive on average.\n3. **Novelty effect** \u2014 users behave differently because something is new, not better.\n4. **Segment by segment analysis post-hoc** \u2014 only valid if pre-registered.\n\n**Business context:** Every product change should go through A/B testing. Analysts who run tests correctly give their companies a compounding advantage.",
+      "exercises": [
+        {
+          "id": "stats-ab-e1",
+          "title": "Why randomise?",
+          "prompt": "Why is random assignment to control and treatment groups essential in an A/B test?",
+          "hint_1": "What would happen if motivated users self-selected into treatment?",
+          "hint_2": "Selection bias would confound the result.",
+          "hint_3": "Randomisation ensures any difference in outcomes is caused by the treatment, not by pre-existing differences between groups (confounding).",
+          "solution": "Ensures differences are caused by the treatment, not confounding",
+          "evaluation_mode": "contains",
+          "points": 20
+        },
+        {
+          "id": "stats-ab-e2",
+          "title": "Peeking problem",
+          "prompt": "You start an A/B test. After 3 days, p = 0.04. You stop and declare success. What is the problem?",
+          "hint_1": "You planned for 2 weeks of data.",
+          "hint_2": "Stopping based on an interim result inflates error.",
+          "hint_3": "Peeking \u2014 stopping early when a significant result appears inflates the Type I error rate above your chosen alpha. The true false-positive rate is much higher than 5%.",
+          "solution": "Peeking inflates Type I error",
+          "evaluation_mode": "contains",
+          "points": 20
+        }
+      ]
+    },
+    {
+      "id": "stats-timeseries",
+      "title": "Time Series Basics",
+      "description": "Decompose trends, seasonality, and noise \u2014 and make defensible forecasts.",
+      "level": "advanced",
+      "prerequisites": [
+        "stats-regression"
+      ],
+      "estimated_min": 55,
+      "sort_order": 7,
+      "theory_md": "## Time Series Basics\n\n### Components of a time series\n- **Trend** \u2014 long-term direction (up, down, flat).\n- **Seasonality** \u2014 repeating pattern at a fixed frequency (weekly, monthly, yearly).\n- **Cyclical** \u2014 longer, irregular waves (economic cycles).\n- **Noise** \u2014 random variation that can't be predicted.\n\n### Decomposition\n```python\nfrom statsmodels.tsa.seasonal import seasonal_decompose\nresult = seasonal_decompose(df['sales'], model='additive', period=12)\nresult.plot()\n```\n\n### Moving averages \u2014 smooth out noise\n```python\ndf['7d_MA'] = df['sales'].rolling(window=7).mean()\ndf['30d_MA'] = df['sales'].rolling(window=30).mean()\n```\n\n### Stationarity\nA stationary series has constant mean and variance over time. Many forecasting models require it.\n\n**Augmented Dickey-Fuller test:**\n```python\nfrom statsmodels.tsa.stattools import adfuller\nresult = adfuller(df['sales'])\np_value = result[1]  # p < 0.05 \u2192 stationary\n```\n\n**Differencing** makes a non-stationary series stationary:\n```python\ndf['sales_diff'] = df['sales'].diff()\n```\n\n### Simple forecast: Exponential Smoothing\n```python\nfrom statsmodels.tsa.holtwinters import ExponentialSmoothing\nmodel = ExponentialSmoothing(df['sales'], trend='add', seasonal='add', seasonal_periods=12)\nfitted = model.fit()\nforecast = fitted.forecast(6)  # 6 months ahead\n```\n\n**Business context:** \"Are our sales really growing or is this just the usual Q4 bump?\" Time series decomposition answers that definitively.",
+      "exercises": [
+        {
+          "id": "stats-ts-e1",
+          "title": "Identify component",
+          "prompt": "Monthly ice cream sales spike every July and August and drop every January. Which time series component does this represent?",
+          "hint_1": "It repeats at the same time every year.",
+          "hint_2": "Annual pattern that repeats at a fixed interval.",
+          "hint_3": "Seasonality",
+          "solution": "Seasonality",
+          "evaluation_mode": "contains",
+          "points": 10
+        },
+        {
+          "id": "stats-ts-e2",
+          "title": "Moving average purpose",
+          "prompt": "You apply a 7-day moving average to daily website traffic data. What does this achieve?",
+          "hint_1": "What does averaging adjacent values do to spikes?",
+          "hint_2": "Random day-to-day noise gets cancelled out.",
+          "hint_3": "It smooths out day-to-day noise and reveals the underlying trend, making it easier to see whether traffic is growing or declining.",
+          "solution": "Smooths noise and reveals the underlying trend",
+          "evaluation_mode": "contains",
+          "points": 15
+        }
       ]
     }
   ]

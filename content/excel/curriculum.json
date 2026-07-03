@@ -46,10 +46,12 @@
       "title": "Lookup Functions",
       "description": "VLOOKUP, HLOOKUP, INDEX/MATCH and XLOOKUP for retrieving data across tables.",
       "level": "intermediate",
-      "prerequisites": ["excel-basics"],
+      "prerequisites": [
+        "excel-basics"
+      ],
       "estimated_min": 40,
       "sort_order": 2,
-      "theory_md": "## Lookup Functions\n\n### VLOOKUP\n`=VLOOKUP(lookup_value, table_array, col_index, [range_lookup])`\n\nSearches the **first column** of a table and returns a value from the specified column.\n\n### INDEX / MATCH\nMore flexible alternative:\n`=INDEX(return_range, MATCH(lookup_value, lookup_range, 0))`\n\n### XLOOKUP (Excel 365)\n`=XLOOKUP(lookup_value, lookup_array, return_array)`\nReturns an entire row or column — the modern replacement for VLOOKUP.",
+      "theory_md": "## Lookup Functions\n\n### VLOOKUP\n`=VLOOKUP(lookup_value, table_array, col_index, [range_lookup])`\n\nSearches the **first column** of a table and returns a value from the specified column.\n\n### INDEX / MATCH\nMore flexible alternative:\n`=INDEX(return_range, MATCH(lookup_value, lookup_range, 0))`\n\n### XLOOKUP (Excel 365)\n`=XLOOKUP(lookup_value, lookup_array, return_array)`\nReturns an entire row or column \u2014 the modern replacement for VLOOKUP.",
       "exercises": [
         {
           "id": "excel-lookup-ex1",
@@ -72,10 +74,12 @@
       "title": "Pivot Tables",
       "description": "Summarise, group and cross-tabulate data without writing formulas.",
       "level": "intermediate",
-      "prerequisites": ["excel-basics"],
+      "prerequisites": [
+        "excel-basics"
+      ],
       "estimated_min": 45,
       "sort_order": 3,
-      "theory_md": "## Pivot Tables\n\nPivot tables let you quickly summarise thousands of rows of data.\n\n### Creating a pivot table\n1. Click anywhere inside your data table.\n2. **Insert → PivotTable**.\n3. Drag fields to Rows, Columns, Values and Filters.\n\n### Common value summarisations\n- Sum, Count, Average, Max, Min.\n- Right-click a value → **Value Field Settings** to change.\n\n### Slicers\nInsert slicers (**PivotTable Analyze → Insert Slicer**) for visual, clickable filters.",
+      "theory_md": "## Pivot Tables\n\nPivot tables let you quickly summarise thousands of rows of data.\n\n### Creating a pivot table\n1. Click anywhere inside your data table.\n2. **Insert \u2192 PivotTable**.\n3. Drag fields to Rows, Columns, Values and Filters.\n\n### Common value summarisations\n- Sum, Count, Average, Max, Min.\n- Right-click a value \u2192 **Value Field Settings** to change.\n\n### Slicers\nInsert slicers (**PivotTable Analyze \u2192 Insert Slicer**) for visual, clickable filters.",
       "exercises": [
         {
           "id": "excel-pivots-ex1",
@@ -89,6 +93,234 @@
           "evaluation_mode": "ai_review",
           "points": 20,
           "sort_order": 1
+        }
+      ]
+    },
+    {
+      "id": "excel-if-logic",
+      "title": "IF & Logical Functions",
+      "description": "Build conditional logic in Excel with IF, AND, OR, and nested formulas.",
+      "level": "beginner",
+      "prerequisites": [
+        "excel-fundamentals"
+      ],
+      "estimated_min": 30,
+      "sort_order": 4,
+      "theory_md": "## IF & Logical Functions\n\n### IF\n`=IF(logical_test, value_if_true, value_if_false)`\n\n```excel\n=IF(B2>10000, \"High Value\", \"Standard\")\n```\n\n### AND / OR\n```excel\n=IF(AND(B2>5000, C2=\"Active\"), \"Priority\", \"Normal\")\n=IF(OR(D2=\"Manager\", D2=\"Director\"), \"Senior\", \"Junior\")\n```\n\n### Nested IF\n```excel\n=IF(B2>=90, \"A\", IF(B2>=80, \"B\", IF(B2>=70, \"C\", \"F\")))\n```\n\n**Tip:** More than 3 nesting levels \u2192 use IFS (Excel 2019+):\n```excel\n=IFS(B2>=90,\"A\", B2>=80,\"B\", B2>=70,\"C\", TRUE,\"F\")\n```\n\n**Business context:** Sales tier labels, status flags, and grading systems all use IF logic. Master this and 30% of analyst formula requests become trivial.",
+      "exercises": [
+        {
+          "id": "excel-if-e1",
+          "title": "Sales Flag",
+          "prompt": "Write an IF formula in C2 that returns 'Exceeded' if B2 > 50000, otherwise 'Missed'.",
+          "hint_1": "IF takes three arguments: test, value if true, value if false.",
+          "hint_2": "=IF(B2>50000, ...)",
+          "hint_3": "=IF(B2>50000,\"Exceeded\",\"Missed\")",
+          "solution": "=IF(B2>50000,\"Exceeded\",\"Missed\")",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "excel-if-e2",
+          "title": "Nested Grade",
+          "prompt": "Write a nested IF in C2 that assigns 'A' if B2>=90, 'B' if B2>=80, 'C' if B2>=70, else 'F'.",
+          "hint_1": "Start with =IF(B2>=90,...",
+          "hint_2": "The value_if_false of each IF is another IF.",
+          "hint_3": "=IF(B2>=90,\"A\",IF(B2>=80,\"B\",IF(B2>=70,\"C\",\"F\")))",
+          "solution": "=IF(B2>=90,\"A\",IF(B2>=80,\"B\",IF(B2>=70,\"C\",\"F\")))",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "excel-if-e3",
+          "title": "AND Condition",
+          "prompt": "Write an IF formula that returns 'Bonus' if B2>10000 AND C2='Active', otherwise blank.",
+          "hint_1": "Use AND() inside the logical_test.",
+          "hint_2": "=IF(AND(B2>10000,C2=\"Active\"),...",
+          "hint_3": "=IF(AND(B2>10000,C2=\"Active\"),\"Bonus\",\"\")",
+          "solution": "=IF(AND(B2>10000,C2=\"Active\"),\"Bonus\",\"\")",
+          "evaluation_mode": "exact",
+          "points": 20
+        }
+      ]
+    },
+    {
+      "id": "excel-charts",
+      "title": "Charts & Visualisation",
+      "description": "Create clear, professional charts that communicate data instantly.",
+      "level": "beginner",
+      "prerequisites": [
+        "excel-fundamentals"
+      ],
+      "estimated_min": 35,
+      "sort_order": 5,
+      "theory_md": "## Charts & Visualisation\n\n### Choosing the right chart\n| Data type | Best chart |\n|---|---|\n| Compare categories | Bar / Column |\n| Show trend over time | Line |\n| Show proportions | Pie / Donut (max 5 slices) |\n| Show distribution | Histogram |\n| Show two-variable relationship | Scatter |\n\n### Creating a chart\n1. Select your data range (include headers).\n2. **Insert \u2192 Recommended Charts**, or pick from the Charts group.\n3. Use **Chart Design \u2192 Select Data** to adjust series and axes.\n\n### Formatting rules\n- Remove chart borders and grid lines that add no information.\n- Use consistent colours across a report.\n- Title every chart with a statement, not a label: \"Revenue declined in Q3\" not \"Revenue Chart\".\n- Use **Data Labels** sparingly \u2014 one clear number per series is enough.\n\n**Business context:** Decision-makers spend 10 seconds on a chart. If they have to ask what it means, the chart failed.",
+      "exercises": [
+        {
+          "id": "excel-chart-e1",
+          "title": "Right chart for trend",
+          "prompt": "You have monthly sales over 12 months. Which chart type best shows the trend? A) Bar B) Line C) Pie D) Scatter",
+          "hint_1": "Trend data over time has a clear time axis.",
+          "hint_2": "Time on x-axis, value on y-axis is a classic line chart.",
+          "hint_3": "B) Line",
+          "solution": "B) Line",
+          "evaluation_mode": "exact",
+          "points": 10
+        },
+        {
+          "id": "excel-chart-e2",
+          "title": "Pie chart limit",
+          "prompt": "You have sales data for 8 product categories. Is a pie chart appropriate? Answer Yes or No and explain why in one sentence.",
+          "hint_1": "Think about readability with many slices.",
+          "hint_2": "Pie charts lose clarity beyond 5 slices.",
+          "hint_3": "No \u2014 pie charts are hard to read with more than 5 categories; use a bar chart instead.",
+          "solution": "No",
+          "evaluation_mode": "contains",
+          "points": 10
+        }
+      ]
+    },
+    {
+      "id": "excel-financial",
+      "title": "Financial Functions",
+      "description": "PMT, NPV, IRR and the core financial formulas every analyst needs.",
+      "level": "intermediate",
+      "prerequisites": [
+        "excel-if-logic"
+      ],
+      "estimated_min": 40,
+      "sort_order": 6,
+      "theory_md": "## Financial Functions\n\n### PMT \u2014 Loan payments\n`=PMT(rate, nper, pv)` \u2014 calculates a fixed periodic payment.\n\n```excel\n=PMT(6%/12, 60, -200000)\n```\n\u2192 Monthly payment on a $200,000 loan at 6% annual rate over 60 months.\n\n**Always divide annual rate by 12 for monthly periods.**\n\n### NPV \u2014 Net Present Value\n```excel\n=NPV(0.1, B2:B6) + A1\n```\nwhere A1 is the initial investment (negative) and B2:B6 are future cash flows.\n\nNPV > 0 \u2192 invest. NPV < 0 \u2192 don't.\n\n### IRR \u2014 Internal Rate of Return\n```excel\n=IRR(A1:A6)\n```\nA1 is the initial outflow (negative), A2:A6 are inflows.\n\n### CAGR (no built-in function)\n```excel\n=(end_value/start_value)^(1/years) - 1\n=(B10/B1)^(1/9)-1\n```\n\n**Business context:** Finance teams use these daily for budgeting, project approval, and loan analysis.",
+      "exercises": [
+        {
+          "id": "excel-fin-e1",
+          "title": "Monthly Loan Payment",
+          "prompt": "Calculate the monthly payment for a $50,000 loan at 8% annual interest over 5 years (60 months). Use PMT.",
+          "hint_1": "=PMT(rate_per_period, number_of_periods, present_value)",
+          "hint_2": "Annual rate 8% divided by 12 for monthly. PV is negative of loan amount.",
+          "hint_3": "=PMT(8%/12, 60, -50000)",
+          "solution": "=PMT(8%/12,60,-50000)",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "excel-fin-e2",
+          "title": "CAGR interpretation",
+          "prompt": "Revenue grew from $1,000,000 to $1,610,510 over 5 years. Write the CAGR formula.",
+          "hint_1": "CAGR = (End/Start)^(1/years) - 1",
+          "hint_2": "=(1610510/1000000)^(1/5)-1",
+          "hint_3": "=(1610510/1000000)^(1/5)-1",
+          "solution": "=(1610510/1000000)^(1/5)-1",
+          "evaluation_mode": "exact",
+          "points": 25
+        }
+      ]
+    },
+    {
+      "id": "excel-tables",
+      "title": "Data Validation & Excel Tables",
+      "description": "Lock down data entry and use Excel Tables to make formulas that update automatically.",
+      "level": "intermediate",
+      "prerequisites": [
+        "excel-charts"
+      ],
+      "estimated_min": 35,
+      "sort_order": 7,
+      "theory_md": "## Data Validation & Excel Tables\n\n### Data Validation\nPrevents bad data from entering your spreadsheet.\n\n**Data \u2192 Data Validation \u2192 Settings**\n- List \u2192 users pick from a dropdown.\n- Whole Number \u2192 constrain to a range.\n- Date \u2192 restrict to valid date ranges.\n- Custom \u2192 any formula: `=AND(A1>=0, A1<=100)` for percentages.\n\n### Excel Tables (Ctrl+T)\nConvert a range into a Table and Excel gives you:\n- **Automatic expansion** \u2014 add a row and formulas extend.\n- **Structured references** \u2014 `=SUM(Table1[Sales])` instead of `=SUM(B2:B100)`.\n- **Filter dropdowns** built in.\n- **Total Row** \u2014 toggle from Table Design \u2192 Total Row.\n\n```excel\n=SUMIF(Table1[Region], \"North\", Table1[Sales])\n```\n\n**Best practice:** Every data source in an Excel model should be a Table. This removes the constant need to update formula ranges.",
+      "exercises": [
+        {
+          "id": "excel-tbl-e1",
+          "title": "Structured reference",
+          "prompt": "In an Excel Table named SalesData with a column called Revenue, write the structured reference formula to sum all Revenue values.",
+          "hint_1": "Structured references use TableName[ColumnName].",
+          "hint_2": "=SUM(SalesData[...])",
+          "hint_3": "=SUM(SalesData[Revenue])",
+          "solution": "=SUM(SalesData[Revenue])",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "excel-tbl-e2",
+          "title": "Validation type",
+          "prompt": "You want a cell to only accept values between 0 and 100 (inclusive). Which validation type do you use? A) List B) Whole Number C) Custom D) Date",
+          "hint_1": "You are constraining to a numeric range.",
+          "hint_2": "Whole Number allows you to set minimum and maximum.",
+          "hint_3": "B) Whole Number",
+          "solution": "B) Whole Number",
+          "evaluation_mode": "exact",
+          "points": 10
+        }
+      ]
+    },
+    {
+      "id": "excel-powerquery",
+      "title": "Power Query",
+      "description": "Connect to any data source, clean and reshape data without formulas \u2014 then refresh with one click.",
+      "level": "advanced",
+      "prerequisites": [
+        "excel-tables"
+      ],
+      "estimated_min": 50,
+      "sort_order": 8,
+      "theory_md": "## Power Query\n\nPower Query (Data \u2192 Get & Transform) lets you connect to any data source and build a repeatable cleaning pipeline. Every step is recorded; click **Refresh** to rerun the whole pipeline on new data.\n\n### Common transforms\n| Task | Power Query action |\n|---|---|\n| Remove duplicates | Home \u2192 Remove Rows \u2192 Remove Duplicates |\n| Filter rows | Filter dropdown on any column |\n| Split a column | Transform \u2192 Split Column |\n| Unpivot | Transform \u2192 Unpivot Columns |\n| Merge two tables | Home \u2192 Merge Queries (like a JOIN) |\n| Change data type | click the type icon left of column header |\n\n### M Language (optional but powerful)\nPower Query records your steps as M code. Example \u2014 add a custom column:\n```\n= Table.AddColumn(Source, \"Margin\", each [Revenue] - [Cost])\n```\n\n### When to use Power Query vs VLOOKUP\nUse Power Query when:\n- You repeat the same cleaning steps on new exports.\n- You need to combine 3+ tables.\n- The raw data is messy (extra header rows, wrong types, inconsistent formats).\n\n**Business context:** Analysts who know Power Query turn hour-long monthly reports into 30-second refreshes.",
+      "exercises": [
+        {
+          "id": "excel-pq-e1",
+          "title": "Unpivot use case",
+          "prompt": "You have a table with columns: Product, Jan, Feb, Mar (sales by month across columns). What Power Query operation reshapes this into three columns: Product, Month, Sales?",
+          "hint_1": "This is a wide-to-long transformation.",
+          "hint_2": "Select the month columns, then choose Transform.",
+          "hint_3": "Unpivot Columns",
+          "solution": "Unpivot Columns",
+          "evaluation_mode": "contains",
+          "points": 20
+        },
+        {
+          "id": "excel-pq-e2",
+          "title": "Merge vs VLOOKUP",
+          "prompt": "You have two tables: Orders (10,000 rows) and Customers (5,000 rows) you need to join on CustomerID. Should you use VLOOKUP or Power Query Merge? Explain in one sentence.",
+          "hint_1": "Think about performance and repeatability.",
+          "hint_2": "VLOOKUP recalculates on every change. Power Query runs once on refresh.",
+          "hint_3": "Power Query Merge \u2014 it is faster on large tables and produces a refreshable, repeatable pipeline without volatile formula recalculation.",
+          "solution": "Power Query Merge",
+          "evaluation_mode": "contains",
+          "points": 20
+        }
+      ]
+    },
+    {
+      "id": "excel-dashboard",
+      "title": "Dashboard Design",
+      "description": "Build a professional Excel dashboard that tells a story at a glance.",
+      "level": "advanced",
+      "prerequisites": [
+        "excel-charts",
+        "excel-powerquery"
+      ],
+      "estimated_min": 60,
+      "sort_order": 9,
+      "theory_md": "## Dashboard Design\n\nA dashboard distils complex data into the 3\u20135 metrics a decision-maker needs right now.\n\n### Layout principles\n1. **Top-left = most important.** Eyes start there.\n2. **KPI cards first** \u2014 one big number per card (current value, vs target, vs last period).\n3. **Supporting charts below** \u2014 context, not the headline.\n4. **One colour family** \u2014 highlight only what matters in your brand colour.\n\n### Making it interactive\n- **Slicers** link to a PivotTable and filter all connected charts at once.\n- **Form controls** (Combo Box, Scroll Bar) let users select a year/region.\n- **Named Ranges + INDIRECT** allows dynamic chart titles: `=\"Sales \u2014 \" & TEXT(E1,\"MMMM YYYY\")`\n\n### KPI formula pattern\n```excel\n=TEXT(B2,\"$#,##0\")   ' formatted number\n=B2/B3-1             ' vs last period\n=IF(B2>B4,\"\u25b2 \",\"\u25bc \")&TEXT(ABS(B2/B4-1),\"0.0%\")  ' arrow + % change\n```\n\n### Common mistakes\n- Too many charts \u2192 pick the 3 most important.\n- Different scales on similar charts \u2192 confuses comparison.\n- No print area set \u2192 dashboards print badly.\n- Live data connection with no \"Last refreshed\" timestamp \u2192 no one trusts it.\n\n**Business context:** A well-designed dashboard eliminates 80% of the questions managers ask repeatedly.",
+      "exercises": [
+        {
+          "id": "excel-dash-e1",
+          "title": "Layout priority",
+          "prompt": "On a sales dashboard, you have: a summary KPI table, a trend line chart, a regional breakdown bar chart, and raw data. In what order should they appear top-to-bottom?",
+          "hint_1": "What does a decision-maker need to see first?",
+          "hint_2": "Most important information first, supporting detail lower.",
+          "hint_3": "KPI table \u2192 trend line chart \u2192 regional bar chart \u2192 raw data (usually on a separate sheet)",
+          "solution": "KPI table, trend line chart, regional bar chart, raw data",
+          "evaluation_mode": "contains",
+          "points": 15
+        },
+        {
+          "id": "excel-dash-e2",
+          "title": "Slicer purpose",
+          "prompt": "A Slicer is inserted and connected to a PivotTable. What happens when a user clicks 'North' on the Region slicer?",
+          "hint_1": "Slicers filter connected objects.",
+          "hint_2": "All charts and tables connected to that PivotTable update.",
+          "hint_3": "All PivotTables and charts connected to that slicer filter to show only North region data.",
+          "solution": "All connected charts and PivotTables filter to show only North region data",
+          "evaluation_mode": "contains",
+          "points": 15
         }
       ]
     }

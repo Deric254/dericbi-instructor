@@ -10,7 +10,7 @@
       "prerequisites": [],
       "estimated_min": 35,
       "sort_order": 1,
-      "theory_md": "## Power BI Fundamentals\n\nPower BI has three main tools:\n- **Power BI Desktop** — build reports on your PC.\n- **Power BI Service** — publish and share in the browser.\n- **Power BI Mobile** — view reports on phones/tablets.\n\n### The workflow\n1. **Get Data** — connect to Excel, SQL, web, etc.\n2. **Power Query** — clean and transform data.\n3. **Data Model** — define relationships between tables.\n4. **Report View** — build visualisations.\n5. **Publish** — share to the Power BI Service.",
+      "theory_md": "## Power BI Fundamentals\n\nPower BI has three main tools:\n- **Power BI Desktop** \u2014 build reports on your PC.\n- **Power BI Service** \u2014 publish and share in the browser.\n- **Power BI Mobile** \u2014 view reports on phones/tablets.\n\n### The workflow\n1. **Get Data** \u2014 connect to Excel, SQL, web, etc.\n2. **Power Query** \u2014 clean and transform data.\n3. **Data Model** \u2014 define relationships between tables.\n4. **Report View** \u2014 build visualisations.\n5. **Publish** \u2014 share to the Power BI Service.",
       "exercises": [
         {
           "id": "powerbi-intro-ex1",
@@ -19,8 +19,8 @@
           "prompt": "List the five stages of the Power BI workflow in the correct order and briefly describe what happens at each stage.",
           "hint_1": "Start with how data enters the system.",
           "hint_2": "The five stages are: Get Data, Transform, Model, Visualise, Share.",
-          "hint_3": "Get Data → Power Query (Transform) → Data Model → Report View → Publish/Share.",
-          "solution": "Get Data → Transform (Power Query) → Data Model (relationships) → Report View (visuals) → Publish (Service/Share)",
+          "hint_3": "Get Data \u2192 Power Query (Transform) \u2192 Data Model \u2192 Report View \u2192 Publish/Share.",
+          "solution": "Get Data \u2192 Transform (Power Query) \u2192 Data Model (relationships) \u2192 Report View (visuals) \u2192 Publish (Service/Share)",
           "evaluation_mode": "ai_review",
           "points": 15,
           "sort_order": 1
@@ -33,10 +33,12 @@
       "title": "DAX Basics",
       "description": "Calculated columns, measures and the most useful DAX functions.",
       "level": "intermediate",
-      "prerequisites": ["powerbi-intro"],
+      "prerequisites": [
+        "powerbi-intro"
+      ],
       "estimated_min": 50,
       "sort_order": 2,
-      "theory_md": "## DAX — Data Analysis Expressions\n\nDAX is the formula language used in Power BI (and Excel Power Pivot).\n\n### Measures vs Calculated Columns\n| | Measure | Calculated Column |\n|---|---|---|\n| Evaluated | At query time | At data refresh |\n| Context | Filter context | Row context |\n| Stored | Not stored | Stored in model |\n\n### Essential functions\n- `SUM(table[column])` — total\n- `CALCULATE(expression, filter)` — change filter context\n- `DIVIDE(numerator, denominator, [alternate])` — safe division\n- `DATEYTD(date_column)` — year-to-date\n- `RELATED(column)` — look up a value from a related table",
+      "theory_md": "## DAX \u2014 Data Analysis Expressions\n\nDAX is the formula language used in Power BI (and Excel Power Pivot).\n\n### Measures vs Calculated Columns\n| | Measure | Calculated Column |\n|---|---|---|\n| Evaluated | At query time | At data refresh |\n| Context | Filter context | Row context |\n| Stored | Not stored | Stored in model |\n\n### Essential functions\n- `SUM(table[column])` \u2014 total\n- `CALCULATE(expression, filter)` \u2014 change filter context\n- `DIVIDE(numerator, denominator, [alternate])` \u2014 safe division\n- `DATEYTD(date_column)` \u2014 year-to-date\n- `RELATED(column)` \u2014 look up a value from a related table",
       "exercises": [
         {
           "id": "powerbi-dax-ex1",
@@ -50,6 +52,186 @@
           "evaluation_mode": "ai_review",
           "points": 20,
           "sort_order": 1
+        }
+      ]
+    },
+    {
+      "id": "powerbi-datamodel",
+      "title": "Data Modelling & Relationships",
+      "description": "Build a star schema model that connects your tables correctly.",
+      "level": "intermediate",
+      "prerequisites": [
+        "powerbi-dax"
+      ],
+      "estimated_min": 45,
+      "sort_order": 3,
+      "theory_md": "## Data Modelling & Relationships\n\nThe model determines what you can calculate. A bad model makes DAX hard; a good model makes it easy.\n\n### Star schema\n- **Fact table** \u2014 transactions, events. Large. Has foreign keys.\n- **Dimension tables** \u2014 who, what, where, when. Small. Have primary keys.\n\n```\nDimDate \u2500\u2500\u2500\u2500 FactSales \u2500\u2500\u2500\u2500 DimProduct\n                \u2502\n            DimCustomer\n```\n\n### Creating relationships\nIn Model view, drag a field from one table to another.\n- Primary key (unique) \u2192 foreign key (many) = **one-to-many** \u2713\n- Many-to-many \u2192 usually a sign the model needs fixing.\n\n### Cardinality\n| Setting | When to use |\n|---|---|\n| One-to-many | Standard fact-to-dim |\n| One-to-one | Split table for readability |\n| Many-to-many | Bridge tables, role-playing dims |\n\n### Cross-filter direction\n- **Single** (default) \u2014 filter flows from dim to fact. Correct for star schemas.\n- **Both** \u2014 filters flow both ways. Use only when necessary; can cause unexpected results.",
+      "exercises": [
+        {
+          "id": "pbi-model-e1",
+          "title": "Star schema role",
+          "prompt": "In a star schema, which table type contains one row per transaction? A) Fact table B) Dimension table C) Bridge table D) Calendar table",
+          "hint_1": "Think about what holds the measurable data.",
+          "hint_2": "Transactions are events you measure.",
+          "hint_3": "A) Fact table",
+          "solution": "A) Fact table",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "pbi-model-e2",
+          "title": "Relationship direction",
+          "prompt": "You have DimCustomer (one) and FactOrders (many). Which cross-filter direction should you use?",
+          "hint_1": "Standard star schemas use single direction.",
+          "hint_2": "Filter flows from the one side to the many side.",
+          "hint_3": "Single \u2014 filter flows from DimCustomer to FactOrders",
+          "solution": "Single",
+          "evaluation_mode": "contains",
+          "points": 20
+        }
+      ]
+    },
+    {
+      "id": "powerbi-dax-advanced",
+      "title": "Advanced DAX",
+      "description": "CALCULATE, FILTER, time intelligence, and the measures that make Power BI powerful.",
+      "level": "advanced",
+      "prerequisites": [
+        "powerbi-datamodel"
+      ],
+      "estimated_min": 60,
+      "sort_order": 4,
+      "theory_md": "## Advanced DAX\n\n### CALCULATE \u2014 the most important DAX function\nCALCULATE evaluates an expression in a modified filter context.\n\n```dax\nSales YTD = CALCULATE(\n    SUM(FactSales[Revenue]),\n    DATESYTD(DimDate[Date])\n)\n\nSales North = CALCULATE(\n    [Total Revenue],\n    DimRegion[Region] = \"North\"\n)\n```\n\n### Time Intelligence\nRequires a proper Date table marked as such (Table \u2192 Mark as Date Table).\n\n```dax\nRevenue LY = CALCULATE([Total Revenue], SAMEPERIODLASTYEAR(DimDate[Date]))\nRevenue MoM% = DIVIDE([Total Revenue] - [Revenue LM], [Revenue LM])\n```\n\n### DIVIDE \u2014 safe division\n```dax\nMargin % = DIVIDE([Gross Profit], [Total Revenue], 0)\n```\nAlways use DIVIDE instead of `/` to handle divide-by-zero gracefully.\n\n### Variables in DAX\n```dax\nRevenue Growth =\nVAR CurrentRev = [Total Revenue]\nVAR LastYearRev = [Revenue LY]\nRETURN DIVIDE(CurrentRev - LastYearRev, LastYearRev, 0)\n```\n\nVariables make DAX readable and avoid recalculating the same measure twice.",
+      "exercises": [
+        {
+          "id": "pbi-dax2-e1",
+          "title": "CALCULATE with filter",
+          "prompt": "Write a DAX measure called 'Online Sales' that calculates SUM of FactSales[Revenue] filtered to where FactSales[Channel] equals 'Online'.",
+          "hint_1": "CALCULATE(expression, filter)",
+          "hint_2": "The filter uses FactSales[Channel] = \"Online\"",
+          "hint_3": "Online Sales = CALCULATE(SUM(FactSales[Revenue]), FactSales[Channel] = \"Online\")",
+          "solution": "Online Sales = CALCULATE(SUM(FactSales[Revenue]), FactSales[Channel] = \"Online\")",
+          "evaluation_mode": "contains",
+          "points": 30
+        },
+        {
+          "id": "pbi-dax2-e2",
+          "title": "DIVIDE vs division",
+          "prompt": "Why should you use DIVIDE([Profit],[Revenue],0) instead of [Profit]/[Revenue]?",
+          "hint_1": "Think about what happens when Revenue is zero.",
+          "hint_2": "Division by zero causes an error.",
+          "hint_3": "DIVIDE handles divide-by-zero gracefully by returning the third argument (0) instead of an error.",
+          "solution": "DIVIDE handles divide-by-zero",
+          "evaluation_mode": "contains",
+          "points": 20
+        }
+      ]
+    },
+    {
+      "id": "powerbi-powerquery",
+      "title": "Power Query in Power BI",
+      "description": "Clean and shape data before it hits the model \u2014 the right place to fix messy data.",
+      "level": "intermediate",
+      "prerequisites": [
+        "powerbi-fundamentals"
+      ],
+      "estimated_min": 40,
+      "sort_order": 2,
+      "theory_md": "## Power Query in Power BI\n\nTransform data in Power Query (Get Data \u2192 Transform Data), not in DAX. Transformations here run once at refresh; DAX runs on every visual interaction.\n\n### Applied Steps\nEvery transform you apply appears in Applied Steps on the right. You can click any step to see the data at that point, or delete/reorder steps.\n\n### Essential transforms\n```\nRemove Duplicates \u2192 ensures one row per key\nReplace Values   \u2192 fix typos: \"Online \" \u2192 \"Online\"\nSplit Column     \u2192 \"John Smith\" \u2192 \"John\" | \"Smith\"\nPivot / Unpivot  \u2192 reshape wide to long or long to wide\nMerge Queries    \u2192 JOIN two tables\nAppend Queries   \u2192 UNION two tables (same columns)\nGroup By         \u2192 aggregate rows\n```\n\n### Custom Column (M formula)\n```\n= [Revenue] - [Cost]\n= Date.Year([OrderDate])\n= Text.Upper([ProductName])\n```\n\n### Incremental Refresh\nFor large tables (millions of rows), set a date range parameter so Power BI only loads new/changed rows on refresh rather than reloading everything.",
+      "exercises": [
+        {
+          "id": "pbi-pq-e1",
+          "title": "Right tool",
+          "prompt": "You need to calculate Year-over-Year revenue growth. Should you do this in Power Query or DAX? Explain.",
+          "hint_1": "Which layer runs at query time vs refresh time?",
+          "hint_2": "YoY needs to compare across time using filter context.",
+          "hint_3": "DAX \u2014 YoY growth requires filter context from the date table, which only exists at query time. Power Query runs before the model is built.",
+          "solution": "DAX",
+          "evaluation_mode": "contains",
+          "points": 20
+        },
+        {
+          "id": "pbi-pq-e2",
+          "title": "Merge vs Append",
+          "prompt": "You have two tables: Q1_Sales and Q2_Sales with identical columns. What Power Query operation combines them into one table?",
+          "hint_1": "Same columns, combining rows.",
+          "hint_2": "This is like a SQL UNION.",
+          "hint_3": "Append Queries",
+          "solution": "Append Queries",
+          "evaluation_mode": "contains",
+          "points": 15
+        }
+      ]
+    },
+    {
+      "id": "powerbi-design",
+      "title": "Report Design & UX",
+      "description": "Build reports people actually use \u2014 layout, colour, and interaction patterns.",
+      "level": "intermediate",
+      "prerequisites": [
+        "powerbi-dax"
+      ],
+      "estimated_min": 45,
+      "sort_order": 5,
+      "theory_md": "## Report Design & UX\n\n### The 5-second rule\nA business user should understand the main message within 5 seconds of seeing a page.\n\n### Layout\n- **Z-pattern**: KPIs top-left \u2192 trend top-right \u2192 breakdown bottom-left \u2192 detail bottom-right.\n- Align every visual to a grid. Use **View \u2192 Snap to Grid**.\n- Group related visuals with a rectangle shape behind them.\n\n### Colour\n- One accent colour for the metric that matters most.\n- Grey for context. Don't colour everything.\n- Conditional formatting: red for below target, green for above.\n\n### Slicers and filters\n- Slicers visible on the canvas = user-driven exploration.\n- Filters pane = developer-set constraints users don't change.\n- Sync slicers across pages: View \u2192 Sync Slicers.\n\n### Tooltips\nAdd a tooltip page (Page \u2192 Page type \u2192 Tooltip) and assign it to a visual for rich hover detail without cluttering the main canvas.\n\n### Bookmarks\nCreate Bookmarks (View \u2192 Bookmarks) to save filter states. Wire them to buttons for one-click view switching: \"By Region\" / \"By Product\" / \"By Time\".",
+      "exercises": [
+        {
+          "id": "pbi-design-e1",
+          "title": "5 second test",
+          "prompt": "You open a Power BI report and it has 12 visuals of equal size with no clear hierarchy. What is the main design problem?",
+          "hint_1": "Think about what a user sees first.",
+          "hint_2": "Everything the same size means nothing is prioritised.",
+          "hint_3": "No visual hierarchy \u2014 the user cannot tell what the most important metric is, and the 5-second rule fails.",
+          "solution": "No visual hierarchy",
+          "evaluation_mode": "contains",
+          "points": 15
+        },
+        {
+          "id": "pbi-design-e2",
+          "title": "Slicer vs filter",
+          "prompt": "A manager wants to filter the report by region but doesn't want the slicer visible on the canvas. Where should you put the filter?",
+          "hint_1": "There are two places to apply filters in Power BI.",
+          "hint_2": "One is on-canvas, one is in the sidebar.",
+          "hint_3": "The Filters pane \u2014 it applies the filter without a visible slicer on the canvas.",
+          "solution": "Filters pane",
+          "evaluation_mode": "contains",
+          "points": 15
+        }
+      ]
+    },
+    {
+      "id": "powerbi-publish",
+      "title": "Publishing & Sharing",
+      "description": "Publish to Power BI Service, manage workspaces, and set up scheduled refresh.",
+      "level": "beginner",
+      "prerequisites": [
+        "powerbi-fundamentals"
+      ],
+      "estimated_min": 30,
+      "sort_order": 6,
+      "theory_md": "## Publishing & Sharing\n\n### Publish from Desktop\n**Home \u2192 Publish \u2192 Select workspace.** The report uploads to Power BI Service.\n\n### Power BI Service concepts\n| Term | Meaning |\n|---|---|\n| Workspace | A folder shared with a team |\n| Dataset | The data model (separate from the report) |\n| Report | The visuals layer |\n| Dashboard | Pinned tiles from multiple reports |\n| App | A packaged workspace for end-users |\n\n### Scheduled Refresh\nConnect datasets to the original data source and set refresh:\n1. Dataset settings \u2192 Data source credentials \u2192 sign in.\n2. Scheduled refresh \u2192 set frequency (up to 48\u00d7/day on Premium).\n\n### Sharing options\n- **Share a report** \u2014 link to specific users or AAD groups.\n- **Publish to web** \u2014 public URL, no login needed. \u26a0\ufe0f Not for sensitive data.\n- **Embed** \u2014 embed in SharePoint, Teams, or custom web app.\n- **Power BI App** \u2014 package a workspace and publish to end-users. Hides workspace structure.\n\n### Row-Level Security (RLS)\n```dax\n[Region] = USERPRINCIPALNAME()  -- each user sees only their region\n```\nSet in Desktop (Modelling \u2192 Manage Roles), test with Desktop \u2192 View as Role, then assign users in Service.",
+      "exercises": [
+        {
+          "id": "pbi-pub-e1",
+          "title": "Dataset vs Report",
+          "prompt": "You update the underlying data in your SQL database. After refreshing the Power BI dataset, do you need to republish the report?",
+          "hint_1": "The report is separate from the dataset.",
+          "hint_2": "Refresh updates the dataset; the report reads from the dataset.",
+          "hint_3": "No \u2014 refreshing the dataset updates the data. The report automatically reflects the new data without republishing.",
+          "solution": "No",
+          "evaluation_mode": "contains",
+          "points": 15
+        },
+        {
+          "id": "pbi-pub-e2",
+          "title": "Publish to web risk",
+          "prompt": "A colleague asks you to use Publish to Web for a report containing employee salaries. Should you? Why?",
+          "hint_1": "Think about who can access a public URL.",
+          "hint_2": "Anyone with the URL can see the data.",
+          "hint_3": "No \u2014 Publish to Web creates a public URL accessible to anyone, which is inappropriate for sensitive data like employee salaries. Use share or embed with authentication instead.",
+          "solution": "No",
+          "evaluation_mode": "contains",
+          "points": 20
         }
       ]
     }
