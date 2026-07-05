@@ -3,6 +3,8 @@ import Editor from '@monaco-editor/react'
 import { TrendingUp, CheckCircle, ChevronRight, Lock, Brain, Info, Play, Loader } from 'lucide-react'
 import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
+import LessonTheory from '../components/ui/LessonTheory'
+import LessonQuiz from '../components/ui/LessonQuiz'
 import type { Lesson } from '../types'
 
 // Pyodide hook inline (reused from PythonAcademy pattern)
@@ -128,7 +130,8 @@ function StatLessonView({ lesson, exercises, onBack }: { lesson: any; exercises:
       </div>
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <div style={{ width: 320, flexShrink: 0, borderRight: '1px solid var(--border)', overflow: 'auto', padding: 16 }}>
-          <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{lesson.theory_md}</div>
+          <LessonTheory markdown={lesson.theory_md} />
+          <LessonQuiz quizJson={lesson.quiz} accentColor="var(--stats-color)" />
         </div>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {exercises.length > 0 ? (
@@ -165,8 +168,9 @@ function StatExercise({ exercise }: { exercise: any }) {
   const [running, setRunning] = useState(false)
   const [hint, setHint] = useState<string | null>(null)
   const [hintsUsed, setHintsUsed] = useState(0)
+  const [lastRunCode, setLastRunCode] = useState<string | null>(null)
 
-  useEffect(() => { if (status === 'idle') loadRuntime(); setCode(''); setOutput(''); setHint(null); setHintsUsed(0) }, [exercise?.id])
+  useEffect(() => { if (status === 'idle') loadRuntime(); setCode(''); setOutput(''); setHint(null); setHintsUsed(0); setLastRunCode(null) }, [exercise?.id])
 
   const run = async () => {
     if (!code.trim() || status !== 'ready') return
@@ -186,26 +190,41 @@ function StatExercise({ exercise }: { exercise: any }) {
 
   if (!exercise) return null
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', background: 'var(--bg-surface)', flexShrink: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 5 }}>{exercise.title}</div>
-        <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{exercise.prompt}</div>
-        {hint && <div style={{ marginTop: 8, padding: '7px 10px', background: 'var(--warning-dim)', border: '1px solid var(--warning)', borderRadius: 'var(--radius)', fontSize: 11, color: 'var(--warning)' }}>💡 {hint}</div>}
+    <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+        <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', background: 'var(--bg-surface)', flexShrink: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 5 }}>{exercise.title}</div>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{exercise.prompt}</div>
+          {hint && <div style={{ marginTop: 8, padding: '7px 10px', background: 'var(--warning-dim)', border: '1px solid var(--warning)', borderRadius: 'var(--radius)', fontSize: 11, color: 'var(--warning)' }}>💡 {hint}</div>}
+        </div>
+        <div style={{ flex: '0 0 50%', borderBottom: '1px solid var(--border)' }}>
+          <Editor height="100%" language="python" value={code} onChange={v => setCode(v ?? '')} theme="vs-dark" options={{ fontSize: 13, fontFamily: 'var(--font-mono)', minimap: { enabled: false }, scrollBeyondLastLine: false, padding: { top: 10 }, tabSize: 4 }} />
+        </div>
+        <div style={{ flex: 1, overflow: 'auto', padding: '10px 14px', background: '#0d1117', fontFamily: 'var(--font-mono)', fontSize: 12, lineHeight: 1.6, color: isError ? 'var(--error)' : '#a5d6a7', whiteSpace: 'pre-wrap' }}>
+          {output || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Output appears here…</span>}
+        </div>
+        <div style={{ padding: '7px 14px', borderTop: '1px solid var(--border)', background: 'var(--bg-surface)', display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+          <button className="btn btn-primary btn-sm" onClick={async () => { await run(); setLastRunCode(code) }} disabled={running || status !== 'ready' || !code.trim()}>
+            {running ? <Loader size={12} className="animate-spin" /> : <Play size={12} />}
+            {status === 'loading' ? 'Loading…' : running ? 'Running…' : 'Run ▶'}
+          </button>
+          <button className="btn btn-secondary btn-sm" onClick={getHint} disabled={hintsUsed >= 3}>💡 Hint {hintsUsed > 0 ? `(${hintsUsed}/3)` : ''}</button>
+          <button className="btn btn-ghost btn-sm" onClick={() => setCode('')}>Reset</button>
+          <span style={{ marginLeft: 'auto', fontSize: 10, color: status === 'ready' ? 'var(--success)' : 'var(--text-muted)' }}>● {status === 'ready' ? 'Python ready' : status}</span>
+        </div>
       </div>
-      <div style={{ flex: '0 0 50%', borderBottom: '1px solid var(--border)' }}>
-        <Editor height="100%" language="python" value={code} onChange={v => setCode(v ?? '')} theme="vs-dark" options={{ fontSize: 13, fontFamily: 'var(--font-mono)', minimap: { enabled: false }, scrollBeyondLastLine: false, padding: { top: 10 }, tabSize: 4 }} />
-      </div>
-      <div style={{ flex: 1, overflow: 'auto', padding: '10px 14px', background: '#0d1117', fontFamily: 'var(--font-mono)', fontSize: 12, lineHeight: 1.6, color: isError ? 'var(--error)' : '#a5d6a7', whiteSpace: 'pre-wrap' }}>
-        {output || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Output appears here…</span>}
-      </div>
-      <div style={{ padding: '7px 14px', borderTop: '1px solid var(--border)', background: 'var(--bg-surface)', display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-        <button className="btn btn-primary btn-sm" onClick={run} disabled={running || status !== 'ready' || !code.trim()}>
-          {running ? <Loader size={12} className="animate-spin" /> : <Play size={12} />}
-          {status === 'loading' ? 'Loading…' : running ? 'Running…' : 'Run ▶'}
-        </button>
-        <button className="btn btn-secondary btn-sm" onClick={getHint} disabled={hintsUsed >= 3}>💡 Hint {hintsUsed > 0 ? `(${hintsUsed}/3)` : ''}</button>
-        <button className="btn btn-ghost btn-sm" onClick={() => setCode('')}>Reset</button>
-        <span style={{ marginLeft: 'auto', fontSize: 10, color: status === 'ready' ? 'var(--success)' : 'var(--text-muted)' }}>● {status === 'ready' ? 'Python ready' : status}</span>
+
+      {/* AI Instructor — kicks in automatically after every run, since there's
+          no single mechanical "correct" output to check freeform code against. */}
+      <div style={{ width: 290, flexShrink: 0 }}>
+        <InstructorPanel
+          context={{ type: 'exercise', lesson: 'statistics', exercise: exercise.title }}
+          initialPrompt={
+            lastRunCode
+              ? `This is an open-ended stats/Python exercise with no single correct answer format. Exercise: ${exercise.prompt}\n\nMy code:\n${lastRunCode}\n\nOutput:\n${output || '(no output)'}\n\nAssess whether my approach and result are sound. If something's off, guide me without giving the full solution. If it's solid, briefly affirm it and suggest one way to extend the analysis.`
+              : undefined
+          }
+        />
       </div>
     </div>
   )

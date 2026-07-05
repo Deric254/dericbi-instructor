@@ -5,7 +5,7 @@ import { app } from 'electron'
 import { getDb } from '../db/database'
 import { v4 as uuidv4 } from 'uuid'
 
-const SETUP_VERSION = 2 // increment to force re-seed on app update
+const SETUP_VERSION = 3 // increment to force re-seed on app update
 
 // ─────────────────────────────────────────────
 // ENTRY POINT — called from main.ts after initDb()
@@ -273,8 +273,8 @@ function seedCurriculum(jsonPath: string, exerciseType: string): void {
 
   const insertLesson = db.prepare(`
     INSERT OR REPLACE INTO lessons
-    (id, module, title, description, level, prerequisites, estimated_min, sort_order, theory_md)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (id, module, title, description, level, prerequisites, estimated_min, sort_order, theory_md, quiz)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `)
 
   const insertExercise = db.prepare(`
@@ -292,7 +292,8 @@ function seedCurriculum(jsonPath: string, exerciseType: string): void {
         lesson.level, JSON.stringify(lesson.prerequisites || []),
         lesson.estimated_min || 30,
         lesson.sort_order || 0,
-        lesson.theory_md || ''
+        lesson.theory_md || '',
+        JSON.stringify(lesson.quiz || [])
       )
 
       for (let i = 0; i < (lesson.exercises || []).length; i++) {

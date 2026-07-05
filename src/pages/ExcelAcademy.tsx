@@ -5,6 +5,8 @@ import {
   RefreshCw, Info, Lightbulb, AlertCircle,
 } from 'lucide-react'
 import { useAuthStore, notify } from '../store'
+import LessonTheory from '../components/ui/LessonTheory'
+import LessonQuiz from '../components/ui/LessonQuiz'
 import type { Lesson } from '../types'
 
 type View = 'lessons' | 'spreadsheet'
@@ -17,6 +19,7 @@ export default function ExcelAcademy() {
   const [view, setView] = useState<View>('lessons')
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeLessonId, setActiveLessonId] = useState<string | null>(null)
   const { user } = useAuthStore()
 
   useEffect(() => {
@@ -60,8 +63,45 @@ export default function ExcelAcademy() {
       </div>
 
       <div style={{ flex: 1, overflow: 'hidden' }}>
-        {view === 'lessons' && <LessonList lessons={lessons} loading={loading} onOpen={() => setView('spreadsheet')} />}
-        {view === 'spreadsheet' && <SpreadsheetEnv />}
+        {view === 'lessons' && (
+          <LessonList
+            lessons={lessons}
+            loading={loading}
+            onOpen={(id) => { setActiveLessonId(id); setView('spreadsheet') }}
+          />
+        )}
+        {view === 'spreadsheet' && (
+          <div style={{ height: '100%', display: 'flex', overflow: 'hidden' }}>
+            {activeLessonId && (
+              <div style={{ width: 340, flexShrink: 0, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+                  <button onClick={() => { setActiveLessonId(null); setView('lessons') }} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 12, padding: 0, marginBottom: 10 }}>
+                    ← Back to lessons
+                  </button>
+                  <h3 style={{ color: 'var(--excel-color)' }}>
+                    {lessons.find(l => l.id === activeLessonId)?.title}
+                  </h3>
+                </div>
+                <div style={{ flex: 1, overflow: 'auto', padding: 16 }}>
+                  <LessonTheory markdown={lessons.find(l => l.id === activeLessonId)?.theory_md ?? ''} />
+                  <LessonQuiz quizJson={lessons.find(l => l.id === activeLessonId)?.quiz} accentColor="var(--excel-color)" />
+                </div>
+                <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
+                  <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={async () => {
+                    if (!user || !activeLessonId) return
+                    await window.api.lessons.complete(user.id, activeLessonId, 0)
+                    notify.success('Lesson marked complete!')
+                  }}>
+                    <CheckCircle size={14} /> Mark Complete
+                  </button>
+                </div>
+              </div>
+            )}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <SpreadsheetEnv />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

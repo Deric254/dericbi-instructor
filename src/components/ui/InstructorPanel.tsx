@@ -28,7 +28,7 @@ export default function InstructorPanel({
   const [checkingKey, setCheckingKey] = useState(true)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const didSendInitial = useRef(false)
+  const lastSentPrompt = useRef<string | null>(null)
 
   // Check API key
   useEffect(() => {
@@ -42,10 +42,13 @@ export default function InstructorPanel({
     check()
   }, [user])
 
-  // Auto-send initial prompt once API key confirmed
+  // Auto-send the initial prompt whenever it changes to a new value — this
+  // fires once per exercise attempt (not just the first one), so a student
+  // who gets it wrong, then retries and gets it right, gets AI feedback both
+  // times rather than only ever on their very first attempt.
   useEffect(() => {
-    if (!apiKeyOk || !initialPrompt || didSendInitial.current) return
-    didSendInitial.current = true
+    if (!apiKeyOk || !initialPrompt || initialPrompt === lastSentPrompt.current) return
+    lastSentPrompt.current = initialPrompt
     sendMessage(initialPrompt, context).then(() => {
       if (onFeedbackReady && messages.length > 0) {
         const last = messages[messages.length - 1]

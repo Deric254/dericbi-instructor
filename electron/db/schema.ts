@@ -1,7 +1,7 @@
 // DericBI Instructor — Complete Database Schema
 // All DDL statements in migration order
 
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
 
 export const CREATE_TABLES = `
 
@@ -86,6 +86,7 @@ CREATE TABLE IF NOT EXISTS lessons (
   prerequisites TEXT NOT NULL DEFAULT '[]',  -- JSON array of lesson IDs
   estimated_min INTEGER NOT NULL DEFAULT 30,
   theory_md     TEXT NOT NULL DEFAULT '',
+  quiz          TEXT NOT NULL DEFAULT '[]',  -- JSON array of {question, options, correct_index, explanation}
   content_path  TEXT,  -- path to full content JSON file
   sort_order    INTEGER NOT NULL DEFAULT 0,
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))

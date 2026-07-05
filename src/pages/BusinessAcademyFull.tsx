@@ -6,6 +6,8 @@ import {
 } from 'lucide-react'
 import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
+import LessonTheory from '../components/ui/LessonTheory'
+import LessonQuiz from '../components/ui/LessonQuiz'
 import type { Lesson } from '../types'
 
 export function BusinessAcademy() {
@@ -234,7 +236,8 @@ function BusinessLessonView({ lesson, exercises, onBack }: { lesson: any; exerci
       </div>
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <div style={{ width: 340, flexShrink: 0, borderRight: '1px solid var(--border)', overflow: 'auto', padding: 18 }}>
-          <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{lesson.theory_md}</div>
+          <LessonTheory markdown={lesson.theory_md} />
+          <LessonQuiz quizJson={lesson.quiz} accentColor="var(--business-color)" />
         </div>
         <div style={{ flex: 1, overflow: 'auto', padding: 20 }}>
           {exercises.length === 0 ? <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>No exercises yet.</p> : exercises.map((ex: any, i: number) => <WrittenExercise key={ex.id} exercise={ex} index={i+1} />)}
@@ -256,7 +259,7 @@ function WrittenExercise({ exercise, index }: { exercise: any; index: number }) 
     if (!user || !answer.trim()) return
     setSubmitting(true)
     try {
-      const r = await window.api.ai.exerciseFeedback({ userId: user.id, exercise_prompt: exercise.prompt, user_answer: answer, solution: exercise.solution || '', is_correct: true, skill: 'business_thinking', context: { type: 'exercise', exercise: exercise.title } })
+      const r = await window.api.ai.exerciseFeedback({ userId: user.id, exercise_prompt: exercise.prompt, user_answer: answer, solution: exercise.solution || '', is_correct: null, skill: 'business_thinking', context: { type: 'exercise', exercise: exercise.title } })
       if (r.success) setFeedback(r.message)
       await window.api.exercises.submit({ userId: user.id, exerciseId: exercise.id, answer, timeSpentS: 60 })
     } finally { setSubmitting(false) }

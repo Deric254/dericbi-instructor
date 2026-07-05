@@ -80,6 +80,7 @@ export interface Lesson {
   prerequisites: string[]
   estimated_min: number
   theory_md: string
+  quiz?: string  // raw JSON string: {question, options, correct_index, explanation}[] — parse before use
   sort_order: number
   user_status: LessonStatus
   completed_at?: string

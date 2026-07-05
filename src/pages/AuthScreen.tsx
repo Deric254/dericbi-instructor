@@ -21,12 +21,26 @@ export default function AuthScreen() {
   const [forgotEmail, setForgotEmail] = useState('')
 
   return (
-    <div style={{ height: '100vh', background: 'var(--bg-base)', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100vh', background: 'transparent', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
+      {/* Decorative bar-chart motif — purely visual, sits behind everything, never intercepts clicks */}
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 400 300"
+        style={{ position: 'absolute', bottom: -30, right: -30, width: 480, height: 360, opacity: 0.12, pointerEvents: 'none' }}
+      >
+        <rect x="40"  y="180" width="42" height="120" rx="6" fill="var(--accent)" />
+        <rect x="100" y="120" width="42" height="180" rx="6" fill="var(--accent)" />
+        <rect x="160" y="60"  width="42" height="240" rx="6" fill="var(--accent)" />
+        <rect x="220" y="150" width="42" height="150" rx="6" fill="var(--accent)" />
+        <rect x="280" y="90"  width="42" height="210" rx="6" fill="var(--accent)" />
+        <polyline points="61,170 121,110 181,50 241,140 301,80" fill="none" stroke="var(--sql-color)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+
       {/* Drag region / titlebar */}
       <div style={{ height: 'var(--titlebar-height)', WebkitAppRegion: 'drag', flexShrink: 0 } as any} />
 
       {/* Centered card */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, position: 'relative' }}>
         <div style={{ width: '100%', maxWidth: 440 }}>
           {screen === 'login' && (
             <LoginForm

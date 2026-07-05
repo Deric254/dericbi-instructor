@@ -162,6 +162,22 @@ function runMigrations(): void {
     _db.run("INSERT INTO schema_migrations (version, description) VALUES (1, 'Initial schema')")
     _db.run('COMMIT')
   }
+
+  // v2 — add quiz column to lessons (existing installs created the table
+  // before this column existed; CREATE TABLE IF NOT EXISTS won't add it
+  // retroactively, so it needs an explicit ALTER TABLE here)
+  if (cur < 2) {
+    _db.run('BEGIN')
+    try {
+      _db.run("ALTER TABLE lessons ADD COLUMN quiz TEXT NOT NULL DEFAULT '[]'")
+    } catch (e: any) {
+      // Column already exists (e.g. a fresh install that got it from
+      // CREATE_TABLES directly) — safe to ignore.
+      if (!String(e.message).includes('duplicate column')) throw e
+    }
+    _db.run("INSERT INTO schema_migrations (version, description) VALUES (2, 'Add quiz column to lessons')")
+    _db.run('COMMIT')
+  }
 }
 
 // ─────────────────────────────────────────────

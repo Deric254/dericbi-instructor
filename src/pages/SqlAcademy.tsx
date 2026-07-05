@@ -8,6 +8,8 @@ import {
 } from 'lucide-react'
 import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
+import LessonTheory from '../components/ui/LessonTheory'
+import LessonQuiz from '../components/ui/LessonQuiz'
 import { useInstructor } from '../hooks/useInstructor'
 import type { Lesson, SqlResult } from '../types'
 
@@ -250,14 +252,13 @@ function LessonView({ lessonId, onBack, onComplete }: {
         </div>
         <div style={{ flex: 1, overflow: 'auto', padding: '16px' }}>
           {lesson.theory_md ? (
-            <div style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7 }}
-              dangerouslySetInnerHTML={{ __html: lesson.theory_md.replace(/\n/g, '<br/>') }}
-            />
+            <LessonTheory markdown={lesson.theory_md} />
           ) : (
             <p style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>
               Lesson content will appear here once seeded.
             </p>
           )}
+          <LessonQuiz quizJson={lesson.quiz} accentColor="var(--sql-color)" />
         </div>
         <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)' }}>
           <button className="btn btn-primary" onClick={handleComplete} style={{ width: '100%', justifyContent: 'center' }}>
@@ -392,6 +393,16 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
           <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
             {exercise.prompt}
           </div>
+          {lessonModule === 'sql' && (
+            <div style={{
+              marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 5,
+              fontSize: 11, color: 'var(--sql-color)', fontWeight: 500,
+              padding: '3px 9px', borderRadius: 'var(--radius-full)',
+              background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.3)',
+            }}>
+              <Database size={11} /> Tables ready: patients, billing
+            </div>
+          )}
           {hint && (
             <div style={{
               marginTop: 10, padding: '8px 12px',
@@ -486,8 +497,10 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
             exercise: exercise.title,
           }}
           initialPrompt={
-            result && !result.correct
-              ? `I tried the exercise "${exercise.title}". Task: ${exercise.prompt}. My attempt:\n${code}\nPlease guide me without giving the answer.`
+            result
+              ? result.correct
+                ? `I got the exercise "${exercise.title}" correct. Task: ${exercise.prompt}. My answer:\n${code}\nBriefly affirm what I did well and suggest one way to go deeper.`
+                : `I tried the exercise "${exercise.title}". Task: ${exercise.prompt}. My attempt:\n${code}\nPlease guide me without giving the answer.`
               : undefined
           }
         />
@@ -509,12 +522,6 @@ function SqlPlayground() {
   const [activeDataset, setActiveDataset] = useState<any>(null)
   const sandboxId = useRef(`playground_${user?.id}`)
 
-  useEffect(() => {
-    if (!user) return
-    window.api.sql.datasets(user.id).then(setDatasets)
-    return () => { window.api.sql.closeSandbox(sandboxId.current) }
-  }, [user])
-
   const loadDataset = async (ds: any, type: 'bundled' | 'imported') => {
     if (!user) return
     const res = await window.api.sql.loadDataset(sandboxId.current, ds.id, type, user.id)
@@ -526,6 +533,27 @@ function SqlPlayground() {
       notify.error('Failed to load dataset', res.error)
     }
   }
+
+  useEffect(() => {
+    if (!user) return
+    window.api.sql.datasets(user.id).then(async (ds: any) => {
+      setDatasets(ds)
+      // Auto-load a dataset immediately so the pre-filled query works without
+      // requiring the user to already know they need to pick one first.
+      // This is what was causing "no such table" the first time anyone opened
+      // the Playground — nothing was ever loaded until a manual click.
+      // Prefer the Patients dataset as the default — it's the simple,
+      // foundational table every SQL lesson starts from. Falling back to
+      // whatever sorts first alphabetically would default to "Billing"
+      // instead, which is the more complex, derived table.
+      const preferred = ds.bundled.find((d: any) => d.id === 'ds-hospital-patients') ?? ds.bundled[0]
+      if (preferred) {
+        await loadDataset(preferred, 'bundled')
+      }
+    })
+    return () => { window.api.sql.closeSandbox(sandboxId.current) }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
 
   const runQuery = async () => {
     if (!user || !query.trim()) return
@@ -607,13 +635,26 @@ function SqlPlayground() {
           background: 'var(--bg-surface)',
           display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0,
         }}>
-          <button className="btn btn-primary btn-sm" onClick={runQuery} disabled={running}>
+          <button className="btn btn-primary btn-sm" onClick={runQuery} disabled={running || !activeDataset}>
             {running ? <Loader size={12} className="animate-spin" /> : <Play size={12} />}
             {running ? 'Running…' : 'Run  ⌘↵'}
           </button>
-          {activeDataset && (
-            <span style={{ fontSize: 11, color: 'var(--sql-color)', display: 'flex', alignItems: 'center', gap: 5 }}>
-              <Database size={11} /> {activeDataset.name}
+          {activeDataset ? (
+            <span style={{
+              fontSize: 11, color: 'var(--sql-color)', display: 'flex', alignItems: 'center', gap: 5,
+              padding: '3px 9px', borderRadius: 'var(--radius-full)',
+              background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.3)',
+              fontWeight: 600,
+            }}>
+              <Database size={11} /> {activeDataset.name} loaded — table "{activeDataset.table_name}"
+            </span>
+          ) : (
+            <span style={{
+              fontSize: 11, color: 'var(--warning)', display: 'flex', alignItems: 'center', gap: 5,
+              padding: '3px 9px', borderRadius: 'var(--radius-full)',
+              background: 'var(--warning-dim)', border: '1px solid var(--warning)',
+            }}>
+              <Database size={11} /> No dataset loaded — pick one from the left
             </span>
           )}
           {result && (
@@ -629,7 +670,9 @@ function SqlPlayground() {
         <div style={{ flex: 1, overflow: 'auto' }}>
           {!result && (
             <div style={{ padding: 20, color: 'var(--text-muted)', fontSize: 12 }}>
-              Results will appear here after you run a query.
+              {activeDataset
+                ? 'Results will appear here after you run a query.'
+                : 'Select a dataset from the left to get started.'}
             </div>
           )}
           {result && !result.success && (
@@ -690,7 +733,7 @@ function DatasetBtn({ ds, active, onClick }: { ds: any; active: boolean; onClick
     <button onClick={onClick} style={{
       width: '100%', textAlign: 'left', padding: '6px 8px',
       borderRadius: 'var(--radius-sm)',
-      border: `1px solid ${active ? 'var(--sql-color)40' : 'transparent'}`,
+      border: `1px solid ${active ? 'var(--sql-color)' : 'transparent'}`,
       background: active ? 'rgba(34,211,238,0.08)' : 'transparent',
       color: active ? 'var(--sql-color)' : 'var(--text-secondary)',
       cursor: 'pointer', fontSize: 12, transition: 'all var(--transition)',

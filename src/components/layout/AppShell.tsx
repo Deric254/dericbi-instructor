@@ -53,7 +53,7 @@ export default function AppShell() {
   }, [setActiveSection])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--bg-base)', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'transparent', overflow: 'hidden' }}>
       <Titlebar />
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <Sidebar />

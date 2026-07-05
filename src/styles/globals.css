@@ -75,6 +75,11 @@
   --shadow-lg:   0 8px 32px rgba(0,0,0,0.6);
   --shadow-glow: 0 0 24px var(--accent-glow);
 
+  /* Decorative texture (dot-grid + glow) — theme-aware, purely visual */
+  --texture-dot:    rgba(232, 236, 244, 0.09);
+  --texture-glow-1: rgba(73, 160, 120, 0.24);
+  --texture-glow-2: rgba(34, 211, 238, 0.13);
+
   /* Transitions */
   --transition: 150ms ease;
   --transition-slow: 300ms ease;
@@ -136,6 +141,11 @@
   --shadow:      0 4px 12px rgba(15,23,42,0.10);
   --shadow-lg:   0 8px 32px rgba(15,23,42,0.16);
   --shadow-glow: 0 0 24px var(--accent-glow);
+
+  /* Decorative texture — softer on light backgrounds */
+  --texture-dot:    rgba(26, 31, 46, 0.07);
+  --texture-glow-1: rgba(47, 122, 87, 0.16);
+  --texture-glow-2: rgba(14, 116, 144, 0.10);
 }
 
 /* ─────────────────────────────────────────────
@@ -154,7 +164,13 @@ html, body, #root {
 
 body {
   font-family: var(--font-sans);
-  background: var(--bg-base);
+  background-color: var(--bg-base);
+  background-image:
+    radial-gradient(ellipse 900px 600px at 15% -10%, var(--texture-glow-1), transparent 60%),
+    radial-gradient(ellipse 700px 500px at 100% 110%, var(--texture-glow-2), transparent 60%),
+    radial-gradient(var(--texture-dot) 1px, transparent 1px);
+  background-size: auto, auto, 24px 24px;
+  background-attachment: fixed;
   color: var(--text-primary);
   font-size: 14px;
   line-height: 1.5;
@@ -529,4 +545,110 @@ pre {
   border-top-color: var(--accent);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
+}
+
+/* ─────────────────────────────────────────────
+   LESSON THEORY — rendered markdown content
+   Shared across all six academies. Every element below is themed via the
+   same CSS variables the rest of the app uses, so it looks identical in
+   light/dark mode and matches the app's existing visual language exactly.
+───────────────────────────────────────────── */
+.lesson-theory {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+.lesson-theory h1, .lesson-theory h2, .lesson-theory h3, .lesson-theory h4 {
+  color: var(--text-primary);
+  font-weight: 700;
+  margin: 20px 0 10px;
+  line-height: 1.35;
+}
+.lesson-theory h1:first-child, .lesson-theory h2:first-child, .lesson-theory h3:first-child {
+  margin-top: 0;
+}
+.lesson-theory h1 { font-size: 18px; }
+.lesson-theory h2 { font-size: 16px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+.lesson-theory h3 { font-size: 14px; color: var(--accent); }
+.lesson-theory h4 { font-size: 13px; }
+.lesson-theory p { margin: 0 0 12px; }
+.lesson-theory strong { color: var(--text-primary); font-weight: 600; }
+.lesson-theory em { color: var(--text-secondary); font-style: italic; }
+.lesson-theory ul, .lesson-theory ol {
+  margin: 0 0 12px;
+  padding-left: 22px;
+}
+.lesson-theory li { margin-bottom: 5px; }
+.lesson-theory li::marker { color: var(--accent); }
+.lesson-theory a { color: var(--accent); text-decoration: none; }
+.lesson-theory a:hover { text-decoration: underline; }
+
+/* Inline code */
+.lesson-theory :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--sql-color);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Fenced code blocks */
+.lesson-theory pre {
+  background: #0d1117;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  overflow-x: auto;
+  margin: 0 0 14px;
+}
+.lesson-theory pre code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: #c9d1d9;
+  background: none;
+  border: none;
+  padding: 0;
+  white-space: pre;
+}
+
+/* Tables */
+.lesson-theory table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 14px;
+  font-size: 12px;
+}
+.lesson-theory th, .lesson-theory td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  text-align: left;
+}
+.lesson-theory th {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.lesson-theory tr:nth-child(even) td {
+  background: var(--bg-elevated);
+}
+
+/* Blockquotes */
+.lesson-theory blockquote {
+  border-left: 3px solid var(--accent);
+  margin: 0 0 14px;
+  padding: 4px 14px;
+  color: var(--text-muted);
+  background: var(--accent-dim);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+
+.lesson-theory hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 18px 0;
 }
