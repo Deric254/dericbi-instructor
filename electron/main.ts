@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import path from 'path'
 import { initDb, closeDb, backupDb } from './db/database'
@@ -171,23 +171,89 @@ function registerWindowHandlers(): void {
 // AUTO UPDATER
 // ─────────────────────────────────────────────
 
+let isManualUpdateCheck = false
+
 function setupUpdater(): void {
-  if (process.env.NODE_ENV === 'development') return
+  if (!app.isPackaged) return // never runs from source — only in the built/installed app
 
-  autoUpdater.autoDownload = false
-  autoUpdater.autoInstallOnAppQuit = true
+  autoUpdater.autoDownload = false        // never pull bytes without asking first
+  autoUpdater.autoInstallOnAppQuit = true // if they said yes, install silently next quit — no forced restart mid-work
 
-  autoUpdater.on('checking-for-update', () => mainWindow?.webContents.send('updater:checking'))
-  autoUpdater.on('update-available',    (i) => mainWindow?.webContents.send('updater:available', i))
-  autoUpdater.on('update-not-available',()  => mainWindow?.webContents.send('updater:not-available'))
-  autoUpdater.on('download-progress',   (p) => mainWindow?.webContents.send('updater:progress', p))
-  autoUpdater.on('update-downloaded',   ()  => mainWindow?.webContents.send('updater:downloaded'))
-  autoUpdater.on('error',               (e) => mainWindow?.webContents.send('updater:error', e.message))
+  autoUpdater.on('checking-for-update', () => {
+    mainWindow?.webContents.send('updater:checking')
+  })
 
-  ipcMain.handle('updater:check',   () => autoUpdater.checkForUpdates())
-  ipcMain.handle('updater:download',() => autoUpdater.downloadUpdate())
-  ipcMain.handle('updater:install', () => autoUpdater.quitAndInstall())
+  autoUpdater.on('update-not-available', () => {
+    // Only worth telling the user "you're current" if they explicitly asked —
+    // a silent background check has nothing worth interrupting them for.
+    if (isManualUpdateCheck && mainWindow) {
+      dialog.showMessageBox(mainWindow, {
+        type: 'info',
+        message: "You're on the latest version.",
+        buttons: ['OK'],
+      })
+    }
+    isManualUpdateCheck = false
+  })
 
+  autoUpdater.on('update-available', async (info) => {
+    if (!mainWindow) return
+    const result = await dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      message: `A new version (v${info.version}) is available.`,
+      detail: 'Your progress and data are stored separately and are never affected by an update.',
+      buttons: ['Download Update', 'Not Now'],
+      defaultId: 0,
+      cancelId: 1,
+    })
+    if (result.response === 0) {
+      autoUpdater.downloadUpdate().catch(e => console.error('[Updater] download failed:', e.message))
+    }
+  })
+
+  autoUpdater.on('download-progress', (p) => {
+    mainWindow?.webContents.send('updater:progress', p)
+  })
+
+  autoUpdater.on('update-downloaded', async (info) => {
+    if (!mainWindow) return
+    const result = await dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      message: `v${info.version} has been downloaded.`,
+      detail: 'Restart now to install it, or keep working — it installs automatically the next time you quit.',
+      buttons: ['Restart and Install', 'Later'],
+      defaultId: 0,
+      cancelId: 1,
+    })
+    if (result.response === 0) autoUpdater.quitAndInstall(false, true)
+    // If "Later": autoInstallOnAppQuit (set above) still installs it silently
+    // the next time the app quits normally — nothing further needed here.
+  })
+
+  autoUpdater.on('error', (e) => {
+    // A background check failing (e.g. no internet) shouldn't nag anyone —
+    // only surface an error dialog if the user explicitly clicked "Check
+    // for Updates" themselves.
+    console.error('[Updater]', e.message)
+    if (isManualUpdateCheck && mainWindow) {
+      dialog.showMessageBox(mainWindow, {
+        type: 'error',
+        message: 'Could not check for updates.',
+        detail: e.message,
+        buttons: ['OK'],
+      })
+    }
+    isManualUpdateCheck = false
+  })
+
+  ipcMain.handle('updater:check', () => {
+    isManualUpdateCheck = true
+    return autoUpdater.checkForUpdates()
+  })
+
+  // Background check shortly after launch — fully silent unless it finds
+  // something (isManualUpdateCheck stays false, so update-not-available
+  // and error both stay quiet here).
   setTimeout(() => {
     autoUpdater.checkForUpdates().catch(e => console.error('[Updater]', e.message))
   }, 8000)

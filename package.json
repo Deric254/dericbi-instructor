@@ -10,7 +10,9 @@
     "build": "npm run build:vite && npm run build:electron",
     "build:vite": "vite build",
     "build:electron": "tsc -p tsconfig.electron.json",
-    "dist:win": "npm run build && electron-builder --win --x64"
+    "dist:win": "npm run build && electron-builder --win --x64",
+    "build:win": "npm run build && electron-builder --win --x64 --publish never",
+    "publish:win": "npm run build && electron-builder --win --x64 --publish always"
   },
   "keywords": [],
   "author": "Deric",
@@ -107,7 +109,8 @@
     "publish": {
       "provider": "github",
       "owner": "Deric254",
-      "repo": "dericbi-instructor"
+      "repo": "dericbi-instructor",
+      "releaseType": "release"
     }
   }
 }

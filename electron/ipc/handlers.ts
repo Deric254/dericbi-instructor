@@ -1,4 +1,4 @@
-import { ipcMain, dialog } from 'electron'
+import { ipcMain, dialog, app } from 'electron'
 import * as AuthService from '../services/auth.service'
 import * as ProgressService from '../services/progress.service'
 import * as SqlService from '../services/sql.service'
@@ -434,6 +434,125 @@ export function registerSettingsHandlers() {
     const rows = db.prepare('SELECT key, value FROM app_settings').all() as any[]
     return Object.fromEntries(rows.map(r => [r.key, r.value]))
   })
+
+  ipcMain.handle('app:get-version', async () => {
+    return { version: app.getVersion() }
+  })
+}
+
+// ─────────────────────────────────────────────
+// ADMIN HANDLERS
+// ─────────────────────────────────────────────
+
+export function registerAdminHandlers() {
+  const db = getDb()
+
+  // Every admin handler double-checks the caller is actually an admin,
+  // server-side — never trust a client-side gate alone for anything
+  // destructive like deleting a user or resetting progress.
+  const requireAdmin = (userId: string) => {
+    const row = db.prepare('SELECT is_admin FROM users WHERE id = ?').get(userId) as any
+    if (!row || row.is_admin !== 1) throw new Error('Admin access required')
+  }
+
+  ipcMain.handle('admin:check', async (_, userId: string) => {
+    const row = db.prepare('SELECT is_admin FROM users WHERE id = ?').get(userId) as any
+    return { is_admin: !!row && row.is_admin === 1 }
+  })
+
+  ipcMain.handle('admin:users-list', async (_, { requesterId }) => {
+    requireAdmin(requesterId)
+    const users = db.prepare(`
+      SELECT
+        u.id, u.name, u.email, u.experience_level, u.is_admin, u.created_at,
+        (SELECT COUNT(*) FROM lesson_progress lp WHERE lp.user_id = u.id AND lp.status = 'complete') as lessons_completed,
+        (SELECT COUNT(*) FROM exercise_attempts ea WHERE ea.user_id = u.id) as exercises_attempted,
+        (SELECT COUNT(*) FROM exercise_attempts ea WHERE ea.user_id = u.id AND ea.is_correct = 1) as exercises_correct,
+        (SELECT MAX(s.last_seen) FROM sessions s WHERE s.user_id = u.id) as last_login
+      FROM users u
+      ORDER BY u.created_at ASC
+    `).all()
+    return { users }
+  })
+
+  ipcMain.handle('admin:user-detail', async (_, { requesterId, targetUserId }) => {
+    requireAdmin(requesterId)
+    const user = db.prepare('SELECT id, name, email, experience_level, is_admin, created_at FROM users WHERE id = ?').get(targetUserId)
+    if (!user) return { error: 'User not found' }
+
+    const skills = db.prepare('SELECT skill, score FROM skill_ratings WHERE user_id = ?').all(targetUserId)
+    const lessonsCompleted = db.prepare(`SELECT module, COUNT(*) as count FROM lesson_progress lp JOIN lessons l ON lp.lesson_id = l.id WHERE lp.user_id = ? AND lp.status = 'complete' GROUP BY module`).all(targetUserId)
+    const recentAttempts = db.prepare(`SELECT exercise_id, is_correct, attempted_at FROM exercise_attempts WHERE user_id = ? ORDER BY attempted_at DESC LIMIT 20`).all(targetUserId)
+
+    return { user, skills, lessonsCompleted, recentAttempts }
+  })
+
+  ipcMain.handle('admin:reset-user-progress', async (_, { requesterId, targetUserId }) => {
+    requireAdmin(requesterId)
+    // Wipe learning progress only — never touches the account itself
+    // (name, email, password) or their portfolio/projects.
+    const tx = db.transaction(() => {
+      db.prepare('DELETE FROM lesson_progress WHERE user_id = ?').run(targetUserId)
+      db.prepare('DELETE FROM exercise_attempts WHERE user_id = ?').run(targetUserId)
+      db.prepare('DELETE FROM skill_ratings WHERE user_id = ?').run(targetUserId)
+      db.prepare('DELETE FROM user_achievements WHERE user_id = ?').run(targetUserId)
+    })
+    tx()
+    return { success: true }
+  })
+
+  ipcMain.handle('admin:set-admin', async (_, { requesterId, targetUserId, isAdmin }) => {
+    requireAdmin(requesterId)
+    // Never allow removing the last remaining admin — that would lock
+    // everyone out of this panel with no way back in short of editing
+    // the database file directly.
+    if (!isAdmin) {
+      const row = db.prepare('SELECT COUNT(*) as c FROM users WHERE is_admin = 1').get() as any
+      if (row.c <= 1) {
+        return { success: false, error: 'Cannot remove the last remaining admin.' }
+      }
+    }
+    db.prepare('UPDATE users SET is_admin = ? WHERE id = ?').run(isAdmin ? 1 : 0, targetUserId)
+    return { success: true }
+  })
+
+  ipcMain.handle('admin:delete-user', async (_, { requesterId, targetUserId }) => {
+    requireAdmin(requesterId)
+    if (requesterId === targetUserId) {
+      return { success: false, error: 'You cannot delete your own account from here.' }
+    }
+    // ON DELETE CASCADE (verified) cleans up every related table —
+    // progress, attempts, sessions, portfolio, projects, everything.
+    db.prepare('DELETE FROM users WHERE id = ?').run(targetUserId)
+    return { success: true }
+  })
+
+  ipcMain.handle('admin:content-stats', async (_, { requesterId }) => {
+    requireAdmin(requesterId)
+    const lessons = db.prepare('SELECT module, COUNT(*) as count FROM lessons GROUP BY module').all()
+    const exercises = db.prepare(`
+      SELECT l.module, COUNT(*) as count
+      FROM exercises e JOIN lessons l ON e.lesson_id = l.id
+      GROUP BY l.module
+    `).all()
+    const totalUsers = (db.prepare('SELECT COUNT(*) as c FROM users').get() as any).c
+    const totalAttempts = (db.prepare('SELECT COUNT(*) as c FROM exercise_attempts').get() as any).c
+    const datasets = db.prepare('SELECT id, name, row_count FROM bundled_datasets').all()
+    return { lessons, exercises, totalUsers, totalAttempts, datasets }
+  })
+
+  ipcMain.handle('admin:system-info', async (_, { requesterId }) => {
+    requireAdmin(requesterId)
+    const schemaVersion = (db.prepare('SELECT MAX(version) as v FROM schema_migrations').get() as any)?.v ?? 0
+    return {
+      appVersion: app.getVersion(),
+      electronVersion: process.versions.electron,
+      nodeVersion: process.versions.node,
+      platform: process.platform,
+      schemaVersion,
+      userDataPath: app.getPath('userData'),
+    }
+  })
 }
 
 // ─────────────────────────────────────────────
@@ -453,6 +572,7 @@ export function registerAllHandlers() {
   registerAiHandlers()
   registerSettingsHandlers()
   registerPortfolioHandlers()
+  registerAdminHandlers()
 
   console.log('[IPC] All handlers registered')
 }

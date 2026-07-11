@@ -1,7 +1,7 @@
 // DericBI Instructor — Complete Database Schema
 // All DDL statements in migration order
 
-export const SCHEMA_VERSION = 2
+export const SCHEMA_VERSION = 3
 
 export const CREATE_TABLES = `
 
@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS users (
   -- beginner | junior | analyst | senior | consultant
   learning_goals  TEXT NOT NULL DEFAULT '[]',  -- JSON array
   avatar_color    TEXT NOT NULL DEFAULT '#49A078',
+  is_admin        INTEGER NOT NULL DEFAULT 0,  -- 1 = has access to the Admin panel
   created_at      TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
 );

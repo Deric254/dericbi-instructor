@@ -9,6 +9,7 @@ export interface User {
   experience_level: 'beginner' | 'junior' | 'analyst' | 'senior' | 'consultant'
   learning_goals: string[]
   avatar_color: string
+  is_admin?: boolean
   created_at: string
 }
 
@@ -204,3 +205,4 @@ export type NavSection =
   | 'portfolio'
   | 'achievements'
   | 'settings'
+  | 'admin'

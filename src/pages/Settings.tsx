@@ -8,6 +8,24 @@ import { useAuthStore, useUIStore, notify } from '../store'
 export default function Settings() {
   const { user, token, logout: storeLogout } = useAuthStore()
   const [provider, setProvider] = useState('gemini')
+  const [appVersion, setAppVersion] = useState<string | null>(null)
+  const [checkingUpdate, setCheckingUpdate] = useState(false)
+
+  useEffect(() => {
+    window.api.settings.getVersion().then((r: any) => setAppVersion(r.version))
+  }, [])
+
+  const handleCheckForUpdates = async () => {
+    setCheckingUpdate(true)
+    try {
+      await window.api.updater.check()
+    } finally {
+      // The result (up to date / update found) shows as a native dialog
+      // from the main process — this just resets the button's own spinner
+      // after giving that a moment to arrive.
+      setTimeout(() => setCheckingUpdate(false), 2000)
+    }
+  }
   const [keyInputs, setKeyInputs] = useState<Record<string, string>>({})
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({})
   const [keySaved, setKeySaved] = useState<Record<string, boolean>>({})
@@ -288,12 +306,16 @@ export default function Settings() {
         {/* ── About ── */}
         <Section icon={<Info size={15} />} title="About">
           <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.8 }}>
-            <div><strong style={{ color: 'var(--text-secondary)' }}>DericBI Instructor</strong> v1.0.0</div>
+            <div><strong style={{ color: 'var(--text-secondary)' }}>DericBI Instructor</strong> v{appVersion ?? '…'}</div>
             <div>Electron · React 18 · TypeScript · SQLite</div>
             <div>Python runtime: Pyodide 0.26 (in-browser WASM)</div>
             <div>Formula engine: HyperFormula</div>
             <div>Code editor: Monaco Editor</div>
           </div>
+          <button className="btn btn-secondary btn-sm" style={{ marginTop: 12 }} onClick={handleCheckForUpdates} disabled={checkingUpdate}>
+            {checkingUpdate ? <Loader size={13} className="animate-spin" /> : <RefreshCw size={13} />}
+            {checkingUpdate ? 'Checking…' : 'Check for Updates'}
+          </button>
           <div style={{ marginTop: 16, padding: '10px 14px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius)', border: '1px solid var(--border)', fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.6 }}>
             All user data is stored locally on your device in SQLite. Nothing is transmitted to external servers except API calls to your configured AI provider. The app works fully offline without an AI key.
           </div>

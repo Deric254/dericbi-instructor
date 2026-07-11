@@ -92,6 +92,7 @@ const api = {
     get: (key: string) => ipcRenderer.invoke('settings:get', key),
     set: (key: string, value: string) => ipcRenderer.invoke('settings:set', { key, value }),
     getAll: () => ipcRenderer.invoke('settings:get-all'),
+    getVersion: () => ipcRenderer.invoke('app:get-version'),
   },
 
   // Projects
@@ -116,13 +117,24 @@ const api = {
   // Updater
   updater: {
     check: () => ipcRenderer.invoke('updater:check'),
-    download: () => ipcRenderer.invoke('updater:download'),
-    install: () => ipcRenderer.invoke('updater:install'),
     onChecking: (cb: () => void) => ipcRenderer.on('updater:checking', cb),
-    onAvailable: (cb: (info: any) => void) => ipcRenderer.on('updater:available', (_, info) => cb(info)),
     onProgress: (cb: (progress: any) => void) => ipcRenderer.on('updater:progress', (_, p) => cb(p)),
-    onDownloaded: (cb: () => void) => ipcRenderer.on('updater:downloaded', cb),
-    onError: (cb: (msg: string) => void) => ipcRenderer.on('updater:error', (_, msg) => cb(msg)),
+  },
+
+  // Admin
+  admin: {
+    check: (userId: string) => ipcRenderer.invoke('admin:check', userId),
+    usersList: (requesterId: string) => ipcRenderer.invoke('admin:users-list', { requesterId }),
+    userDetail: (requesterId: string, targetUserId: string) =>
+      ipcRenderer.invoke('admin:user-detail', { requesterId, targetUserId }),
+    resetUserProgress: (requesterId: string, targetUserId: string) =>
+      ipcRenderer.invoke('admin:reset-user-progress', { requesterId, targetUserId }),
+    setAdmin: (requesterId: string, targetUserId: string, isAdmin: boolean) =>
+      ipcRenderer.invoke('admin:set-admin', { requesterId, targetUserId, isAdmin }),
+    deleteUser: (requesterId: string, targetUserId: string) =>
+      ipcRenderer.invoke('admin:delete-user', { requesterId, targetUserId }),
+    contentStats: (requesterId: string) => ipcRenderer.invoke('admin:content-stats', { requesterId }),
+    systemInfo: (requesterId: string) => ipcRenderer.invoke('admin:system-info', { requesterId }),
   },
 }
 

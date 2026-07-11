@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Database, FileSpreadsheet, Terminal,
   BarChart3, TrendingUp, Briefcase, FlaskConical,
   Table2, FolderOpen, BookOpen, Trophy, Settings,
-  ChevronLeft, ChevronRight, Cpu, Users, LogOut,
+  ChevronLeft, ChevronRight, Cpu, Users, LogOut, ShieldCheck,
 } from 'lucide-react'
 import { useAuthStore, useUIStore } from '../../store'
 import type { NavSection } from '../../types'
@@ -39,6 +39,7 @@ const NAV_ITEMS: NavItem[] = [
 
   // Config
   { id: 'settings',    label: 'Settings',     icon: <Settings size={16} />,                                       section: 'System' },
+  { id: 'admin',       label: 'Admin',        icon: <ShieldCheck size={16} /> },
 ]
 
 export default function Sidebar() {
@@ -149,8 +150,9 @@ export default function Sidebar() {
   function renderNavItems() {
     const elements: React.ReactNode[] = []
     let currentSection = ''
+    const visibleItems = NAV_ITEMS.filter(item => item.id !== 'admin' || user?.is_admin)
 
-    for (const item of NAV_ITEMS) {
+    for (const item of visibleItems) {
       if (item.section && item.section !== currentSection) {
         currentSection = item.section
         if (!sidebarCollapsed) {

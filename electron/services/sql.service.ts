@@ -1,8 +1,7 @@
 import path from 'path'
 import fs from 'fs'
-import { app } from 'electron'
 import { v4 as uuidv4 } from 'uuid'
-import { getDb } from '../db/database'
+import { getDb, getDatasetsPath } from '../db/database'
 import Papa from 'papaparse'
 import * as XLSX from 'xlsx'
 
@@ -126,7 +125,13 @@ export interface ValidationResult {
 let defaultDatasetsCache: { id: string; table_name: string; file_path: string }[] | null = null
 
 function getDefaultDatasetRows(): { id: string; table_name: string; file_path: string }[] {
-  if (defaultDatasetsCache) return defaultDatasetsCache
+  // Explicit length check, not truthiness — an empty array is truthy in JS.
+  // If this ever ran once before bundled_datasets was populated (a timing
+  // edge case during first-time setup), a plain `if (defaultDatasetsCache)`
+  // would cache that empty result FOREVER for the rest of the session,
+  // making every single SQL exercise fail with "no such table" until the
+  // app was fully restarted. This is very likely the "always fails" bug.
+  if (defaultDatasetsCache && defaultDatasetsCache.length > 0) return defaultDatasetsCache
   const mainDb = getDb()
   defaultDatasetsCache = mainDb.prepare(`
     SELECT id, table_name, file_path FROM bundled_datasets
@@ -144,10 +149,9 @@ async function ensureDefaultDatasetsLoaded(sandboxId: string): Promise<void> {
   const existing = sandbox.exec(`SELECT name FROM sqlite_master WHERE type='table' AND name='patients'`)
   if (existing && existing.length > 0) return
 
+  const datasetsDir = getDatasetsPath()
   for (const ds of getDefaultDatasetRows()) {
-    const resourcePath = app.isPackaged
-      ? path.join(process.resourcesPath, 'content', 'datasets', ds.file_path)
-      : path.join(__dirname, '../../content/datasets', ds.file_path)
+    const resourcePath = path.join(datasetsDir, ds.file_path)
 
     if (!fs.existsSync(resourcePath)) {
       console.warn(`[SQL] Default dataset file missing: ${resourcePath}`)
@@ -216,9 +220,7 @@ export async function loadBundledDataset(sandboxId: string, datasetId: string): 
   const dataset = mainDb.prepare('SELECT * FROM bundled_datasets WHERE id = ?').get(datasetId) as any
   if (!dataset) return { success: false, error: 'Dataset not found.' }
 
-  const resourcePath = app.isPackaged
-    ? path.join(process.resourcesPath, 'content', 'datasets', dataset.file_path)
-    : path.join(__dirname, '../../content/datasets', dataset.file_path)
+  const resourcePath = path.join(getDatasetsPath(), dataset.file_path)
 
   return loadFileIntoSandbox(sandboxId, resourcePath, dataset.table_name)
 }
@@ -243,8 +245,7 @@ export async function importFile(userId: string, filePath: string, fileName: str
     return { success: false, error: `File type .${ext} is not supported.` }
   }
 
-  const datasetsDir = path.join(app.getPath('userData'), 'datasets')
-  fs.mkdirSync(datasetsDir, { recursive: true })
+  const datasetsDir = getDatasetsPath()
 
   const datasetId = uuidv4()
   const tableName = `ds_${datasetId.replace(/-/g, '_').slice(0, 16)}`

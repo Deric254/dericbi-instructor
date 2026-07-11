@@ -72,6 +72,22 @@ function _flush(immediate = false): void {
 }
 
 // ─────────────────────────────────────────────
+// DATASETS PATH — always the writable userData folder
+// ─────────────────────────────────────────────
+// Dataset CSVs are generated at runtime (never bundled in the installer —
+// package.json's extraResources deliberately excludes content/datasets).
+// They must live in userData, the same guaranteed-writable location the
+// database itself uses — NOT in process.resourcesPath, which sits inside
+// the installed app directory: often not writable without admin rights,
+// and wiped/replaced on every auto-update regardless. Using userData here
+// matches how the database already correctly handles exactly this problem.
+export function getDatasetsPath(): string {
+  const dir = path.join(app.getPath('userData'), 'datasets')
+  fs.mkdirSync(dir, { recursive: true })
+  return dir
+}
+
+// ─────────────────────────────────────────────
 // PUBLIC API — mirrors better-sqlite3 interface
 // ─────────────────────────────────────────────
 
@@ -176,6 +192,27 @@ function runMigrations(): void {
       if (!String(e.message).includes('duplicate column')) throw e
     }
     _db.run("INSERT INTO schema_migrations (version, description) VALUES (2, 'Add quiz column to lessons')")
+    _db.run('COMMIT')
+  }
+
+  // v3 — add is_admin column to users, and auto-promote the earliest
+  // registered user to admin (on a personal desktop install, whoever
+  // registered first is virtually always the app's owner)
+  if (cur < 3) {
+    _db.run('BEGIN')
+    try {
+      _db.run("ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0")
+    } catch (e: any) {
+      if (!String(e.message).includes('duplicate column')) throw e
+    }
+    try {
+      const r = _db.exec("SELECT id FROM users ORDER BY created_at ASC LIMIT 1")
+      const firstUserId = r[0]?.values[0]?.[0]
+      if (firstUserId) {
+        _db.run("UPDATE users SET is_admin = 1 WHERE id = ?", [firstUserId])
+      }
+    } catch { /* no users yet — nothing to promote */ }
+    _db.run("INSERT INTO schema_migrations (version, description) VALUES (3, 'Add is_admin column, promote first user')")
     _db.run('COMMIT')
   }
 }

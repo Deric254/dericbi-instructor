@@ -20,6 +20,7 @@ import Projects from '../../pages/Projects'
 import Portfolio from '../../pages/Portfolio'
 import Achievements from '../../pages/Achievements'
 import Settings from '../../pages/Settings'
+import AdminPanel from '../../pages/AdminPanel'
 import type { NavSection } from '../../types'
 
 const PAGES: Record<NavSection, React.ReactNode> = {
@@ -37,6 +38,7 @@ const PAGES: Record<NavSection, React.ReactNode> = {
   portfolio:    <Portfolio />,
   achievements: <Achievements />,
   settings:     <Settings />,
+  admin:        <AdminPanel />,
 }
 
 export default function AppShell() {

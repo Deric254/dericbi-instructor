@@ -64,6 +64,7 @@ declare global {
         get: (key: string) => Promise<{ value: string | null }>
         set: (key: string, value: string) => Promise<any>
         getAll: () => Promise<Record<string, string>>
+        getVersion: () => Promise<{ version: string }>
       }
       projects: {
         list: (userId: string) => Promise<any[]>
@@ -81,13 +82,18 @@ declare global {
       }
       updater: {
         check: () => Promise<any>
-        download: () => Promise<any>
-        install: () => Promise<any>
         onChecking: (cb: () => void) => void
-        onAvailable: (cb: (info: any) => void) => void
         onProgress: (cb: (progress: any) => void) => void
-        onDownloaded: (cb: () => void) => void
-        onError: (cb: (msg: string) => void) => void
+      }
+      admin: {
+        check: (userId: string) => Promise<{ is_admin: boolean }>
+        usersList: (requesterId: string) => Promise<{ users: any[] }>
+        userDetail: (requesterId: string, targetUserId: string) => Promise<any>
+        resetUserProgress: (requesterId: string, targetUserId: string) => Promise<{ success: boolean; error?: string }>
+        setAdmin: (requesterId: string, targetUserId: string, isAdmin: boolean) => Promise<{ success: boolean; error?: string }>
+        deleteUser: (requesterId: string, targetUserId: string) => Promise<{ success: boolean; error?: string }>
+        contentStats: (requesterId: string) => Promise<any>
+        systemInfo: (requesterId: string) => Promise<any>
       }
     }
   }

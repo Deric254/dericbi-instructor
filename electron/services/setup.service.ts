@@ -2,10 +2,10 @@ import path from 'path'
 import fs from 'fs'
 import { app } from 'electron'
 // sql.js is used via getDb() — no direct import needed
-import { getDb } from '../db/database'
+import { getDb, getDatasetsPath } from '../db/database'
 import { v4 as uuidv4 } from 'uuid'
 
-const SETUP_VERSION = 3 // increment to force re-seed on app update
+const SETUP_VERSION = 4 // increment to force re-seed on app update
 
 // ─────────────────────────────────────────────
 // ENTRY POINT — called from main.ts after initDb()
@@ -101,8 +101,7 @@ function initAnalystRank(userId: string): void {
 // ─────────────────────────────────────────────
 
 async function generateDatasets(): Promise<void> {
-  const datasetsDir = getContentPath('datasets')
-  fs.mkdirSync(datasetsDir, { recursive: true })
+  const datasetsDir = getDatasetsPath()
 
   // Only generate if files don't exist
   const files = [

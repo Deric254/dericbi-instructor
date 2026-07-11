@@ -362,6 +362,12 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
       if (res.new_achievements?.length > 0) {
         notify.success('Achievement Unlocked!')
       }
+    } catch (err: any) {
+      // Without this, any unexpected failure (not a normal wrong-answer
+      // case, which is handled above) leaves the screen showing nothing —
+      // the spinner just stops with zero explanation. Always show something.
+      notify.error('Could not run this', err?.message || 'Something went wrong. Try again.')
+      setResult({ success: false, correct: false, error: err?.message || 'Something went wrong running this.' })
     } finally {
       setRunning(false)
     }
@@ -561,6 +567,10 @@ function SqlPlayground() {
     try {
       const res = await window.api.sql.execute(sandboxId.current, query, user.id)
       setResult(res)
+    } catch (err: any) {
+      // Without this, any unexpected failure left the screen exactly as it
+      // was before clicking Run — no error, no result, nothing visible.
+      setResult({ success: false, error: err?.message || 'Something went wrong running this query. Try again.' })
     } finally {
       setRunning(false)
     }

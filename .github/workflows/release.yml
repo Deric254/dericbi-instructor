@@ -26,34 +26,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build application
-        run: npm run build
+      - name: Build and publish
+        # publish:win chains `npm run build` (Vite + TypeScript compile)
+        # before electron-builder — skipping straight to electron-builder
+        # alone would package whatever happens to be in dist/, which is
+        # empty or stale on a fresh CI checkout.
+        run: npm run publish:win
         env:
-          NODE_ENV: production
-
-      - name: Package Windows installer
-        # --publish never  — we let softprops/action-gh-release upload the
-        #   artifact in the next step.  Using --publish always here AND
-        #   action-gh-release in the next step causes a race condition where
-        #   electron-builder tries to create the release at the same time as
-        #   the action, and one of them fails silently.
-        run: npx electron-builder --win --x64 --publish never
-        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_ENV: production
           # Disable code signing — we don't have a certificate.
-          # The installer will still work; Windows SmartScreen may show a
+          # The installer still works; Windows SmartScreen may show a
           # one-time "unknown publisher" prompt that users click through.
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
-
-      - name: Create GitHub Release and upload installer
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            release/*.exe
-            release/*.exe.blockmap
-            release/latest.yml
-          generate_release_notes: true
-          draft: false
-          prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

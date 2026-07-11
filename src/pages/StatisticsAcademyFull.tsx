@@ -124,7 +124,9 @@ function StatLessonView({ lesson, exercises, onBack }: { lesson: any; exercises:
         <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 12 }}>← Back</button>
         <h3 style={{ color: 'var(--stats-color)' }}>{lesson.title}</h3>
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-          <button onClick={() => setShowInstructor(v => !v)} className="btn btn-secondary btn-sm"><Brain size={12} /> Instructor</button>
+          {exercises.length === 0 && (
+            <button onClick={() => setShowInstructor(v => !v)} className="btn btn-secondary btn-sm"><Brain size={12} /> Instructor</button>
+          )}
           <button onClick={handleComplete} className="btn btn-primary btn-sm"><CheckCircle size={12} /> Complete</button>
         </div>
       </div>
@@ -149,7 +151,7 @@ function StatLessonView({ lesson, exercises, onBack }: { lesson: any; exercises:
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 13 }}>No exercises yet.</div>
           )}
         </div>
-        {showInstructor && (
+        {showInstructor && exercises.length === 0 && (
           <div style={{ width: 280, flexShrink: 0 }}>
             <InstructorPanel context={{ type: 'lesson', lesson: lesson.title }} />
           </div>

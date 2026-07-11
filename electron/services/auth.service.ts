@@ -10,6 +10,7 @@ export interface User {
   experience_level: string
   learning_goals: string[]
   avatar_color: string
+  is_admin?: boolean
   created_at: string
 }
 
@@ -223,6 +224,7 @@ function rowToUser(row: any): User {
     experience_level: row.experience_level,
     learning_goals: JSON.parse(row.learning_goals || '[]'),
     avatar_color: row.avatar_color,
+    is_admin: row.is_admin === 1,
     created_at: row.created_at,
   }
 }
