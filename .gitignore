@@ -1,38 +1,75 @@
 # Dependencies
 node_modules/
+.npm/
 
 # Build outputs
 dist/
 dist-electron/
 release/
 .electron-builder-cache/
+.vite/
+*.tgz
 
-# Generated datasets (created at runtime)
+# Generated datasets (created at runtime by userData, or locally by
+# scripts/generate-datasets.js for dev/testing)
 content/datasets/
 
-# Database & user data
+# Database & user data (SQLite — covers rollback-journal mode files too,
+# not just WAL mode's -shm/-wal)
 *.db
 *.db-shm
 *.db-wal
+*.db-journal
 
 # Logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Environment
+# Environment — but keep a tracked .env.example template if one exists,
+# since that's meant to document required variables for other developers
 .env
 .env.*
+!.env.example
+
+# Secrets & certificates — relevant if code signing is ever added;
+# accidentally committing one of these would be a real security incident
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Testing / coverage
+coverage/
+.nyc_output/
 
 # OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
 Thumbs.db
+ehthumbs.db
 desktop.ini
+$RECYCLE.BIN/
 
 # Editor
 .vscode/
 .idea/
+.history/
 *.swp
 *.swo
+*~
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 
 # TypeScript cache
 *.tsbuildinfo
+
+# Misc temp files
+*.tmp
+*.temp
