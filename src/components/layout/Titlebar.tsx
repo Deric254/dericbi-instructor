@@ -4,6 +4,50 @@ import { useAuthStore, useUIStore } from '../../store'
 import { LogoMark } from '../ui/AppLogo'
 import { SECTIONS_WITH_OWN_INSTRUCTOR } from '../ui/GlobalInstructor'
 
+export function MinimalTitlebar({ showBranding = true }: { showBranding?: boolean }) {
+  const [isMaximized, setIsMaximized] = useState(false)
+
+  useEffect(() => {
+    window.api?.window.isMaximized().then(setIsMaximized)
+  }, [])
+
+  const handleMaximize = async () => {
+    await window.api?.window.maximize()
+    const max = await window.api?.window.isMaximized()
+    setIsMaximized(max ?? false)
+  }
+
+  return (
+    <div style={{
+      height: 'var(--titlebar-height)',
+      background: 'var(--bg-surface)',
+      borderBottom: '1px solid var(--border)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      WebkitAppRegion: 'drag',
+      flexShrink: 0,
+      paddingLeft: 12,
+      userSelect: 'none',
+    } as any}>
+      {showBranding ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <LogoMark size={22} />
+          <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+            DericBI Instructor
+          </span>
+        </div>
+      ) : <div />}
+
+      <div style={{ display: 'flex', WebkitAppRegion: 'no-drag' } as any}>
+        <WinBtn icon={<Minus size={12} />} onClick={() => window.api?.window.minimize()} />
+        <WinBtn icon={<Square size={10} />} onClick={handleMaximize} />
+        <WinBtn icon={<X size={12} />} onClick={() => window.api?.window.close()} danger />
+      </div>
+    </div>
+  )
+}
+
 export default function Titlebar() {
   const [isMaximized, setIsMaximized] = useState(false)
   const { user } = useAuthStore()

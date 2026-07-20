@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Eye, EyeOff, ArrowRight, ArrowLeft, Check, ShieldQuestion, KeyRound, RefreshCw } from 'lucide-react'
 import AppLogo from '../components/ui/AppLogo'
+import { MinimalTitlebar } from '../components/layout/Titlebar'
 import { useAuthStore, notify } from '../store'
 
 type Screen = 'login' | 'register' | 'onboarding' | 'forgot' | 'reset'
@@ -36,8 +37,10 @@ export default function AuthScreen() {
         <polyline points="61,170 121,110 181,50 241,140 301,80" fill="none" stroke="var(--sql-color)" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
 
-      {/* Drag region / titlebar */}
-      <div style={{ height: 'var(--titlebar-height)', WebkitAppRegion: 'drag', flexShrink: 0 } as any} />
+      {/* Titlebar with real window controls — previously just an invisible
+          drag region, meaning minimize/close were unreachable from the UI
+          for the entire time a user isn't logged in yet. */}
+      <MinimalTitlebar />
 
       {/* Centered card */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, position: 'relative' }}>
