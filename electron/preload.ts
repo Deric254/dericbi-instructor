@@ -14,6 +14,13 @@ const api = {
     isMaximized: () => ipcRenderer.invoke('window:is-maximized'),
   },
 
+  // License
+  license: {
+    status: () => ipcRenderer.invoke('license:status'),
+    activate: (licenseKey: string) => ipcRenderer.invoke('license:activate', licenseKey),
+    deactivate: () => ipcRenderer.invoke('license:deactivate'),
+  },
+
   // Auth
   auth: {
     register: (params: any) => ipcRenderer.invoke('auth:register', params),

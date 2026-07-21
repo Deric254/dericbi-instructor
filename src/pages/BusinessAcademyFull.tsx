@@ -8,12 +8,15 @@ import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
+import { PageError } from '../components/ui/PageState'
+import { reportApiError } from '../lib/apiError'
 import type { Lesson } from '../types'
 
 export function BusinessAcademy() {
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [activeLesson, setActiveLesson] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const { user } = useAuthStore()
 
   const TOPICS = [
@@ -56,15 +59,28 @@ export function BusinessAcademy() {
 
   useEffect(() => {
     if (!user) return
-    window.api.lessons.list(user.id, 'business').then((d: any) => { setLessons(d); setLoading(false) })
+    loadLessons()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
+
+  function loadLessons() {
+    if (!user) return
+    setLoading(true)
+    setLoadError(false)
+    window.api.lessons.list(user.id, 'business')
+      .then((d: any) => setLessons(d))
+      .catch((err: any) => { reportApiError('load Business lessons', err); setLoadError(true) })
+      .finally(() => setLoading(false))
+  }
+
+  if (loadError && !activeLesson) return <PageError message="Couldn't load the Business Academy lessons." onRetry={loadLessons} />
 
   if (activeLesson) {
     return (
       <BusinessLessonView
         lesson={activeLesson.lesson}
         exercises={activeLesson.exercises || []}
-        onBack={() => { setActiveLesson(null); if (user) window.api.lessons.list(user.id, 'business').then(setLessons) }}
+        onBack={() => { setActiveLesson(null); loadLessons() }}
       />
     )
   }
@@ -153,6 +169,8 @@ function CaseStudyCard({ caseStudy }: { caseStudy: any }) {
       })
       if (result.success) { setFeedback(result.message); setSubmitted(true) }
       else setFeedback('Could not get feedback. Check AI API key in Settings.')
+    } catch (err) {
+      reportApiError('get AI feedback', err)
     } finally { setSubmitting(false) }
   }
 
@@ -219,9 +237,13 @@ function BusinessLessonView({ lesson, exercises, onBack }: { lesson: any; exerci
 
   const handleComplete = async () => {
     if (!user) return
-    await window.api.lessons.complete(user.id, lesson.id, Math.floor((Date.now() - startRef.current) / 1000))
-    notify.success('Lesson complete!', lesson.title)
-    onBack()
+    try {
+      await window.api.lessons.complete(user.id, lesson.id, Math.floor((Date.now() - startRef.current) / 1000))
+      notify.success('Lesson complete!', lesson.title)
+      onBack()
+    } catch (err) {
+      reportApiError('save your lesson progress', err)
+    }
   }
 
   return (
@@ -261,7 +283,10 @@ function WrittenExercise({ exercise, index }: { exercise: any; index: number }) 
     try {
       const r = await window.api.ai.exerciseFeedback({ userId: user.id, exercise_prompt: exercise.prompt, user_answer: answer, solution: exercise.solution || '', is_correct: null, skill: 'business_thinking', context: { type: 'exercise', exercise: exercise.title } })
       if (r.success) setFeedback(r.message)
+      else setFeedback('Could not get feedback. Check your AI API key in Settings.')
       await window.api.exercises.submit({ userId: user.id, exerciseId: exercise.id, answer, timeSpentS: 60 })
+    } catch (err) {
+      reportApiError('get feedback on this exercise', err)
     } finally { setSubmitting(false) }
   }
 

@@ -5,6 +5,8 @@ import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
+import { PageError } from '../components/ui/PageState'
+import { reportApiError } from '../lib/apiError'
 import type { Lesson } from '../types'
 
 // Pyodide hook inline (reused from PythonAcademy pattern)
@@ -14,6 +16,7 @@ export function StatisticsAcademy() {
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [activeLesson, setActiveLesson] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const { user } = useAuthStore()
 
   const STAT_TOPICS = [
@@ -29,8 +32,21 @@ export function StatisticsAcademy() {
 
   useEffect(() => {
     if (!user) return
-    window.api.lessons.list(user.id, 'statistics').then((d: any) => { setLessons(d); setLoading(false) })
+    loadLessons()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
+
+  function loadLessons() {
+    if (!user) return
+    setLoading(true)
+    setLoadError(false)
+    window.api.lessons.list(user.id, 'statistics')
+      .then((d: any) => setLessons(d))
+      .catch((err: any) => { reportApiError('load Statistics lessons', err); setLoadError(true) })
+      .finally(() => setLoading(false))
+  }
+
+  if (loadError && !activeLesson) return <PageError message="Couldn't load the Statistics Academy lessons." onRetry={loadLessons} />
 
   if (activeLesson) {
     return (
@@ -39,7 +55,7 @@ export function StatisticsAcademy() {
         exercises={activeLesson.exercises || []}
         onBack={() => {
           setActiveLesson(null)
-          if (user) window.api.lessons.list(user.id, 'statistics').then(setLessons)
+          loadLessons()
         }}
       />
     )
@@ -113,9 +129,13 @@ function StatLessonView({ lesson, exercises, onBack }: { lesson: any; exercises:
 
   const handleComplete = async () => {
     if (!user) return
-    await window.api.lessons.complete(user.id, lesson.id, Math.floor((Date.now() - startRef.current) / 1000))
-    notify.success('Lesson complete!', lesson.title)
-    onBack()
+    try {
+      await window.api.lessons.complete(user.id, lesson.id, Math.floor((Date.now() - startRef.current) / 1000))
+      notify.success('Lesson complete!', lesson.title)
+      onBack()
+    } catch (err) {
+      reportApiError('save your lesson progress', err)
+    }
   }
 
   return (
@@ -181,13 +201,20 @@ function StatExercise({ exercise }: { exercise: any }) {
     setOutput(r.output || r.error || '(no output)')
     setIsError(!!r.error)
     setRunning(false)
-    if (user) window.api.exercises.submit({ userId: user.id, exerciseId: exercise.id, answer: code, timeSpentS: 30 })
+    if (user) {
+      window.api.exercises.submit({ userId: user.id, exerciseId: exercise.id, answer: code, timeSpentS: 30 })
+        .catch((err: any) => reportApiError('save your progress', err))
+    }
   }
 
   const getHint = async () => {
     if (hintsUsed >= 3) return
-    const res = await window.api.exercises.hint(exercise.id, hintsUsed + 1)
-    if (res.hint) { setHint(res.hint); setHintsUsed(h => h + 1) }
+    try {
+      const res = await window.api.exercises.hint(exercise.id, hintsUsed + 1)
+      if (res.hint) { setHint(res.hint); setHintsUsed(h => h + 1) }
+    } catch (err) {
+      reportApiError('get a hint', err)
+    }
   }
 
   if (!exercise) return null

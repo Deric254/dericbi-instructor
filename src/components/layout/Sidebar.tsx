@@ -55,7 +55,15 @@ export default function Sidebar() {
       return
     }
     if (confirmTimer.current) clearTimeout(confirmTimer.current)
-    if (token) await window.api.auth.logout(token)
+    if (token) {
+      try {
+        await window.api.auth.logout(token)
+      } catch (err) {
+        // Still log the person out locally even if invalidating the
+        // server-side session fails.
+        console.error('[logout]', err)
+      }
+    }
     storeLogout()
     setActiveSection('dashboard')
   }

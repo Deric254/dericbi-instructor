@@ -8,6 +8,8 @@ import {
 import { useAuthStore, useUIStore } from '../store'
 import type { DashboardStats, SkillRating, NavSection } from '../types'
 import AppLogo from '../components/ui/AppLogo'
+import { PageLoader, PageError } from '../components/ui/PageState'
+import { reportApiError } from '../lib/apiError'
 
 const SKILL_META: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   sql:              { label: 'SQL',              color: 'var(--sql-color)',      icon: <Database size={14} /> },
@@ -70,15 +72,25 @@ export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const [loadError, setLoadError] = useState(false)
+
+  const loadStats = () => {
     if (!user) return
-    window.api.progress.dashboard(user.id).then((data: any) => {
-      setStats(data)
-      setLoading(false)
-    })
+    setLoading(true)
+    setLoadError(false)
+    window.api.progress.dashboard(user.id)
+      .then((data: any) => setStats(data))
+      .catch((err) => { reportApiError('load your dashboard', err); setLoadError(true) })
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    loadStats()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   if (loading) return <PageLoader />
+  if (loadError && !stats) return <PageError onRetry={loadStats} />
 
   const rank = stats?.rank
   const greeting = getGreeting()
@@ -383,14 +395,6 @@ function JourneyCard({ order, item, onClick }: {
       </div>
       <ChevronRight size={14} color={hov ? item.color : 'var(--text-muted)'} style={{ flexShrink: 0, marginTop: 2 }} />
     </button>
-  )
-}
-
-function PageLoader() {
-  return (
-    <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="spinner" style={{ width: 28, height: 28 }} />
-    </div>
   )
 }
 

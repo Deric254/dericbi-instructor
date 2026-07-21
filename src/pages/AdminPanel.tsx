@@ -4,19 +4,30 @@ import {
   ShieldCheck, ShieldOff, AlertTriangle, Server, RefreshCw,
 } from 'lucide-react'
 import { useAuthStore, notify } from '../store'
+import { PageError } from '../components/ui/PageState'
+import { reportApiError } from '../lib/apiError'
 
 export default function AdminPanel() {
   const { user } = useAuthStore()
   const [checking, setChecking] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [checkError, setCheckError] = useState(false)
 
-  useEffect(() => {
+  const check = () => {
     if (!user) return
-    window.api.admin.check(user.id).then((r: any) => {
-      setIsAdmin(r.is_admin)
-      setChecking(false)
-    })
-  }, [user])
+    setChecking(true)
+    setCheckError(false)
+    window.api.admin.check(user.id)
+      .then((r: any) => setIsAdmin(r.is_admin))
+      .catch((err: any) => { reportApiError('check admin access', err); setCheckError(true) })
+      .finally(() => setChecking(false))
+  }
+
+  useEffect(check, [user])
+
+  if (checkError) {
+    return <PageError message="Couldn't verify admin access." onRetry={check} />
+  }
 
   if (checking) {
     return (
@@ -47,48 +58,69 @@ function AdminDashboard() {
   const [sysInfo, setSysInfo] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [confirmAction, setConfirmAction] = useState<{ type: 'reset' | 'delete'; target: any } | null>(null)
+  const [loadError, setLoadError] = useState(false)
 
   const refresh = async () => {
     if (!user) return
     setLoading(true)
-    const [usersRes, statsRes, sysRes] = await Promise.all([
-      window.api.admin.usersList(user.id),
-      window.api.admin.contentStats(user.id),
-      window.api.admin.systemInfo(user.id),
-    ])
-    setUsers(usersRes.users)
-    setStats(statsRes)
-    setSysInfo(sysRes)
-    setLoading(false)
+    setLoadError(false)
+    try {
+      const [usersRes, statsRes, sysRes] = await Promise.all([
+        window.api.admin.usersList(user.id),
+        window.api.admin.contentStats(user.id),
+        window.api.admin.systemInfo(user.id),
+      ])
+      setUsers(usersRes.users)
+      setStats(statsRes)
+      setSysInfo(sysRes)
+    } catch (err) {
+      reportApiError('load admin data', err)
+      setLoadError(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { refresh() }, [user])
 
   const handleToggleAdmin = async (target: any) => {
     if (!user) return
-    const res = await window.api.admin.setAdmin(user.id, target.id, !target.is_admin)
-    if (res.success) {
-      notify.success(target.is_admin ? 'Admin access removed' : 'Admin access granted', target.name)
-      refresh()
-    } else {
-      notify.error('Could not update', res.error)
+    try {
+      const res = await window.api.admin.setAdmin(user.id, target.id, !target.is_admin)
+      if (res.success) {
+        notify.success(target.is_admin ? 'Admin access removed' : 'Admin access granted', target.name)
+        refresh()
+      } else {
+        notify.error('Could not update', res.error)
+      }
+    } catch (err) {
+      reportApiError('update admin access', err)
     }
   }
 
   const handleConfirmedAction = async () => {
     if (!confirmAction || !user) return
     const { type, target } = confirmAction
-    if (type === 'reset') {
-      const res = await window.api.admin.resetUserProgress(user.id, target.id)
-      if (res.success) notify.success('Progress reset', `${target.name}'s learning progress was cleared.`)
-      else notify.error('Could not reset', res.error)
-    } else {
-      const res = await window.api.admin.deleteUser(user.id, target.id)
-      if (res.success) notify.success('User deleted', target.name)
-      else notify.error('Could not delete', res.error)
+    try {
+      if (type === 'reset') {
+        const res = await window.api.admin.resetUserProgress(user.id, target.id)
+        if (res.success) notify.success('Progress reset', `${target.name}'s learning progress was cleared.`)
+        else notify.error('Could not reset', res.error)
+      } else {
+        const res = await window.api.admin.deleteUser(user.id, target.id)
+        if (res.success) notify.success('User deleted', target.name)
+        else notify.error('Could not delete', res.error)
+      }
+      refresh()
+    } catch (err) {
+      reportApiError(type === 'reset' ? "reset this user's progress" : 'delete this user', err)
+    } finally {
+      setConfirmAction(null)
     }
-    setConfirmAction(null)
-    refresh()
+  }
+
+  if (loadError) {
+    return <PageError message="Couldn't load the admin dashboard." onRetry={refresh} />
   }
 
   if (loading) {

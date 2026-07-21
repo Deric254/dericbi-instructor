@@ -7,6 +7,8 @@ import {
 import { useAuthStore, notify } from '../store'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
+import { PageError } from '../components/ui/PageState'
+import { reportApiError } from '../lib/apiError'
 import type { Lesson } from '../types'
 
 type View = 'lessons' | 'spreadsheet'
@@ -19,16 +21,23 @@ export default function ExcelAcademy() {
   const [view, setView] = useState<View>('lessons')
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null)
   const { user } = useAuthStore()
 
-  useEffect(() => {
+  const loadLessons = useCallback(() => {
     if (!user) return
-    window.api.lessons.list(user.id, 'excel').then((data: any) => {
-      setLessons(data)
-      setLoading(false)
-    })
+    setLoading(true)
+    setLoadError(false)
+    window.api.lessons.list(user.id, 'excel')
+      .then((data: any) => setLessons(data))
+      .catch((err) => { reportApiError('load Excel lessons', err); setLoadError(true) })
+      .finally(() => setLoading(false))
   }, [user])
+
+  useEffect(loadLessons, [loadLessons])
+
+  if (loadError) return <PageError message="Couldn't load the Excel Academy lessons." onRetry={loadLessons} />
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -89,8 +98,12 @@ export default function ExcelAcademy() {
                 <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
                   <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={async () => {
                     if (!user || !activeLessonId) return
-                    await window.api.lessons.complete(user.id, activeLessonId, 0)
-                    notify.success('Lesson marked complete!')
+                    try {
+                      await window.api.lessons.complete(user.id, activeLessonId, 0)
+                      notify.success('Lesson marked complete!')
+                    } catch (err) {
+                      reportApiError('mark this lesson complete', err)
+                    }
                   }}>
                     <CheckCircle size={14} /> Mark Complete
                   </button>

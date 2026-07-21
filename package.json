@@ -1,7 +1,7 @@
 {
   "name": "dericbi-instructor",
-  "version": "1.4.4",
-  "description": "DericBI Instructor — Personal Analytics Mentor and Training Platform",
+  "version": "1.4.0",
+  "description": "DericBI Instructor \u2014 Personal Analytics Mentor and Training Platform",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "concurrently -n VITE,ELECTRON -c cyan,yellow \"npm run dev:vite\" \"npm run dev:electron\"",
@@ -37,6 +37,8 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
+    "@noble/ed25519": "^3.1.0",
+    "@noble/hashes": "^2.2.0",
     "bcryptjs": "^2.4.3",
     "crypto-js": "^4.2.0",
     "date-fns": "^3.6.0",
@@ -54,14 +56,14 @@
     "recharts": "^2.12.7",
     "remark-gfm": "^4.0.1",
     "sql.js": "^1.12.0",
-    "uuid": "^10.0.0",
-    "xlsx": "^0.18.5",
+    "uuid": "^11.1.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zustand": "^4.5.4"
   },
   "build": {
     "appId": "com.deric.dericbi-instructor",
     "productName": "DericBI Instructor",
-    "copyright": "Copyright © 2025 Deric",
+    "copyright": "Copyright \u00a9 2025 Deric",
     "directories": {
       "output": "release",
       "buildResources": "assets"

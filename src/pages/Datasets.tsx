@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Table2, Upload, Trash2, Eye, Database, ChevronRight, CheckCircle } from 'lucide-react'
 import { useAuthStore, useUIStore, notify } from '../store'
+import { PageError } from '../components/ui/PageState'
+import { reportApiError } from '../lib/apiError'
 
 export default function Datasets() {
   const { user } = useAuthStore()
@@ -9,45 +11,67 @@ export default function Datasets() {
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<any>(null)
   const [profileFor, setProfileFor] = useState<string | null>(null)
+  const [loadError, setLoadError] = useState(false)
 
   const load = async () => {
     if (!user) return
-    const d = await window.api.sql.datasets(user.id)
-    setDatasets(d)
-    setLoading(false)
+    setLoading(true)
+    setLoadError(false)
+    try {
+      const d = await window.api.sql.datasets(user.id)
+      setDatasets(d)
+    } catch (err) {
+      reportApiError('load datasets', err)
+      setLoadError(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { load() }, [user])
 
   const handleImport = async () => {
     if (!user) return
-    const picked = await window.api.files.pick()
-    if (picked.canceled || !picked.path) return
-    const filePath = picked.path
-    const fileName = filePath.split(/[/\\]/).pop() ?? 'dataset'
-    notify.info('Importing…', fileName)
-    const result = await window.api.files.import(user.id, filePath, fileName)
-    if (result.success) {
-      notify.success('Dataset imported', `${result.dataset?.name} — ${result.profile?.row_count?.toLocaleString()} rows`)
-      load()
-    } else {
-      notify.error('Import failed', result.error)
+    try {
+      const picked = await window.api.files.pick()
+      if (picked.canceled || !picked.path) return
+      const filePath = picked.path
+      const fileName = filePath.split(/[/\\]/).pop() ?? 'dataset'
+      notify.info('Importing…', fileName)
+      const result = await window.api.files.import(user.id, filePath, fileName)
+      if (result.success) {
+        notify.success('Dataset imported', `${result.dataset?.name} — ${result.profile?.row_count?.toLocaleString()} rows`)
+        load()
+      } else {
+        notify.error('Import failed', result.error)
+      }
+    } catch (err) {
+      reportApiError('import this file', err)
     }
   }
 
   const viewProfile = async (ds: any) => {
     if (!user) return
     setProfileFor(ds.id)
-    const p = await window.api.files.profile(user.id, ds.id)
-    setProfile(p)
+    try {
+      const p = await window.api.files.profile(user.id, ds.id)
+      setProfile(p)
+    } catch (err) {
+      reportApiError('load dataset preview', err)
+      setProfileFor(null)
+    }
   }
 
   const deleteDataset = async (id: string) => {
     if (!user) return
-    await window.api.files.delete(user.id, id)
-    notify.success('Dataset deleted')
-    if (profileFor === id) { setProfile(null); setProfileFor(null) }
-    load()
+    try {
+      await window.api.files.delete(user.id, id)
+      notify.success('Dataset deleted')
+      if (profileFor === id) { setProfile(null); setProfileFor(null) }
+      load()
+    } catch (err) {
+      reportApiError('delete this dataset', err)
+    }
   }
 
   return (
@@ -68,7 +92,9 @@ export default function Datasets() {
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* Dataset list */}
         <div style={{ flex: 1, overflow: 'auto', padding: 24 }}>
-          {loading ? (
+          {loadError ? (
+            <PageError message="Couldn't load your datasets." onRetry={load} />
+          ) : loading ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}><div className="spinner" /></div>
           ) : (
             <>

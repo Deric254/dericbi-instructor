@@ -6,6 +6,8 @@ import {
 } from 'lucide-react'
 import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
+import { PageError } from '../components/ui/PageState'
+import { reportApiError } from '../lib/apiError'
 
 type Screen = 'list' | 'editor'
 
@@ -24,21 +26,34 @@ export default function Projects() {
   const [activeProject, setActiveProject] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [showNew, setShowNew] = useState(false)
+  const [loadError, setLoadError] = useState(false)
   const { user } = useAuthStore()
 
   const load = async () => {
     if (!user) return
-    const data = await window.api.projects.list(user.id)
-    setProjects(data)
-    setLoading(false)
+    setLoading(true)
+    setLoadError(false)
+    try {
+      const data = await window.api.projects.list(user.id)
+      setProjects(data)
+    } catch (err) {
+      reportApiError('load your projects', err)
+      setLoadError(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { load() }, [user])
 
   const openProject = async (p: any) => {
-    const full = await window.api.projects.get(user!.id, p.id)
-    setActiveProject(full)
-    setScreen('editor')
+    try {
+      const full = await window.api.projects.get(user!.id, p.id)
+      setActiveProject(full)
+      setScreen('editor')
+    } catch (err) {
+      reportApiError('open this project', err)
+    }
   }
 
   if (screen === 'editor' && activeProject) {
@@ -47,10 +62,14 @@ export default function Projects() {
         project={activeProject}
         onBack={() => { setScreen('list'); load() }}
         onSave={async (updates: any) => {
-          await window.api.projects.update({ ...updates, id: activeProject.id, userId: user!.id })
-          const fresh = await window.api.projects.get(user!.id, activeProject.id)
-          setActiveProject(fresh)
-          notify.success('Project saved')
+          try {
+            await window.api.projects.update({ ...updates, id: activeProject.id, userId: user!.id })
+            const fresh = await window.api.projects.get(user!.id, activeProject.id)
+            setActiveProject(fresh)
+            notify.success('Project saved')
+          } catch (err) {
+            reportApiError('save this project', err)
+          }
         }}
       />
     )
@@ -71,10 +90,21 @@ export default function Projects() {
         </button>
       </div>
 
-      {showNew && <NewProjectModal onClose={() => setShowNew(false)} onCreated={async (id) => { setShowNew(false); const p = await window.api.projects.get(user!.id, id); setActiveProject(p); setScreen('editor') }} />}
+      {showNew && <NewProjectModal onClose={() => setShowNew(false)} onCreated={async (id) => {
+        setShowNew(false)
+        try {
+          const p = await window.api.projects.get(user!.id, id)
+          setActiveProject(p)
+          setScreen('editor')
+        } catch (err) {
+          reportApiError('open your new project', err)
+        }
+      }} />}
 
       <div style={{ flex: 1, overflow: 'auto', padding: 24 }}>
-        {loading ? (
+        {loadError ? (
+          <PageError message="Couldn't load your projects." onRetry={load} />
+        ) : loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}><div className="spinner" /></div>
         ) : projects.length === 0 ? (
           <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>
@@ -85,7 +115,14 @@ export default function Projects() {
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 14 }}>
-            {projects.map(p => <ProjectCard key={p.id} project={p} onClick={() => openProject(p)} onDelete={async () => { await window.api.projects.delete(user!.id, p.id); load() }} />)}
+            {projects.map(p => <ProjectCard key={p.id} project={p} onClick={() => openProject(p)} onDelete={async () => {
+              try {
+                await window.api.projects.delete(user!.id, p.id)
+                load()
+              } catch (err) {
+                reportApiError('delete this project', err)
+              }
+            }} />)}
           </div>
         )}
       </div>
@@ -134,9 +171,15 @@ function NewProjectModal({ onClose, onCreated }: { onClose: () => void; onCreate
   const create = async () => {
     if (!user || !form.title.trim()) return
     setSaving(true)
-    const r = await window.api.projects.create({ ...form, userId: user.id })
-    if (r.success) onCreated(r.id)
-    setSaving(false)
+    try {
+      const r = await window.api.projects.create({ ...form, userId: user.id })
+      if (r.success) onCreated(r.id)
+      else notify.error('Could not create project', r.error)
+    } catch (err) {
+      reportApiError('create this project', err)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -183,23 +226,33 @@ function ProjectEditor({ project, onBack, onSave }: { project: any; onBack: () =
 
   const save = async (status?: string) => {
     setSaving(true)
-    await onSave({ ...form, status: status || project.status })
-    setSaving(false)
+    try {
+      await onSave({ ...form, status: status || project.status })
+    } finally {
+      setSaving(false)
+    }
   }
 
   const evaluate = async () => {
     if (!user) return
     setEvaluating(true)
-    const r = await window.api.ai.chat({
-      userId: user.id,
-      message: `Evaluate this analyst project.\n\nTitle: ${form.title}\nProblem: ${form.problem_statement}\nMethodology: ${form.methodology}\nFindings: ${form.findings}\nRecommendations: ${form.recommendations}\n\nProvide: 1) Strengths, 2) Areas to improve, 3) What a senior analyst would add, 4) Overall score /100. Be direct and professional.`,
-      history: [], context: { type: 'exercise', exercise: form.title },
-    })
-    if (r.success) {
-      setAiEval(r.message)
-      await window.api.projects.update({ id: project.id, userId: user.id, ai_evaluation: r.message })
+    try {
+      const r = await window.api.ai.chat({
+        userId: user.id,
+        message: `Evaluate this analyst project.\n\nTitle: ${form.title}\nProblem: ${form.problem_statement}\nMethodology: ${form.methodology}\nFindings: ${form.findings}\nRecommendations: ${form.recommendations}\n\nProvide: 1) Strengths, 2) Areas to improve, 3) What a senior analyst would add, 4) Overall score /100. Be direct and professional.`,
+        history: [], context: { type: 'exercise', exercise: form.title },
+      })
+      if (r.success) {
+        setAiEval(r.message)
+        await window.api.projects.update({ id: project.id, userId: user.id, ai_evaluation: r.message })
+      } else {
+        notify.error('Could not get AI evaluation', 'Check your AI API key in Settings.')
+      }
+    } catch (err) {
+      reportApiError('get an AI evaluation', err)
+    } finally {
+      setEvaluating(false)
     }
-    setEvaluating(false)
   }
 
   const typeMeta = PROJECT_TYPES.find(t => t.id === project.project_type) || PROJECT_TYPES[0]

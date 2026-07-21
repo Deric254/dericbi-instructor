@@ -3,22 +3,43 @@ import * as AuthService from '../services/auth.service'
 import * as ProgressService from '../services/progress.service'
 import * as SqlService from '../services/sql.service'
 import * as AiService from '../services/ai.service'
+import * as LicenseService from '../services/license.service'
 import { registerPortfolioHandlers } from '../services/portfolio.service'
 import { getDb } from '../db/database'
 import { v4 as uuidv4 } from 'uuid'
 
 let _handlersRegistered = false
 
+/**
+ * Wraps ipcMain.handle so every failure is logged with its channel name
+ * before propagating to the renderer. Without this, a thrown error in a
+ * packaged app (no devtools console open by default) leaves no trace
+ * anywhere — the renderer just sees a rejected promise with a generic
+ * "Error invoking remote method" message and there's nothing to debug from.
+ * The renderer's own error message is unaffected: this only adds logging,
+ * it still rethrows the original error so existing behavior is preserved.
+ */
+function safeHandle(channel: string, listener: (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any) {
+  ipcMain.handle(channel, async (event, ...args) => {
+    try {
+      return await listener(event, ...args)
+    } catch (err) {
+      console.error(`[ipc:${channel}]`, err)
+      throw err
+    }
+  })
+}
+
 // ─────────────────────────────────────────────
 // AUTH HANDLERS
 // ─────────────────────────────────────────────
 
 export function registerAuthHandlers() {
-  ipcMain.handle('auth:register', async (_, params) => {
+  safeHandle('auth:register', async (_, params) => {
     return AuthService.register(params)
   })
 
-  ipcMain.handle('auth:login', async (_, params) => {
+  safeHandle('auth:login', async (_, params) => {
     const result = await AuthService.login(params)
     if (result.success && result.user) {
       ProgressService.checkAndAwardAchievements(result.user.id)
@@ -26,35 +47,53 @@ export function registerAuthHandlers() {
     return result
   })
 
-  ipcMain.handle('auth:validate-session', async (_, token: string) => {
+  safeHandle('auth:validate-session', async (_, token: string) => {
     const user = AuthService.validateSession(token)
     return { valid: !!user, user }
   })
 
-  ipcMain.handle('auth:logout', async (_, token: string) => {
+  safeHandle('auth:logout', async (_, token: string) => {
     AuthService.logout(token)
     return { success: true }
   })
 
-  ipcMain.handle('auth:update-profile', async (_, { userId, updates }) => {
+  safeHandle('auth:update-profile', async (_, { userId, updates }) => {
     return AuthService.updateUser(userId, updates)
   })
 
-  ipcMain.handle('auth:change-password', async (_, { userId, currentPassword, newPassword }) => {
+  safeHandle('auth:change-password', async (_, { userId, currentPassword, newPassword }) => {
     return AuthService.changePassword(userId, currentPassword, newPassword)
   })
 
-  ipcMain.handle('auth:set-security-question', async (_, { userId, question, answer }) => {
+  safeHandle('auth:set-security-question', async (_, { userId, question, answer }) => {
     AuthService.setSecurityQuestion(userId, question, answer)
     return { success: true }
   })
 
-  ipcMain.handle('auth:get-security-question', async (_, email: string) => {
+  safeHandle('auth:get-security-question', async (_, email: string) => {
     return AuthService.getSecurityQuestion(email)
   })
 
-  ipcMain.handle('auth:reset-password', async (_, params) => {
+  safeHandle('auth:reset-password', async (_, params) => {
     return AuthService.resetPasswordWithAnswer(params)
+  })
+}
+
+// ─────────────────────────────────────────────
+// LICENSE HANDLERS
+// ─────────────────────────────────────────────
+
+export function registerLicenseHandlers() {
+  safeHandle('license:status', async () => {
+    return LicenseService.getStatus()
+  })
+
+  safeHandle('license:activate', async (_, licenseKey: string) => {
+    return LicenseService.activate(licenseKey)
+  })
+
+  safeHandle('license:deactivate', async () => {
+    return LicenseService.deactivate()
   })
 }
 
@@ -63,23 +102,23 @@ export function registerAuthHandlers() {
 // ─────────────────────────────────────────────
 
 export function registerProgressHandlers() {
-  ipcMain.handle('progress:dashboard', async (_, userId: string) => {
+  safeHandle('progress:dashboard', async (_, userId: string) => {
     return ProgressService.getDashboardStats(userId)
   })
 
-  ipcMain.handle('progress:skills', async (_, userId: string) => {
+  safeHandle('progress:skills', async (_, userId: string) => {
     return ProgressService.getSkillRatings(userId)
   })
 
-  ipcMain.handle('progress:rank', async (_, userId: string) => {
+  safeHandle('progress:rank', async (_, userId: string) => {
     return ProgressService.getRankInfo(userId)
   })
 
-  ipcMain.handle('progress:memory', async (_, { userId, options }) => {
+  safeHandle('progress:memory', async (_, { userId, options }) => {
     return ProgressService.getMemory(userId, options)
   })
 
-  ipcMain.handle('progress:achievements', async (_, userId: string) => {
+  safeHandle('progress:achievements', async (_, userId: string) => {
     const db = getDb()
     const earned = db.prepare(`
       SELECT a.*, ua.earned_at
@@ -104,7 +143,7 @@ export function registerProgressHandlers() {
 export function registerLessonHandlers() {
   const db = getDb()
 
-  ipcMain.handle('lessons:list', async (_, { userId, module }) => {
+  safeHandle('lessons:list', async (_, { userId, module }) => {
     let query = `
       SELECT l.*,
         COALESCE(lp.status, 'locked') as user_status,
@@ -124,7 +163,7 @@ export function registerLessonHandlers() {
     return db.prepare(query).all(...params)
   })
 
-  ipcMain.handle('lessons:get', async (_, { userId, lessonId }) => {
+  safeHandle('lessons:get', async (_, { userId, lessonId }) => {
     const lesson = db.prepare('SELECT * FROM lessons WHERE id = ?').get(lessonId)
     if (!lesson) return null
 
@@ -140,7 +179,7 @@ export function registerLessonHandlers() {
     return { lesson, progress, exercises }
   })
 
-  ipcMain.handle('lessons:start', async (_, { userId, lessonId }) => {
+  safeHandle('lessons:start', async (_, { userId, lessonId }) => {
     const existing = db.prepare(`
       SELECT * FROM lesson_progress WHERE user_id = ? AND lesson_id = ?
     `).get(userId, lessonId) as any
@@ -160,7 +199,7 @@ export function registerLessonHandlers() {
     return { success: true }
   })
 
-  ipcMain.handle('lessons:complete', async (_, { userId, lessonId, timeSpentS }) => {
+  safeHandle('lessons:complete', async (_, { userId, lessonId, timeSpentS }) => {
     db.prepare(`
       UPDATE lesson_progress
       SET status = 'complete', completed_at = datetime('now'), time_spent_s = ?
@@ -218,11 +257,11 @@ function unlockNextLessons(userId: string, completedLessonId: string) {
 export function registerExerciseHandlers() {
   const db = getDb()
 
-  ipcMain.handle('exercises:get', async (_, exerciseId: string) => {
+  safeHandle('exercises:get', async (_, exerciseId: string) => {
     return db.prepare('SELECT * FROM exercises WHERE id = ?').get(exerciseId)
   })
 
-  ipcMain.handle('exercises:submit', async (_, { userId, exerciseId, answer, timeSpentS, sandboxId }) => {
+  safeHandle('exercises:submit', async (_, { userId, exerciseId, answer, timeSpentS, sandboxId }) => {
     const exercise = db.prepare('SELECT * FROM exercises WHERE id = ?').get(exerciseId) as any
     if (!exercise) return { success: false, error: 'Exercise not found' }
 
@@ -288,7 +327,7 @@ export function registerExerciseHandlers() {
     return { success: true, validation: validationResult, new_achievements: newAchievements }
   })
 
-  ipcMain.handle('exercises:hint', async (_, { exerciseId, hintLevel }) => {
+  safeHandle('exercises:hint', async (_, { exerciseId, hintLevel }) => {
     const exercise = db.prepare('SELECT * FROM exercises WHERE id = ?').get(exerciseId) as any
     if (!exercise) return { hint: null }
 
@@ -307,11 +346,11 @@ export function registerExerciseHandlers() {
 export function registerSqlHandlers() {
   const db = getDb()
 
-  ipcMain.handle('sql:execute', async (_, { sandboxId, query, userId }) => {
+  safeHandle('sql:execute', async (_, { sandboxId, query, userId }) => {
     return await SqlService.executeSQL({ sandboxId, query, userId })
   })
 
-  ipcMain.handle('sql:load-dataset', async (_, { sandboxId, datasetId, type, userId }) => {
+  safeHandle('sql:load-dataset', async (_, { sandboxId, datasetId, type, userId }) => {
     if (type === 'bundled') {
       return await SqlService.loadBundledDataset(sandboxId, datasetId)
     } else {
@@ -319,14 +358,14 @@ export function registerSqlHandlers() {
     }
   })
 
-  ipcMain.handle('sql:history', async (_, { userId, limit }) => {
+  safeHandle('sql:history', async (_, { userId, limit }) => {
     return db.prepare(`
       SELECT * FROM sql_query_history WHERE user_id = ?
       ORDER BY executed_at DESC LIMIT ?
     `).all(userId, limit ?? 50)
   })
 
-  ipcMain.handle('sql:datasets', async (_, userId: string) => {
+  safeHandle('sql:datasets', async (_, userId: string) => {
     const bundled = db.prepare('SELECT * FROM bundled_datasets ORDER BY domain, name').all()
     const imported = db.prepare(`
       SELECT * FROM imported_datasets WHERE user_id = ? ORDER BY imported_at DESC
@@ -334,7 +373,7 @@ export function registerSqlHandlers() {
     return { bundled, imported }
   })
 
-  ipcMain.handle('sql:close-sandbox', async (_, sandboxId: string) => {
+  safeHandle('sql:close-sandbox', async (_, sandboxId: string) => {
     SqlService.closeSandbox(sandboxId)
     return { success: true }
   })
@@ -345,7 +384,7 @@ export function registerSqlHandlers() {
 // ─────────────────────────────────────────────
 
 export function registerFileHandlers() {
-  ipcMain.handle('files:pick', async () => {
+  safeHandle('files:pick', async () => {
     const result = await dialog.showOpenDialog({
       title: 'Import Dataset',
       filters: [
@@ -359,17 +398,17 @@ export function registerFileHandlers() {
     return { canceled: false, path: result.filePaths[0] }
   })
 
-  ipcMain.handle('files:import', async (_, { userId, filePath, fileName }) => {
+  safeHandle('files:import', async (_, { userId, filePath, fileName }) => {
     return await SqlService.importFile(userId, filePath, fileName)
   })
 
-  ipcMain.handle('files:profile', async (_, { userId, datasetId }) => {
+  safeHandle('files:profile', async (_, { userId, datasetId }) => {
     const db = getDb()
     const dataset = db.prepare('SELECT profile_json FROM imported_datasets WHERE id = ? AND user_id = ?').get(datasetId, userId) as any
     return dataset?.profile_json ? JSON.parse(dataset.profile_json) : null
   })
 
-  ipcMain.handle('files:delete', async (_, { userId, datasetId }) => {
+  safeHandle('files:delete', async (_, { userId, datasetId }) => {
     const db = getDb()
     db.prepare('DELETE FROM imported_datasets WHERE id = ? AND user_id = ?').run(datasetId, userId)
     return { success: true }
@@ -381,29 +420,29 @@ export function registerFileHandlers() {
 // ─────────────────────────────────────────────
 
 export function registerAiHandlers() {
-  ipcMain.handle('ai:chat', async (_, params) => {
+  safeHandle('ai:chat', async (_, params) => {
     return AiService.chat(params)
   })
 
-  ipcMain.handle('ai:exercise-feedback', async (_, params) => {
+  safeHandle('ai:exercise-feedback', async (_, params) => {
     return AiService.getExerciseFeedback(params)
   })
 
-  ipcMain.handle('ai:save-key', async (_, { userId, provider, key }) => {
+  safeHandle('ai:save-key', async (_, { userId, provider, key }) => {
     AiService.saveApiKey(userId, provider, key)
     return { success: true }
   })
 
-  ipcMain.handle('ai:has-key', async (_, { userId, provider }) => {
+  safeHandle('ai:has-key', async (_, { userId, provider }) => {
     const key = AiService.getApiKey(userId, provider)
     return { has_key: !!key }
   })
 
-  ipcMain.handle('ai:get-provider', async (_, userId: string) => {
+  safeHandle('ai:get-provider', async (_, userId: string) => {
     return { provider: AiService.getActiveProvider(userId) }
   })
 
-  ipcMain.handle('ai:set-provider', async (_, { provider }) => {
+  safeHandle('ai:set-provider', async (_, { provider }) => {
     const db = getDb()
     db.prepare("UPDATE app_settings SET value = ? WHERE key = 'ai_provider'").run(provider)
     return { success: true }
@@ -417,12 +456,12 @@ export function registerAiHandlers() {
 export function registerSettingsHandlers() {
   const db = getDb()
 
-  ipcMain.handle('settings:get', async (_, key: string) => {
+  safeHandle('settings:get', async (_, key: string) => {
     const row = db.prepare('SELECT value FROM app_settings WHERE key = ?').get(key) as any
     return { value: row?.value ?? null }
   })
 
-  ipcMain.handle('settings:set', async (_, { key, value }) => {
+  safeHandle('settings:set', async (_, { key, value }) => {
     db.prepare(`
       INSERT INTO app_settings (key, value) VALUES (?, ?)
       ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')
@@ -430,12 +469,12 @@ export function registerSettingsHandlers() {
     return { success: true }
   })
 
-  ipcMain.handle('settings:get-all', async () => {
+  safeHandle('settings:get-all', async () => {
     const rows = db.prepare('SELECT key, value FROM app_settings').all() as any[]
     return Object.fromEntries(rows.map(r => [r.key, r.value]))
   })
 
-  ipcMain.handle('app:get-version', async () => {
+  safeHandle('app:get-version', async () => {
     return { version: app.getVersion() }
   })
 }
@@ -455,12 +494,12 @@ export function registerAdminHandlers() {
     if (!row || row.is_admin !== 1) throw new Error('Admin access required')
   }
 
-  ipcMain.handle('admin:check', async (_, userId: string) => {
+  safeHandle('admin:check', async (_, userId: string) => {
     const row = db.prepare('SELECT is_admin FROM users WHERE id = ?').get(userId) as any
     return { is_admin: !!row && row.is_admin === 1 }
   })
 
-  ipcMain.handle('admin:users-list', async (_, { requesterId }) => {
+  safeHandle('admin:users-list', async (_, { requesterId }) => {
     requireAdmin(requesterId)
     const users = db.prepare(`
       SELECT
@@ -475,7 +514,7 @@ export function registerAdminHandlers() {
     return { users }
   })
 
-  ipcMain.handle('admin:user-detail', async (_, { requesterId, targetUserId }) => {
+  safeHandle('admin:user-detail', async (_, { requesterId, targetUserId }) => {
     requireAdmin(requesterId)
     const user = db.prepare('SELECT id, name, email, experience_level, is_admin, created_at FROM users WHERE id = ?').get(targetUserId)
     if (!user) return { error: 'User not found' }
@@ -487,7 +526,7 @@ export function registerAdminHandlers() {
     return { user, skills, lessonsCompleted, recentAttempts }
   })
 
-  ipcMain.handle('admin:reset-user-progress', async (_, { requesterId, targetUserId }) => {
+  safeHandle('admin:reset-user-progress', async (_, { requesterId, targetUserId }) => {
     requireAdmin(requesterId)
     // Wipe learning progress only — never touches the account itself
     // (name, email, password) or their portfolio/projects.
@@ -501,7 +540,7 @@ export function registerAdminHandlers() {
     return { success: true }
   })
 
-  ipcMain.handle('admin:set-admin', async (_, { requesterId, targetUserId, isAdmin }) => {
+  safeHandle('admin:set-admin', async (_, { requesterId, targetUserId, isAdmin }) => {
     requireAdmin(requesterId)
     // Never allow removing the last remaining admin — that would lock
     // everyone out of this panel with no way back in short of editing
@@ -516,7 +555,7 @@ export function registerAdminHandlers() {
     return { success: true }
   })
 
-  ipcMain.handle('admin:delete-user', async (_, { requesterId, targetUserId }) => {
+  safeHandle('admin:delete-user', async (_, { requesterId, targetUserId }) => {
     requireAdmin(requesterId)
     if (requesterId === targetUserId) {
       return { success: false, error: 'You cannot delete your own account from here.' }
@@ -527,7 +566,7 @@ export function registerAdminHandlers() {
     return { success: true }
   })
 
-  ipcMain.handle('admin:content-stats', async (_, { requesterId }) => {
+  safeHandle('admin:content-stats', async (_, { requesterId }) => {
     requireAdmin(requesterId)
     const lessons = db.prepare('SELECT module, COUNT(*) as count FROM lessons GROUP BY module').all()
     const exercises = db.prepare(`
@@ -541,7 +580,7 @@ export function registerAdminHandlers() {
     return { lessons, exercises, totalUsers, totalAttempts, datasets }
   })
 
-  ipcMain.handle('admin:system-info', async (_, { requesterId }) => {
+  safeHandle('admin:system-info', async (_, { requesterId }) => {
     requireAdmin(requesterId)
     const schemaVersion = (db.prepare('SELECT MAX(version) as v FROM schema_migrations').get() as any)?.v ?? 0
     return {
@@ -564,6 +603,7 @@ export function registerAllHandlers() {
   _handlersRegistered = true
 
   registerAuthHandlers()
+  registerLicenseHandlers()
   registerProgressHandlers()
   registerLessonHandlers()
   registerExerciseHandlers()

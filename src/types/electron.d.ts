@@ -10,6 +10,11 @@ declare global {
         close: () => Promise<void>
         isMaximized: () => Promise<boolean>
       }
+      license: {
+        status: () => Promise<{ activated: boolean; ref?: string }>
+        activate: (licenseKey: string) => Promise<{ success: boolean; error?: string }>
+        deactivate: () => Promise<{ success: boolean }>
+      }
       auth: {
         register: (params: any) => Promise<any>
         login: (params: any) => Promise<any>

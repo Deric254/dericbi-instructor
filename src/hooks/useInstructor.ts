@@ -103,8 +103,10 @@ export function useInstructor(initialContext?: InstructorContext): UseInstructor
         setMessages(prev => [...prev, msg])
         return result.message
       }
+      setError(result.error ?? 'Could not get feedback.')
       return null
-    } catch {
+    } catch (err: any) {
+      setError(err?.message ?? 'Network error getting feedback.')
       return null
     }
   }, [user])

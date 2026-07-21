@@ -10,7 +10,7 @@
       "prerequisites": [],
       "estimated_min": 30,
       "sort_order": 1,
-      "theory_md": "## Excel Fundamentals \u2014 Starting From Zero\n\n### The basic shape of Excel\nA **workbook** is the whole file you open. Inside it are **worksheets** (the tabs at the bottom) \u2014 each one is a separate grid. Every worksheet is made of **cells** arranged in rows (numbered) and columns (lettered). Every cell has an address combining both, like `A1` (column A, row 1) or `C15` (column C, row 15).\n\n### Typing a formula\nClick any empty cell and type `=` first \u2014 this tells Excel \"what follows is a calculation, not just text.\" For example, click cell `C1` and type:\n```\n=A1+B1\n```\nthen press Enter. Excel instantly shows the result of adding whatever is in A1 and B1 \u2014 and if you ever change A1 or B1 later, C1 recalculates automatically. This automatic recalculation is the entire reason spreadsheets are useful instead of just typing numbers into a table.\n\n### Basic arithmetic\n- Addition: `=A1+B1`\n- Subtraction: `=A1-B1`\n- Multiplication: `=A1*B1`\n- Division: `=A1/B1`\n\nYou can combine these and use parentheses exactly like in maths: `=(A1+B1)/2` calculates an average of two cells.\n\n### Referring to a range of cells\nInstead of adding cells one by one, refer to a whole block at once using a colon:\n```\n=SUM(A1:A10)\n```\nThis means \"everything from A1 down to A10\" \u2014 far faster than typing `=A1+A2+A3...`.\n\n### Best practices from day one\n- Keep raw data in one sheet; build analysis/formulas in another \u2014 never edit raw data by hand once formulas depend on it.\n- Avoid merging cells in data tables \u2014 merged cells break sorting, filtering, and most formulas.\n- Use consistent date formats throughout a sheet (Excel is notoriously inconsistent about interpreting dates typed differently).\n- Give your worksheets clear names (double-click the tab) instead of leaving them as \"Sheet1\", \"Sheet2\".\n\n**Business context:** Every dashboard, every PivotTable, every model you'll build in this course rests on this one idea: a formula that references cells, not typed-in numbers, so the whole sheet updates itself the moment the underlying data changes.\n\n## \ud83d\udd17 How This Connects\n- **SQL**: a worksheet is conceptually a table \u2014 rows and columns, exactly like a SQL table's structure.\n- **Python**: a cell reference like `A1` plays the same role as a named variable \u2014 both let you reuse a value without retyping it.",
+      "theory_md": "## Excel Fundamentals — Starting From Zero\n\n### The basic shape of Excel\nA **workbook** is the whole file you open. Inside it are **worksheets** (the tabs at the bottom) — each one is a separate grid. Every worksheet is made of **cells** arranged in rows (numbered) and columns (lettered). Every cell has an address combining both, like `A1` (column A, row 1) or `C15` (column C, row 15).\n\n### Typing a formula\nClick any empty cell and type `=` first — this tells Excel \"what follows is a calculation, not just text.\" For example, click cell `C1` and type:\n```\n=A1+B1\n```\nthen press Enter. Excel instantly shows the result of adding whatever is in A1 and B1 — and if you ever change A1 or B1 later, C1 recalculates automatically. This automatic recalculation is the entire reason spreadsheets are useful instead of just typing numbers into a table.\n\n### Basic arithmetic\n- Addition: `=A1+B1`\n- Subtraction: `=A1-B1`\n- Multiplication: `=A1*B1`\n- Division: `=A1/B1`\n\nYou can combine these and use parentheses exactly like in maths: `=(A1+B1)/2` calculates an average of two cells.\n\n### Referring to a range of cells\nInstead of adding cells one by one, refer to a whole block at once using a colon:\n```\n=SUM(A1:A10)\n```\nThis means \"everything from A1 down to A10\" — far faster than typing `=A1+A2+A3...`.\n\n### Best practices from day one\n- Keep raw data in one sheet; build analysis/formulas in another — never edit raw data by hand once formulas depend on it.\n- Avoid merging cells in data tables — merged cells break sorting, filtering, and most formulas.\n- Use consistent date formats throughout a sheet (Excel is notoriously inconsistent about interpreting dates typed differently).\n- Give your worksheets clear names (double-click the tab) instead of leaving them as \"Sheet1\", \"Sheet2\".\n\n**Business context:** Every dashboard, every PivotTable, every model you'll build in this course rests on this one idea: a formula that references cells, not typed-in numbers, so the whole sheet updates itself the moment the underlying data changes.\n\n## 🔗 How This Connects\n- **SQL**: a worksheet is conceptually a table — rows and columns, exactly like a SQL table's structure.\n- **Python**: a cell reference like `A1` plays the same role as a named variable — both let you reuse a value without retyping it.",
       "exercises": [
         {
           "id": "excel-basics-ex1",
@@ -54,13 +54,13 @@
         {
           "question": "What does `=SUM(A1:A10)` do differently from `=A1+A2+A3...+A10`?",
           "options": [
-            "Nothing \u2014 they're exactly the same with no practical difference",
+            "Nothing — they're exactly the same with no practical difference",
             "SUM only works on whole numbers",
-            "SUM refers to the whole range at once \u2014 far faster to write and just as accurate",
+            "SUM refers to the whole range at once — far faster to write and just as accurate",
             "The colon means something different from addition entirely"
           ],
           "correct_index": 2,
-          "explanation": "A1:A10 means 'everything from A1 through A10' \u2014 SUM adds the whole block in one step instead of listing every cell individually."
+          "explanation": "A1:A10 means 'everything from A1 through A10' — SUM adds the whole block in one step instead of listing every cell individually."
         },
         {
           "question": "Why should raw data and formulas usually live on separate sheets?",
@@ -71,7 +71,7 @@
             "There's no real reason, it's just convention"
           ],
           "correct_index": 1,
-          "explanation": "Keeping raw data untouched protects every formula that depends on it \u2014 editing data by hand once formulas reference it is one of the most common ways spreadsheets silently break."
+          "explanation": "Keeping raw data untouched protects every formula that depends on it — editing data by hand once formulas reference it is one of the most common ways spreadsheets silently break."
         }
       ]
     },
@@ -86,7 +86,7 @@
       ],
       "estimated_min": 40,
       "sort_order": 2,
-      "theory_md": "## Lookup Functions\n\n### VLOOKUP\n`=VLOOKUP(lookup_value, table_array, col_index, [range_lookup])`\n\nSearches the **first column** of a table and returns a value from the specified column.\n\n### INDEX / MATCH\nMore flexible alternative:\n`=INDEX(return_range, MATCH(lookup_value, lookup_range, 0))`\n\n### XLOOKUP (Excel 365)\n`=XLOOKUP(lookup_value, lookup_array, return_array)`\nReturns an entire row or column \u2014 the modern replacement for VLOOKUP.\n\n## \ud83d\udd17 How This Connects\n- **SQL**: VLOOKUP/XLOOKUP are the manual version of a JOIN \u2014 matching one table's key to another's, one lookup at a time instead of all at once.\n- **Power BI**: the Data Modelling lesson replaces this entirely with drawn relationships \u2014 once you model tables properly, you rarely need a lookup formula again.\n- **Python**: pandas' `.merge()` does the same job as XLOOKUP, but across entire tables at once.",
+      "theory_md": "## Lookup Functions\n\n### VLOOKUP\n`=VLOOKUP(lookup_value, table_array, col_index, [range_lookup])`\n\nSearches the **first column** of a table and returns a value from the specified column.\n\n### INDEX / MATCH\nMore flexible alternative:\n`=INDEX(return_range, MATCH(lookup_value, lookup_range, 0))`\n\n### XLOOKUP (Excel 365)\n`=XLOOKUP(lookup_value, lookup_array, return_array)`\nReturns an entire row or column — the modern replacement for VLOOKUP.\n\n## 🔗 How This Connects\n- **SQL**: VLOOKUP/XLOOKUP are the manual version of a JOIN — matching one table's key to another's, one lookup at a time instead of all at once.\n- **Power BI**: the Data Modelling lesson replaces this entirely with drawn relationships — once you model tables properly, you rarely need a lookup formula again.\n- **Python**: pandas' `.merge()` does the same job as XLOOKUP, but across entire tables at once.",
       "exercises": [
         {
           "id": "excel-lookup-ex1",
@@ -101,6 +101,114 @@
           "points": 15,
           "sort_order": 1
         }
+      ],
+      "quiz": [
+        {
+          "question": "What column does VLOOKUP search in?",
+          "options": [
+            "The last column of the table",
+            "The first column of the table array",
+            "Any column you specify",
+            "It searches all columns simultaneously"
+          ],
+          "correct_index": 1,
+          "explanation": "VLOOKUP always searches the leftmost column of the table_array — this is its main limitation, which INDEX/MATCH and XLOOKUP don't share."
+        },
+        {
+          "question": "Why is INDEX/MATCH considered more flexible than VLOOKUP?",
+          "options": [
+            "It's faster to type",
+            "It can look up values to the left of the return column, not just to the right",
+            "It only works with numbers",
+            "It doesn't require a lookup value"
+          ],
+          "correct_index": 1,
+          "explanation": "VLOOKUP can only return columns to the right of the lookup column; INDEX/MATCH separates the lookup and return ranges, so it can look in either direction."
+        },
+        {
+          "question": "What is XLOOKUP generally considered to be?",
+          "options": [
+            "A deprecated, older function",
+            "The modern replacement for VLOOKUP in Excel 365",
+            "Only usable with text data",
+            "The same as SUMIF"
+          ],
+          "correct_index": 1,
+          "explanation": "XLOOKUP simplifies syntax, searches in any direction, and handles missing matches more gracefully than VLOOKUP — it's the recommended function going forward."
+        }
+      ]
+    },
+    {
+      "id": "excel-text-date",
+      "title": "Text & Date Functions",
+      "description": "Clean messy text and work confidently with dates — skills you'll use in nearly every workbook",
+      "level": "beginner",
+      "prerequisites": [
+        "excel-basics"
+      ],
+      "estimated_min": 30,
+      "sort_order": 3,
+      "theory_md": "## Text & Date Functions\n\nRaw data is rarely clean. Names have extra spaces, dates arrive as text, product codes need splitting. These functions fix that before you calculate anything.\n\n### Text functions\n```excel\n=TRIM(A2)                          ' removes extra spaces\n=UPPER(A2)  =LOWER(A2)  =PROPER(A2) ' case conversion\n=LEFT(A2, 3)                       ' first 3 characters\n=RIGHT(A2, 4)                      ' last 4 characters\n=MID(A2, 2, 5)                     ' 5 characters starting at position 2\n=CONCAT(A2, \" - \", B2)             ' join text together (or use &)\n=A2 & \" - \" & B2                   ' same result, & operator\n=SUBSTITUTE(A2, \"-\", \"/\")          ' replace one substring with another\n=LEN(A2)                           ' character count\n=FIND(\"@\", A2)                     ' position of a character (case-sensitive)\n```\n\n**Splitting a name column:**\n```excel\n=LEFT(A2, FIND(\" \", A2) - 1)       ' first name\n=MID(A2, FIND(\" \", A2) + 1, 100)   ' last name\n```\n\n### Date functions\n```excel\n=TODAY()                           ' current date\n=NOW()                             ' current date + time\n=YEAR(A2)  =MONTH(A2)  =DAY(A2)    ' extract parts\n=DATEDIF(A2, B2, \"d\")              ' days between two dates\n=DATEDIF(A2, B2, \"y\")              ' full years between two dates\n=EDATE(A2, 3)                      ' 3 months after a date\n=WORKDAY(A2, 10)                   ' 10 business days after a date, skipping weekends\n=NETWORKDAYS(A2, B2)               ' business days between two dates\n=TEXT(A2, \"mmmm yyyy\")             ' format a date as \"January 2025\"\n```\n\n**Fixing dates stored as text:** if a date shows left-aligned (a giveaway it's really text), use `=DATEVALUE(A2)` to convert it into a real date Excel can calculate with.\n\n**Business context:** \"Days since last order\", \"customer tenure in years\", \"extract the region code from a product ID\" — all of these are text/date function problems before they're ever business questions.\n\n## 🔗 How This Connects\n- **SQL**: TRIM, SUBSTR, and date functions like DATEDIFF exist in SQL with near-identical purposes — cleaning is cleaning, regardless of tool.\n- **Python**: pandas' `.str.strip()`, `.str.upper()`, and `pd.to_datetime()` do the same jobs at scale, across an entire column at once instead of one cell at a time.\n- **Power BI**: Power Query's Text and Date transformation menus are point-and-click versions of exactly these functions.",
+      "exercises": [
+        {
+          "id": "excel-textdate-ex1",
+          "title": "Extract the first name",
+          "prompt": "Cell A2 contains a full name like 'Maria Santos'. Write a formula to extract just the first name.",
+          "hint_1": "You need to find where the space is, then take everything before it.",
+          "hint_2": "LEFT() takes characters from the start; FIND() locates the space.",
+          "hint_3": "=LEFT(A2, FIND(\" \", A2) - 1)",
+          "solution": "=LEFT(A2, FIND(\" \", A2) - 1)",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "sort_order": 1
+        },
+        {
+          "id": "excel-textdate-ex2",
+          "title": "Days since signup",
+          "prompt": "Cell B2 contains a customer's signup date. Write a formula that returns how many days ago that was, using today's date.",
+          "hint_1": "You need today's date and the difference between two dates.",
+          "hint_2": "TODAY() returns the current date with no arguments.",
+          "hint_3": "=TODAY() - B2",
+          "solution": "=TODAY() - B2",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "sort_order": 2
+        }
+      ],
+      "quiz": [
+        {
+          "question": "What does `=TRIM(A2)` do?",
+          "options": [
+            "Deletes the cell contents",
+            "Removes extra/leading/trailing spaces from text",
+            "Converts text to uppercase",
+            "Splits text into two columns"
+          ],
+          "correct_index": 1,
+          "explanation": "TRIM cleans up stray whitespace — a very common issue with data pasted or exported from other systems, and often the hidden cause of lookups failing to match."
+        },
+        {
+          "question": "What's a telltale sign that a 'date' in a cell is actually stored as text?",
+          "options": [
+            "It appears in red",
+            "It's left-aligned instead of right-aligned by default",
+            "It's bold",
+            "There's no way to tell"
+          ],
+          "correct_index": 1,
+          "explanation": "Excel right-aligns real numbers and dates by default; a left-aligned 'date' is a strong signal it's actually text, which DATEVALUE() can convert into a true date."
+        },
+        {
+          "question": "What does `=NETWORKDAYS(A2, B2)` calculate?",
+          "options": [
+            "Total calendar days between two dates, including weekends",
+            "Business days between two dates, excluding weekends",
+            "The exact time in hours between two dates",
+            "Whether A2 is before or after B2"
+          ],
+          "correct_index": 1,
+          "explanation": "NETWORKDAYS specifically excludes Saturdays and Sundays — the standard way to calculate things like turnaround time in business days."
+        }
       ]
     },
     {
@@ -113,8 +221,8 @@
         "excel-basics"
       ],
       "estimated_min": 45,
-      "sort_order": 3,
-      "theory_md": "## Pivot Tables\n\nPivot tables let you quickly summarise thousands of rows of data.\n\n### Creating a pivot table\n1. Click anywhere inside your data table.\n2. **Insert \u2192 PivotTable**.\n3. Drag fields to Rows, Columns, Values and Filters.\n\n### Common value summarisations\n- Sum, Count, Average, Max, Min.\n- Right-click a value \u2192 **Value Field Settings** to change.\n\n### Slicers\nInsert slicers (**PivotTable Analyze \u2192 Insert Slicer**) for visual, clickable filters.\n\n## \ud83d\udd17 How This Connects\n- **SQL**: a PivotTable is GROUP BY with a point-and-click interface \u2014 dragging a field to \"Rows\" is choosing what to group by; dragging one to \"Values\" is choosing what to aggregate.\n- **Python**: pandas' `.groupby()` and `.pivot_table()` do exactly this, in code.\n- **Power BI**: report visuals perform the same aggregation automatically once your model is built.",
+      "sort_order": 4,
+      "theory_md": "## Pivot Tables\n\nPivot tables let you quickly summarise thousands of rows of data.\n\n### Creating a pivot table\n1. Click anywhere inside your data table.\n2. **Insert → PivotTable**.\n3. Drag fields to Rows, Columns, Values and Filters.\n\n### Common value summarisations\n- Sum, Count, Average, Max, Min.\n- Right-click a value → **Value Field Settings** to change.\n\n### Slicers\nInsert slicers (**PivotTable Analyze → Insert Slicer**) for visual, clickable filters.\n\n## 🔗 How This Connects\n- **SQL**: a PivotTable is GROUP BY with a point-and-click interface — dragging a field to \"Rows\" is choosing what to group by; dragging one to \"Values\" is choosing what to aggregate.\n- **Python**: pandas' `.groupby()` and `.pivot_table()` do exactly this, in code.\n- **Power BI**: report visuals perform the same aggregation automatically once your model is built.",
       "exercises": [
         {
           "id": "excel-pivots-ex1",
@@ -129,6 +237,41 @@
           "points": 20,
           "sort_order": 1
         }
+      ],
+      "quiz": [
+        {
+          "question": "What are you doing when you drag a field into a PivotTable's 'Rows' area?",
+          "options": [
+            "Choosing what to aggregate",
+            "Choosing what to group the data by",
+            "Filtering out that field entirely",
+            "Sorting the whole table"
+          ],
+          "correct_index": 1,
+          "explanation": "Fields in Rows (or Columns) define the grouping — like the columns you'd list after GROUP BY in SQL."
+        },
+        {
+          "question": "What is a PivotTable the point-and-click equivalent of, in SQL terms?",
+          "options": [
+            "A JOIN",
+            "GROUP BY with aggregation",
+            "WHERE",
+            "ORDER BY"
+          ],
+          "correct_index": 1,
+          "explanation": "Rows/Columns = the GROUP BY columns; Values = the aggregate function applied per group — same underlying logic, different interface."
+        },
+        {
+          "question": "What do PivotTable slicers do?",
+          "options": [
+            "Delete rows permanently",
+            "Provide clickable, visual filters connected to the PivotTable",
+            "Automatically sort data alphabetically",
+            "Convert the pivot into a chart"
+          ],
+          "correct_index": 1,
+          "explanation": "Slicers are an interactive filtering UI layered on top of a PivotTable — clicking a value filters the summarized data instantly."
+        }
       ]
     },
     {
@@ -137,11 +280,11 @@
       "description": "Build conditional logic in Excel with IF, AND, OR, and nested formulas.",
       "level": "beginner",
       "prerequisites": [
-        "excel-fundamentals"
+        "excel-basics"
       ],
       "estimated_min": 30,
-      "sort_order": 4,
-      "theory_md": "## IF & Logical Functions\n\n### IF\n`=IF(logical_test, value_if_true, value_if_false)`\n\n```excel\n=IF(B2>10000, \"High Value\", \"Standard\")\n```\n\n### AND / OR\n```excel\n=IF(AND(B2>5000, C2=\"Active\"), \"Priority\", \"Normal\")\n=IF(OR(D2=\"Manager\", D2=\"Director\"), \"Senior\", \"Junior\")\n```\n\n### Nested IF\n```excel\n=IF(B2>=90, \"A\", IF(B2>=80, \"B\", IF(B2>=70, \"C\", \"F\")))\n```\n\n**Tip:** More than 3 nesting levels \u2192 use IFS (Excel 2019+):\n```excel\n=IFS(B2>=90,\"A\", B2>=80,\"B\", B2>=70,\"C\", TRUE,\"F\")\n```\n\n**Business context:** Sales tier labels, status flags, and grading systems all use IF logic. Master this and 30% of analyst formula requests become trivial.\n\n## \ud83d\udd17 How This Connects\n- **SQL**: directly equivalent to CASE WHEN \u2014 same branching logic, different syntax.\n- **Python**: the same logic as if/elif/else.\n- **Power BI**: DAX's `IF()` and `SWITCH()` functions work identically to Excel's.",
+      "sort_order": 5,
+      "theory_md": "## IF & Logical Functions\n\n### IF\n`=IF(logical_test, value_if_true, value_if_false)`\n\n```excel\n=IF(B2>10000, \"High Value\", \"Standard\")\n```\n\n### AND / OR\n```excel\n=IF(AND(B2>5000, C2=\"Active\"), \"Priority\", \"Normal\")\n=IF(OR(D2=\"Manager\", D2=\"Director\"), \"Senior\", \"Junior\")\n```\n\n### Nested IF\n```excel\n=IF(B2>=90, \"A\", IF(B2>=80, \"B\", IF(B2>=70, \"C\", \"F\")))\n```\n\n**Tip:** More than 3 nesting levels → use IFS (Excel 2019+):\n```excel\n=IFS(B2>=90,\"A\", B2>=80,\"B\", B2>=70,\"C\", TRUE,\"F\")\n```\n\n**Business context:** Sales tier labels, status flags, and grading systems all use IF logic. Master this and 30% of analyst formula requests become trivial.\n\n## 🔗 How This Connects\n- **SQL**: directly equivalent to CASE WHEN — same branching logic, different syntax.\n- **Python**: the same logic as if/elif/else.\n- **Power BI**: DAX's `IF()` and `SWITCH()` functions work identically to Excel's.",
       "exercises": [
         {
           "id": "excel-if-e1",
@@ -176,6 +319,41 @@
           "evaluation_mode": "exact",
           "points": 20
         }
+      ],
+      "quiz": [
+        {
+          "question": "What does `=IF(B2>10000, \"High Value\", \"Standard\")` return when B2 is 8000?",
+          "options": [
+            "\"High Value\"",
+            "\"Standard\"",
+            "TRUE",
+            "An error"
+          ],
+          "correct_index": 1,
+          "explanation": "Since 8000 is not greater than 10000, the logical test is FALSE, so IF returns the value_if_false argument: \"Standard\"."
+        },
+        {
+          "question": "When should you consider switching from nested IFs to IFS?",
+          "options": [
+            "Never — nested IF is always better",
+            "When you have more than 3 nesting levels, since it becomes hard to read",
+            "Only when working with dates",
+            "IFS and nested IF can't be compared"
+          ],
+          "correct_index": 1,
+          "explanation": "IFS lets you list condition/result pairs directly, which is much easier to read and debug than several layers of nested IF()."
+        },
+        {
+          "question": "IF/AND/OR logic in Excel is directly equivalent to which SQL feature?",
+          "options": [
+            "JOIN",
+            "GROUP BY",
+            "CASE WHEN",
+            "ORDER BY"
+          ],
+          "correct_index": 2,
+          "explanation": "Both express the same branching logic — 'if this condition, then this value, otherwise that value' — just in different syntax."
+        }
       ]
     },
     {
@@ -184,11 +362,11 @@
       "description": "Create clear, professional charts that communicate data instantly.",
       "level": "beginner",
       "prerequisites": [
-        "excel-fundamentals"
+        "excel-basics"
       ],
       "estimated_min": 35,
-      "sort_order": 5,
-      "theory_md": "## Charts & Visualisation\n\n### Choosing the right chart\n| Data type | Best chart |\n|---|---|\n| Compare categories | Bar / Column |\n| Show trend over time | Line |\n| Show proportions | Pie / Donut (max 5 slices) |\n| Show distribution | Histogram |\n| Show two-variable relationship | Scatter |\n\n### Creating a chart\n1. Select your data range (include headers).\n2. **Insert \u2192 Recommended Charts**, or pick from the Charts group.\n3. Use **Chart Design \u2192 Select Data** to adjust series and axes.\n\n### Formatting rules\n- Remove chart borders and grid lines that add no information.\n- Use consistent colours across a report.\n- Title every chart with a statement, not a label: \"Revenue declined in Q3\" not \"Revenue Chart\".\n- Use **Data Labels** sparingly \u2014 one clear number per series is enough.\n\n**Business context:** Decision-makers spend 10 seconds on a chart. If they have to ask what it means, the chart failed.\n\n## \ud83d\udd17 How This Connects\n- **Power BI**: this is the direct prerequisite to Power BI's Report Design lesson \u2014 the same \"pick the right chart type\" thinking applies, just in a more interactive tool.\n- **Python**: matplotlib (Data Visualisation lesson) covers the same chart-selection principles in code.",
+      "sort_order": 6,
+      "theory_md": "## Charts & Visualisation\n\n### Choosing the right chart\n| Data type | Best chart |\n|---|---|\n| Compare categories | Bar / Column |\n| Show trend over time | Line |\n| Show proportions | Pie / Donut (max 5 slices) |\n| Show distribution | Histogram |\n| Show two-variable relationship | Scatter |\n\n### Creating a chart\n1. Select your data range (include headers).\n2. **Insert → Recommended Charts**, or pick from the Charts group.\n3. Use **Chart Design → Select Data** to adjust series and axes.\n\n### Formatting rules\n- Remove chart borders and grid lines that add no information.\n- Use consistent colours across a report.\n- Title every chart with a statement, not a label: \"Revenue declined in Q3\" not \"Revenue Chart\".\n- Use **Data Labels** sparingly — one clear number per series is enough.\n\n**Business context:** Decision-makers spend 10 seconds on a chart. If they have to ask what it means, the chart failed.\n\n## 🔗 How This Connects\n- **Power BI**: this is the direct prerequisite to Power BI's Report Design lesson — the same \"pick the right chart type\" thinking applies, just in a more interactive tool.\n- **Python**: matplotlib (Data Visualisation lesson) covers the same chart-selection principles in code.",
       "exercises": [
         {
           "id": "excel-chart-e1",
@@ -207,10 +385,45 @@
           "prompt": "You have sales data for 8 product categories. Is a pie chart appropriate? Answer Yes or No and explain why in one sentence.",
           "hint_1": "Think about readability with many slices.",
           "hint_2": "Pie charts lose clarity beyond 5 slices.",
-          "hint_3": "No \u2014 pie charts are hard to read with more than 5 categories; use a bar chart instead.",
+          "hint_3": "No — pie charts are hard to read with more than 5 categories; use a bar chart instead.",
           "solution": "No",
           "evaluation_mode": "contains",
           "points": 10
+        }
+      ],
+      "quiz": [
+        {
+          "question": "Which chart type is best for showing a trend over time?",
+          "options": [
+            "Pie chart",
+            "Line chart",
+            "Scatter plot",
+            "Donut chart"
+          ],
+          "correct_index": 1,
+          "explanation": "Line charts connect points in sequence, making direction and rate of change over time immediately visible."
+        },
+        {
+          "question": "According to the lesson's formatting rules, what should a good chart title do?",
+          "options": [
+            "Just label the data type, e.g. 'Revenue Chart'",
+            "State the insight, e.g. 'Revenue declined in Q3'",
+            "Always include the company logo",
+            "Be left blank so it doesn't distract"
+          ],
+          "correct_index": 1,
+          "explanation": "A title that states the takeaway does the interpretive work for the reader — 'Revenue declined in Q3' is far more useful than a generic label."
+        },
+        {
+          "question": "For showing proportions of a whole, what's the recommended chart, and what's its limit?",
+          "options": [
+            "A line chart, unlimited categories",
+            "A pie/donut chart, best kept to a max of about 5 slices",
+            "A scatter plot, no limit",
+            "A histogram, exactly 10 bins"
+          ],
+          "correct_index": 1,
+          "explanation": "Pie/donut charts get unreadable fast — beyond about 5 slices, a bar chart communicates proportions far more clearly."
         }
       ]
     },
@@ -223,8 +436,8 @@
         "excel-if-logic"
       ],
       "estimated_min": 40,
-      "sort_order": 6,
-      "theory_md": "## Financial Functions\n\n### PMT \u2014 Loan payments\n`=PMT(rate, nper, pv)` \u2014 calculates a fixed periodic payment.\n\n```excel\n=PMT(6%/12, 60, -200000)\n```\n\u2192 Monthly payment on a $200,000 loan at 6% annual rate over 60 months.\n\n**Always divide annual rate by 12 for monthly periods.**\n\n### NPV \u2014 Net Present Value\n```excel\n=NPV(0.1, B2:B6) + A1\n```\nwhere A1 is the initial investment (negative) and B2:B6 are future cash flows.\n\nNPV > 0 \u2192 invest. NPV < 0 \u2192 don't.\n\n### IRR \u2014 Internal Rate of Return\n```excel\n=IRR(A1:A6)\n```\nA1 is the initial outflow (negative), A2:A6 are inflows.\n\n### CAGR (no built-in function)\n```excel\n=(end_value/start_value)^(1/years) - 1\n=(B10/B1)^(1/9)-1\n```\n\n**Business context:** Finance teams use these daily for budgeting, project approval, and loan analysis.\n\n## \ud83d\udd17 How This Connects\n- **Business**: the Financial Modelling Basics lesson uses these exact functions (PMT, NPV, IRR) as building blocks for full business models \u2014 this lesson is the toolkit, that lesson is the application.",
+      "sort_order": 7,
+      "theory_md": "## Financial Functions\n\n### PMT — Loan payments\n`=PMT(rate, nper, pv)` — calculates a fixed periodic payment.\n\n```excel\n=PMT(6%/12, 60, -200000)\n```\n→ Monthly payment on a $200,000 loan at 6% annual rate over 60 months.\n\n**Always divide annual rate by 12 for monthly periods.**\n\n### NPV — Net Present Value\n```excel\n=NPV(0.1, B2:B6) + A1\n```\nwhere A1 is the initial investment (negative) and B2:B6 are future cash flows.\n\nNPV > 0 → invest. NPV < 0 → don't.\n\n### IRR — Internal Rate of Return\n```excel\n=IRR(A1:A6)\n```\nA1 is the initial outflow (negative), A2:A6 are inflows.\n\n### CAGR (no built-in function)\n```excel\n=(end_value/start_value)^(1/years) - 1\n=(B10/B1)^(1/9)-1\n```\n\n**Business context:** Finance teams use these daily for budgeting, project approval, and loan analysis.\n\n## 🔗 How This Connects\n- **Business**: the Financial Modelling Basics lesson uses these exact functions (PMT, NPV, IRR) as building blocks for full business models — this lesson is the toolkit, that lesson is the application.",
       "exercises": [
         {
           "id": "excel-fin-e1",
@@ -248,6 +461,41 @@
           "evaluation_mode": "exact",
           "points": 25
         }
+      ],
+      "quiz": [
+        {
+          "question": "In `=PMT(6%/12, 60, -200000)`, why is the rate divided by 12?",
+          "options": [
+            "To convert the loan amount to monthly",
+            "To convert an annual interest rate into a monthly rate, since the payments are monthly",
+            "It's an arbitrary Excel requirement with no meaning",
+            "To calculate the number of years instead of months"
+          ],
+          "correct_index": 1,
+          "explanation": "PMT's rate argument must match the payment frequency — since payments are monthly here (60 months), the annual 6% rate must be converted to a monthly rate first."
+        },
+        {
+          "question": "What does a positive NPV indicate?",
+          "options": [
+            "The investment should be rejected",
+            "The investment is expected to add value and is worth considering",
+            "The interest rate is too high",
+            "There was a calculation error"
+          ],
+          "correct_index": 1,
+          "explanation": "NPV > 0 means the projected returns, discounted to today's value, exceed the initial investment — a positive signal for the project."
+        },
+        {
+          "question": "What does IRR calculate?",
+          "options": [
+            "The total profit of an investment",
+            "The discount rate at which NPV would equal zero",
+            "The monthly loan payment",
+            "The number of years to break even"
+          ],
+          "correct_index": 1,
+          "explanation": "IRR is the 'break-even' discount rate — the rate of return at which the investment's NPV is exactly zero. Compare it to your required rate of return to judge attractiveness."
+        }
       ]
     },
     {
@@ -259,8 +507,8 @@
         "excel-charts"
       ],
       "estimated_min": 35,
-      "sort_order": 7,
-      "theory_md": "## Data Validation & Excel Tables\n\n### Data Validation\nPrevents bad data from entering your spreadsheet.\n\n**Data \u2192 Data Validation \u2192 Settings**\n- List \u2192 users pick from a dropdown.\n- Whole Number \u2192 constrain to a range.\n- Date \u2192 restrict to valid date ranges.\n- Custom \u2192 any formula: `=AND(A1>=0, A1<=100)` for percentages.\n\n### Excel Tables (Ctrl+T)\nConvert a range into a Table and Excel gives you:\n- **Automatic expansion** \u2014 add a row and formulas extend.\n- **Structured references** \u2014 `=SUM(Table1[Sales])` instead of `=SUM(B2:B100)`.\n- **Filter dropdowns** built in.\n- **Total Row** \u2014 toggle from Table Design \u2192 Total Row.\n\n```excel\n=SUMIF(Table1[Region], \"North\", Table1[Sales])\n```\n\n**Best practice:** Every data source in an Excel model should be a Table. This removes the constant need to update formula ranges.\n\n## \ud83d\udd17 How This Connects\n- **SQL**: an Excel Table with structured references behaves like a miniature version of a SQL table \u2014 consistent columns, no manual range updates needed.\n- **Power BI**: this is a stepping stone toward proper data modelling, where tables and relationships replace ad-hoc ranges entirely.",
+      "sort_order": 8,
+      "theory_md": "## Data Validation & Excel Tables\n\n### Data Validation\nPrevents bad data from entering your spreadsheet.\n\n**Data → Data Validation → Settings**\n- List → users pick from a dropdown.\n- Whole Number → constrain to a range.\n- Date → restrict to valid date ranges.\n- Custom → any formula: `=AND(A1>=0, A1<=100)` for percentages.\n\n### Excel Tables (Ctrl+T)\nConvert a range into a Table and Excel gives you:\n- **Automatic expansion** — add a row and formulas extend.\n- **Structured references** — `=SUM(Table1[Sales])` instead of `=SUM(B2:B100)`.\n- **Filter dropdowns** built in.\n- **Total Row** — toggle from Table Design → Total Row.\n\n```excel\n=SUMIF(Table1[Region], \"North\", Table1[Sales])\n```\n\n**Best practice:** Every data source in an Excel model should be a Table. This removes the constant need to update formula ranges.\n\n## 🔗 How This Connects\n- **SQL**: an Excel Table with structured references behaves like a miniature version of a SQL table — consistent columns, no manual range updates needed.\n- **Power BI**: this is a stepping stone toward proper data modelling, where tables and relationships replace ad-hoc ranges entirely.",
       "exercises": [
         {
           "id": "excel-tbl-e1",
@@ -284,19 +532,54 @@
           "evaluation_mode": "exact",
           "points": 10
         }
+      ],
+      "quiz": [
+        {
+          "question": "What is the main purpose of Data Validation?",
+          "options": [
+            "To make cells look prettier",
+            "To restrict what can be entered into a cell, preventing bad data",
+            "To automatically sort a column",
+            "To create a chart"
+          ],
+          "correct_index": 1,
+          "explanation": "Data Validation enforces rules at entry time (dropdown lists, number ranges, custom formulas) so invalid data never gets into the sheet in the first place."
+        },
+        {
+          "question": "What's the advantage of an Excel Table's structured references, like `Table1[Sales]`, over `B2:B100`?",
+          "options": [
+            "They're shorter to type only",
+            "They automatically stay correct as rows are added or removed, and are more readable",
+            "They only work with SUM",
+            "They disable filtering"
+          ],
+          "correct_index": 1,
+          "explanation": "Structured references expand automatically with the table's data, so formulas never go stale as rows are added — unlike a fixed range like B2:B100."
+        },
+        {
+          "question": "What does converting a range to a Table (Ctrl+T) give you automatically?",
+          "options": [
+            "Automatic expansion, structured references, and built-in filter dropdowns",
+            "A pivot table",
+            "A chart",
+            "A macro"
+          ],
+          "correct_index": 0,
+          "explanation": "Tables bundle several conveniences at once — growing formulas, readable references, and filter controls — all from one Ctrl+T."
+        }
       ]
     },
     {
       "id": "excel-powerquery",
       "title": "Power Query",
-      "description": "Connect to any data source, clean and reshape data without formulas \u2014 then refresh with one click.",
+      "description": "Connect to any data source, clean and reshape data without formulas — then refresh with one click.",
       "level": "advanced",
       "prerequisites": [
         "excel-tables"
       ],
       "estimated_min": 50,
-      "sort_order": 8,
-      "theory_md": "## Power Query\n\nPower Query (Data \u2192 Get & Transform) lets you connect to any data source and build a repeatable cleaning pipeline. Every step is recorded; click **Refresh** to rerun the whole pipeline on new data.\n\n### Common transforms\n| Task | Power Query action |\n|---|---|\n| Remove duplicates | Home \u2192 Remove Rows \u2192 Remove Duplicates |\n| Filter rows | Filter dropdown on any column |\n| Split a column | Transform \u2192 Split Column |\n| Unpivot | Transform \u2192 Unpivot Columns |\n| Merge two tables | Home \u2192 Merge Queries (like a JOIN) |\n| Change data type | click the type icon left of column header |\n\n### M Language (optional but powerful)\nPower Query records your steps as M code. Example \u2014 add a custom column:\n```\n= Table.AddColumn(Source, \"Margin\", each [Revenue] - [Cost])\n```\n\n### When to use Power Query vs VLOOKUP\nUse Power Query when:\n- You repeat the same cleaning steps on new exports.\n- You need to combine 3+ tables.\n- The raw data is messy (extra header rows, wrong types, inconsistent formats).\n\n**Business context:** Analysts who know Power Query turn hour-long monthly reports into 30-second refreshes.\n\n## \ud83d\udd17 How This Connects\n- **Power BI**: this is genuinely the same engine \u2014 everything learned here transfers directly to Power BI's Power Query lesson, just at a larger scale.\n- **SQL**: Merge Queries and Group By steps are Power Query's visual equivalents of JOIN and GROUP BY.",
+      "sort_order": 9,
+      "theory_md": "## Power Query\n\nPower Query (Data → Get & Transform) lets you connect to any data source and build a repeatable cleaning pipeline. Every step is recorded; click **Refresh** to rerun the whole pipeline on new data.\n\n### Common transforms\n| Task | Power Query action |\n|---|---|\n| Remove duplicates | Home → Remove Rows → Remove Duplicates |\n| Filter rows | Filter dropdown on any column |\n| Split a column | Transform → Split Column |\n| Unpivot | Transform → Unpivot Columns |\n| Merge two tables | Home → Merge Queries (like a JOIN) |\n| Change data type | click the type icon left of column header |\n\n### M Language (optional but powerful)\nPower Query records your steps as M code. Example — add a custom column:\n```\n= Table.AddColumn(Source, \"Margin\", each [Revenue] - [Cost])\n```\n\n### When to use Power Query vs VLOOKUP\nUse Power Query when:\n- You repeat the same cleaning steps on new exports.\n- You need to combine 3+ tables.\n- The raw data is messy (extra header rows, wrong types, inconsistent formats).\n\n**Business context:** Analysts who know Power Query turn hour-long monthly reports into 30-second refreshes.\n\n## 🔗 How This Connects\n- **Power BI**: this is genuinely the same engine — everything learned here transfers directly to Power BI's Power Query lesson, just at a larger scale.\n- **SQL**: Merge Queries and Group By steps are Power Query's visual equivalents of JOIN and GROUP BY.",
       "exercises": [
         {
           "id": "excel-pq-e1",
@@ -315,10 +598,45 @@
           "prompt": "You have two tables: Orders (10,000 rows) and Customers (5,000 rows) you need to join on CustomerID. Should you use VLOOKUP or Power Query Merge? Explain in one sentence.",
           "hint_1": "Think about performance and repeatability.",
           "hint_2": "VLOOKUP recalculates on every change. Power Query runs once on refresh.",
-          "hint_3": "Power Query Merge \u2014 it is faster on large tables and produces a refreshable, repeatable pipeline without volatile formula recalculation.",
+          "hint_3": "Power Query Merge — it is faster on large tables and produces a refreshable, repeatable pipeline without volatile formula recalculation.",
           "solution": "Power Query Merge",
           "evaluation_mode": "contains",
           "points": 20
+        }
+      ],
+      "quiz": [
+        {
+          "question": "What is the key benefit of Power Query's step-based approach?",
+          "options": [
+            "It's the only way to create a chart",
+            "Every transformation step is recorded and can be re-run on new data with one click (Refresh)",
+            "It replaces the need for formulas entirely",
+            "It works only with Excel Tables, never external files"
+          ],
+          "correct_index": 1,
+          "explanation": "Because every cleaning step is recorded, the entire pipeline can be refreshed against updated source data without redoing any manual work."
+        },
+        {
+          "question": "In Power Query, which action is the equivalent of a SQL JOIN?",
+          "options": [
+            "Remove Duplicates",
+            "Merge Queries",
+            "Split Column",
+            "Unpivot Columns"
+          ],
+          "correct_index": 1,
+          "explanation": "Merge Queries combines two tables based on matching key columns — exactly the same concept as a SQL JOIN, done visually."
+        },
+        {
+          "question": "What does 'Unpivot Columns' do?",
+          "options": [
+            "Removes a column entirely",
+            "Converts columns into rows — useful for turning wide data into long/tidy format",
+            "Sorts columns alphabetically",
+            "Merges two queries"
+          ],
+          "correct_index": 1,
+          "explanation": "Unpivot reshapes wide data (e.g. one column per month) into a long format (one row per month) that's easier to analyze and chart."
         }
       ]
     },
@@ -332,8 +650,8 @@
         "excel-powerquery"
       ],
       "estimated_min": 60,
-      "sort_order": 9,
-      "theory_md": "## Dashboard Design\n\nA dashboard distils complex data into the 3\u20135 metrics a decision-maker needs right now.\n\n### Layout principles\n1. **Top-left = most important.** Eyes start there.\n2. **KPI cards first** \u2014 one big number per card (current value, vs target, vs last period).\n3. **Supporting charts below** \u2014 context, not the headline.\n4. **One colour family** \u2014 highlight only what matters in your brand colour.\n\n### Making it interactive\n- **Slicers** link to a PivotTable and filter all connected charts at once.\n- **Form controls** (Combo Box, Scroll Bar) let users select a year/region.\n- **Named Ranges + INDIRECT** allows dynamic chart titles: `=\"Sales \u2014 \" & TEXT(E1,\"MMMM YYYY\")`\n\n### KPI formula pattern\n```excel\n=TEXT(B2,\"$#,##0\")   ' formatted number\n=B2/B3-1             ' vs last period\n=IF(B2>B4,\"\u25b2 \",\"\u25bc \")&TEXT(ABS(B2/B4-1),\"0.0%\")  ' arrow + % change\n```\n\n### Common mistakes\n- Too many charts \u2192 pick the 3 most important.\n- Different scales on similar charts \u2192 confuses comparison.\n- No print area set \u2192 dashboards print badly.\n- Live data connection with no \"Last refreshed\" timestamp \u2192 no one trusts it.\n\n**Business context:** A well-designed dashboard eliminates 80% of the questions managers ask repeatedly.\n\n## \ud83d\udd17 How This Connects\n- **Power BI**: this lesson's layout and colour principles are the direct precursor to Power BI's Report Design & UX lesson \u2014 the same instincts, applied in a more interactive tool next.\n- **Business**: the KPI Design & Dashboards lesson covers *which* metrics deserve a dashboard slot in the first place \u2014 this lesson covers *how* to lay them out once chosen.",
+      "sort_order": 10,
+      "theory_md": "## Dashboard Design\n\nA dashboard distils complex data into the 3–5 metrics a decision-maker needs right now.\n\n### Layout principles\n1. **Top-left = most important.** Eyes start there.\n2. **KPI cards first** — one big number per card (current value, vs target, vs last period).\n3. **Supporting charts below** — context, not the headline.\n4. **One colour family** — highlight only what matters in your brand colour.\n\n### Making it interactive\n- **Slicers** link to a PivotTable and filter all connected charts at once.\n- **Form controls** (Combo Box, Scroll Bar) let users select a year/region.\n- **Named Ranges + INDIRECT** allows dynamic chart titles: `=\"Sales — \" & TEXT(E1,\"MMMM YYYY\")`\n\n### KPI formula pattern\n```excel\n=TEXT(B2,\"$#,##0\")   ' formatted number\n=B2/B3-1             ' vs last period\n=IF(B2>B4,\"▲ \",\"▼ \")&TEXT(ABS(B2/B4-1),\"0.0%\")  ' arrow + % change\n```\n\n### Common mistakes\n- Too many charts → pick the 3 most important.\n- Different scales on similar charts → confuses comparison.\n- No print area set → dashboards print badly.\n- Live data connection with no \"Last refreshed\" timestamp → no one trusts it.\n\n**Business context:** A well-designed dashboard eliminates 80% of the questions managers ask repeatedly.\n\n## 🔗 How This Connects\n- **Power BI**: this lesson's layout and colour principles are the direct precursor to Power BI's Report Design & UX lesson — the same instincts, applied in a more interactive tool next.\n- **Business**: the KPI Design & Dashboards lesson covers *which* metrics deserve a dashboard slot in the first place — this lesson covers *how* to lay them out once chosen.",
       "exercises": [
         {
           "id": "excel-dash-e1",
@@ -341,7 +659,7 @@
           "prompt": "On a sales dashboard, you have: a summary KPI table, a trend line chart, a regional breakdown bar chart, and raw data. In what order should they appear top-to-bottom?",
           "hint_1": "What does a decision-maker need to see first?",
           "hint_2": "Most important information first, supporting detail lower.",
-          "hint_3": "KPI table \u2192 trend line chart \u2192 regional bar chart \u2192 raw data (usually on a separate sheet)",
+          "hint_3": "KPI table → trend line chart → regional bar chart → raw data (usually on a separate sheet)",
           "solution": "KPI table, trend line chart, regional bar chart, raw data",
           "evaluation_mode": "contains",
           "points": 15
@@ -356,6 +674,41 @@
           "solution": "All connected charts and PivotTables filter to show only North region data",
           "evaluation_mode": "contains",
           "points": 15
+        }
+      ],
+      "quiz": [
+        {
+          "question": "According to dashboard layout principles, where should the most important information go?",
+          "options": [
+            "Bottom-right",
+            "Top-left, since that's where eyes naturally start",
+            "Wherever there's empty space",
+            "It doesn't matter"
+          ],
+          "correct_index": 1,
+          "explanation": "Readers scan top-left first (in left-to-right reading cultures) — placing the headline KPI there ensures it's seen immediately."
+        },
+        {
+          "question": "What do dashboard slicers connected to a PivotTable do?",
+          "options": [
+            "Nothing — they're purely decorative",
+            "Filter all connected charts and tables at once when clicked",
+            "Only affect one chart at a time, never more",
+            "Automatically email the dashboard"
+          ],
+          "correct_index": 1,
+          "explanation": "A slicer wired to multiple PivotTables/charts filters all of them simultaneously — that's what makes a dashboard feel interactive rather than static."
+        },
+        {
+          "question": "Why does the lesson recommend one KPI card with a single big number, rather than many numbers per card?",
+          "options": [
+            "Excel technically can't fit more than one number per card",
+            "A single clear number per card is fastest for a decision-maker to read at a glance",
+            "Multiple numbers cause performance issues",
+            "It's a hard formatting limit"
+          ],
+          "correct_index": 1,
+          "explanation": "Dashboards exist to answer 'what do I need to know right now' fast — one number per KPI card keeps that answer unambiguous."
         }
       ]
     }

@@ -11,6 +11,8 @@ import InstructorPanel from '../components/ui/InstructorPanel'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
 import { useInstructor } from '../hooks/useInstructor'
+import { PageError } from '../components/ui/PageState'
+import { reportApiError } from '../lib/apiError'
 import type { Lesson, SqlResult } from '../types'
 
 type View = 'lessons' | 'lesson' | 'playground'
@@ -20,15 +22,20 @@ export default function SqlAcademy() {
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const { user } = useAuthStore()
 
-  useEffect(() => {
+  const loadLessons = useCallback(() => {
     if (!user) return
-    window.api.lessons.list(user.id, 'sql').then((data: any) => {
-      setLessons(data)
-      setLoading(false)
-    })
+    setLoading(true)
+    setLoadError(false)
+    window.api.lessons.list(user.id, 'sql')
+      .then((data: any) => setLessons(data))
+      .catch((err) => { reportApiError('load SQL lessons', err); setLoadError(true) })
+      .finally(() => setLoading(false))
   }, [user])
+
+  useEffect(loadLessons, [loadLessons])
 
   const openLesson = (id: string) => {
     setActiveLessonId(id)
@@ -84,7 +91,7 @@ export default function SqlAcademy() {
             onComplete={() => {
               setView('lessons')
               // Refresh lessons
-              if (user) window.api.lessons.list(user.id, 'sql').then(setLessons)
+              if (user) window.api.lessons.list(user.id, 'sql').then(setLessons).catch((err: any) => reportApiError('refresh your lessons', err))
             }}
           />
         )}
@@ -203,28 +210,40 @@ function LessonView({ lessonId, onBack, onComplete }: {
   const [data, setData] = useState<any>(null)
   const [activeExIdx, setActiveExIdx] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const startTime = useRef(Date.now())
 
-  useEffect(() => {
+  const loadLesson = useCallback(() => {
     if (!user) return
-    window.api.lessons.get(user.id, lessonId).then((d: any) => {
-      setData(d)
-      setLoading(false)
-      window.api.lessons.start(user.id, lessonId)
-    })
+    setLoading(true)
+    setLoadError(false)
+    window.api.lessons.get(user.id, lessonId)
+      .then((d: any) => {
+        setData(d)
+        window.api.lessons.start(user.id, lessonId).catch((err) => reportApiError('mark lesson started', err))
+      })
+      .catch((err) => { reportApiError('load this lesson', err); setLoadError(true) })
+      .finally(() => setLoading(false))
   }, [lessonId, user])
+
+  useEffect(loadLesson, [loadLesson])
 
   const handleComplete = async () => {
     if (!user) return
     const elapsed = Math.floor((Date.now() - startTime.current) / 1000)
-    const result = await window.api.lessons.complete(user.id, lessonId, elapsed)
-    if (result.new_achievements?.length > 0) {
-      notify.success('Achievement Unlocked!', `You earned ${result.new_achievements.length} new achievement(s)`)
+    try {
+      const result = await window.api.lessons.complete(user.id, lessonId, elapsed)
+      if (result.new_achievements?.length > 0) {
+        notify.success('Achievement Unlocked!', `You earned ${result.new_achievements.length} new achievement(s)`)
+      }
+      notify.success('Lesson Complete!', data?.lesson?.title)
+      onComplete()
+    } catch (err) {
+      reportApiError('save your lesson progress', err)
     }
-    notify.success('Lesson Complete!', data?.lesson?.title)
-    onComplete()
   }
 
+  if (loadError) return <PageError message="Couldn't load this lesson." onRetry={loadLesson} />
   if (loading) return <CenteredSpinner />
   if (!data) return null
 
@@ -300,6 +319,7 @@ function LessonView({ lessonId, onBack, onComplete }: {
               ))}
             </div>
             <ExerciseSolver
+              key={exercises[activeExIdx]?.id}
               exercise={exercises[activeExIdx]}
               lessonModule="sql"
               onNext={activeExIdx < exercises.length - 1 ? () => setActiveExIdx(i => i + 1) : undefined}
@@ -336,6 +356,17 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
     setHintsUsed(0)
     setCorrect(null)
   }, [exercise?.id])
+
+  // Each exercise gets its own in-memory sql.js sandbox (loaded with the
+  // hospital dataset). Without closing it on unmount, every exercise a
+  // student has ever attempted stays allocated for the entire app session
+  // — across a full 60-lesson course that's 100+ accumulated sandboxes
+  // never freed. The `key={exercise.id}` on this component (see parent)
+  // ensures this effect's cleanup fires on every exercise switch, not just
+  // when leaving the lesson entirely.
+  useEffect(() => {
+    return () => { window.api.sql.closeSandbox(sandboxId.current).catch((err: any) => console.error('[close sandbox]', err)) }
+  }, [])
 
   const handleRun = async () => {
     if (!user || !exercise) return
@@ -376,12 +407,16 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
   const getHint = async () => {
     if (!exercise || hintsUsed >= 3) return
     const next = hintsUsed + 1
-    const res = await window.api.exercises.hint(exercise.id, next)
-    if (res.hint) {
-      setHint(res.hint)
-      setHintsUsed(next)
-    } else {
-      setHint('No more hints available for this exercise.')
+    try {
+      const res = await window.api.exercises.hint(exercise.id, next)
+      if (res.hint) {
+        setHint(res.hint)
+        setHintsUsed(next)
+      } else {
+        setHint('No more hints available for this exercise.')
+      }
+    } catch (err) {
+      reportApiError('get a hint', err)
     }
   }
 
@@ -530,13 +565,17 @@ function SqlPlayground() {
 
   const loadDataset = async (ds: any, type: 'bundled' | 'imported') => {
     if (!user) return
-    const res = await window.api.sql.loadDataset(sandboxId.current, ds.id, type, user.id)
-    if (res.success) {
-      setActiveDataset({ ...ds, type })
-      setQuery(`-- Dataset: ${ds.name}\n-- Table: ${ds.table_name}\nSELECT * FROM ${ds.table_name} LIMIT 20;`)
-      notify.success(`Loaded: ${ds.name}`)
-    } else {
-      notify.error('Failed to load dataset', res.error)
+    try {
+      const res = await window.api.sql.loadDataset(sandboxId.current, ds.id, type, user.id)
+      if (res.success) {
+        setActiveDataset({ ...ds, type })
+        setQuery(`-- Dataset: ${ds.name}\n-- Table: ${ds.table_name}\nSELECT * FROM ${ds.table_name} LIMIT 20;`)
+        notify.success(`Loaded: ${ds.name}`)
+      } else {
+        notify.error('Failed to load dataset', res.error)
+      }
+    } catch (err) {
+      reportApiError('load this dataset', err)
     }
   }
 
@@ -556,7 +595,7 @@ function SqlPlayground() {
       if (preferred) {
         await loadDataset(preferred, 'bundled')
       }
-    })
+    }).catch((err: any) => reportApiError('load your datasets', err))
     return () => { window.api.sql.closeSandbox(sandboxId.current) }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])

@@ -5,6 +5,8 @@ import {
   ExternalLink, Star, Brain, ChevronRight,
 } from 'lucide-react'
 import { useAuthStore, notify } from '../store'
+import { PageError } from '../components/ui/PageState'
+import { reportApiError } from '../lib/apiError'
 
 export default function Portfolio() {
   const [items, setItems] = useState<any[]>([])
@@ -12,17 +14,26 @@ export default function Portfolio() {
   const [loading, setLoading] = useState(true)
   const [showAddModal, setShowAddModal] = useState(false)
   const [exportingId, setExportingId] = useState<string | null>(null)
+  const [loadError, setLoadError] = useState(false)
   const { user } = useAuthStore()
 
   const load = async () => {
     if (!user) return
-    const [portItems, projList] = await Promise.all([
-      window.api.portfolio.list(user.id),
-      window.api.projects.list(user.id),
-    ])
-    setItems(portItems)
-    setProjects(projList.filter((p: any) => p.status === 'complete'))
-    setLoading(false)
+    setLoading(true)
+    setLoadError(false)
+    try {
+      const [portItems, projList] = await Promise.all([
+        window.api.portfolio.list(user.id),
+        window.api.projects.list(user.id),
+      ])
+      setItems(portItems)
+      setProjects(projList.filter((p: any) => p.status === 'complete'))
+    } catch (err) {
+      reportApiError('load your portfolio', err)
+      setLoadError(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => { load() }, [user])
@@ -41,6 +52,8 @@ export default function Portfolio() {
       } else {
         notify.error('Export failed', result.error)
       }
+    } catch (err) {
+      reportApiError('export this item', err)
     } finally {
       setExportingId(null)
     }
@@ -48,9 +61,13 @@ export default function Portfolio() {
 
   const handleDelete = async (id: string) => {
     if (!user) return
-    await window.api.portfolio.delete(user.id, id)
-    notify.success('Removed from portfolio')
-    load()
+    try {
+      await window.api.portfolio.delete(user.id, id)
+      notify.success('Removed from portfolio')
+      load()
+    } catch (err) {
+      reportApiError('remove this item', err)
+    }
   }
 
   return (
@@ -80,7 +97,9 @@ export default function Portfolio() {
       )}
 
       <div style={{ flex: 1, overflow: 'auto', padding: 24 }}>
-        {loading ? (
+        {loadError ? (
+          <PageError message="Couldn't load your portfolio." onRetry={load} />
+        ) : loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}><div className="spinner" /></div>
         ) : items.length === 0 ? (
           <EmptyPortfolio projects={projects} onAdd={() => setShowAddModal(true)} />
@@ -178,10 +197,15 @@ function AddToPortfolioModal({ projects, existing, onClose, onAdded }: {
   const add = async () => {
     if (!user || !form.title.trim()) return
     setSaving(true)
-    await window.api.portfolio.create({ userId: user.id, projectId: selected || null, title: form.title, summary: form.summary, skills_used: form.skills_used })
-    notify.success('Added to portfolio')
-    onAdded()
-    setSaving(false)
+    try {
+      await window.api.portfolio.create({ userId: user.id, projectId: selected || null, title: form.title, summary: form.summary, skills_used: form.skills_used })
+      notify.success('Added to portfolio')
+      onAdded()
+    } catch (err) {
+      reportApiError('add this to your portfolio', err)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (

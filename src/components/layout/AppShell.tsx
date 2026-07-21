@@ -4,6 +4,7 @@ import Titlebar from './Titlebar'
 import Sidebar from './Sidebar'
 import NotificationStack from '../ui/NotificationStack'
 import GlobalInstructor from '../ui/GlobalInstructor'
+import ErrorBoundary from '../ErrorBoundary'
 
 // Pages — all fully implemented
 import Dashboard from '../../pages/Dashboard'
@@ -60,7 +61,9 @@ export default function AppShell() {
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <Sidebar />
         <main style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-          {PAGES[activeSection]}
+          <ErrorBoundary resetKeys={[activeSection]} onReset={() => setActiveSection('dashboard')}>
+            {PAGES[activeSection]}
+          </ErrorBoundary>
         </main>
       </div>
       <NotificationStack />

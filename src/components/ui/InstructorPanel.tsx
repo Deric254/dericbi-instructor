@@ -6,6 +6,7 @@ import {
 import { useAuthStore } from '../../store'
 import { useInstructor } from '../../hooks/useInstructor'
 import type { InstructorContext } from '../../hooks/useInstructor'
+import { reportApiError } from '../../lib/apiError'
 
 interface Props {
   context: InstructorContext
@@ -26,6 +27,7 @@ export default function InstructorPanel({
   const [collapsed, setCollapsed] = useState(compact)
   const [apiKeyOk, setApiKeyOk] = useState<boolean | null>(null)
   const [checkingKey, setCheckingKey] = useState(true)
+  const [keyCheckFailed, setKeyCheckFailed] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const lastSentPrompt = useRef<string | null>(null)
@@ -34,10 +36,18 @@ export default function InstructorPanel({
   useEffect(() => {
     if (!user) return
     const check = async () => {
-      const provider = await window.api.ai.getProvider(user.id)
-      const res = await window.api.ai.hasKey(user.id, provider.provider)
-      setApiKeyOk(res.has_key)
-      setCheckingKey(false)
+      setCheckingKey(true)
+      setKeyCheckFailed(false)
+      try {
+        const provider = await window.api.ai.getProvider(user.id)
+        const res = await window.api.ai.hasKey(user.id, provider.provider)
+        setApiKeyOk(res.has_key)
+      } catch (err) {
+        reportApiError('check your AI instructor setup', err)
+        setKeyCheckFailed(true)
+      } finally {
+        setCheckingKey(false)
+      }
     }
     check()
   }, [user])

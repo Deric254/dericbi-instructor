@@ -5,12 +5,12 @@
     {
       "id": "sql-select",
       "title": "SELECT & FROM",
-      "description": "Retrieve data from tables \u2014 your first SQL statement",
+      "description": "Retrieve data from tables — your first SQL statement",
       "level": "beginner",
       "prerequisites": [],
       "estimated_min": 25,
       "sort_order": 1,
-      "theory_md": "## SELECT & FROM \u2014 Starting From Zero\n\n### What is a database, actually?\nA database stores data in **tables** \u2014 think of a table exactly like a spreadsheet: rows and columns. Each row is one record (e.g. one patient); each column is one piece of information about that record (e.g. their age). SQL (Structured Query Language) is how you ask a database questions about that data \u2014 \"show me,\" \"count,\" \"filter,\" \"sort.\"\n\nYou never modify the table just by asking it a question \u2014 running a SELECT is like reading a book, not writing in it. This makes it safe to experiment freely.\n\n### Your first query\n```sql\nSELECT * FROM patients;\n```\nRead this left to right as plain English: *\"Select [everything] from [the patients table].\"* `*` is shorthand for \"every column\" \u2014 you'll narrow this down next.\n\n### Choosing specific columns\n```sql\nSELECT patient_name, age FROM patients;\n```\nOnly these two columns come back, in this order, for every row in the table. Column names are separated by commas.\n\n**Key rules:**\n- `*` means all columns; naming columns explicitly returns only those\n- Column names are separated by commas, never a table name repeated\n- A semicolon `;` marks the end of a statement (good habit, not always required)\n- SQL keywords (`SELECT`, `FROM`) are case-insensitive, but the convention is UPPERCASE for keywords and lowercase for your own table/column names \u2014 this makes queries far easier to read once they get longer\n\n### Why this is the foundation of everything else\nEvery SQL feature you'll learn next \u2014 filtering, sorting, grouping, joining multiple tables \u2014 starts by first deciding what you're selecting and from where. Get comfortable with this shape before moving on; it never goes away, it only grows.\n\n**Business context:** Every report, every dashboard, every \"how many customers did X\" question starts with exactly this: telling the database which table to look at and which columns matter.\n\n## \ud83d\udd17 How This Connects\n- **Excel**: this is the same idea as opening a worksheet and looking at columns \u2014 SELECT just lets you choose which ones without scrolling.\n- **Python**: a pandas DataFrame's `df[['col1','col2']]` does exactly this.\n- **Power BI**: Power Query's \"Choose Columns\" step is the visual equivalent.",
+      "theory_md": "## SELECT & FROM — Starting From Zero\n\n### What is a database, actually?\nA database stores data in **tables** — think of a table exactly like a spreadsheet: rows and columns. Each row is one record (e.g. one patient); each column is one piece of information about that record (e.g. their age). SQL (Structured Query Language) is how you ask a database questions about that data — \"show me,\" \"count,\" \"filter,\" \"sort.\"\n\nYou never modify the table just by asking it a question — running a SELECT is like reading a book, not writing in it. This makes it safe to experiment freely.\n\n### Your first query\n```sql\nSELECT * FROM patients;\n```\nRead this left to right as plain English: *\"Select [everything] from [the patients table].\"* `*` is shorthand for \"every column\" — you'll narrow this down next.\n\n### Choosing specific columns\n```sql\nSELECT patient_name, age FROM patients;\n```\nOnly these two columns come back, in this order, for every row in the table. Column names are separated by commas.\n\n**Key rules:**\n- `*` means all columns; naming columns explicitly returns only those\n- Column names are separated by commas, never a table name repeated\n- A semicolon `;` marks the end of a statement (good habit, not always required)\n- SQL keywords (`SELECT`, `FROM`) are case-insensitive, but the convention is UPPERCASE for keywords and lowercase for your own table/column names — this makes queries far easier to read once they get longer\n\n### Why this is the foundation of everything else\nEvery SQL feature you'll learn next — filtering, sorting, grouping, joining multiple tables — starts by first deciding what you're selecting and from where. Get comfortable with this shape before moving on; it never goes away, it only grows.\n\n**Business context:** Every report, every dashboard, every \"how many customers did X\" question starts with exactly this: telling the database which table to look at and which columns matter.\n\n## 🔗 How This Connects\n- **Excel**: this is the same idea as opening a worksheet and looking at columns — SELECT just lets you choose which ones without scrolling.\n- **Python**: a pandas DataFrame's `df[['col1','col2']]` does exactly this.\n- **Power BI**: Power Query's \"Choose Columns\" step is the visual equivalent.",
       "exercises": [
         {
           "id": "sql-s1-e1",
@@ -89,18 +89,18 @@
             "Multiply all values"
           ],
           "correct_index": 1,
-          "explanation": "The asterisk is shorthand for 'every column' in the table \u2014 it says nothing about which rows come back (that's controlled by WHERE, covered later)."
+          "explanation": "The asterisk is shorthand for 'every column' in the table — it says nothing about which rows come back (that's controlled by WHERE, covered later)."
         },
         {
           "question": "Does running a SELECT query change the data in the table?",
           "options": [
             "Yes, it removes the rows it returns",
             "Yes, it sorts the table permanently",
-            "No \u2014 SELECT only reads data, it never modifies it",
+            "No — SELECT only reads data, it never modifies it",
             "It depends on the database"
           ],
           "correct_index": 2,
-          "explanation": "SELECT is read-only \u2014 like reading a book rather than writing in it. This is exactly why it's safe to experiment freely with queries."
+          "explanation": "SELECT is read-only — like reading a book rather than writing in it. This is exactly why it's safe to experiment freely with queries."
         }
       ]
     },
@@ -114,7 +114,7 @@
       ],
       "estimated_min": 30,
       "sort_order": 2,
-      "theory_md": "## WHERE Clause\n\nWHERE filters rows based on conditions.\n\n```sql\nSELECT * FROM patients WHERE age > 40;\nSELECT * FROM patients WHERE gender = 'Female';\nSELECT * FROM patients WHERE ward IN ('ICU', 'Emergency');\nSELECT * FROM patients WHERE age BETWEEN 20 AND 40;\nSELECT * FROM patients WHERE patient_name LIKE 'J%';\n```\n\n**Operators:**\n`=` `!=` `<` `>` `<=` `>=` `LIKE` `IN` `BETWEEN` `IS NULL` `IS NOT NULL`\n\n**Combine with:** `AND`, `OR`, `NOT`\n\n**Business context:** Segmentation. Instead of 50,000 records, isolate exactly the population relevant to the question.\n\n## \ud83d\udd17 How This Connects\n- **Excel**: WHERE is the query-language version of a Filter or an IF condition.\n- **Python**: pandas boolean indexing (`df[df['age'] > 30]`) is the same idea, different syntax.\n- **Power BI**: the Filters pane applies the same logic without writing a line of code.",
+      "theory_md": "## WHERE Clause\n\nWHERE filters rows based on conditions.\n\n```sql\nSELECT * FROM patients WHERE age > 40;\nSELECT * FROM patients WHERE gender = 'Female';\nSELECT * FROM patients WHERE ward IN ('ICU', 'Emergency');\nSELECT * FROM patients WHERE age BETWEEN 20 AND 40;\nSELECT * FROM patients WHERE patient_name LIKE 'J%';\n```\n\n**Operators:**\n`=` `!=` `<` `>` `<=` `>=` `LIKE` `IN` `BETWEEN` `IS NULL` `IS NOT NULL`\n\n**Combine with:** `AND`, `OR`, `NOT`\n\n**Business context:** Segmentation. Instead of 50,000 records, isolate exactly the population relevant to the question.\n\n## 🔗 How This Connects\n- **Excel**: WHERE is the query-language version of a Filter or an IF condition.\n- **Python**: pandas boolean indexing (`df[df['age'] > 30]`) is the same idea, different syntax.\n- **Power BI**: the Filters pane applies the same logic without writing a line of code.",
       "exercises": [
         {
           "id": "sql-w1-e1",
@@ -175,7 +175,7 @@
           "id": "sql-w1-e6",
           "title": "LIKE Pattern",
           "prompt": "Find all patients whose name starts with 'J'. Return patient_name only.",
-          "hint_1": "Use LIKE 'J%' \u2014 % is a wildcard for any characters.",
+          "hint_1": "Use LIKE 'J%' — % is a wildcard for any characters.",
           "hint_2": "WHERE patient_name LIKE 'J%'",
           "hint_3": "SELECT patient_name FROM patients WHERE patient_name LIKE 'J%'",
           "solution": "SELECT patient_name FROM patients WHERE patient_name LIKE 'J%'",
@@ -193,6 +193,41 @@
           "evaluation_mode": "exact",
           "points": 20
         }
+      ],
+      "quiz": [
+        {
+          "question": "Which SQL clause filters rows based on a condition?",
+          "options": [
+            "ORDER BY",
+            "GROUP BY",
+            "WHERE",
+            "SELECT"
+          ],
+          "correct_index": 2,
+          "explanation": "WHERE filters which rows come back, evaluated before any grouping or sorting happens."
+        },
+        {
+          "question": "What does `WHERE age BETWEEN 20 AND 40` return?",
+          "options": [
+            "Only age 20 and age 40",
+            "Ages strictly greater than 20 and less than 40",
+            "Ages 20 through 40 inclusive",
+            "A syntax error"
+          ],
+          "correct_index": 2,
+          "explanation": "BETWEEN is inclusive on both ends — 20 and 40 themselves are included."
+        },
+        {
+          "question": "Which operator would you use to match names starting with 'J'?",
+          "options": [
+            "IN",
+            "LIKE 'J%'",
+            "= 'J'",
+            "BETWEEN 'J' AND 'K'"
+          ],
+          "correct_index": 1,
+          "explanation": "LIKE with the % wildcard matches any text after 'J' — '%' means 'anything, including nothing'."
+        }
       ]
     },
     {
@@ -205,7 +240,7 @@
       ],
       "estimated_min": 20,
       "sort_order": 3,
-      "theory_md": "## ORDER BY\n\nSorts query results.\n\n```sql\nSELECT * FROM patients ORDER BY age;          -- ASC default\nSELECT * FROM patients ORDER BY age DESC;     -- descending\nSELECT * FROM patients ORDER BY ward, age;    -- multiple columns\n```\n\n**Top N pattern** \u2014 used in nearly every business report:\n```sql\nSELECT patient_name, age FROM patients\nORDER BY age DESC\nLIMIT 10;  -- top 10 oldest\n```\n\n**Business context:** 'Top 10 customers', 'Most expensive procedures', 'Oldest open tickets' \u2014 all ORDER BY + LIMIT.\n\n## \ud83d\udd17 How This Connects\n- **Excel**: identical to Sort \u2014 smallest/largest first, or alphabetical.\n- **Power BI**: visuals sort automatically, but ORDER BY is what happens underneath when you sort a table visual.",
+      "theory_md": "## ORDER BY\n\nSorts query results.\n\n```sql\nSELECT * FROM patients ORDER BY age;          -- ASC default\nSELECT * FROM patients ORDER BY age DESC;     -- descending\nSELECT * FROM patients ORDER BY ward, age;    -- multiple columns\n```\n\n**Top N pattern** — used in nearly every business report:\n```sql\nSELECT patient_name, age FROM patients\nORDER BY age DESC\nLIMIT 10;  -- top 10 oldest\n```\n\n**Business context:** 'Top 10 customers', 'Most expensive procedures', 'Oldest open tickets' — all ORDER BY + LIMIT.\n\n## 🔗 How This Connects\n- **Excel**: identical to Sort — smallest/largest first, or alphabetical.\n- **Power BI**: visuals sort automatically, but ORDER BY is what happens underneath when you sort a table visual.",
       "exercises": [
         {
           "id": "sql-o1-e1",
@@ -251,19 +286,54 @@
           "evaluation_mode": "exact",
           "points": 20
         }
+      ],
+      "quiz": [
+        {
+          "question": "By default, does ORDER BY sort ascending or descending?",
+          "options": [
+            "Descending",
+            "Ascending",
+            "Random",
+            "It depends on the data type"
+          ],
+          "correct_index": 1,
+          "explanation": "ASC is the default — smallest/earliest first — unless you explicitly add DESC."
+        },
+        {
+          "question": "What does `ORDER BY age DESC LIMIT 10` return?",
+          "options": [
+            "The 10 youngest people",
+            "The 10 oldest people",
+            "10 random people",
+            "Everyone, sorted, with no limit"
+          ],
+          "correct_index": 1,
+          "explanation": "DESC sorts oldest-first, and LIMIT 10 keeps only the first 10 rows of that sorted result — the classic 'Top N' pattern."
+        },
+        {
+          "question": "In `ORDER BY ward, age`, what happens for rows with the same ward?",
+          "options": [
+            "They're grouped into one row",
+            "They're sorted by age within that ward",
+            "An error occurs",
+            "They're dropped from the result"
+          ],
+          "correct_index": 1,
+          "explanation": "Multiple ORDER BY columns act as tie-breakers in order: first sort by ward, then, within each ward, sort by age."
+        }
       ]
     },
     {
       "id": "sql-groupby",
       "title": "GROUP BY & Aggregations",
-      "description": "Summarize data by category \u2014 the heart of analytical SQL",
+      "description": "Summarize data by category — the heart of analytical SQL",
       "level": "beginner",
       "prerequisites": [
         "sql-orderby"
       ],
       "estimated_min": 40,
       "sort_order": 4,
-      "theory_md": "## GROUP BY & Aggregate Functions\n\nGroup rows and compute summaries per group.\n\n**Aggregate functions:**\n```sql\nCOUNT(*)          -- count rows\nCOUNT(column)     -- count non-null values\nSUM(column)       -- total\nAVG(column)       -- average\nMAX(column)       -- maximum\nMIN(column)       -- minimum\nROUND(value, 2)   -- round to 2 decimal places\n```\n\n**Pattern:**\n```sql\nSELECT category, COUNT(*) as count\nFROM table\nGROUP BY category\nORDER BY count DESC;\n```\n\n**Golden rule:** Every column in SELECT must either be in GROUP BY or inside an aggregate function.\n\n**Business context:** KPIs are GROUP BY queries. 'Revenue by region', 'Patients by diagnosis', 'Orders by month' \u2014 all of these.\n\n## \ud83d\udd17 How This Connects\n- **Excel**: this is exactly what a PivotTable does \u2014 GROUP BY is the query-language version of dragging a field into \"Rows\" and another into \"Values.\"\n- **Python**: pandas' `.groupby()` is named after this exact SQL clause for a reason \u2014 same concept, same name.\n- **Power BI**: DAX's `SUMX`/`CALCULATE` patterns and the Data Modelling lesson both build on this same aggregate-by-category idea.\n- **Statistics**: descriptive statistics (mean, count) are usually calculated *per group* \u2014 this is the SQL mechanism for that.",
+      "theory_md": "## GROUP BY & Aggregate Functions\n\nGroup rows and compute summaries per group.\n\n**Aggregate functions:**\n```sql\nCOUNT(*)          -- count rows\nCOUNT(column)     -- count non-null values\nSUM(column)       -- total\nAVG(column)       -- average\nMAX(column)       -- maximum\nMIN(column)       -- minimum\nROUND(value, 2)   -- round to 2 decimal places\n```\n\n**Pattern:**\n```sql\nSELECT category, COUNT(*) as count\nFROM table\nGROUP BY category\nORDER BY count DESC;\n```\n\n**Golden rule:** Every column in SELECT must either be in GROUP BY or inside an aggregate function.\n\n**Business context:** KPIs are GROUP BY queries. 'Revenue by region', 'Patients by diagnosis', 'Orders by month' — all of these.\n\n## 🔗 How This Connects\n- **Excel**: this is exactly what a PivotTable does — GROUP BY is the query-language version of dragging a field into \"Rows\" and another into \"Values.\"\n- **Python**: pandas' `.groupby()` is named after this exact SQL clause for a reason — same concept, same name.\n- **Power BI**: DAX's `SUMX`/`CALCULATE` patterns and the Data Modelling lesson both build on this same aggregate-by-category idea.\n- **Statistics**: descriptive statistics (mean, count) are usually calculated *per group* — this is the SQL mechanism for that.",
       "exercises": [
         {
           "id": "sql-g1-e1",
@@ -320,19 +390,54 @@
           "evaluation_mode": "exact",
           "points": 25
         }
+      ],
+      "quiz": [
+        {
+          "question": "What does `COUNT(*)` do?",
+          "options": [
+            "Counts only non-null values in one column",
+            "Counts every row, including nulls",
+            "Sums all numeric columns",
+            "Counts distinct values only"
+          ],
+          "correct_index": 1,
+          "explanation": "COUNT(*) counts rows regardless of nulls; COUNT(column) counts only non-null values in that specific column."
+        },
+        {
+          "question": "What is the 'golden rule' of GROUP BY?",
+          "options": [
+            "Every column in SELECT must be in GROUP BY or wrapped in an aggregate function",
+            "You can only group by numeric columns",
+            "GROUP BY must come before SELECT",
+            "You need at least two aggregate functions"
+          ],
+          "correct_index": 0,
+          "explanation": "SQL needs to know how to collapse every non-grouped column down to one value per group — that's what an aggregate function does."
+        },
+        {
+          "question": "Which real-world report pattern is a GROUP BY query?",
+          "options": [
+            "Sorting customers alphabetically",
+            "Revenue by region",
+            "Filtering to only active customers",
+            "Renaming a column"
+          ],
+          "correct_index": 1,
+          "explanation": "'X by category' — revenue by region, patients by diagnosis — is exactly what GROUP BY computes: one summary row per group."
+        }
       ]
     },
     {
       "id": "sql-having",
       "title": "HAVING Clause",
-      "description": "Filter aggregated results \u2014 WHERE for GROUP BY",
+      "description": "Filter aggregated results — WHERE for GROUP BY",
       "level": "intermediate",
       "prerequisites": [
         "sql-groupby"
       ],
       "estimated_min": 25,
       "sort_order": 5,
-      "theory_md": "## HAVING\n\nHAVING filters groups after aggregation. WHERE filters rows before aggregation.\n\n```sql\n-- WHERE: filters rows BEFORE grouping\nSELECT ward, COUNT(*) as cnt\nFROM patients\nWHERE gender = 'Female'   -- filter rows first\nGROUP BY ward\nHAVING cnt > 10;          -- then filter groups\n```\n\n**Rule:** Use WHERE for column conditions. Use HAVING for aggregate conditions.\n\n**Business context:** 'Show me only regions with sales > 100,000' \u2014 that's HAVING, not WHERE.\n\n## \ud83d\udd17 How This Connects\n- **Excel**: the equivalent of filtering a PivotTable's *summarized* values (e.g. \"only show regions with total sales > $50,000\"), not the raw rows.\n- **Power BI**: `CALCULATE` with a filter on an aggregated measure does the same job.",
+      "theory_md": "## HAVING\n\nHAVING filters groups after aggregation. WHERE filters rows before aggregation.\n\n```sql\n-- WHERE: filters rows BEFORE grouping\nSELECT ward, COUNT(*) as cnt\nFROM patients\nWHERE gender = 'Female'   -- filter rows first\nGROUP BY ward\nHAVING cnt > 10;          -- then filter groups\n```\n\n**Rule:** Use WHERE for column conditions. Use HAVING for aggregate conditions.\n\n**Business context:** 'Show me only regions with sales > 100,000' — that's HAVING, not WHERE.\n\n## 🔗 How This Connects\n- **Excel**: the equivalent of filtering a PivotTable's *summarized* values (e.g. \"only show regions with total sales > $50,000\"), not the raw rows.\n- **Power BI**: `CALCULATE` with a filter on an aggregated measure does the same job.",
       "exercises": [
         {
           "id": "sql-h1-e1",
@@ -367,6 +472,41 @@
           "evaluation_mode": "exact",
           "points": 35
         }
+      ],
+      "quiz": [
+        {
+          "question": "What's the key difference between WHERE and HAVING?",
+          "options": [
+            "They do the same thing",
+            "WHERE filters rows before grouping; HAVING filters groups after aggregation",
+            "HAVING is faster than WHERE",
+            "WHERE only works with numbers"
+          ],
+          "correct_index": 1,
+          "explanation": "WHERE acts on individual rows before GROUP BY runs. HAVING acts on the aggregated groups afterward — so it can filter on things like COUNT(*) or SUM(...)."
+        },
+        {
+          "question": "Which condition belongs in HAVING rather than WHERE?",
+          "options": [
+            "gender = 'Female'",
+            "age > 40",
+            "COUNT(*) > 10",
+            "ward = 'ICU'"
+          ],
+          "correct_index": 2,
+          "explanation": "COUNT(*) only exists after grouping happens, so a condition on it must go in HAVING — WHERE can't see aggregate results yet."
+        },
+        {
+          "question": "Can a query use both WHERE and HAVING together?",
+          "options": [
+            "No, only one is allowed per query",
+            "Yes — WHERE filters rows first, then HAVING filters the resulting groups",
+            "Yes, but they must filter the same column",
+            "Only in SQL Server, not other databases"
+          ],
+          "correct_index": 1,
+          "explanation": "This is a very common real pattern: narrow down the raw rows with WHERE, then narrow down the summarized groups with HAVING."
+        }
       ]
     },
     {
@@ -379,7 +519,7 @@
       ],
       "estimated_min": 50,
       "sort_order": 6,
-      "theory_md": "## JOINs\n\nReal databases split data across tables. JOINs combine them.\n\n**INNER JOIN** \u2014 only matched rows:\n```sql\nSELECT p.patient_name, b.bill_amount\nFROM patients p\nINNER JOIN billing b ON p.patient_id = b.patient_id;\n```\n\n**LEFT JOIN** \u2014 all left rows, NULL where no match:\n```sql\nSELECT p.patient_name, b.bill_amount\nFROM patients p\nLEFT JOIN billing b ON p.patient_id = b.patient_id;\n-- patients with no bill get NULL for bill_amount\n```\n\n**Aliases** (p, b) keep queries readable.\n\n**Business context:** Most reports require 3-5 tables. A patient report needs patients + billing + diagnoses. Mastering JOINs is the defining skill of a working analyst.\n\n## \ud83d\udd17 How This Connects\n- **Power BI**: this is the exact same concept as the Data Modelling & Relationships lesson \u2014 a JOIN *is* a relationship, just written as code instead of drawn as a line between tables.\n- **Excel**: VLOOKUP/XLOOKUP are the manual, one-column-at-a-time version of what a JOIN does all at once.\n- **Python**: pandas' `.merge()` is a direct equivalent \u2014 same logic, same join types (inner, left, right, outer).",
+      "theory_md": "## JOINs\n\nReal databases split data across tables. JOINs combine them.\n\n**INNER JOIN** — only matched rows:\n```sql\nSELECT p.patient_name, b.bill_amount\nFROM patients p\nINNER JOIN billing b ON p.patient_id = b.patient_id;\n```\n\n**LEFT JOIN** — all left rows, NULL where no match:\n```sql\nSELECT p.patient_name, b.bill_amount\nFROM patients p\nLEFT JOIN billing b ON p.patient_id = b.patient_id;\n-- patients with no bill get NULL for bill_amount\n```\n\n**Aliases** (p, b) keep queries readable.\n\n**Business context:** Most reports require 3-5 tables. A patient report needs patients + billing + diagnoses. Mastering JOINs is the defining skill of a working analyst.\n\n## 🔗 How This Connects\n- **Power BI**: this is the exact same concept as the Data Modelling & Relationships lesson — a JOIN *is* a relationship, just written as code instead of drawn as a line between tables.\n- **Excel**: VLOOKUP/XLOOKUP are the manual, one-column-at-a-time version of what a JOIN does all at once.\n- **Python**: pandas' `.merge()` is a direct equivalent — same logic, same join types (inner, left, right, outer).",
       "exercises": [
         {
           "id": "sql-j1-e1",
@@ -436,19 +576,54 @@
           "evaluation_mode": "exact",
           "points": 40
         }
+      ],
+      "quiz": [
+        {
+          "question": "What does an INNER JOIN return?",
+          "options": [
+            "All rows from both tables regardless of match",
+            "Only rows that have a match in both tables",
+            "Only rows from the left table",
+            "A random sample of matched rows"
+          ],
+          "correct_index": 1,
+          "explanation": "INNER JOIN keeps only rows where the join condition finds a match on both sides — unmatched rows from either table are dropped."
+        },
+        {
+          "question": "With a LEFT JOIN, what happens to a patient with no matching billing record?",
+          "options": [
+            "The patient row is dropped entirely",
+            "The patient row appears with NULL in the billing columns",
+            "The query throws an error",
+            "The billing columns are filled with zero"
+          ],
+          "correct_index": 1,
+          "explanation": "LEFT JOIN always keeps every row from the left (first-named) table, filling in NULL for any columns from the right table when there's no match."
+        },
+        {
+          "question": "Why do JOINs use table aliases like `p` and `b`?",
+          "options": [
+            "They're required by SQL syntax",
+            "To make queries shorter and more readable, especially with repeated or same-named columns",
+            "They make the query run faster",
+            "They're only needed for LEFT JOINs"
+          ],
+          "correct_index": 1,
+          "explanation": "Aliases are a readability convention, not a requirement — but once a query joins 3+ tables, `p.patient_name` is much clearer than repeating full table names."
+        }
       ]
     },
     {
       "id": "sql-subqueries",
       "title": "Subqueries",
-      "description": "Queries inside queries \u2014 powerful multi-step logic",
+      "description": "Queries inside queries — powerful multi-step logic",
       "level": "intermediate",
       "prerequisites": [
         "sql-joins"
       ],
       "estimated_min": 40,
       "sort_order": 7,
-      "theory_md": "## Subqueries\n\nA subquery is a query nested inside another query.\n\n**In WHERE:**\n```sql\n-- Patients older than the average age\nSELECT patient_name, age\nFROM patients\nWHERE age > (SELECT AVG(age) FROM patients);\n```\n\n**In FROM (derived table):**\n```sql\nSELECT ward, avg_age\nFROM (\n  SELECT ward, AVG(age) as avg_age\n  FROM patients\n  GROUP BY ward\n) ward_stats\nWHERE avg_age > 40;\n```\n\n**With IN:**\n```sql\n-- Patients who have a billing record\nSELECT patient_name\nFROM patients\nWHERE patient_id IN (\n  SELECT DISTINCT patient_id FROM billing\n);\n```\n\n**Business context:** Subqueries answer multi-step questions: 'Show me only the top-performing wards' where 'top-performing' itself requires a calculation.\n\n## \ud83d\udd17 How This Connects\n- **Excel**: similar to nesting one formula inside another \u2014 the inner SELECT runs first, just like an inner formula evaluates before the outer one uses its result.\n- **Python**: comparable to computing an intermediate DataFrame first, then filtering or joining against it.",
+      "theory_md": "## Subqueries\n\nA subquery is a query nested inside another query.\n\n**In WHERE:**\n```sql\n-- Patients older than the average age\nSELECT patient_name, age\nFROM patients\nWHERE age > (SELECT AVG(age) FROM patients);\n```\n\n**In FROM (derived table):**\n```sql\nSELECT ward, avg_age\nFROM (\n  SELECT ward, AVG(age) as avg_age\n  FROM patients\n  GROUP BY ward\n) ward_stats\nWHERE avg_age > 40;\n```\n\n**With IN:**\n```sql\n-- Patients who have a billing record\nSELECT patient_name\nFROM patients\nWHERE patient_id IN (\n  SELECT DISTINCT patient_id FROM billing\n);\n```\n\n**Business context:** Subqueries answer multi-step questions: 'Show me only the top-performing wards' where 'top-performing' itself requires a calculation.\n\n## 🔗 How This Connects\n- **Excel**: similar to nesting one formula inside another — the inner SELECT runs first, just like an inner formula evaluates before the outer one uses its result.\n- **Python**: comparable to computing an intermediate DataFrame first, then filtering or joining against it.",
       "exercises": [
         {
           "id": "sql-sq1-e1",
@@ -472,6 +647,41 @@
           "evaluation_mode": "exact",
           "points": 45
         }
+      ],
+      "quiz": [
+        {
+          "question": "In `WHERE age > (SELECT AVG(age) FROM patients)`, what runs first?",
+          "options": [
+            "The outer query",
+            "The inner subquery — its single result is used by the outer query",
+            "Both run simultaneously",
+            "Neither runs without a JOIN"
+          ],
+          "correct_index": 1,
+          "explanation": "The subquery in parentheses is evaluated first to produce a single value (the average age), which the outer WHERE then compares against."
+        },
+        {
+          "question": "A subquery used inside FROM, wrapped in its own alias, is called what?",
+          "options": [
+            "A derived table",
+            "A CTE",
+            "A window function",
+            "A trigger"
+          ],
+          "correct_index": 0,
+          "explanation": "That pattern — a subquery treated as if it were a regular table — is called a derived table."
+        },
+        {
+          "question": "What does `WHERE patient_id IN (SELECT DISTINCT patient_id FROM billing)` find?",
+          "options": [
+            "Patients with no billing record",
+            "Patients who appear at least once in the billing table",
+            "All patients, regardless of billing",
+            "Only patients billed more than once"
+          ],
+          "correct_index": 1,
+          "explanation": "IN checks whether the outer row's patient_id shows up anywhere in the subquery's result set — so this returns patients who have at least one billing record."
+        }
       ]
     },
     {
@@ -484,7 +694,7 @@
       ],
       "estimated_min": 35,
       "sort_order": 8,
-      "theory_md": "## Common Table Expressions (CTEs)\n\nCTEs are named subqueries defined before the main query using WITH. They make complex queries readable.\n\n```sql\nWITH ward_stats AS (\n  SELECT ward,\n         COUNT(*) as patient_count,\n         AVG(age) as avg_age\n  FROM patients\n  GROUP BY ward\n)\nSELECT *\nFROM ward_stats\nWHERE patient_count > 20\nORDER BY avg_age DESC;\n```\n\n**Multiple CTEs:**\n```sql\nWITH\nadmitted AS (\n  SELECT * FROM patients WHERE discharge_date IS NULL\n),\nhigh_risk AS (\n  SELECT * FROM admitted WHERE age > 65\n)\nSELECT * FROM high_risk;\n```\n\n**Business context:** CTEs are how professional analysts structure complex queries \u2014 each step is named, readable, and reusable in the same query.\n\n## \ud83d\udd17 How This Connects\n- **Python**: the same instinct as breaking a long calculation into named variables or a function \u2014 a CTE just names an intermediate query step so the final query reads top-to-bottom instead of nested inside itself.\n- **Business**: this is also a storytelling skill \u2014 breaking one big confusing query into readable named steps mirrors breaking one big confusing slide into a clear narrative.",
+      "theory_md": "## Common Table Expressions (CTEs)\n\nCTEs are named subqueries defined before the main query using WITH. They make complex queries readable.\n\n```sql\nWITH ward_stats AS (\n  SELECT ward,\n         COUNT(*) as patient_count,\n         AVG(age) as avg_age\n  FROM patients\n  GROUP BY ward\n)\nSELECT *\nFROM ward_stats\nWHERE patient_count > 20\nORDER BY avg_age DESC;\n```\n\n**Multiple CTEs:**\n```sql\nWITH\nadmitted AS (\n  SELECT * FROM patients WHERE discharge_date IS NULL\n),\nhigh_risk AS (\n  SELECT * FROM admitted WHERE age > 65\n)\nSELECT * FROM high_risk;\n```\n\n**Business context:** CTEs are how professional analysts structure complex queries — each step is named, readable, and reusable in the same query.\n\n## 🔗 How This Connects\n- **Python**: the same instinct as breaking a long calculation into named variables or a function — a CTE just names an intermediate query step so the final query reads top-to-bottom instead of nested inside itself.\n- **Business**: this is also a storytelling skill — breaking one big confusing query into readable named steps mirrors breaking one big confusing slide into a clear narrative.",
       "exercises": [
         {
           "id": "sql-c1-e1",
@@ -508,19 +718,54 @@
           "evaluation_mode": "exact",
           "points": 50
         }
+      ],
+      "quiz": [
+        {
+          "question": "What keyword starts a CTE?",
+          "options": [
+            "FROM",
+            "WITH",
+            "AS",
+            "HAVING"
+          ],
+          "correct_index": 1,
+          "explanation": "WITH defines one or more named, temporary result sets that the main query can then reference by name."
+        },
+        {
+          "question": "Why use a CTE instead of a plain subquery?",
+          "options": [
+            "CTEs run faster in every database",
+            "CTEs give each step a name, making complex queries easier to read and reuse within the same query",
+            "CTEs are required for JOINs",
+            "Subqueries can't use WHERE"
+          ],
+          "correct_index": 1,
+          "explanation": "The performance is often similar — the real benefit is readability: naming each logical step top-to-bottom instead of nesting parentheses."
+        },
+        {
+          "question": "Can one CTE reference another CTE defined earlier in the same WITH clause?",
+          "options": [
+            "No, CTEs can never reference each other",
+            "Yes — as shown by 'high_risk' building on 'admitted' in the lesson",
+            "Only if they're in separate queries",
+            "Only for window functions"
+          ],
+          "correct_index": 1,
+          "explanation": "Multiple CTEs can chain together, each one built on the result of an earlier one — exactly like the admitted → high_risk example."
+        }
       ]
     },
     {
       "id": "sql-window",
       "title": "Window Functions",
-      "description": "RANK, ROW_NUMBER, LAG, running totals \u2014 advanced analytical queries",
+      "description": "RANK, ROW_NUMBER, LAG, running totals — advanced analytical queries",
       "level": "advanced",
       "prerequisites": [
         "sql-cte"
       ],
       "estimated_min": 60,
       "sort_order": 9,
-      "theory_md": "## Window Functions\n\nWindow functions compute values across a set of rows related to the current row \u2014 without collapsing rows like GROUP BY.\n\n```sql\nfunction() OVER (\n  PARTITION BY column   -- group within\n  ORDER BY column       -- order within group\n)\n```\n\n**Ranking:**\n```sql\nROW_NUMBER() OVER (PARTITION BY ward ORDER BY age DESC)\nRANK()       OVER (ORDER BY bill_amount DESC)  -- gaps on tie\nDENSE_RANK() OVER (ORDER BY bill_amount DESC)  -- no gaps\n```\n\n**Lag/Lead (compare to adjacent rows):**\n```sql\nLAG(bill_amount, 1) OVER (PARTITION BY patient_id ORDER BY bill_date)\nLEAD(bill_amount, 1) OVER (ORDER BY bill_date)\n```\n\n**Running totals:**\n```sql\nSUM(bill_amount) OVER (ORDER BY bill_date) as running_total\n```\n\n**Business context:** Month-over-month growth, running totals, customer ranking, top N per group \u2014 all window functions.\n\n## \ud83d\udd17 How This Connects\n- **Excel**: similar to a running total or rank formula that still shows every row (unlike a PivotTable, which collapses them).\n- **Python**: pandas' `.rolling()` and `.cumsum()` do the same running-calculation job.\n- **Statistics**: the Time Series lesson builds directly on this \u2014 trends and moving averages need per-row calculations exactly like window functions provide.",
+      "theory_md": "## Window Functions\n\nWindow functions compute values across a set of rows related to the current row — without collapsing rows like GROUP BY.\n\n```sql\nfunction() OVER (\n  PARTITION BY column   -- group within\n  ORDER BY column       -- order within group\n)\n```\n\n**Ranking:**\n```sql\nROW_NUMBER() OVER (PARTITION BY ward ORDER BY age DESC)\nRANK()       OVER (ORDER BY bill_amount DESC)  -- gaps on tie\nDENSE_RANK() OVER (ORDER BY bill_amount DESC)  -- no gaps\n```\n\n**Lag/Lead (compare to adjacent rows):**\n```sql\nLAG(bill_amount, 1) OVER (PARTITION BY patient_id ORDER BY bill_date)\nLEAD(bill_amount, 1) OVER (ORDER BY bill_date)\n```\n\n**Running totals:**\n```sql\nSUM(bill_amount) OVER (ORDER BY bill_date) as running_total\n```\n\n**Business context:** Month-over-month growth, running totals, customer ranking, top N per group — all window functions.\n\n## 🔗 How This Connects\n- **Excel**: similar to a running total or rank formula that still shows every row (unlike a PivotTable, which collapses them).\n- **Python**: pandas' `.rolling()` and `.cumsum()` do the same running-calculation job.\n- **Statistics**: the Time Series lesson builds directly on this — trends and moving averages need per-row calculations exactly like window functions provide.",
       "exercises": [
         {
           "id": "sql-wf1-e1",
@@ -555,19 +800,54 @@
           "evaluation_mode": "exact",
           "points": 60
         }
+      ],
+      "quiz": [
+        {
+          "question": "What's the key difference between a window function and GROUP BY?",
+          "options": [
+            "They're identical",
+            "Window functions collapse rows into one per group; GROUP BY keeps every row",
+            "GROUP BY collapses rows into one per group; window functions keep every original row",
+            "Window functions only work on dates"
+          ],
+          "correct_index": 2,
+          "explanation": "This is the defining feature of window functions: they compute an aggregate-like value (rank, running total, etc.) but keep every individual row visible, unlike GROUP BY which collapses rows."
+        },
+        {
+          "question": "What does PARTITION BY do inside an OVER() clause?",
+          "options": [
+            "Deletes rows outside the partition",
+            "Restarts the window calculation separately within each group",
+            "Sorts the entire table",
+            "Joins two tables together"
+          ],
+          "correct_index": 1,
+          "explanation": "PARTITION BY resets the calculation for each group — e.g. RANK() PARTITION BY ward restarts ranking from 1 within every ward."
+        },
+        {
+          "question": "Which function would you use to compare a row's value to the row before it (e.g. yesterday's billing)?",
+          "options": [
+            "RANK()",
+            "SUM() OVER",
+            "LAG()",
+            "COUNT(*)"
+          ],
+          "correct_index": 2,
+          "explanation": "LAG() reaches back to a previous row (LEAD() reaches forward) — the standard way to compute period-over-period comparisons."
+        }
       ]
     },
     {
       "id": "sql-case",
       "title": "CASE WHEN",
-      "description": "Conditional logic inside queries \u2014 build categories on the fly",
+      "description": "Conditional logic inside queries — build categories on the fly",
       "level": "intermediate",
       "prerequisites": [
         "sql-groupby"
       ],
       "estimated_min": 30,
       "sort_order": 10,
-      "theory_md": "## CASE WHEN\n\nCASE WHEN adds conditional logic directly inside SQL \u2014 like IF/ELSE.\n\n```sql\nSELECT patient_name, age,\n  CASE\n    WHEN age < 18 THEN 'Pediatric'\n    WHEN age BETWEEN 18 AND 60 THEN 'Adult'\n    ELSE 'Senior'\n  END as age_group\nFROM patients;\n```\n\n**In aggregations:**\n```sql\nSELECT\n  COUNT(CASE WHEN gender = 'Male' THEN 1 END) as male_count,\n  COUNT(CASE WHEN gender = 'Female' THEN 1 END) as female_count\nFROM patients;\n```\n\n**Business context:** Categorizing continuous data (age groups, revenue tiers, risk levels), pivoting rows to columns, conditional counts.\n\n## \ud83d\udd17 How This Connects\n- **Excel**: directly equivalent to nested IF statements \u2014 CASE WHEN is just SQL's syntax for the same branching logic.\n- **Python**: the same logic as an if/elif/else chain.\n- **Power BI**: DAX's `SWITCH()` function is the direct DAX equivalent of CASE WHEN.",
+      "theory_md": "## CASE WHEN\n\nCASE WHEN adds conditional logic directly inside SQL — like IF/ELSE.\n\n```sql\nSELECT patient_name, age,\n  CASE\n    WHEN age < 18 THEN 'Pediatric'\n    WHEN age BETWEEN 18 AND 60 THEN 'Adult'\n    ELSE 'Senior'\n  END as age_group\nFROM patients;\n```\n\n**In aggregations:**\n```sql\nSELECT\n  COUNT(CASE WHEN gender = 'Male' THEN 1 END) as male_count,\n  COUNT(CASE WHEN gender = 'Female' THEN 1 END) as female_count\nFROM patients;\n```\n\n**Business context:** Categorizing continuous data (age groups, revenue tiers, risk levels), pivoting rows to columns, conditional counts.\n\n## 🔗 How This Connects\n- **Excel**: directly equivalent to nested IF statements — CASE WHEN is just SQL's syntax for the same branching logic.\n- **Python**: the same logic as an if/elif/else chain.\n- **Power BI**: DAX's `SWITCH()` function is the direct DAX equivalent of CASE WHEN.",
       "exercises": [
         {
           "id": "sql-ca1-e1",
@@ -601,6 +881,41 @@
           "solution": "SELECT ward, COUNT(CASE WHEN gender='Male' THEN 1 END) as male_count, COUNT(CASE WHEN gender='Female' THEN 1 END) as female_count FROM patients GROUP BY ward ORDER BY ward",
           "evaluation_mode": "exact",
           "points": 40
+        }
+      ],
+      "quiz": [
+        {
+          "question": "CASE WHEN in SQL is most similar to which concept in other tools?",
+          "options": [
+            "A JOIN",
+            "Nested IF statements in Excel / if-elif-else in Python",
+            "A GROUP BY",
+            "A window function"
+          ],
+          "correct_index": 1,
+          "explanation": "CASE WHEN is SQL's branching logic — functionally identical to Excel's nested IFs or Python's if/elif/else."
+        },
+        {
+          "question": "What does `COUNT(CASE WHEN gender = 'Male' THEN 1 END)` compute?",
+          "options": [
+            "The total number of rows",
+            "The count of rows where gender is 'Male'",
+            "An average of all ages",
+            "A syntax error — CASE can't go inside COUNT"
+          ],
+          "correct_index": 1,
+          "explanation": "COUNT only counts non-null values — CASE returns 1 for matching rows and NULL (implicit ELSE) otherwise, so this is a conditional count."
+        },
+        {
+          "question": "What is CASE WHEN commonly used for in business reporting?",
+          "options": [
+            "Joining two tables",
+            "Turning continuous values like age into categories like 'Pediatric'/'Adult'/'Senior'",
+            "Sorting results alphabetically",
+            "Removing duplicate rows"
+          ],
+          "correct_index": 1,
+          "explanation": "Bucketing continuous data into named categories — age groups, revenue tiers, risk levels — is one of CASE WHEN's most common real-world jobs."
         }
       ]
     }

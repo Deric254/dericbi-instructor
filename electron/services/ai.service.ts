@@ -1,9 +1,16 @@
 import CryptoJS from 'crypto-js'
+import { safeStorage } from 'electron'
 import { v4 as uuidv4 } from 'uuid'
 import { getDb } from '../db/database'
 import { getMemorySummary, getSkillRatings } from './progress.service'
 
-const ENCRYPTION_KEY = 'dericbi-local-key-v1'
+// Legacy fallback only — kept so any key saved before this file switched to
+// safeStorage can still be read back and transparently re-saved in the new
+// format. Never used for new saves. A hardcoded key like this only ever
+// provided obfuscation, not real protection, since it ships inside the app
+// and is trivially recoverable by anyone who decompiles it (Electron apps
+// are just JS) — that's exactly why this moved to OS-level encryption.
+const LEGACY_ENCRYPTION_KEY = 'dericbi-local-key-v1'
 
 // ─────────────────────────────────────────────
 // API KEY MANAGEMENT
@@ -11,7 +18,7 @@ const ENCRYPTION_KEY = 'dericbi-local-key-v1'
 
 export function saveApiKey(userId: string, provider: string, key: string): void {
   const db = getDb()
-  const encrypted = CryptoJS.AES.encrypt(key, ENCRYPTION_KEY).toString()
+  const encrypted = encryptApiKey(key)
   db.prepare(`
     INSERT INTO api_keys (id, user_id, provider, key_encrypted)
     VALUES (?, ?, ?, ?)
@@ -28,11 +35,33 @@ export function getApiKey(userId: string, provider: string): string | null {
   `).get(userId, provider) as any
 
   if (!row) return null
+  return decryptApiKey(row.key_encrypted)
+}
 
+/** OS-keychain-backed encryption (macOS Keychain / Windows DPAPI / Linux
+ * Secret Service) via a per-machine key Electron manages — never embedded
+ * in the app itself, unlike the old static AES key. */
+function encryptApiKey(key: string): string {
+  if (safeStorage.isEncryptionAvailable()) {
+    return 'v2:' + safeStorage.encryptString(key).toString('base64')
+  }
+  // Rare fallback (some Linux setups without a keyring available) — still
+  // better than refusing to save the key at all.
+  console.warn('[ai] OS-level encryption unavailable, falling back to legacy encryption for this save')
+  return CryptoJS.AES.encrypt(key, LEGACY_ENCRYPTION_KEY).toString()
+}
+
+function decryptApiKey(stored: string): string | null {
   try {
-    const bytes = CryptoJS.AES.decrypt(row.key_encrypted, ENCRYPTION_KEY)
+    if (stored.startsWith('v2:')) {
+      const buffer = Buffer.from(stored.slice(3), 'base64')
+      return safeStorage.decryptString(buffer)
+    }
+    // Legacy format from before this switched to safeStorage.
+    const bytes = CryptoJS.AES.decrypt(stored, LEGACY_ENCRYPTION_KEY)
     return bytes.toString(CryptoJS.enc.Utf8)
-  } catch {
+  } catch (err) {
+    console.error('[ai] failed to decrypt stored API key', err)
     return null
   }
 }
@@ -270,24 +299,44 @@ async function callGemini(apiKey: string, systemPrompt: string, history: ChatMes
     { role: 'user', parts: [{ text: userMessage }] },
   ]
 
-  // gemini-flash-latest is Google's own maintained alias — it always points
-  // at the current Flash model, so this stays correct even as Google
-  // retires specific dated model names (which is what broke this before).
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: systemPrompt }] },
-        contents,
-        generationConfig: { maxOutputTokens: 1024, temperature: 0.7 },
-      }),
+  // Without an explicit timeout, fetch() will wait indefinitely if a
+  // request stalls (a common real-world case: flaky wifi, a captive
+  // portal, an overloaded provider). That leaves the chat UI's loading
+  // spinner stuck forever with no error and no way to recover short of
+  // restarting the app. 45s is generous for an LLM response while still
+  // eventually failing instead of hanging.
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 45_000)
+
+  let res: Response
+  try {
+    // gemini-flash-latest is Google's own maintained alias — it always points
+    // at the current Flash model, so this stays correct even as Google
+    // retires specific dated model names (which is what broke this before).
+    res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: systemPrompt }] },
+          contents,
+          generationConfig: { maxOutputTokens: 1024, temperature: 0.7 },
+        }),
+        signal: controller.signal,
+      }
+    )
+  } catch (err: any) {
+    if (err.name === 'AbortError') {
+      throw new Error('Gemini took too long to respond. Check your internet connection and try again.')
     }
-  )
+    throw new Error(`Could not reach Gemini: ${err.message}`)
+  } finally {
+    clearTimeout(timeout)
+  }
 
   if (!res.ok) {
-    const err = await res.json() as any
+    const err = await res.json().catch(() => ({})) as any
     throw new Error(err.error?.message ?? `Gemini error ${res.status}`)
   }
 
@@ -302,22 +351,36 @@ async function callOpenAI(apiKey: string, systemPrompt: string, history: ChatMes
     { role: 'user', content: userMessage },
   ]
 
-  const res = await fetch(`${baseUrl}/chat/completions`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model,
-      messages,
-      max_tokens: 1024,
-      temperature: 0.7,
-    }),
-  })
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 45_000)
+
+  let res: Response
+  try {
+    res = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        max_tokens: 1024,
+        temperature: 0.7,
+      }),
+      signal: controller.signal,
+    })
+  } catch (err: any) {
+    if (err.name === 'AbortError') {
+      throw new Error('The AI provider took too long to respond. Check your internet connection and try again.')
+    }
+    throw new Error(`Could not reach the AI provider: ${err.message}`)
+  } finally {
+    clearTimeout(timeout)
+  }
 
   if (!res.ok) {
-    const err = await res.json() as any
+    const err = await res.json().catch(() => ({})) as any
     throw new Error(err.error?.message ?? `API error ${res.status}`)
   }
 

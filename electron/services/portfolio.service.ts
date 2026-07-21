@@ -4,6 +4,20 @@ import { app, ipcMain, shell } from 'electron'
 import { v4 as uuidv4 } from 'uuid'
 import { getDb } from '../db/database'
 
+/** Same rationale as the wrapper in electron/ipc/handlers.ts: log failures
+ * with their channel name before they propagate, since a packaged app has
+ * no visible console otherwise. */
+function safeHandle(channel: string, listener: (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any) {
+  ipcMain.handle(channel, async (event, ...args) => {
+    try {
+      return await listener(event, ...args)
+    } catch (err) {
+      console.error(`[ipc:${channel}]`, err)
+      throw err
+    }
+  })
+}
+
 // ─────────────────────────────────────────────
 // TYPES
 // ─────────────────────────────────────────────
@@ -380,22 +394,22 @@ function sanitizeFilename(name: string) {
 export function registerPortfolioHandlers() {
   const db = getDb()
 
-  ipcMain.handle('portfolio:export', async (_: any, params: any) => {
+  safeHandle('portfolio:export', async (_: any, params: any) => {
     return exportProject(params)
   })
 
-  ipcMain.handle('portfolio:open-file', async (_: any, filePath: string) => {
+  safeHandle('portfolio:open-file', async (_: any, filePath: string) => {
     await shell.openPath(filePath)
     return { success: true }
   })
 
-  ipcMain.handle('portfolio:list', async (_: any, userId: string) => {
+  safeHandle('portfolio:list', async (_: any, userId: string) => {
     return db.prepare(`
       SELECT * FROM portfolio_items WHERE user_id = ? ORDER BY created_at DESC
     `).all(userId)
   })
 
-  ipcMain.handle('portfolio:create', async (_: any, params: any) => {
+  safeHandle('portfolio:create', async (_: any, params: any) => {
     const id = uuidv4()
     db.prepare(`
       INSERT INTO portfolio_items (id, user_id, project_id, title, summary, skills_used)
@@ -404,16 +418,16 @@ export function registerPortfolioHandlers() {
     return { success: true, id }
   })
 
-  ipcMain.handle('portfolio:delete', async (_: any, { userId, itemId }: any) => {
+  safeHandle('portfolio:delete', async (_: any, { userId, itemId }: any) => {
     db.prepare('DELETE FROM portfolio_items WHERE id = ? AND user_id = ?').run(itemId, userId)
     return { success: true }
   })
 
-  ipcMain.handle('projects:list', async (_: any, userId: string) => {
+  safeHandle('projects:list', async (_: any, userId: string) => {
     return db.prepare('SELECT * FROM projects WHERE user_id = ? ORDER BY started_at DESC').all(userId)
   })
 
-  ipcMain.handle('projects:create', async (_: any, params: any) => {
+  safeHandle('projects:create', async (_: any, params: any) => {
     const id = uuidv4()
     db.prepare(`
       INSERT INTO projects (id, user_id, title, description, project_type, domain, status, problem_statement)
@@ -422,7 +436,7 @@ export function registerPortfolioHandlers() {
     return { success: true, id }
   })
 
-  ipcMain.handle('projects:update', async (_: any, params: any) => {
+  safeHandle('projects:update', async (_: any, params: any) => {
     const fields = ['title', 'description', 'problem_statement', 'methodology', 'findings', 'recommendations', 'status', 'score', 'ai_evaluation']
     const updates: string[] = []
     const values: any[] = []
@@ -436,11 +450,11 @@ export function registerPortfolioHandlers() {
     return { success: true }
   })
 
-  ipcMain.handle('projects:get', async (_: any, { userId, projectId }: any) => {
+  safeHandle('projects:get', async (_: any, { userId, projectId }: any) => {
     return db.prepare('SELECT * FROM projects WHERE id = ? AND user_id = ?').get(projectId, userId)
   })
 
-  ipcMain.handle('projects:delete', async (_: any, { userId, projectId }: any) => {
+  safeHandle('projects:delete', async (_: any, { userId, projectId }: any) => {
     db.prepare('DELETE FROM projects WHERE id = ? AND user_id = ?').run(projectId, userId)
     return { success: true }
   })

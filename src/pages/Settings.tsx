@@ -4,6 +4,7 @@ import {
   Key, User, Info, RefreshCw, Bell, Moon, Cpu, ShieldQuestion, Lock,
 } from 'lucide-react'
 import { useAuthStore, useUIStore, notify } from '../store'
+import { reportApiError } from '../lib/apiError'
 
 export default function Settings() {
   const { user, token, logout: storeLogout } = useAuthStore()
@@ -12,13 +13,17 @@ export default function Settings() {
   const [checkingUpdate, setCheckingUpdate] = useState(false)
 
   useEffect(() => {
-    window.api.settings.getVersion().then((r: any) => setAppVersion(r.version))
+    window.api.settings.getVersion()
+      .then((r: any) => setAppVersion(r.version))
+      .catch((err: any) => reportApiError('load app version', err))
   }, [])
 
   const handleCheckForUpdates = async () => {
     setCheckingUpdate(true)
     try {
       await window.api.updater.check()
+    } catch (err) {
+      reportApiError('check for updates', err)
     } finally {
       // The result (up to date / update found) shows as a native dialog
       // from the main process — this just resets the button's own spinner
@@ -96,13 +101,17 @@ export default function Settings() {
 
   useEffect(() => {
     if (!user) return
-    window.api.ai.getProvider(user.id).then((r: any) => setProvider(r.provider))
+    window.api.ai.getProvider(user.id)
+      .then((r: any) => setProvider(r.provider))
+      .catch((err: any) => reportApiError('load your AI provider setting', err))
     for (const p of ALL_PROVIDER_IDS) {
       window.api.ai.hasKey(user.id, p).then((r: any) => {
         if (r.has_key) setKeySaved(prev => ({ ...prev, [p]: true }))
-      })
+      }).catch((err: any) => console.error(`[check ${p} key]`, err))
     }
-    window.api.settings.getAll().then((s: any) => setAppSettings(s || {}))
+    window.api.settings.getAll()
+      .then((s: any) => setAppSettings(s || {}))
+      .catch((err: any) => reportApiError('load app settings', err))
   }, [user])
 
   // Listen for navigate event from InstructorPanel
@@ -120,34 +129,61 @@ export default function Settings() {
   const saveKey = async (p: string) => {
     if (!user || !keyInputs[p]?.trim()) return
     setSaving(prev => ({ ...prev, [p]: true }))
-    await window.api.ai.saveKey(user.id, p, keyInputs[p].trim())
-    setKeySaved(prev => ({ ...prev, [p]: true }))
-    setKeyInputs(prev => ({ ...prev, [p]: '' }))
-    notify.success('API key saved', `${PROVIDERS.find(x => x.id === p)?.label} key configured`)
-    setSaving(prev => ({ ...prev, [p]: false }))
+    try {
+      await window.api.ai.saveKey(user.id, p, keyInputs[p].trim())
+      setKeySaved(prev => ({ ...prev, [p]: true }))
+      setKeyInputs(prev => ({ ...prev, [p]: '' }))
+      notify.success('API key saved', `${PROVIDERS.find(x => x.id === p)?.label} key configured`)
+    } catch (err) {
+      reportApiError('save this API key', err)
+    } finally {
+      setSaving(prev => ({ ...prev, [p]: false }))
+    }
   }
 
   const saveProfile = async () => {
     if (!user) return
     setSavingProfile(true)
-    await window.api.auth.updateProfile(user.id, profileForm)
-    notify.success('Profile updated')
-    setSavingProfile(false)
+    try {
+      await window.api.auth.updateProfile(user.id, profileForm)
+      notify.success('Profile updated')
+    } catch (err) {
+      reportApiError('update your profile', err)
+    } finally {
+      setSavingProfile(false)
+    }
   }
 
   const setActiveProvider = async (p: string) => {
+    const previous = provider
     setProvider(p)
-    await window.api.ai.setProvider(p)
-    notify.info('AI provider changed', PROVIDERS.find(x => x.id === p)?.label)
+    try {
+      await window.api.ai.setProvider(p)
+      notify.info('AI provider changed', PROVIDERS.find(x => x.id === p)?.label)
+    } catch (err) {
+      setProvider(previous)
+      reportApiError('change your AI provider', err)
+    }
   }
 
   const saveSetting = async (key: string, value: string) => {
-    await window.api.settings.set(key, value)
-    setAppSettings(prev => ({ ...prev, [key]: value }))
+    try {
+      await window.api.settings.set(key, value)
+      setAppSettings(prev => ({ ...prev, [key]: value }))
+    } catch (err) {
+      reportApiError('save this setting', err)
+    }
   }
 
   const handleLogout = async () => {
-    if (token) await window.api.auth.logout(token)
+    try {
+      if (token) await window.api.auth.logout(token)
+    } catch (err) {
+      // Still log the person out locally even if invalidating the
+      // server-side session fails — staying "logged in" to a broken
+      // backend call is worse than a session that outlives its token.
+      console.error('[logout]', err)
+    }
     storeLogout()
   }
 
@@ -321,6 +357,11 @@ export default function Settings() {
           </div>
         </Section>
 
+        {/* ── License ── */}
+        <Section icon={<Key size={15} />} title="License">
+          <LicenseSection />
+        </Section>
+
 
         {/* ── Security ── */}
         <Section icon={<ShieldQuestion size={15} />} title="Security">
@@ -409,11 +450,16 @@ function SecuritySection() {
   const saveSecQuestion = async () => {
     if (!user || !secAnswer.trim()) return
     setSavingSec(true)
-    await window.api.auth.setSecurityQuestion(user.id, secQuestion, secAnswer)
-    notify.success('Security question saved')
-    setSecAnswer('')
-    setMode('idle')
-    setSavingSec(false)
+    try {
+      await window.api.auth.setSecurityQuestion(user.id, secQuestion, secAnswer)
+      notify.success('Security question saved')
+      setSecAnswer('')
+      setMode('idle')
+    } catch (err) {
+      reportApiError('save your security question', err)
+    } finally {
+      setSavingSec(false)
+    }
   }
 
   const changePassword = async () => {
@@ -422,15 +468,20 @@ function SecuritySection() {
     if (pwForm.next !== pwForm.confirm) { setPwError('New passwords do not match.'); return }
     if (pwForm.next.length < 6) { setPwError('New password must be at least 6 characters.'); return }
     setSavingPw(true)
-    const r = await window.api.auth.changePassword(user.id, pwForm.current, pwForm.next)
-    if (r.success) {
-      notify.success('Password changed successfully')
-      setPwForm({ current: '', next: '', confirm: '' })
-      setMode('idle')
-    } else {
-      setPwError(r.error ?? 'Failed to change password.')
+    try {
+      const r = await window.api.auth.changePassword(user.id, pwForm.current, pwForm.next)
+      if (r.success) {
+        notify.success('Password changed successfully')
+        setPwForm({ current: '', next: '', confirm: '' })
+        setMode('idle')
+      } else {
+        setPwError(r.error ?? 'Failed to change password.')
+      }
+    } catch (err: any) {
+      setPwError(err?.message || 'Something went wrong changing your password. Try again.')
+    } finally {
+      setSavingPw(false)
     }
-    setSavingPw(false)
   }
 
   return (
@@ -507,6 +558,58 @@ function SecuritySection() {
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
+// LICENSE SECTION COMPONENT
+// ─────────────────────────────────────────────
+
+function LicenseSection() {
+  const [ref, setRef] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [confirming, setConfirming] = useState(false)
+
+  useEffect(() => {
+    window.api.license.status()
+      .then((r) => setRef(r.ref ?? null))
+      .catch((err: any) => reportApiError('load license status', err))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const deactivate = async () => {
+    if (!confirming) {
+      setConfirming(true)
+      setTimeout(() => setConfirming(false), 3000)
+      return
+    }
+    try {
+      await window.api.license.deactivate()
+      notify.success('Device deactivated', 'Restart the app to activate it again — with this key or a different one.')
+      setConfirming(false)
+    } catch (err) {
+      reportApiError('deactivate this device', err)
+    }
+  }
+
+  return (
+    <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+        <CheckCircle size={13} color="var(--success)" />
+        <span style={{ color: 'var(--text-secondary)' }}>
+          {loading ? 'Checking…' : 'Active on this device'}
+        </span>
+      </div>
+      {ref && <div>Reference: <span style={{ fontFamily: 'var(--font-mono)' }}>{ref}</span></div>}
+      <div style={{ marginTop: 16, padding: '10px 14px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius)', border: '1px solid var(--border)', fontSize: 11, lineHeight: 1.6 }}>
+        This license is locked to this device. Deactivating clears it locally — use this before
+        reinstalling on the same machine, or if you're moving to a new one and want to activate
+        there instead.
+      </div>
+      <button className="btn btn-secondary btn-sm" style={{ marginTop: 12 }} onClick={deactivate}>
+        {confirming ? 'Click again to confirm' : 'Deactivate This Device'}
+      </button>
     </div>
   )
 }

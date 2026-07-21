@@ -3,6 +3,7 @@ import { Eye, EyeOff, ArrowRight, ArrowLeft, Check, ShieldQuestion, KeyRound, Re
 import AppLogo from '../components/ui/AppLogo'
 import { MinimalTitlebar } from '../components/layout/Titlebar'
 import { useAuthStore, notify } from '../store'
+import { reportApiError } from '../lib/apiError'
 
 type Screen = 'login' | 'register' | 'onboarding' | 'forgot' | 'reset'
 
@@ -438,9 +439,9 @@ function ResetPassword({ email, onBack, onSuccess }: { email: string; onBack: ()
   const [error, setError] = useState('')
 
   useEffect(() => {
-    window.api.auth.getSecurityQuestion(email).then((r: any) => {
-      if (r) setQuestion(r.question)
-    })
+    window.api.auth.getSecurityQuestion(email)
+      .then((r: any) => { if (r) setQuestion(r.question) })
+      .catch((err: any) => reportApiError('load your security question', err))
   }, [email])
 
   const handleReset = async (e: React.FormEvent) => {

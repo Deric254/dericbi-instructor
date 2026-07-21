@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Trophy, Star, Lock, CheckCircle, Zap, Award } from 'lucide-react'
 import { useAuthStore } from '../store'
+import { PageError } from '../components/ui/PageState'
+import { reportApiError } from '../lib/apiError'
 
 const RARITY_ORDER = { legendary: 0, epic: 1, rare: 2, common: 3 }
 const RARITY_COLOR: Record<string, string> = {
@@ -12,12 +14,20 @@ export default function Achievements() {
   const { user } = useAuthStore()
   const [data, setData] = useState<{ earned: any[]; locked: any[] }>({ earned: [], locked: [] })
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [filter, setFilter] = useState<'all' | 'earned' | 'locked'>('all')
 
-  useEffect(() => {
+  const load = () => {
     if (!user) return
-    window.api.progress.achievements(user.id).then((d: any) => { setData(d); setLoading(false) })
-  }, [user])
+    setLoading(true)
+    setLoadError(false)
+    window.api.progress.achievements(user.id)
+      .then((d: any) => setData(d))
+      .catch((err) => { reportApiError('load achievements', err); setLoadError(true) })
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(load, [user])
 
   const allAchs = [
     ...data.earned.map(a => ({ ...a, _earned: true })),
@@ -52,7 +62,9 @@ export default function Achievements() {
       </div>
 
       <div style={{ flex: 1, overflow: 'auto', padding: 24 }}>
-        {loading ? (
+        {loadError ? (
+          <PageError message="Couldn't load your achievements." onRetry={load} />
+        ) : loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}><div className="spinner" /></div>
         ) : (
           <>

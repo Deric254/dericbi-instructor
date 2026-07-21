@@ -10,14 +10,14 @@
       "prerequisites": [],
       "estimated_min": 30,
       "sort_order": 1,
-      "theory_md": "## Business Thinking for Analysts\n\nTechnical skills are only half the job. The other half is understanding the **business problem** before writing a single query.\n\n### The Analyst's problem-solving loop\n1. **Clarify the question** \u2014 what decision will this analysis support?\n2. **Identify the data** \u2014 what do we have, and what's missing?\n3. **Analyse** \u2014 SQL, Python, Excel, Power BI.\n4. **Insight, not just data** \u2014 what does this mean for the business?\n5. **Recommend** \u2014 a clear, actionable next step.\n\n### The 5 Whys\nWhen a stakeholder says \"sales are down\", ask *why* five times until you reach a root cause \u2014 not just a symptom.\n\n## \ud83d\udd17 How This Connects\n- **Every module**: this lesson is the \"why\" behind everything technical taught elsewhere in the course \u2014 SQL, Excel, Python, Power BI, and Statistics are all tools; this lesson is how you decide which tool to reach for and why the answer matters to someone.",
+      "theory_md": "## Business Thinking for Analysts\n\nTechnical skills are only half the job. The other half is understanding the **business problem** before writing a single query.\n\n### The Analyst's problem-solving loop\n1. **Clarify the question** — what decision will this analysis support?\n2. **Identify the data** — what do we have, and what's missing?\n3. **Analyse** — SQL, Python, Excel, Power BI.\n4. **Insight, not just data** — what does this mean for the business?\n5. **Recommend** — a clear, actionable next step.\n\n### The 5 Whys\nWhen a stakeholder says \"sales are down\", ask *why* five times until you reach a root cause — not just a symptom.\n\n## 🔗 How This Connects\n- **Every module**: this lesson is the \"why\" behind everything technical taught elsewhere in the course — SQL, Excel, Python, Power BI, and Statistics are all tools; this lesson is how you decide which tool to reach for and why the answer matters to someone.",
       "exercises": [
         {
           "id": "business-thinking-ex1",
           "exercise_type": "freeform",
           "title": "Frame the business question",
           "prompt": "A hospital manager tells you: 'We spend too much on supplies.' Before analysing any data, what are the first three clarifying questions you would ask?",
-          "hint_1": "Think about what 'too much' means \u2014 compared to what?",
+          "hint_1": "Think about what 'too much' means — compared to what?",
           "hint_2": "Consider time, department, and what decisions the manager wants to make.",
           "hint_3": "Examples: (1) Which departments? (2) Too much vs last year or vs budget? (3) What decision will you make with this information?",
           "solution": "Clarifying questions should cover: scope (which departments/supplies), baseline (compared to what: budget, last year, benchmarks), and intended decision (what action will follow the analysis).",
@@ -66,49 +66,234 @@
       "id": "business-metrics",
       "module": "business",
       "title": "Key Business Metrics",
-      "description": "Revenue, cost, margin, churn, conversion \u2014 the metrics every analyst must know cold.",
+      "description": "Revenue, cost, margin, churn, conversion — the metrics every analyst must know cold.",
       "level": "beginner",
       "prerequisites": [
         "business-thinking-intro"
       ],
       "estimated_min": 35,
       "sort_order": 2,
-      "theory_md": "## Key Business Metrics\n\n### Financial\n- **Revenue** \u2014 money earned from sales.\n- **Cost of Goods Sold (COGS)** \u2014 direct costs to produce what was sold.\n- **Gross Margin** = (Revenue \u2212 COGS) / Revenue \u00d7 100%.\n- **Net Profit Margin** = Net Profit / Revenue \u00d7 100%.\n\n### Customer\n- **Churn Rate** \u2014 % of customers lost in a period.\n- **Customer Lifetime Value (CLV)** \u2014 total revenue expected from one customer.\n- **Conversion Rate** \u2014 % of prospects who become customers.\n\n### Operational\n- **Average Handle Time** \u2014 avg time to process one unit of work.\n- **Throughput** \u2014 units processed per period.\n- **Utilisation Rate** \u2014 % of capacity being used.\n\n## \ud83d\udd17 How This Connects\n- **SQL**: most business metrics are literally SQL aggregate queries (`SUM`, `AVG`, `COUNT`) with a business name attached.\n- **Statistics**: the Descriptive Statistics lesson's cautions about mean vs. median apply directly here \u2014 a badly chosen metric can mislead a whole company.",
+      "theory_md": "## Key Business Metrics\n\n### Financial\n- **Revenue** — money earned from sales.\n- **Cost of Goods Sold (COGS)** — direct costs to produce what was sold.\n- **Gross Margin** = (Revenue − COGS) / Revenue × 100%.\n- **Net Profit Margin** = Net Profit / Revenue × 100%.\n\n### Customer\n- **Churn Rate** — % of customers lost in a period.\n- **Customer Lifetime Value (CLV)** — total revenue expected from one customer.\n- **Conversion Rate** — % of prospects who become customers.\n\n### Operational\n- **Average Handle Time** — avg time to process one unit of work.\n- **Throughput** — units processed per period.\n- **Utilisation Rate** — % of capacity being used.\n\n## 🔗 How This Connects\n- **SQL**: most business metrics are literally SQL aggregate queries (`SUM`, `AVG`, `COUNT`) with a business name attached.\n- **Statistics**: the Descriptive Statistics lesson's cautions about mean vs. median apply directly here — a badly chosen metric can mislead a whole company.",
       "exercises": [
         {
           "id": "business-metrics-ex1",
           "exercise_type": "freeform",
           "title": "Calculate Gross Margin",
           "prompt": "A company has Revenue of KES 5,000,000 and COGS of KES 3,200,000. Calculate the Gross Margin percentage and explain what it means.",
-          "hint_1": "Gross Margin % = (Revenue - COGS) / Revenue \u00d7 100.",
-          "hint_2": "(5,000,000 - 3,200,000) / 5,000,000 \u00d7 100.",
-          "hint_3": "(1,800,000 / 5,000,000) \u00d7 100 = 36%. For every KES 100 of revenue, KES 36 is left after direct costs.",
-          "solution": "Gross Margin = (5,000,000 - 3,200,000) / 5,000,000 \u00d7 100 = 36%. This means 36 cents of every shilling of revenue remains after paying direct production costs.",
+          "hint_1": "Gross Margin % = (Revenue - COGS) / Revenue × 100.",
+          "hint_2": "(5,000,000 - 3,200,000) / 5,000,000 × 100.",
+          "hint_3": "(1,800,000 / 5,000,000) × 100 = 36%. For every KES 100 of revenue, KES 36 is left after direct costs.",
+          "solution": "Gross Margin = (5,000,000 - 3,200,000) / 5,000,000 × 100 = 36%. This means 36 cents of every shilling of revenue remains after paying direct production costs.",
           "evaluation_mode": "ai_review",
           "points": 20,
           "sort_order": 1
         }
+      ],
+      "quiz": [
+        {
+          "question": "How is Gross Margin calculated?",
+          "options": [
+            "Revenue - Net Profit",
+            "(Revenue - COGS) / Revenue × 100%",
+            "COGS / Revenue",
+            "Net Profit / COGS"
+          ],
+          "correct_index": 1,
+          "explanation": "Gross Margin shows what percentage of revenue remains after direct production costs (COGS) are subtracted, before other expenses."
+        },
+        {
+          "question": "What does Churn Rate measure?",
+          "options": [
+            "Total revenue earned",
+            "The percentage of customers lost in a given period",
+            "The average time to process a task",
+            "How many prospects became customers"
+          ],
+          "correct_index": 1,
+          "explanation": "Churn rate tracks customer loss over a period — a core health metric for any subscription or recurring-revenue business."
+        },
+        {
+          "question": "According to the lesson, what are most business metrics 'literally' at the database level?",
+          "options": [
+            "Random numbers with no formula",
+            "SQL aggregate queries (SUM, AVG, COUNT) with a business name attached",
+            "Always manually entered by finance teams",
+            "Impossible to calculate from raw data"
+          ],
+          "correct_index": 1,
+          "explanation": "This is the direct cross-module link: Revenue, Churn Rate, Conversion Rate — nearly every business metric is really just a GROUP BY + aggregate query wearing a business label."
+        }
       ]
+    },
+    {
+      "id": "business-market-analysis",
+      "title": "Competitive & Market Analysis",
+      "description": "Frame a business situation against its market before diving into internal data",
+      "level": "intermediate",
+      "prerequisites": [
+        "business-metrics"
+      ],
+      "estimated_min": 35,
+      "theory_md": "## Competitive & Market Analysis\n\nInternal metrics answer \"how are we doing.\" Market analysis answers the question a stakeholder actually cares about next: \"how are we doing **compared to what's possible**?\"\n\n### SWOT — the fastest situational framework\n- **Strengths** — internal advantages you control.\n- **Weaknesses** — internal gaps you control.\n- **Opportunities** — external factors that could help you.\n- **Threats** — external factors that could hurt you.\n\nThe most common mistake: mixing internal and external factors into the wrong quadrant (e.g. listing \"a competitor's new product\" as a Weakness — it's a Threat, since you don't control it).\n\n### Porter's Five Forces — how attractive is this market, structurally?\n1. **Competitive rivalry** — how many players, how aggressively do they compete on price?\n2. **Threat of new entrants** — how easy is it for a new competitor to show up?\n3. **Bargaining power of suppliers** — can suppliers dictate terms to you?\n4. **Bargaining power of buyers** — can customers easily switch or demand discounts?\n5. **Threat of substitutes** — is there a fundamentally different way to solve the same problem?\n\nA market with high rivalry, low entry barriers, and powerful buyers is structurally hard to make money in, regardless of how well any single company executes.\n\n### Market sizing (TAM / SAM / SOM)\n- **TAM** (Total Addressable Market) — the total demand if you captured 100% of the market.\n- **SAM** (Serviceable Addressable Market) — the portion you could realistically reach given your current business model and geography.\n- **SOM** (Serviceable Obtainable Market) — the portion you could realistically capture given actual competition.\n\n```\nTAM = total market demand\nSAM = TAM × (segment you can serve)\nSOM = SAM × (realistic capturable share)\n```\n\n**Business context:** Before recommending \"we should invest more in X,\" a market-aware analyst checks whether the market itself has room to grow, whether competitors already dominate it, and whether the underlying economics even support the move — internal data alone can't answer any of that.\n\n## 🔗 How This Connects\n- **Statistics**: sizing a SAM/SOM often starts from the same sampling and estimation logic used in confidence intervals — you're estimating an unknown population value from partial data, with appropriate humility about the uncertainty.\n- **Business (KPI Design)**: Five Forces context often explains *why* a KPI target is realistic or not — a North Star metric goal set without market context can be structurally impossible to hit.",
+      "exercises": [
+        {
+          "id": "business-market-ex1",
+          "exercise_type": "freeform",
+          "title": "Classify a SWOT item correctly",
+          "prompt": "A competitor just launched a cheaper alternative to your product. Is this a Weakness or a Threat in a SWOT analysis, and why does the distinction matter?",
+          "hint_1": "Ask whether this is something your company controls or something happening externally.",
+          "hint_2": "You don't control what competitors do — that puts it outside the 'internal' quadrants.",
+          "hint_3": "It's a Threat, not a Weakness — it's an external factor outside your control. Weaknesses are internal gaps you could act on directly; Threats require a different kind of response (usually strategic, not operational).",
+          "solution": "This is a Threat, not a Weakness. Weaknesses are internal factors you control and can directly fix; a competitor's move is external and outside your control. Misclassifying it as a Weakness would wrongly suggest an internal fix alone can solve it, when a strategic market response is usually what's actually needed.",
+          "evaluation_mode": "ai_review",
+          "points": 15,
+          "sort_order": 1
+        },
+        {
+          "id": "business-market-ex2",
+          "exercise_type": "freeform",
+          "title": "Estimate TAM/SAM/SOM",
+          "prompt": "You're launching a project-management tool for small businesses (under 50 employees) in your country. Sketch a rough approach for estimating TAM, SAM, and SOM — you don't need exact numbers, just describe the logic for each.",
+          "hint_1": "Start broad (everyone who could ever want this) and narrow down at each step.",
+          "hint_2": "TAM = all businesses that could use any project tool; SAM = the small-business segment you can realistically reach; SOM = the share you could realistically win given competitors.",
+          "hint_3": "TAM: total spend on project-management tools across all businesses. SAM: narrow to small businesses under 50 employees in your country. SOM: narrow further to a realistic capturable share given existing competitors and your go-to-market capacity.",
+          "solution": "TAM: total market spend on project-management tools across all company sizes and geographies. SAM: narrow that down to small businesses (under 50 employees) in your specific country — the segment your product and go-to-market can actually serve. SOM: narrow further to a realistic share of that segment you could capture given existing competitors and your actual sales/marketing capacity — not 100% of SAM, a defensible fraction of it.",
+          "evaluation_mode": "ai_review",
+          "points": 15,
+          "sort_order": 2
+        }
+      ],
+      "quiz": [
+        {
+          "question": "In a SWOT analysis, where does a competitor's new product launch belong?",
+          "options": [
+            "Strength",
+            "Weakness",
+            "Opportunity",
+            "Threat"
+          ],
+          "correct_index": 3,
+          "explanation": "It's external and outside your control — that places it in Threats, not Weaknesses, which are reserved for internal factors you control."
+        },
+        {
+          "question": "According to Porter's Five Forces, what makes a market structurally hard to profit in?",
+          "options": [
+            "Low competitive rivalry and high entry barriers",
+            "High rivalry, low barriers to new entrants, and powerful buyers",
+            "A small number of loyal customers",
+            "High supplier bargaining power alone, with nothing else"
+          ],
+          "correct_index": 1,
+          "explanation": "When competitors fight hard on price, new entrants can show up easily, and customers can push back on price, the underlying economics of the market itself work against profitability — regardless of execution quality."
+        },
+        {
+          "question": "What does SOM (Serviceable Obtainable Market) represent?",
+          "options": [
+            "The entire theoretical market demand",
+            "The realistic share of the market you could actually capture given competition",
+            "Only your current customers",
+            "The market size five years from now"
+          ],
+          "correct_index": 1,
+          "explanation": "SOM narrows TAM down twice — first to what you can serve (SAM), then to what you could realistically win given real competitors, not just theoretical demand."
+        }
+      ],
+      "sort_order": 3
+    },
+    {
+      "id": "business-unit-economics",
+      "title": "Pricing & Unit Economics",
+      "description": "Does the business make money on each customer, and how would you know?",
+      "level": "intermediate",
+      "prerequisites": [
+        "business-metrics"
+      ],
+      "estimated_min": 35,
+      "theory_md": "## Pricing & Unit Economics\n\nRevenue growing is not the same as the business getting healthier. Unit economics answers the harder question: does each customer make the company money, and by how much?\n\n### The core numbers\n- **CAC (Customer Acquisition Cost)** = total sales & marketing spend / number of new customers acquired.\n- **LTV / CLV (Lifetime Value)** = average revenue per customer × average customer lifespan (or, more precisely, the sum of expected future profit from a customer).\n- **LTV:CAC ratio** — the single most-watched unit economics number.\n  - Below 1:1 → losing money on every customer, unsustainable.\n  - Around 1:1–2:1 → break-even to thin margin, risky.\n  - 3:1 or higher → generally considered healthy.\n- **Payback period** = CAC / monthly gross profit per customer — how many months until a customer \"pays back\" what it cost to acquire them.\n\n```\nLTV:CAC = LTV / CAC\nPayback period (months) = CAC / (monthly revenue per customer × gross margin %)\n```\n\n### Why growth can hide a broken business\nA company can show impressive revenue growth while burning cash on every single new customer, if CAC exceeds LTV. This is the classic \"growth at all costs\" trap — the metric that looks great (revenue) can mask the metric that actually determines survival (unit economics).\n\n### Pricing strategy basics\n- **Cost-plus pricing** — cost + fixed markup. Simple, but ignores what customers actually value.\n- **Value-based pricing** — price set by what the customer perceives the value to be worth, not by your cost. Usually more profitable, harder to execute well.\n- **Competitive pricing** — anchored to what competitors charge. Fast to set, risks a race to the bottom.\n\n### Sensitivity check\nBefore recommending a price change, model the break-even: how much would volume need to drop to make a price increase net-negative for revenue?\n```\nBreak-even volume drop % ≈ price increase % / (price increase % + current margin %)\n```\n\n**Business context:** Any \"should we lower prices to grow faster\" or \"can we afford to spend more on marketing\" question is fundamentally a unit economics question — the answer depends entirely on whether the resulting customers pay back what they cost.\n\n## 🔗 How This Connects\n- **SQL/Python**: CAC and LTV are both GROUP BY / groupby aggregations at their core — cohort-based LTV calculations are one of the most common real analyst queries.\n- **Business (Financial Modelling)**: unit economics assumptions (CAC, margin, retention) are exactly the yellow assumption cells that drive a revenue model's scenario analysis.",
+      "exercises": [
+        {
+          "id": "business-unit-ex1",
+          "exercise_type": "freeform",
+          "title": "Calculate and interpret LTV:CAC",
+          "prompt": "A company spends $50,000/month on sales and marketing and acquires 100 new customers per month. Average customer lifetime value is $300. Calculate CAC and the LTV:CAC ratio, then assess whether this looks healthy.",
+          "hint_1": "CAC = total acquisition spend / number of new customers.",
+          "hint_2": "CAC = $50,000 / 100 = $500. Compare that to the $300 LTV.",
+          "hint_3": "CAC = $500. LTV:CAC = $300 / $500 = 0.6:1 — well below the healthy 3:1 benchmark. This company is losing money on every customer it acquires.",
+          "solution": "CAC = $50,000 / 100 = $500 per customer. LTV:CAC = $300 / $500 = 0.6:1. This is well below the healthy 3:1 benchmark, and even below 1:1 — the company is spending more to acquire each customer than that customer will ever be worth, an unsustainable position regardless of how fast revenue is growing.",
+          "evaluation_mode": "ai_review",
+          "points": 20,
+          "sort_order": 1
+        },
+        {
+          "id": "business-unit-ex2",
+          "exercise_type": "freeform",
+          "title": "Diagnose a growth trap",
+          "prompt": "A startup's revenue doubled year over year and leadership is celebrating. What unit economics questions would you want answered before agreeing the business is actually healthier?",
+          "hint_1": "Revenue growth alone doesn't tell you whether each new customer is profitable.",
+          "hint_2": "You'd want to know CAC, LTV, the ratio between them, and how they've trended alongside the growth.",
+          "hint_3": "Ask: what happened to CAC and LTV over the same period? Is the LTV:CAC ratio improving or worsening? Is payback period getting longer? Revenue growth funded by worsening unit economics is a warning sign, not a win.",
+          "solution": "Revenue growth alone says nothing about profitability per customer. The key questions: has CAC risen alongside growth (often it does, as easy customers get acquired first)? Has LTV held steady or eroded? Is the LTV:CAC ratio improving or getting worse? Is payback period lengthening? If growth was bought by increasingly expensive or lower-value customers, the business could be getting structurally weaker even as the top-line number looks great.",
+          "evaluation_mode": "ai_review",
+          "points": 20,
+          "sort_order": 2
+        }
+      ],
+      "quiz": [
+        {
+          "question": "What does CAC (Customer Acquisition Cost) measure?",
+          "options": [
+            "Total lifetime revenue from a customer",
+            "Total sales & marketing spend divided by the number of new customers acquired",
+            "The price of the product",
+            "Monthly recurring revenue"
+          ],
+          "correct_index": 1,
+          "explanation": "CAC is a cost-per-acquisition metric — how much, on average, the company spends to win each new customer."
+        },
+        {
+          "question": "What LTV:CAC ratio is generally considered healthy?",
+          "options": [
+            "Below 1:1",
+            "Around 1:1",
+            "3:1 or higher",
+            "Exactly 0:1"
+          ],
+          "correct_index": 2,
+          "explanation": "A ratio of 3:1 or better indicates a customer is worth roughly three times what it costs to acquire them — generally viewed as a sustainable, healthy unit economics benchmark."
+        },
+        {
+          "question": "Why can revenue growth sometimes hide a business getting less healthy?",
+          "options": [
+            "Revenue growth is always accurate and can't mislead",
+            "A company can grow revenue while losing money on every new customer if CAC exceeds LTV",
+            "Growth and unit economics are unrelated concepts",
+            "This only applies to non-profit organizations"
+          ],
+          "correct_index": 1,
+          "explanation": "This is the classic 'growth at all costs' trap — the headline number (revenue) can look great while the number that determines long-term survival (per-customer profitability) is quietly deteriorating."
+        }
+      ],
+      "sort_order": 4
     },
     {
       "id": "business-storytelling",
       "title": "Data Storytelling",
-      "description": "Turn analysis into decisions \u2014 the structure that makes stakeholders act.",
+      "description": "Turn analysis into decisions — the structure that makes stakeholders act.",
       "level": "intermediate",
       "prerequisites": [
-        "business-fundamentals"
+        "business-thinking-intro"
       ],
       "estimated_min": 40,
-      "sort_order": 3,
-      "theory_md": "## Data Storytelling\n\nData without a narrative is just noise. Storytelling is the skill that converts analysis into action.\n\n### The Pyramid Principle (Barbara Minto)\nStart with the **conclusion**, then support it with evidence.\n\n```\n\u274c \"We analysed sales across 5 regions over 12 months.\n    We found that revenue declined in Q3. This was driven by\n    the North region. North's top product, Widget A, dropped 40%.\"\n\n\u2713 \"Widget A sales in the North must be investigated urgently.\n    North revenue fell 40% in Q3, dragging the company below target.\n    Here is the root cause and our recommendation.\"\n```\n\n### SCQA Framework\n- **S**ituation \u2014 context everyone agrees on.\n- **C**omplication \u2014 what changed or what's wrong.\n- **Q**uestion \u2014 what decision does this force?\n- **A**nswer \u2014 your recommendation.\n\n### What to show vs tell\n- **Show** data when the pattern itself is the insight (a chart of a 40% drop).\n- **Tell** the implication when it's not obvious from the chart.\n\n### The \"So what?\" test\nAfter every chart or table, ask: \"So what should the audience do differently?\"\nIf you can't answer, that slide should not be in the deck.\n\n**Business context:** The most technically correct analysis in the world does nothing if it doesn't lead to a decision. Storytelling is the bridge.\n\n## \ud83d\udd17 How This Connects\n- **Power BI / Excel**: this lesson's Pyramid Principle is the narrative structure that should sit behind every dashboard built in the Report Design and Dashboard Design lessons \u2014 a chart without a story is just numbers.",
+      "sort_order": 5,
+      "theory_md": "## Data Storytelling\n\nData without a narrative is just noise. Storytelling is the skill that converts analysis into action.\n\n### The Pyramid Principle (Barbara Minto)\nStart with the **conclusion**, then support it with evidence.\n\n```\n❌ \"We analysed sales across 5 regions over 12 months.\n    We found that revenue declined in Q3. This was driven by\n    the North region. North's top product, Widget A, dropped 40%.\"\n\n✓ \"Widget A sales in the North must be investigated urgently.\n    North revenue fell 40% in Q3, dragging the company below target.\n    Here is the root cause and our recommendation.\"\n```\n\n### SCQA Framework\n- **S**ituation — context everyone agrees on.\n- **C**omplication — what changed or what's wrong.\n- **Q**uestion — what decision does this force?\n- **A**nswer — your recommendation.\n\n### What to show vs tell\n- **Show** data when the pattern itself is the insight (a chart of a 40% drop).\n- **Tell** the implication when it's not obvious from the chart.\n\n### The \"So what?\" test\nAfter every chart or table, ask: \"So what should the audience do differently?\"\nIf you can't answer, that slide should not be in the deck.\n\n**Business context:** The most technically correct analysis in the world does nothing if it doesn't lead to a decision. Storytelling is the bridge.\n\n## 🔗 How This Connects\n- **Power BI / Excel**: this lesson's Pyramid Principle is the narrative structure that should sit behind every dashboard built in the Report Design and Dashboard Design lessons — a chart without a story is just numbers.",
       "exercises": [
         {
           "id": "biz-story-e1",
           "title": "Pyramid principle",
           "prompt": "Rewrite this opening using the Pyramid Principle (conclusion first): 'We reviewed 12 months of churn data, segmented by plan type, and analysed cohorts. We found that monthly-plan customers churn 3x more than annual-plan customers.'",
           "hint_1": "Lead with the insight that requires action.",
-          "hint_2": "Monthly customers churn 3x more \u2014 that is the conclusion.",
-          "hint_3": "Monthly-plan customers churn 3x more than annual customers \u2014 switching monthly customers to annual plans should be an immediate retention priority.",
+          "hint_2": "Monthly customers churn 3x more — that is the conclusion.",
+          "hint_3": "Monthly-plan customers churn 3x more than annual customers — switching monthly customers to annual plans should be an immediate retention priority.",
           "solution": "Monthly-plan customers churn 3x more",
           "evaluation_mode": "contains",
           "points": 20
@@ -119,10 +304,45 @@
           "prompt": "Your chart shows average customer age by product category. The 'So what?' question gets no clear answer. What should you do?",
           "hint_1": "If there's no actionable implication, reconsider whether to include it.",
           "hint_2": "Every visual needs to serve the narrative.",
-          "hint_3": "Remove or replace the chart \u2014 if it doesn't support a decision or recommendation, it dilutes the story and wastes the audience's attention.",
+          "hint_3": "Remove or replace the chart — if it doesn't support a decision or recommendation, it dilutes the story and wastes the audience's attention.",
           "solution": "Remove or replace the chart",
           "evaluation_mode": "contains",
           "points": 15
+        }
+      ],
+      "quiz": [
+        {
+          "question": "What does the Pyramid Principle recommend for structuring a data story?",
+          "options": [
+            "Present all the raw data first, conclusion last",
+            "Lead with the conclusion, then support it with evidence",
+            "Never state a conclusion explicitly",
+            "Present findings in chronological order of analysis"
+          ],
+          "correct_index": 1,
+          "explanation": "Barbara Minto's Pyramid Principle inverts the natural order of doing analysis — busy stakeholders want the 'so what' first, with supporting evidence following."
+        },
+        {
+          "question": "In the SCQA framework, what does the 'C' stand for?",
+          "options": [
+            "Conclusion",
+            "Complication — what changed or what's wrong",
+            "Calculation",
+            "Confidence"
+          ],
+          "correct_index": 1,
+          "explanation": "SCQA is Situation (shared context) → Complication (what's changed/wrong) → Question (the decision this forces) → Answer (your recommendation)."
+        },
+        {
+          "question": "Why is 'We analysed sales across 5 regions...' considered a weaker opening than 'Widget A sales in the North must be investigated urgently'?",
+          "options": [
+            "It's grammatically incorrect",
+            "It buries the actionable conclusion under process description instead of leading with it",
+            "It's too short",
+            "Both openings are equally effective"
+          ],
+          "correct_index": 1,
+          "explanation": "The weak version describes the process before revealing the point — a reader has to work to find out what matters. The strong version leads with the actionable takeaway."
         }
       ]
     },
@@ -135,8 +355,8 @@
         "business-storytelling"
       ],
       "estimated_min": 35,
-      "sort_order": 4,
-      "theory_md": "## Stakeholder Presentations\n\n### Know your audience\n| Audience | They want | They don't want |\n|---|---|---|\n| C-suite | The decision and the risk | Methodology details |\n| Finance | Numbers, assumptions, sensitivity | Raw data |\n| Operations | What to do | Why it was calculated |\n| Data team | Methodology, caveats | High-level summary |\n\n### Slide structure\nEach slide should have **one message** in the title \u2014 a full sentence, not a label.\n\n```\n\u274c \"Revenue by Region\"\n\u2713  \"North and West are the only regions exceeding target\"\n```\n\n### The executive summary slide\nLeads the deck. Contains:\n1. The situation (1 line).\n2. The recommendation (1 line).\n3. Supporting evidence (3 bullets max).\n4. What you need from this audience (1 line).\n\n### Handling the \"can you add...\" request\nStakeholders often ask for more data. The right response is:\n- \"What decision would that data help you make?\"\nIf there's no answer, the data isn't needed.\n\n### Anticipate questions\nList the 5 hardest questions your audience will ask. Have backup slides ready for each.\n\n## \ud83d\udd17 How This Connects\n- **Power BI**: the Publishing & Sharing lesson's App and Share features are how a stakeholder presentation actually gets delivered and revisited after the meeting ends.",
+      "sort_order": 6,
+      "theory_md": "## Stakeholder Presentations\n\n### Know your audience\n| Audience | They want | They don't want |\n|---|---|---|\n| C-suite | The decision and the risk | Methodology details |\n| Finance | Numbers, assumptions, sensitivity | Raw data |\n| Operations | What to do | Why it was calculated |\n| Data team | Methodology, caveats | High-level summary |\n\n### Slide structure\nEach slide should have **one message** in the title — a full sentence, not a label.\n\n```\n❌ \"Revenue by Region\"\n✓  \"North and West are the only regions exceeding target\"\n```\n\n### The executive summary slide\nLeads the deck. Contains:\n1. The situation (1 line).\n2. The recommendation (1 line).\n3. Supporting evidence (3 bullets max).\n4. What you need from this audience (1 line).\n\n### Handling the \"can you add...\" request\nStakeholders often ask for more data. The right response is:\n- \"What decision would that data help you make?\"\nIf there's no answer, the data isn't needed.\n\n### Anticipate questions\nList the 5 hardest questions your audience will ask. Have backup slides ready for each.\n\n## 🔗 How This Connects\n- **Power BI**: the Publishing & Sharing lesson's App and Share features are how a stakeholder presentation actually gets delivered and revisited after the meeting ends.",
       "exercises": [
         {
           "id": "biz-pres-e1",
@@ -160,6 +380,41 @@
           "evaluation_mode": "contains",
           "points": 20
         }
+      ],
+      "quiz": [
+        {
+          "question": "According to the audience table, what does the C-suite typically want from a presentation?",
+          "options": [
+            "Detailed methodology",
+            "The decision and the risk involved",
+            "Raw data tables",
+            "Only the appendix"
+          ],
+          "correct_index": 1,
+          "explanation": "Executives are optimizing for decisions under time pressure — they want the recommendation and its risk, not the analytical process behind it."
+        },
+        {
+          "question": "What should a slide title be, according to the lesson?",
+          "options": [
+            "A short label like 'Revenue by Region'",
+            "A full sentence stating the message, like 'North and West are the only regions exceeding target'",
+            "Always left blank",
+            "The name of the presenter"
+          ],
+          "correct_index": 1,
+          "explanation": "A label describes what the slide is about; a message-title tells the reader the actual takeaway without them needing to interpret the chart themselves."
+        },
+        {
+          "question": "What four things belong on the executive summary slide?",
+          "options": [
+            "Only charts and no text",
+            "The situation, the recommendation, supporting evidence (max 3 bullets), and what's needed from the audience",
+            "A full table of contents",
+            "Every data source used in the analysis"
+          ],
+          "correct_index": 1,
+          "explanation": "The executive summary is designed to be readable standalone — situation, recommendation, brief evidence, and a clear ask, all in a few lines."
+        }
       ]
     },
     {
@@ -171,16 +426,16 @@
         "business-metrics"
       ],
       "estimated_min": 50,
-      "sort_order": 5,
-      "theory_md": "## Financial Modelling Basics\n\n### What is a financial model?\nA structured, quantitative framework for making a business decision. It's always a simplification of reality \u2014 the goal is to be useful, not perfect.\n\n### The three-statement model\n- **Income Statement** \u2014 Revenue, Costs, EBITDA, Net Profit.\n- **Balance Sheet** \u2014 Assets = Liabilities + Equity.\n- **Cash Flow Statement** \u2014 Operating, Investing, Financing cash flows.\n\nFor most analyst work, you only need to model the Income Statement.\n\n### Revenue model\n```\nRevenue = Price \u00d7 Volume\nVolume = Market size \u00d7 Market share \u00d7 Conversion rate\n```\nBreak revenue into its component drivers. Each driver gets its own assumption cell (coloured yellow by convention).\n\n### Scenario analysis\nAlways build three scenarios:\n| Scenario | Driver assumptions |\n|---|---|\n| Base | Most likely |\n| Bull (upside) | Best-case drivers |\n| Bear (downside) | Worst-case drivers |\n\n### Sensitivity table (Excel)\nData \u2192 What-If Analysis \u2192 Data Table\nVary two key assumptions simultaneously to show the range of outcomes.\n\n**Business context:** A model with explicit assumptions is far more valuable than a number with no explanation. It lets you update when reality changes.\n\n## \ud83d\udd17 How This Connects\n- **Excel**: this lesson's revenue models and scenarios are built directly with the PMT/NPV/IRR functions from the Financial Functions lesson.\n- **Statistics**: forecasts in a financial model are frequently a regression in disguise \u2014 see the Regression Analysis lesson.",
+      "sort_order": 7,
+      "theory_md": "## Financial Modelling Basics\n\n### What is a financial model?\nA structured, quantitative framework for making a business decision. It's always a simplification of reality — the goal is to be useful, not perfect.\n\n### The three-statement model\n- **Income Statement** — Revenue, Costs, EBITDA, Net Profit.\n- **Balance Sheet** — Assets = Liabilities + Equity.\n- **Cash Flow Statement** — Operating, Investing, Financing cash flows.\n\nFor most analyst work, you only need to model the Income Statement.\n\n### Revenue model\n```\nRevenue = Price × Volume\nVolume = Market size × Market share × Conversion rate\n```\nBreak revenue into its component drivers. Each driver gets its own assumption cell (coloured yellow by convention).\n\n### Scenario analysis\nAlways build three scenarios:\n| Scenario | Driver assumptions |\n|---|---|\n| Base | Most likely |\n| Bull (upside) | Best-case drivers |\n| Bear (downside) | Worst-case drivers |\n\n### Sensitivity table (Excel)\nData → What-If Analysis → Data Table\nVary two key assumptions simultaneously to show the range of outcomes.\n\n**Business context:** A model with explicit assumptions is far more valuable than a number with no explanation. It lets you update when reality changes.\n\n## 🔗 How This Connects\n- **Excel**: this lesson's revenue models and scenarios are built directly with the PMT/NPV/IRR functions from the Financial Functions lesson.\n- **Statistics**: forecasts in a financial model are frequently a regression in disguise — see the Regression Analysis lesson.",
       "exercises": [
         {
           "id": "biz-fin-e1",
           "title": "Revenue decomposition",
           "prompt": "A SaaS company has 1,000 customers paying $200/month. Write the formula to calculate Annual Recurring Revenue (ARR).",
-          "hint_1": "ARR = monthly revenue \u00d7 12",
-          "hint_2": "Monthly revenue = customers \u00d7 monthly price",
-          "hint_3": "ARR = 1000 \u00d7 200 \u00d7 12 = $2,400,000",
+          "hint_1": "ARR = monthly revenue × 12",
+          "hint_2": "Monthly revenue = customers × monthly price",
+          "hint_3": "ARR = 1000 × 200 × 12 = $2,400,000",
           "solution": "2400000",
           "evaluation_mode": "contains",
           "points": 20
@@ -196,6 +451,41 @@
           "evaluation_mode": "contains",
           "points": 20
         }
+      ],
+      "quiz": [
+        {
+          "question": "For most analyst work, which of the three financial statements is the primary focus?",
+          "options": [
+            "The Balance Sheet",
+            "The Cash Flow Statement",
+            "The Income Statement",
+            "All three are equally required for basic analyst work"
+          ],
+          "correct_index": 2,
+          "explanation": "The lesson notes that for most analyst work, modelling just the Income Statement (Revenue, Costs, EBITDA, Net Profit) is sufficient — the full three-statement model is a step beyond that."
+        },
+        {
+          "question": "In the revenue model `Revenue = Price × Volume`, why break Volume down further into Market size × Market share × Conversion rate?",
+          "options": [
+            "It's not useful — Price × Volume is always sufficient",
+            "Breaking revenue into component drivers makes each assumption explicit and testable separately",
+            "It's required by accounting standards",
+            "It simplifies the model by removing variables"
+          ],
+          "correct_index": 1,
+          "explanation": "Decomposing revenue into its real business drivers lets you test and stress-test each assumption individually, rather than guessing at one opaque number."
+        },
+        {
+          "question": "Why does the lesson recommend always building three scenarios?",
+          "options": [
+            "To make the spreadsheet look more complete",
+            "To show a realistic range of outcomes (e.g. base, upside, downside) rather than a single, potentially misleading number",
+            "Because Excel requires exactly three tabs",
+            "To avoid needing any assumptions at all"
+          ],
+          "correct_index": 1,
+          "explanation": "A single-point forecast hides uncertainty — scenario analysis makes the range of plausible outcomes visible to decision-makers."
+        }
       ]
     },
     {
@@ -207,8 +497,8 @@
         "business-metrics"
       ],
       "estimated_min": 40,
-      "sort_order": 6,
-      "theory_md": "## KPI Design & Dashboards\n\n### What makes a good KPI?\n- **Measurable** \u2014 you can calculate it from data you actually have.\n- **Actionable** \u2014 someone can change their behaviour based on it.\n- **Leading or lagging** \u2014 leading predicts future results; lagging confirms past results.\n\n| KPI type | Example |\n|---|---|\n| Leading | Calls made, demos booked, proposals sent |\n| Lagging | Revenue, churn rate, NPS |\n\n### The SMART framework for KPIs\n- **S**pecific, **M**easurable, **A**chievable, **R**elevant, **T**ime-bound.\n\n\u274c \"Improve customer satisfaction\"\n\u2713 \"Increase NPS from 32 to 45 by end of Q4\"\n\n### KPI hierarchy\n- **North Star metric** \u2014 the one metric that captures overall business health.\n- **Input metrics** \u2014 the driver metrics your team controls.\n- **Guardrail metrics** \u2014 metrics that must not worsen when optimising for North Star.\n\n### Dashboard design for KPIs\n- One number per KPI card, with vs target (\u25b3) and vs last period (%).\n- Traffic light colouring: green = on track, amber = at risk, red = off track.\n- No more than 10 KPIs on a single page \u2014 if everything is important, nothing is.\n\n**Business context:** Companies that measure the wrong things optimise for the wrong things. KPI design is strategic, not just technical.\n\n## \ud83d\udd17 How This Connects\n- **Power BI**: KPI cards designed here are exactly what the DAX Basics and Advanced DAX lessons teach you to calculate, and what the Report Design lesson teaches you to lay out well.\n- **Excel**: the Dashboard Design lesson covers the same layout thinking applied to a spreadsheet instead of a Power BI report.",
+      "sort_order": 8,
+      "theory_md": "## KPI Design & Dashboards\n\n### What makes a good KPI?\n- **Measurable** — you can calculate it from data you actually have.\n- **Actionable** — someone can change their behaviour based on it.\n- **Leading or lagging** — leading predicts future results; lagging confirms past results.\n\n| KPI type | Example |\n|---|---|\n| Leading | Calls made, demos booked, proposals sent |\n| Lagging | Revenue, churn rate, NPS |\n\n### The SMART framework for KPIs\n- **S**pecific, **M**easurable, **A**chievable, **R**elevant, **T**ime-bound.\n\n❌ \"Improve customer satisfaction\"\n✓ \"Increase NPS from 32 to 45 by end of Q4\"\n\n### KPI hierarchy\n- **North Star metric** — the one metric that captures overall business health.\n- **Input metrics** — the driver metrics your team controls.\n- **Guardrail metrics** — metrics that must not worsen when optimising for North Star.\n\n### Dashboard design for KPIs\n- One number per KPI card, with vs target (△) and vs last period (%).\n- Traffic light colouring: green = on track, amber = at risk, red = off track.\n- No more than 10 KPIs on a single page — if everything is important, nothing is.\n\n**Business context:** Companies that measure the wrong things optimise for the wrong things. KPI design is strategic, not just technical.\n\n## 🔗 How This Connects\n- **Power BI**: KPI cards designed here are exactly what the DAX Basics and Advanced DAX lessons teach you to calculate, and what the Report Design lesson teaches you to lay out well.\n- **Excel**: the Dashboard Design lesson covers the same layout thinking applied to a spreadsheet instead of a Power BI report.",
       "exercises": [
         {
           "id": "biz-kpi-e1",
@@ -216,7 +506,7 @@
           "prompt": "Classify each metric: (A) Number of sales calls made this week (B) Revenue this quarter. Which is leading and which is lagging?",
           "hint_1": "Leading metrics predict; lagging metrics confirm.",
           "hint_2": "Can you use metric A to predict metric B?",
-          "hint_3": "A) Leading \u2014 calls predict future revenue. B) Lagging \u2014 revenue confirms past performance.",
+          "hint_3": "A) Leading — calls predict future revenue. B) Lagging — revenue confirms past performance.",
           "solution": "A is leading, B is lagging",
           "evaluation_mode": "contains",
           "points": 15
@@ -232,6 +522,41 @@
           "evaluation_mode": "contains",
           "points": 20
         }
+      ],
+      "quiz": [
+        {
+          "question": "What's the difference between a leading and a lagging KPI?",
+          "options": [
+            "They're the same thing",
+            "A leading KPI predicts future results; a lagging KPI confirms results that already happened",
+            "Leading KPIs are always financial; lagging KPIs are always operational",
+            "Lagging KPIs are more actionable than leading KPIs"
+          ],
+          "correct_index": 1,
+          "explanation": "Leading indicators (calls made, demos booked) give early signal you can still act on; lagging indicators (revenue, churn) confirm outcomes after the fact."
+        },
+        {
+          "question": "Which of these is a properly SMART-framed KPI goal?",
+          "options": [
+            "\"Improve customer satisfaction\"",
+            "\"Increase NPS from 32 to 45 by end of Q4\"",
+            "\"Make customers happier this year\"",
+            "\"Work on NPS sometime\""
+          ],
+          "correct_index": 1,
+          "explanation": "The second option is Specific, Measurable, has a clear target, and is Time-bound — everything the vague 'improve customer satisfaction' is missing."
+        },
+        {
+          "question": "In a KPI hierarchy, what is a 'North Star metric'?",
+          "options": [
+            "Any metric tracked by the data team",
+            "The one metric that captures overall business health",
+            "A metric that only matters once a year",
+            "A synonym for a guardrail metric"
+          ],
+          "correct_index": 1,
+          "explanation": "The North Star metric sits at the top of the hierarchy — the single number that best represents whether the business/product is succeeding overall."
+        }
       ]
     },
     {
@@ -244,8 +569,8 @@
         "business-kpi"
       ],
       "estimated_min": 45,
-      "sort_order": 7,
-      "theory_md": "## Project Analytics\n\nAnalytics projects fail more often from poor scoping and communication than from technical mistakes.\n\n### Scoping an analytics project\n**Five questions before you start:**\n1. What decision will this analysis inform?\n2. Who is the decision-maker?\n3. What is the deadline?\n4. What data is available?\n5. What is good enough (vs perfect)?\n\n### Project brief template\n```\nProblem statement: [One sentence]\nDecision it supports: [Who decides what]\nSuccess metric: [How we know the project worked]\nData needed: [Sources, tables, fields]\nDeliverable: [Dashboard / report / model / presentation]\nDeadline: [Date]\nAssumptions and constraints: [List]\n```\n\n### Estimating effort\nBreak the project into phases:\n| Phase | Typical % of effort |\n|---|---|\n| Data discovery & cleaning | 40% |\n| Analysis | 25% |\n| Visualisation & communication | 20% |\n| Stakeholder review & iteration | 15% |\n\nAnalysts consistently underestimate data cleaning. Always add a buffer.\n\n### Stakeholder sign-off checkpoints\n- **Brief sign-off** \u2014 before any analysis. Prevents scope creep.\n- **Data availability check** \u2014 before promising a deadline.\n- **Draft review** \u2014 before final delivery. Surface misalignments early.\n\n### Measuring your own impact\nTrack the decision that was made because of your analysis and the outcome. Over time, this builds a portfolio of business impact, not just technical output.\n\n## \ud83d\udd17 How This Connects\n- **Python**: the Automation & Reporting lesson is the concrete technical answer to this lesson's point about scoping effort and automating recurring work.\n- **All modules**: this is the capstone lesson \u2014 a real analytics project draws on SQL for data, Excel or Python for analysis, Power BI for delivery, Statistics for rigor, and everything else in this module for how to scope and communicate it.",
+      "sort_order": 9,
+      "theory_md": "## Project Analytics\n\nAnalytics projects fail more often from poor scoping and communication than from technical mistakes.\n\n### Scoping an analytics project\n**Five questions before you start:**\n1. What decision will this analysis inform?\n2. Who is the decision-maker?\n3. What is the deadline?\n4. What data is available?\n5. What is good enough (vs perfect)?\n\n### Project brief template\n```\nProblem statement: [One sentence]\nDecision it supports: [Who decides what]\nSuccess metric: [How we know the project worked]\nData needed: [Sources, tables, fields]\nDeliverable: [Dashboard / report / model / presentation]\nDeadline: [Date]\nAssumptions and constraints: [List]\n```\n\n### Estimating effort\nBreak the project into phases:\n| Phase | Typical % of effort |\n|---|---|\n| Data discovery & cleaning | 40% |\n| Analysis | 25% |\n| Visualisation & communication | 20% |\n| Stakeholder review & iteration | 15% |\n\nAnalysts consistently underestimate data cleaning. Always add a buffer.\n\n### Stakeholder sign-off checkpoints\n- **Brief sign-off** — before any analysis. Prevents scope creep.\n- **Data availability check** — before promising a deadline.\n- **Draft review** — before final delivery. Surface misalignments early.\n\n### Measuring your own impact\nTrack the decision that was made because of your analysis and the outcome. Over time, this builds a portfolio of business impact, not just technical output.\n\n## 🔗 How This Connects\n- **Python**: the Automation & Reporting lesson is the concrete technical answer to this lesson's point about scoping effort and automating recurring work.\n- **All modules**: this is the capstone lesson — a real analytics project draws on SQL for data, Excel or Python for analysis, Power BI for delivery, Statistics for rigor, and everything else in this module for how to scope and communicate it.",
       "exercises": [
         {
           "id": "biz-proj-e1",
@@ -264,12 +589,123 @@
           "prompt": "You estimate an analysis project will take 10 days. According to typical project effort distribution, how many days should you allocate to data discovery and cleaning?",
           "hint_1": "Data cleaning typically takes about 40% of project effort.",
           "hint_2": "40% of 10 days.",
-          "hint_3": "4 days \u2014 data cleaning and discovery accounts for roughly 40% of analytics project effort.",
+          "hint_3": "4 days — data cleaning and discovery accounts for roughly 40% of analytics project effort.",
           "solution": "4",
           "evaluation_mode": "contains",
           "points": 15
         }
+      ],
+      "quiz": [
+        {
+          "question": "According to the lesson, what is the most common cause of analytics projects failing?",
+          "options": [
+            "Technical mistakes in the code",
+            "Poor scoping and communication, more often than technical errors",
+            "Using the wrong programming language",
+            "Insufficient computing power"
+          ],
+          "correct_index": 1,
+          "explanation": "The lesson explicitly states that scoping and communication failures sink more analytics projects than technical mistakes do."
+        },
+        {
+          "question": "Which of the 'five questions before you start' addresses who will actually use the analysis?",
+          "options": [
+            "What is the deadline?",
+            "Who is the decision-maker?",
+            "What data is available?",
+            "What is good enough (vs perfect)?"
+          ],
+          "correct_index": 1,
+          "explanation": "Identifying the actual decision-maker up front ensures the analysis is scoped to answer the question that person actually needs answered."
+        },
+        {
+          "question": "According to the effort breakdown, what typically takes up the largest share of an analytics project's time?",
+          "options": [
+            "Building the final presentation",
+            "Data discovery & cleaning (around 40%)",
+            "Writing the project brief",
+            "Scheduling meetings"
+          ],
+          "correct_index": 1,
+          "explanation": "This mirrors the earlier Python data-cleaning lesson's point — messy real-world data consistently consumes the largest share of project time, at roughly 40% of total effort."
+        }
       ]
+    },
+    {
+      "id": "business-change-management",
+      "title": "Driving Adoption & Change Management",
+      "description": "The capstone skill: getting a great analysis actually used, not just admired",
+      "level": "advanced",
+      "prerequisites": [
+        "business-presentations",
+        "business-project-analytics"
+      ],
+      "estimated_min": 40,
+      "theory_md": "## Driving Adoption & Change Management\n\nA technically perfect analysis that changes nothing has failed. This is the skill that separates senior analysts from junior ones: getting recommendations actually adopted, not just approved in a meeting and then quietly ignored.\n\n### Why good analysis gets ignored\n- **It threatens someone's territory or prior decision.** If your finding implies a past choice was wrong, expect resistance regardless of the data quality.\n- **It asks people to change a habit**, and habits are sticky even when the old way is measurably worse.\n- **No one owns making it happen.** A recommendation with no named owner and no deadline is a suggestion, not a plan.\n- **It arrived without the affected people being consulted first.** People support what they helped shape; they resist what was decided *at* them.\n\n### The adoption checklist\nBefore presenting a recommendation, be ready to answer:\n1. **Who specifically needs to change their behavior?** Name the role, not \"the team.\"\n2. **What exactly do they need to start/stop/keep doing?** Vague recommendations (\"be more data-driven\") don't change behavior.\n3. **What's in it for them?** Their own incentive, not just the company's benefit.\n4. **What will make this hard, and how will you handle it?** Every real change has friction — anticipate it rather than being surprised by it.\n5. **How will you know it worked?** A follow-up metric and a date to check it, not a one-time presentation.\n\n### Kotter's 8-step model (condensed for analyst use)\n1. Create urgency — quantify the cost of the status quo.\n2. Build a coalition — get at least one respected champion beyond just you.\n3. Form a clear vision — the \"after\" state in one sentence.\n4. Communicate it repeatedly — once is never enough.\n5. Remove obstacles — including tooling, process, or incentive misalignment.\n6. Create short-term wins — a fast, visible early success builds momentum.\n7. Build on the change — don't declare victory too early.\n8. Make it stick — bake the new behavior into process, not just goodwill.\n\n### The follow-up habit\nThe single highest-leverage, most-skipped step: **return weeks later and check whether the recommendation was actually adopted, and whether it worked.** This closes the loop, builds your credibility for the next recommendation, and is often the only way you'll actually learn whether your analysis was right.\n\n**Business context:** This is the lesson that ties every other Business Academy skill together — the best KPI design, financial model, or dashboard is worthless if it doesn't survive first contact with organizational reality.\n\n## 🔗 How This Connects\n- **Business (Stakeholder Presentations)**: adoption starts before the presentation — consulting affected people early is what makes the presentation land instead of meeting resistance.\n- **Business (Project Analytics)**: the project brief's \"decision it supports\" and \"who decides\" fields exist precisely so adoption is designed in from the start, not bolted on afterward.",
+      "exercises": [
+        {
+          "id": "business-change-ex1",
+          "exercise_type": "freeform",
+          "title": "Diagnose why a recommendation stalled",
+          "prompt": "You presented a well-received analysis three months ago recommending a change to the sales team's lead-qualification process. Nothing has changed since. Using the adoption checklist, list the questions you'd ask to figure out why.",
+          "hint_1": "Work through each checklist item: who, what exactly, what's in it for them, what's the friction, how would you know it worked.",
+          "hint_2": "A common root cause is that no specific owner or deadline was ever assigned.",
+          "hint_3": "Ask: Was a specific owner named with a deadline? Did the sales team have input before the recommendation was finalized? Was the ask concrete enough to act on, or too vague? Was there a personal incentive for reps to change, or only a company-level benefit? Was there a follow-up check-in scheduled at all?",
+          "solution": "Work through the checklist: Was a specific person named as owner, with a deadline — or did it end as a 'suggestion' with no accountability? Were the sales reps consulted before the recommendation was finalized, or did it arrive as a decision made about them? Was the ask concrete ('stop doing X, start doing Y') or vague ('be more rigorous')? Was there a personal incentive for reps, not just a company-level benefit? And critically — was any follow-up ever scheduled to check adoption, or did the process end at the presentation?",
+          "evaluation_mode": "ai_review",
+          "points": 20,
+          "sort_order": 1
+        },
+        {
+          "id": "business-change-ex2",
+          "exercise_type": "freeform",
+          "title": "Apply Kotter's model to a real scenario",
+          "prompt": "You need to convince a hospital's nursing staff to adopt a new digital intake form instead of paper. Briefly describe how you'd apply 'create urgency,' 'build a coalition,' and 'create short-term wins' to this specific change.",
+          "hint_1": "Urgency needs a concrete cost of the current paper process. Coalition needs a respected insider, not just you. Short-term wins need something fast and visible.",
+          "hint_2": "Think in terms of what's specific to nursing staff and a hospital setting.",
+          "hint_3": "Urgency: quantify time lost to paper errors/re-entry per shift. Coalition: recruit a respected charge nurse as an early, visible champion. Short-term wins: pilot on one ward first and publicize the time saved before asking for hospital-wide adoption.",
+          "solution": "Create urgency: quantify a concrete cost of the paper process — e.g. hours per week lost to re-entry errors or lost forms — so the case for change is tangible, not abstract. Build a coalition: recruit a respected charge nurse (not just management) as a visible early champion, since staff trust peers over top-down directives. Create short-term wins: pilot the digital form on a single ward first, then publicize the concrete time saved there before asking the rest of the hospital to adopt it — a small proven win is far more persuasive than a promise.",
+          "evaluation_mode": "ai_review",
+          "points": 20,
+          "sort_order": 2
+        }
+      ],
+      "quiz": [
+        {
+          "question": "According to the lesson, what makes people resist a recommendation even when the data is solid?",
+          "options": [
+            "Data quality is always the real issue",
+            "It can threaten someone's prior decision, ask them to break a habit, or arrive without their input",
+            "People always resist any change regardless of circumstances",
+            "Recommendations are never resisted if presented well enough"
+          ],
+          "correct_index": 1,
+          "explanation": "Resistance is often about organizational and psychological factors — territory, habit, and being consulted — not about whether the underlying analysis is correct."
+        },
+        {
+          "question": "Why does the adoption checklist emphasize naming a specific owner and deadline?",
+          "options": [
+            "It's a formality with no real effect",
+            "Without a named owner and deadline, a recommendation functions as a suggestion rather than a plan",
+            "Only executives are allowed to own recommendations",
+            "It's required for legal reasons"
+          ],
+          "correct_index": 1,
+          "explanation": "Accountability is what turns a good idea into an executed change — without a specific person responsible and a timeline, recommendations tend to quietly stall."
+        },
+        {
+          "question": "What is described as the single highest-leverage, most-skipped step after presenting a recommendation?",
+          "options": [
+            "Making the slides look polished",
+            "Returning later to check whether the recommendation was actually adopted and whether it worked",
+            "Sending a thank-you email",
+            "Presenting to a larger audience"
+          ],
+          "correct_index": 1,
+          "explanation": "The follow-up check closes the loop — it's how an analyst actually learns whether their recommendation worked, and it builds credibility for future recommendations, yet it's the step most commonly skipped."
+        }
+      ],
+      "sort_order": 10
     }
   ]
 }

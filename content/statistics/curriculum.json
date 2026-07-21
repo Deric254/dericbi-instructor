@@ -5,12 +5,12 @@
     {
       "id": "stat-descriptive",
       "title": "Descriptive Statistics",
-      "description": "Mean, median, std, variance \u2014 summarizing data numerically",
+      "description": "Mean, median, std, variance — summarizing data numerically",
       "level": "beginner",
       "prerequisites": [],
       "estimated_min": 35,
       "sort_order": 1,
-      "theory_md": "## Descriptive Statistics \u2014 Starting From Zero\n\nDescriptive statistics answer one question: **\"what does this pile of numbers actually look like?\"** Before any code, let's build the ideas with numbers you can compute by hand.\n\n### Measures of center \u2014 where's the \"middle\" of the data?\n\nTake this small dataset of daily sales: `12000, 15000, 11000, 85000, 13000, 14000`\n\n**Mean (average):** add everything up, divide by how many numbers there are.\n```\n(12000 + 15000 + 11000 + 85000 + 13000 + 14000) / 6 = 25000\n```\nNotice the mean (25,000) doesn't look like a \"typical\" day in this data at all \u2014 that one unusual 85,000 day dragged it upward. **The mean is sensitive to outliers.**\n\n**Median (middle value):** sort the numbers, take the middle one.\n```\nSorted: 11000, 12000, 13000, 14000, 15000, 85000\nMiddle two (even count): 13000, 14000 \u2192 average them \u2192 13500\n```\n13,500 is a far more honest description of a \"typical\" day here. **The median resists outliers** \u2014 this is why median household income, not mean, is what's usually reported in the news.\n\n**Mode:** simply the most frequently occurring value. Most useful for categories (most common product ordered), less so for continuous numbers like sales.\n\n### Measures of spread \u2014 how far apart are the numbers?\n\n**Range:** max \u2212 min \u2192 `85000 \u2212 11000 = 74000`. Simple, but entirely driven by the two most extreme values.\n\n**Standard deviation:** roughly, the average distance each number sits from the mean. A small standard deviation means the data clusters tightly; a large one means it's spread out or has extreme values. Same units as your original data (dollars, in this example) \u2014 this is why it's used far more often than variance (which is the same idea, but squared, in squared units that don't map back to anything real-world).\n\n**IQR (Interquartile Range):** sort the data, cut it into four equal quarters, and measure the width of the middle two quarters. This deliberately ignores the extreme top and bottom 25% \u2014 making it the spread measure least affected by outliers.\n\n### Now the shortcut: doing this in code instead of by hand\nOnce you understand *what* these numbers mean, you'll almost never calculate them by hand again \u2014 Python's numpy library does it instantly:\n```python\nimport numpy as np\n\ndata = [12000, 15000, 11000, 85000, 13000, 14000]\nprint(f'Mean:   {np.mean(data):,.0f}')     # 25000 \u2014 pulled up by the outlier\nprint(f'Median: {np.median(data):,.0f}')   # 13500 \u2014 resistant to it\nprint(f'Std:    {np.std(data):,.0f}')      # how spread out the data is\n```\nAnd the same summary directly from a database table, using SQL you already know from earlier lessons:\n```sql\nSELECT AVG(bill_amount) as mean, MIN(bill_amount) as min_val, MAX(bill_amount) as max_val\nFROM billing;\n```\n\n### Which measure should you actually use?\n- Data has extreme outliers (income, house prices, hospital bills) \u2192 **median**, not mean\n- Data is fairly evenly distributed with no extreme values \u2192 **mean** is fine and more precise\n- Reporting typical variation to a non-technical audience \u2192 **standard deviation** in plain language (\"most days fall within $X of the average\")\n\n**Business insight:** A finance director asking \"what's our average deal size\" almost always actually wants the median if a handful of huge enterprise deals exist \u2014 using the mean here would make every \"typical\" deal look bigger than it really is, and lead to badly calibrated sales targets.\n\n## \ud83d\udd17 How This Connects\n- **SQL**: `AVG()`, `MIN()`, `MAX()` compute the same descriptive statistics taught here, directly against a database table.\n- **Python**: numpy's `mean()`/`median()`/`std()` (covered fully in the Statistical Analysis with NumPy lesson) are the code implementation of everything in this lesson.",
+      "theory_md": "## Descriptive Statistics — Starting From Zero\n\nDescriptive statistics answer one question: **\"what does this pile of numbers actually look like?\"** Before any code, let's build the ideas with numbers you can compute by hand.\n\n### Measures of center — where's the \"middle\" of the data?\n\nTake this small dataset of daily sales: `12000, 15000, 11000, 85000, 13000, 14000`\n\n**Mean (average):** add everything up, divide by how many numbers there are.\n```\n(12000 + 15000 + 11000 + 85000 + 13000 + 14000) / 6 = 25000\n```\nNotice the mean (25,000) doesn't look like a \"typical\" day in this data at all — that one unusual 85,000 day dragged it upward. **The mean is sensitive to outliers.**\n\n**Median (middle value):** sort the numbers, take the middle one.\n```\nSorted: 11000, 12000, 13000, 14000, 15000, 85000\nMiddle two (even count): 13000, 14000 → average them → 13500\n```\n13,500 is a far more honest description of a \"typical\" day here. **The median resists outliers** — this is why median household income, not mean, is what's usually reported in the news.\n\n**Mode:** simply the most frequently occurring value. Most useful for categories (most common product ordered), less so for continuous numbers like sales.\n\n### Measures of spread — how far apart are the numbers?\n\n**Range:** max − min → `85000 − 11000 = 74000`. Simple, but entirely driven by the two most extreme values.\n\n**Standard deviation:** roughly, the average distance each number sits from the mean. A small standard deviation means the data clusters tightly; a large one means it's spread out or has extreme values. Same units as your original data (dollars, in this example) — this is why it's used far more often than variance (which is the same idea, but squared, in squared units that don't map back to anything real-world).\n\n**IQR (Interquartile Range):** sort the data, cut it into four equal quarters, and measure the width of the middle two quarters. This deliberately ignores the extreme top and bottom 25% — making it the spread measure least affected by outliers.\n\n### Now the shortcut: doing this in code instead of by hand\nOnce you understand *what* these numbers mean, you'll almost never calculate them by hand again — Python's numpy library does it instantly:\n```python\nimport numpy as np\n\ndata = [12000, 15000, 11000, 85000, 13000, 14000]\nprint(f'Mean:   {np.mean(data):,.0f}')     # 25000 — pulled up by the outlier\nprint(f'Median: {np.median(data):,.0f}')   # 13500 — resistant to it\nprint(f'Std:    {np.std(data):,.0f}')      # how spread out the data is\n```\nAnd the same summary directly from a database table, using SQL you already know from earlier lessons:\n```sql\nSELECT AVG(bill_amount) as mean, MIN(bill_amount) as min_val, MAX(bill_amount) as max_val\nFROM billing;\n```\n\n### Which measure should you actually use?\n- Data has extreme outliers (income, house prices, hospital bills) → **median**, not mean\n- Data is fairly evenly distributed with no extreme values → **mean** is fine and more precise\n- Reporting typical variation to a non-technical audience → **standard deviation** in plain language (\"most days fall within $X of the average\")\n\n**Business insight:** A finance director asking \"what's our average deal size\" almost always actually wants the median if a handful of huge enterprise deals exist — using the mean here would make every \"typical\" deal look bigger than it really is, and lead to badly calibrated sales targets.\n\n## 🔗 How This Connects\n- **SQL**: `AVG()`, `MIN()`, `MAX()` compute the same descriptive statistics taught here, directly against a database table.\n- **Python**: numpy's `mean()`/`median()`/`std()` (covered fully in the Statistical Analysis with NumPy lesson) are the code implementation of everything in this lesson.",
       "exercises": [
         {
           "id": "stat-d1-e1",
@@ -34,7 +34,7 @@
             "The mean should always equal the median"
           ],
           "correct_index": 1,
-          "explanation": "The mean is sensitive to outliers \u2014 that single 85,000 day drags the average well above what a typical day actually looks like (the median, 13,500, is far more representative here)."
+          "explanation": "The mean is sensitive to outliers — that single 85,000 day drags the average well above what a typical day actually looks like (the median, 13,500, is far more representative here)."
         },
         {
           "question": "Which measure of center is most resistant to outliers?",
@@ -45,7 +45,7 @@
             "They're all equally sensitive"
           ],
           "correct_index": 1,
-          "explanation": "The median only cares about the middle value's position after sorting, so extreme values at either end barely affect it \u2014 this is why median income, not mean, is usually reported."
+          "explanation": "The median only cares about the middle value's position after sorting, so extreme values at either end barely affect it — this is why median income, not mean, is usually reported."
         },
         {
           "question": "What does standard deviation actually tell you?",
@@ -56,32 +56,7 @@
             "The total sum of all values"
           ],
           "correct_index": 1,
-          "explanation": "Standard deviation summarizes how spread out the data is \u2014 a small value means the data clusters tightly around the mean; a large one means it's spread out or has extremes."
-        }
-      ]
-    },
-    {
-      "id": "stat-correlation",
-      "title": "Correlation Analysis",
-      "description": "Measure relationships between variables",
-      "level": "intermediate",
-      "prerequisites": [
-        "stat-descriptive"
-      ],
-      "estimated_min": 40,
-      "sort_order": 2,
-      "theory_md": "## Correlation\n\nCorrelation measures the strength and direction of a linear relationship between two variables.\n\n**Pearson r:** -1 to +1\n- +1 = perfect positive\n- 0 = no linear relationship\n- -1 = perfect negative\n\n**Interpretation guide:**\n- |r| < 0.3 = weak\n- 0.3-0.7 = moderate\n- |r| > 0.7 = strong\n\n\u26a0\ufe0f **Correlation \u2260 Causation**\n\n**In Python:**\n```python\nimport pandas as pd\nimport numpy as np\n\nnp.random.seed(42)\ndf = pd.DataFrame({\n    'advertising': np.random.normal(5000, 1000, 50),\n    'sales': np.random.normal(50000, 10000, 50)\n})\ndf['sales'] = df['sales'] + df['advertising'] * 8\n\ncorr = df.corr().round(2)\nprint(corr)\n\n# Single pair\nr = df['advertising'].corr(df['sales'])\nprint(f'r = {r:.3f}')\n```\n\n**In SQL (approximate via normalized covariance):**\n```sql\nSELECT\n  (AVG(age * bill_amount) - AVG(age) * AVG(bill_amount)) /\n  (stddev(age) * stddev(bill_amount)) AS correlation\nFROM patients p JOIN billing b ON p.patient_id = b.patient_id;\n```\n\n## \ud83d\udd17 How This Connects\n- **Excel**: the `CORREL()` function calculates the exact same correlation coefficient taught here.\n- **Python**: `scipy.stats.pearsonr()` does the same calculation with a p-value attached.\n- **Business**: correlation is often the first clue behind a business metric relationship worth investigating further in the KPI Design lesson.",
-      "exercises": [
-        {
-          "id": "stat-co1-e1",
-          "title": "Correlation Matrix",
-          "prompt": "Create a DataFrame with 100 rows (np.random.seed(1)): ad_spend (normal 10000,2000), clicks (ad_spend/10 + normal noise 0,50), sales (clicks*500 + normal 0,5000). Print the correlation matrix rounded to 2 decimals.",
-          "hint_1": "df.corr().round(2) gives the full matrix.",
-          "hint_2": "np.random.seed(1)\nn=100\nad = np.random.normal(10000,2000,n)\nclicks = ad/10 + np.random.normal(0,50,n)\nsales = clicks*500 + np.random.normal(0,5000,n)",
-          "hint_3": "import pandas as pd\nimport numpy as np\nnp.random.seed(1)\nn=100\nad = np.random.normal(10000,2000,n)\nclicks = ad/10 + np.random.normal(0,50,n)\nsales = clicks*500 + np.random.normal(0,5000,n)\ndf = pd.DataFrame({'ad_spend':ad.round(0),'clicks':clicks.round(0),'sales':sales.round(0)})\nprint(df.corr().round(2))",
-          "solution": "import pandas as pd\nimport numpy as np\nnp.random.seed(1)\nn=100\nad = np.random.normal(10000,2000,n)\nclicks = ad/10 + np.random.normal(0,50,n)\nsales = clicks*500 + np.random.normal(0,5000,n)\ndf = pd.DataFrame({'ad_spend':ad.round(0),'clicks':clicks.round(0),'sales':sales.round(0)})\nprint(df.corr().round(2))",
-          "evaluation_mode": "ai_review",
-          "points": 35
+          "explanation": "Standard deviation summarizes how spread out the data is — a small value means the data clusters tightly around the mean; a large one means it's spread out or has extremes."
         }
       ]
     },
@@ -91,11 +66,11 @@
       "description": "Understand the randomness behind data: probability rules and key distributions.",
       "level": "intermediate",
       "prerequisites": [
-        "stats-descriptive"
+        "stat-descriptive"
       ],
       "estimated_min": 40,
-      "sort_order": 3,
-      "theory_md": "## Probability & Distributions\n\n### Probability basics\n- **P(A)** = favourable outcomes / total outcomes.\n- **P(A and B)** = P(A) \u00d7 P(B) if independent.\n- **P(A or B)** = P(A) + P(B) \u2212 P(A and B).\n- **Complement**: P(not A) = 1 \u2212 P(A).\n\n### Normal distribution\n- Bell-shaped, symmetric around the mean.\n- **68-95-99.7 rule**: 68% of data within 1\u03c3, 95% within 2\u03c3, 99.7% within 3\u03c3.\n- Many real metrics (heights, test scores, measurement errors) approximate normal.\n\n### Z-score \u2014 standardise any value\n```\nz = (x \u2212 \u03bc) / \u03c3\n```\nz = 2 means the value is 2 standard deviations above average.\n\n### Other distributions\n| Distribution | When to use |\n|---|---|\n| Binomial | Count of successes in n trials |\n| Poisson | Count of events in a time window |\n| Uniform | Each outcome equally likely |\n| Exponential | Time between events |\n\n**Business context:** A product manager asking \"how often does response time exceed 2 seconds?\" is asking about a tail probability from a distribution.\n\n## \ud83d\udd17 How This Connects\n- **Statistics (forward)**: this lesson's distributions and z-scores are the mathematical foundation the Hypothesis Testing and Regression lessons both depend on directly.",
+      "sort_order": 2,
+      "theory_md": "## Probability & Distributions\n\n### Probability basics\n- **P(A)** = favourable outcomes / total outcomes.\n- **P(A and B)** = P(A) × P(B) if independent.\n- **P(A or B)** = P(A) + P(B) − P(A and B).\n- **Complement**: P(not A) = 1 − P(A).\n\n### Normal distribution\n- Bell-shaped, symmetric around the mean.\n- **68-95-99.7 rule**: 68% of data within 1σ, 95% within 2σ, 99.7% within 3σ.\n- Many real metrics (heights, test scores, measurement errors) approximate normal.\n\n### Z-score — standardise any value\n```\nz = (x − μ) / σ\n```\nz = 2 means the value is 2 standard deviations above average.\n\n### Other distributions\n| Distribution | When to use |\n|---|---|\n| Binomial | Count of successes in n trials |\n| Poisson | Count of events in a time window |\n| Uniform | Each outcome equally likely |\n| Exponential | Time between events |\n\n**Business context:** A product manager asking \"how often does response time exceed 2 seconds?\" is asking about a tail probability from a distribution.\n\n## 🔗 How This Connects\n- **Statistics (forward)**: this lesson's distributions and z-scores are the mathematical foundation the Hypothesis Testing and Regression lessons both depend on directly.",
       "exercises": [
         {
           "id": "stats-prob-e1",
@@ -113,25 +88,133 @@
           "title": "68-95-99.7 rule",
           "prompt": "A call centre's average handle time is 5 minutes with a standard deviation of 1 minute. What % of calls fall between 3 and 7 minutes?",
           "hint_1": "3 and 7 are how many standard deviations from 5?",
-          "hint_2": "3 = 5-2\u03c3 and 7 = 5+2\u03c3. This is \u00b12 standard deviations.",
+          "hint_2": "3 = 5-2σ and 7 = 5+2σ. This is ±2 standard deviations.",
           "hint_3": "95%",
           "solution": "95%",
           "evaluation_mode": "exact",
           "points": 15
         }
+      ],
+      "quiz": [
+        {
+          "question": "Under the 68-95-99.7 rule for a normal distribution, what percentage of data falls within 2 standard deviations of the mean?",
+          "options": [
+            "68%",
+            "95%",
+            "99.7%",
+            "50%"
+          ],
+          "correct_index": 1,
+          "explanation": "This is the empirical rule: roughly 95% of normally distributed data falls within 2 standard deviations of the mean."
+        },
+        {
+          "question": "A z-score of 2 means what?",
+          "options": [
+            "The value equals the mean",
+            "The value is 2 standard deviations above the mean",
+            "The value is 2% higher than average",
+            "The value is in the 2nd percentile"
+          ],
+          "correct_index": 1,
+          "explanation": "The z-score formula z = (x − μ) / σ standardizes a value into 'how many standard deviations from the mean' — a z of 2 means 2 standard deviations above."
+        },
+        {
+          "question": "Which distribution would you use to model the count of customer arrivals in a fixed time window?",
+          "options": [
+            "Uniform",
+            "Binomial",
+            "Poisson",
+            "Normal"
+          ],
+          "correct_index": 2,
+          "explanation": "Poisson is specifically built for counting events (like arrivals) within a fixed time or space window — the classic use case named in the lesson."
+        }
       ]
+    },
+    {
+      "id": "stats-confidence-intervals",
+      "title": "Sampling, CLT & Confidence Intervals",
+      "description": "Why a sample can responsibly represent a whole population, and how to express that honestly",
+      "level": "intermediate",
+      "prerequisites": [
+        "stats-probability"
+      ],
+      "estimated_min": 40,
+      "theory_md": "## Sampling, the Central Limit Theorem & Confidence Intervals\n\nYou almost never have data for an entire population — you have a sample, and you need to say something honest about the whole population from it.\n\n### The Central Limit Theorem (CLT) — the reason any of this works\nIf you repeatedly take random samples from *any* population and calculate each sample's mean, those sample means form a distribution that is approximately **normal** — even if the original population isn't normal at all — as long as the sample size is reasonably large (a common rule of thumb: n ≥ 30).\n\nThis is what allows normal-distribution-based methods to work on real, messy business data.\n\n### Standard Error — how much a sample mean typically varies\n```\nSE = σ / √n\n```\nBigger sample → smaller standard error → the sample mean is a more reliable estimate of the true population mean. This is the mathematical reason \"more data\" genuinely helps, and *why* it helps.\n\n### Confidence Intervals — the honest way to report a sample statistic\nInstead of reporting a single number as if it were exact truth, a confidence interval reports a *range* that likely contains the true population value:\n```python\nimport numpy as np\nfrom scipy import stats\n\nsample = df['satisfaction_score'].dropna()\nmean = np.mean(sample)\nsem = stats.sem(sample)  # standard error of the mean\nci = stats.t.interval(confidence=0.95, df=len(sample)-1, loc=mean, scale=sem)\nprint(f\"Mean: {mean:.2f}, 95% CI: ({ci[0]:.2f}, {ci[1]:.2f})\")\n```\n\n**Correct interpretation:** \"We are 95% confident the true population mean falls within this range\" — not \"there's a 95% chance the true mean is in this specific interval\" (a subtle but important distinction analysts get asked about).\n\n### What affects interval width\n- **Larger sample** → narrower interval (more precision).\n- **Higher confidence level** (99% vs 95%) → wider interval (more certainty requires more room).\n- **More variable data** (larger σ) → wider interval.\n\n**Business context:** \"Customer satisfaction is 7.8\" sounds precise but is a single sample estimate. \"Customer satisfaction is 7.8, 95% CI (7.5, 8.1)\" tells a stakeholder exactly how much to trust that number — critical for any decision riding on it.\n\n## 🔗 How This Connects\n- **Business**: this is the statistical foundation under \"how confident are we in this number\" — a question every good stakeholder presentation should be ready to answer.\n- **Python**: `stats.t.interval()` from SciPy is the direct tool for this — the same library used throughout the Python Academy's statistics lesson.",
+      "exercises": [
+        {
+          "id": "stats-ci-ex1",
+          "title": "Calculate a 95% confidence interval",
+          "prompt": "Given a DataFrame `df` with a column 'wait_time_min' (100 rows), calculate the sample mean and a 95% confidence interval for the true average wait time, and print both.",
+          "hint_1": "You need the sample mean, the standard error of the mean, and scipy's t.interval function.",
+          "hint_2": "stats.sem(sample) gives the standard error; stats.t.interval needs the confidence, degrees of freedom (n-1), loc (mean), and scale (sem).",
+          "hint_3": "from scipy import stats\nimport numpy as np\nsample = df['wait_time_min'].dropna()\nmean = np.mean(sample)\nsem = stats.sem(sample)\nci = stats.t.interval(confidence=0.95, df=len(sample)-1, loc=mean, scale=sem)\nprint(f'Mean: {mean:.2f}, 95% CI: {ci}')",
+          "solution": "from scipy import stats\nimport numpy as np\nsample = df['wait_time_min'].dropna()\nmean = np.mean(sample)\nsem = stats.sem(sample)\nci = stats.t.interval(confidence=0.95, df=len(sample)-1, loc=mean, scale=sem)\nprint(f'Mean: {mean:.2f}, 95% CI: {ci}')",
+          "evaluation_mode": "ai_review",
+          "points": 25,
+          "sort_order": 1
+        },
+        {
+          "id": "stats-ci-ex2",
+          "title": "Interpret interval width",
+          "prompt": "Two teams each report a 95% confidence interval for average customer wait time. Team A (n=50) reports (4.2, 9.8) minutes. Team B (n=500) reports (6.5, 7.1) minutes. Which estimate should a manager trust more, and why?",
+          "hint_1": "Think about what sample size does to standard error, and what standard error does to interval width.",
+          "hint_2": "A much larger sample size produces a much narrower, more precise interval.",
+          "hint_3": "Team B's estimate is far more trustworthy — their much larger sample (500 vs 50) produced a much narrower interval, meaning less uncertainty about the true average.",
+          "solution": "Team B's estimate should be trusted more. Their much larger sample size (500 vs 50) shrinks the standard error, producing a narrower, more precise interval — the true average is pinned down much more tightly than Team A's wide, less certain range.",
+          "evaluation_mode": "ai_review",
+          "points": 15,
+          "sort_order": 2
+        }
+      ],
+      "quiz": [
+        {
+          "question": "What does the Central Limit Theorem state?",
+          "options": [
+            "All populations are normally distributed",
+            "The distribution of sample means approaches normal as sample size grows, regardless of the population's original shape",
+            "Larger samples always have larger standard errors",
+            "Confidence intervals only work on normal data"
+          ],
+          "correct_index": 1,
+          "explanation": "This is what makes normal-distribution-based methods broadly usable on real data — even skewed or unusual populations produce approximately normal sample means once n is reasonably large."
+        },
+        {
+          "question": "What happens to a confidence interval's width as sample size increases?",
+          "options": [
+            "It gets wider",
+            "It gets narrower, since the standard error shrinks",
+            "It stays exactly the same",
+            "It becomes impossible to calculate"
+          ],
+          "correct_index": 1,
+          "explanation": "Standard error = σ/√n — as n grows, SE shrinks, and a smaller SE produces a tighter, more precise confidence interval."
+        },
+        {
+          "question": "What is the correct interpretation of a 95% confidence interval?",
+          "options": [
+            "There's a 95% chance the true mean falls in this specific interval",
+            "We are 95% confident this method produces intervals that contain the true population value",
+            "95% of the data falls within this range",
+            "The sample mean is wrong 5% of the time"
+          ],
+          "correct_index": 1,
+          "explanation": "This is a subtle but real distinction: the 95% confidence describes the reliability of the method across repeated sampling, not a probability statement about this one fixed interval."
+        }
+      ],
+      "sort_order": 3
     },
     {
       "id": "stats-hypothesis",
       "title": "Hypothesis Testing",
-      "description": "Test claims about data rigorously \u2014 p-values, significance levels, and what they really mean.",
+      "description": "Test claims about data rigorously — p-values, significance levels, and what they really mean.",
       "level": "intermediate",
       "prerequisites": [
         "stats-probability"
       ],
       "estimated_min": 50,
       "sort_order": 4,
-      "theory_md": "## Hypothesis Testing\n\n### The framework\n1. **H\u2080 (null hypothesis)** \u2014 the default assumption (no effect, no difference).\n2. **H\u2081 (alternative hypothesis)** \u2014 what you're trying to prove.\n3. Choose **\u03b1** (significance level) \u2014 typically 0.05.\n4. Calculate the **test statistic** from your data.\n5. Find the **p-value** \u2014 probability of seeing this result if H\u2080 were true.\n6. **p < \u03b1 \u2192 reject H\u2080** (result is statistically significant).\n\n### p-value misconception\nA p-value is NOT the probability that H\u2080 is true.\nIt is the probability of seeing data this extreme **assuming H\u2080 is true**.\np = 0.03 means: \"If there were truly no effect, we'd see this result only 3% of the time.\"\n\n### t-test \u2014 compare two means\n```python\nfrom scipy import stats\nt_stat, p_value = stats.ttest_ind(group_a, group_b)\nif p_value < 0.05:\n    print(\"Significant difference\")\n```\n\n### Type I and Type II errors\n| | H\u2080 true | H\u2080 false |\n|---|---|---|\n| Reject H\u2080 | \u274c Type I (false positive) | \u2713 Correct |\n| Fail to reject | \u2713 Correct | \u274c Type II (false negative) |\n\n**Business context:** \"Is the new checkout flow actually faster or did we just get lucky?\" Hypothesis testing gives you a defensible answer.\n\n## \ud83d\udd17 How This Connects\n- **Business**: this is the statistical backbone of the A/B Testing lesson, and of any \"is this real or just noise\" question a stakeholder presentation needs to answer defensibly.\n- **Python**: `scipy.stats.ttest_ind()` (Statistical Analysis lesson) is the code implementation of the t-test taught here.",
+      "theory_md": "## Hypothesis Testing\n\n### The framework\n1. **H₀ (null hypothesis)** — the default assumption (no effect, no difference).\n2. **H₁ (alternative hypothesis)** — what you're trying to prove.\n3. Choose **α** (significance level) — typically 0.05.\n4. Calculate the **test statistic** from your data.\n5. Find the **p-value** — probability of seeing this result if H₀ were true.\n6. **p < α → reject H₀** (result is statistically significant).\n\n### p-value misconception\nA p-value is NOT the probability that H₀ is true.\nIt is the probability of seeing data this extreme **assuming H₀ is true**.\np = 0.03 means: \"If there were truly no effect, we'd see this result only 3% of the time.\"\n\n### t-test — compare two means\n```python\nfrom scipy import stats\nt_stat, p_value = stats.ttest_ind(group_a, group_b)\nif p_value < 0.05:\n    print(\"Significant difference\")\n```\n\n### Type I and Type II errors\n| | H₀ true | H₀ false |\n|---|---|---|\n| Reject H₀ | ❌ Type I (false positive) | ✓ Correct |\n| Fail to reject | ✓ Correct | ❌ Type II (false negative) |\n\n**Business context:** \"Is the new checkout flow actually faster or did we just get lucky?\" Hypothesis testing gives you a defensible answer.\n\n## 🔗 How This Connects\n- **Business**: this is the statistical backbone of the A/B Testing lesson, and of any \"is this real or just noise\" question a stakeholder presentation needs to answer defensibly.\n- **Python**: `scipy.stats.ttest_ind()` (Statistical Analysis lesson) is the code implementation of the t-test taught here.",
       "exercises": [
         {
           "id": "stats-hyp-e1",
@@ -139,7 +222,7 @@
           "prompt": "You run an A/B test. p-value = 0.03, significance level = 0.05. Do you reject the null hypothesis?",
           "hint_1": "Compare p-value to alpha.",
           "hint_2": "If p < alpha, reject H0.",
-          "hint_3": "Yes \u2014 p = 0.03 < 0.05, so you reject the null hypothesis. The result is statistically significant.",
+          "hint_3": "Yes — p = 0.03 < 0.05, so you reject the null hypothesis. The result is statistically significant.",
           "solution": "Yes",
           "evaluation_mode": "contains",
           "points": 15
@@ -155,6 +238,174 @@
           "evaluation_mode": "contains",
           "points": 15
         }
+      ],
+      "quiz": [
+        {
+          "question": "What does the null hypothesis (H₀) represent?",
+          "options": [
+            "What you're trying to prove",
+            "The default assumption of no effect or no difference",
+            "The p-value threshold",
+            "The sample size needed"
+          ],
+          "correct_index": 1,
+          "explanation": "H₀ is the 'nothing is happening' baseline assumption — the alternative hypothesis (H₁) is what you're actually trying to find evidence for."
+        },
+        {
+          "question": "What does a p-value of 0.03 actually mean?",
+          "options": [
+            "There's a 3% chance the null hypothesis is true",
+            "If there were truly no effect, you'd see data this extreme only 3% of the time",
+            "The effect size is 3%",
+            "97% of the data supports the alternative hypothesis"
+          ],
+          "correct_index": 1,
+          "explanation": "This is the exact misconception the lesson calls out — a p-value is the probability of the observed data given H₀ is true, not the probability that H₀ itself is true."
+        },
+        {
+          "question": "With α = 0.05, what's the decision rule for statistical significance?",
+          "options": [
+            "Reject H₀ if p < 0.05",
+            "Reject H₀ if p > 0.05",
+            "Always reject H₀ regardless of p",
+            "Significance can't be determined from p-value alone"
+          ],
+          "correct_index": 0,
+          "explanation": "The standard rule: if the p-value falls below the chosen significance level (commonly 0.05), the result is considered statistically significant and H₀ is rejected."
+        }
+      ]
+    },
+    {
+      "id": "stats-chisquare",
+      "title": "Chi-Square Tests & Categorical Data",
+      "description": "Test relationships between categories — is department related to churn, or is that just noise?",
+      "level": "intermediate",
+      "prerequisites": [
+        "stats-hypothesis"
+      ],
+      "estimated_min": 35,
+      "theory_md": "## Chi-Square Tests & Categorical Data\n\nThe t-test compares numeric means between groups. Chi-square answers a different, equally common question: **is there a relationship between two categorical variables?**\n\n### Chi-square test of independence\nQuestion: \"Is customer churn related to subscription plan type?\" Both variables are categories (churned: yes/no; plan: basic/premium/enterprise) — not numbers, so a t-test doesn't apply here.\n\n```python\nimport pandas as pd\nfrom scipy.stats import chi2_contingency\n\n# A contingency table: counts of each combination\ncontingency = pd.crosstab(df['plan_type'], df['churned'])\nprint(contingency)\n\nchi2, p_value, dof, expected = chi2_contingency(contingency)\nprint(f\"Chi-square: {chi2:.2f}, p-value: {p_value:.4f}\")\n\nif p_value < 0.05:\n    print(\"Plan type and churn are significantly related\")\nelse:\n    print(\"No significant relationship detected\")\n```\n\n### How it works, conceptually\nChi-square compares your **observed** counts (what actually happened) against the **expected** counts (what you'd see if the two variables were completely unrelated). A large gap between observed and expected produces a large chi-square statistic and a small p-value — evidence the variables really are related.\n\n### Reading a contingency table\n```\n              churned=No   churned=Yes\nplan=Basic         180           70\nplan=Premium       220           30\nplan=Enterprise     95            5\n```\nChi-square tests whether this pattern of churn differs meaningfully across plans, or whether the differences you see are just what random noise would produce anyway.\n\n### Important caveat — sample size per cell\nChi-square becomes unreliable when expected counts in any cell fall below about 5. With small categories, consider Fisher's Exact Test instead (`scipy.stats.fisher_exact`, for 2x2 tables).\n\n**Business context:** \"Is this defect rate different by supplier?\", \"Does region relate to product preference?\", \"Is response rate related to email subject line?\" — any two-categorical-variable relationship question is a chi-square question.\n\n## 🔗 How This Connects\n- **SQL**: the contingency table itself is exactly what a two-dimensional GROUP BY / pivot query produces — chi-square is the statistical test layered on top of that summary.\n- **Business**: this directly extends the KPI Design lesson's idea of segmentation — chi-square tells you whether an observed difference between segments is real or just noise before you act on it.",
+      "exercises": [
+        {
+          "id": "stats-chi-ex1",
+          "title": "Test plan type vs churn",
+          "prompt": "Given a DataFrame `df` with categorical columns 'plan_type' and 'churned', build a contingency table and run a chi-square test of independence, printing the chi-square statistic and p-value.",
+          "hint_1": "pd.crosstab() builds the contingency table; scipy's chi2_contingency() runs the test.",
+          "hint_2": "chi2_contingency returns four values: chi2, p_value, degrees of freedom, and the expected counts table.",
+          "hint_3": "from scipy.stats import chi2_contingency\nimport pandas as pd\ncontingency = pd.crosstab(df['plan_type'], df['churned'])\nchi2, p_value, dof, expected = chi2_contingency(contingency)\nprint(f'Chi-square: {chi2:.2f}, p-value: {p_value:.4f}')",
+          "solution": "from scipy.stats import chi2_contingency\nimport pandas as pd\ncontingency = pd.crosstab(df['plan_type'], df['churned'])\nchi2, p_value, dof, expected = chi2_contingency(contingency)\nprint(f'Chi-square: {chi2:.2f}, p-value: {p_value:.4f}')",
+          "evaluation_mode": "ai_review",
+          "points": 25,
+          "sort_order": 1
+        },
+        {
+          "id": "stats-chi-ex2",
+          "title": "When chi-square breaks down",
+          "prompt": "A contingency table has one cell with an expected count of only 2. Why is this a problem for the chi-square test, and what alternative would you consider?",
+          "hint_1": "The lesson mentions a specific threshold for expected counts.",
+          "hint_2": "Below roughly 5 expected observations per cell, the chi-square approximation becomes unreliable.",
+          "hint_3": "Expected counts below about 5 make the chi-square approximation unreliable. Fisher's Exact Test (for 2x2 tables) is the recommended alternative for small samples.",
+          "solution": "With an expected count that low, the chi-square approximation becomes statistically unreliable — the test's assumptions break down. Fisher's Exact Test is the standard alternative for small-sample 2x2 tables like this.",
+          "evaluation_mode": "ai_review",
+          "points": 15,
+          "sort_order": 2
+        }
+      ],
+      "quiz": [
+        {
+          "question": "What type of variables does a chi-square test of independence compare?",
+          "options": [
+            "Two numeric variables",
+            "Two categorical variables",
+            "One numeric and one categorical variable",
+            "Time series data only"
+          ],
+          "correct_index": 1,
+          "explanation": "Chi-square tests whether two categorical variables (like plan type and churn status) are related — a t-test or correlation wouldn't apply here since neither variable is a continuous number."
+        },
+        {
+          "question": "What does chi-square fundamentally compare?",
+          "options": [
+            "Two sample means",
+            "Observed counts against the counts you'd expect if the variables were unrelated",
+            "The correlation coefficient between two columns",
+            "Standard deviations of two groups"
+          ],
+          "correct_index": 1,
+          "explanation": "A large gap between what you actually observed and what pure independence would predict produces a large chi-square statistic and evidence of a real relationship."
+        },
+        {
+          "question": "What's the recommended threshold below which chi-square becomes unreliable?",
+          "options": [
+            "Expected count per cell below about 5",
+            "Sample size below 1,000",
+            "p-value above 0.5",
+            "More than 2 categories in either variable"
+          ],
+          "correct_index": 0,
+          "explanation": "When expected cell counts drop below roughly 5, the chi-square approximation loses accuracy — Fisher's Exact Test is the standard fallback for small 2x2 tables."
+        }
+      ],
+      "sort_order": 5
+    },
+    {
+      "id": "stat-correlation",
+      "title": "Correlation Analysis",
+      "description": "Measure relationships between variables",
+      "level": "intermediate",
+      "prerequisites": [
+        "stat-descriptive"
+      ],
+      "estimated_min": 40,
+      "sort_order": 6,
+      "theory_md": "## Correlation\n\nCorrelation measures the strength and direction of a linear relationship between two variables.\n\n**Pearson r:** -1 to +1\n- +1 = perfect positive\n- 0 = no linear relationship\n- -1 = perfect negative\n\n**Interpretation guide:**\n- |r| < 0.3 = weak\n- 0.3-0.7 = moderate\n- |r| > 0.7 = strong\n\n⚠️ **Correlation ≠ Causation**\n\n**In Python:**\n```python\nimport pandas as pd\nimport numpy as np\n\nnp.random.seed(42)\ndf = pd.DataFrame({\n    'advertising': np.random.normal(5000, 1000, 50),\n    'sales': np.random.normal(50000, 10000, 50)\n})\ndf['sales'] = df['sales'] + df['advertising'] * 8\n\ncorr = df.corr().round(2)\nprint(corr)\n\n# Single pair\nr = df['advertising'].corr(df['sales'])\nprint(f'r = {r:.3f}')\n```\n\n**In SQL (approximate via normalized covariance):**\n```sql\nSELECT\n  (AVG(age * bill_amount) - AVG(age) * AVG(bill_amount)) /\n  (stddev(age) * stddev(bill_amount)) AS correlation\nFROM patients p JOIN billing b ON p.patient_id = b.patient_id;\n```\n\n## 🔗 How This Connects\n- **Excel**: the `CORREL()` function calculates the exact same correlation coefficient taught here.\n- **Python**: `scipy.stats.pearsonr()` does the same calculation with a p-value attached.\n- **Business**: correlation is often the first clue behind a business metric relationship worth investigating further in the KPI Design lesson.",
+      "exercises": [
+        {
+          "id": "stat-co1-e1",
+          "title": "Correlation Matrix",
+          "prompt": "Create a DataFrame with 100 rows (np.random.seed(1)): ad_spend (normal 10000,2000), clicks (ad_spend/10 + normal noise 0,50), sales (clicks*500 + normal 0,5000). Print the correlation matrix rounded to 2 decimals.",
+          "hint_1": "df.corr().round(2) gives the full matrix.",
+          "hint_2": "np.random.seed(1)\nn=100\nad = np.random.normal(10000,2000,n)\nclicks = ad/10 + np.random.normal(0,50,n)\nsales = clicks*500 + np.random.normal(0,5000,n)",
+          "hint_3": "import pandas as pd\nimport numpy as np\nnp.random.seed(1)\nn=100\nad = np.random.normal(10000,2000,n)\nclicks = ad/10 + np.random.normal(0,50,n)\nsales = clicks*500 + np.random.normal(0,5000,n)\ndf = pd.DataFrame({'ad_spend':ad.round(0),'clicks':clicks.round(0),'sales':sales.round(0)})\nprint(df.corr().round(2))",
+          "solution": "import pandas as pd\nimport numpy as np\nnp.random.seed(1)\nn=100\nad = np.random.normal(10000,2000,n)\nclicks = ad/10 + np.random.normal(0,50,n)\nsales = clicks*500 + np.random.normal(0,5000,n)\ndf = pd.DataFrame({'ad_spend':ad.round(0),'clicks':clicks.round(0),'sales':sales.round(0)})\nprint(df.corr().round(2))",
+          "evaluation_mode": "ai_review",
+          "points": 35
+        }
+      ],
+      "quiz": [
+        {
+          "question": "What does a Pearson correlation of -0.9 indicate?",
+          "options": [
+            "A very weak relationship",
+            "A very strong negative linear relationship",
+            "No relationship at all",
+            "A calculation error, since correlations can't be negative"
+          ],
+          "correct_index": 1,
+          "explanation": "Values close to -1 indicate a strong negative relationship: as one variable increases, the other tends to strongly decrease."
+        },
+        {
+          "question": "According to the lesson's interpretation guide, what does |r| = 0.5 represent?",
+          "options": [
+            "Weak correlation",
+            "Moderate correlation",
+            "Strong correlation",
+            "Perfect correlation"
+          ],
+          "correct_index": 1,
+          "explanation": "The guide places 0.3–0.7 in the 'moderate' range — 0.5 falls squarely inside it, neither weak nor strong."
+        },
+        {
+          "question": "Why does the lesson warn 'Correlation ≠ Causation'?",
+          "options": [
+            "Correlation can never be calculated accurately",
+            "Two variables can move together without one causing the other — a third factor or coincidence could explain it",
+            "Causation is always stronger than correlation numerically",
+            "This warning only applies to negative correlations"
+          ],
+          "correct_index": 1,
+          "explanation": "A strong correlation just shows two variables move together — it doesn't prove one causes the other. A hidden third factor or pure coincidence can produce the same pattern."
+        }
       ]
     },
     {
@@ -163,18 +414,18 @@
       "description": "Predict a continuous outcome and understand the relationship between variables.",
       "level": "intermediate",
       "prerequisites": [
-        "stats-correlation"
+        "stat-correlation"
       ],
       "estimated_min": 55,
-      "sort_order": 5,
-      "theory_md": "## Regression Analysis\n\n### Simple Linear Regression\nPredict Y from one variable X:\n```\nY = \u03b2\u2080 + \u03b2\u2081X + \u03b5\n```\n- **\u03b2\u2080** = intercept (Y when X=0)\n- **\u03b2\u2081** = slope (change in Y per unit change in X)\n- **\u03b5** = error term\n\n```python\nfrom sklearn.linear_model import LinearRegression\nmodel = LinearRegression()\nmodel.fit(X_train, y_train)\nprint(f\"Slope: {model.coef_[0]:.2f}\")\nprint(f\"Intercept: {model.intercept_:.2f}\")\n```\n\n### R\u00b2 \u2014 how well does the model fit?\n- R\u00b2 = 1 \u2192 perfect fit.\n- R\u00b2 = 0 \u2192 X explains nothing about Y.\n- R\u00b2 = 0.75 \u2192 X explains 75% of the variance in Y.\n\n### Multiple Regression\n```python\n# Multiple predictors\nX = df[['advertising_spend', 'price', 'num_stores']]\ny = df['sales']\nmodel.fit(X, y)\n```\n\n### Assumptions (LINE)\n- **L**inearity \u2014 relationship is linear.\n- **I**ndependence \u2014 observations are independent.\n- **N**ormality \u2014 residuals are normally distributed.\n- **E**qual variance \u2014 residuals have constant spread (homoscedasticity).\n\n**Business context:** \"For every $1,000 more we spend on ads, we expect $8,200 more in revenue\" \u2014 that is a regression coefficient in plain English.\n\n## \ud83d\udd17 How This Connects\n- **Python**: this is the exact same technique taught in the Machine Learning Introduction lesson \u2014 a linear regression model *is* this lesson's formula, fit with code instead of by hand.\n- **Business**: the Financial Modelling lesson's forecasts often rest on a regression like this one, even when it isn't labelled as such.",
+      "sort_order": 7,
+      "theory_md": "## Regression Analysis\n\n### Simple Linear Regression\nPredict Y from one variable X:\n```\nY = β₀ + β₁X + ε\n```\n- **β₀** = intercept (Y when X=0)\n- **β₁** = slope (change in Y per unit change in X)\n- **ε** = error term\n\n```python\nfrom sklearn.linear_model import LinearRegression\nmodel = LinearRegression()\nmodel.fit(X_train, y_train)\nprint(f\"Slope: {model.coef_[0]:.2f}\")\nprint(f\"Intercept: {model.intercept_:.2f}\")\n```\n\n### R² — how well does the model fit?\n- R² = 1 → perfect fit.\n- R² = 0 → X explains nothing about Y.\n- R² = 0.75 → X explains 75% of the variance in Y.\n\n### Multiple Regression\n```python\n# Multiple predictors\nX = df[['advertising_spend', 'price', 'num_stores']]\ny = df['sales']\nmodel.fit(X, y)\n```\n\n### Assumptions (LINE)\n- **L**inearity — relationship is linear.\n- **I**ndependence — observations are independent.\n- **N**ormality — residuals are normally distributed.\n- **E**qual variance — residuals have constant spread (homoscedasticity).\n\n**Business context:** \"For every $1,000 more we spend on ads, we expect $8,200 more in revenue\" — that is a regression coefficient in plain English.\n\n## 🔗 How This Connects\n- **Python**: this is the exact same technique taught in the Machine Learning Introduction lesson — a linear regression model *is* this lesson's formula, fit with code instead of by hand.\n- **Business**: the Financial Modelling lesson's forecasts often rest on a regression like this one, even when it isn't labelled as such.",
       "exercises": [
         {
           "id": "stats-reg-e1",
           "title": "Interpret slope",
           "prompt": "A regression model predicts Sales from Advertising. The slope coefficient is 8.2. What does this mean in plain English?",
           "hint_1": "The slope is change in Y per 1 unit increase in X.",
-          "hint_2": "1 unit more advertising \u2192 8.2 units more sales.",
+          "hint_2": "1 unit more advertising → 8.2 units more sales.",
           "hint_3": "For every 1 unit increase in advertising spend, sales are expected to increase by 8.2 units, holding other factors constant.",
           "solution": "For every 1 unit increase in advertising, sales increase by 8.2 units",
           "evaluation_mode": "contains",
@@ -183,7 +434,7 @@
         {
           "id": "stats-reg-e2",
           "title": "R-squared interpretation",
-          "prompt": "Your model has R\u00b2 = 0.62. What does this mean?",
+          "prompt": "Your model has R² = 0.62. What does this mean?",
           "hint_1": "R-squared measures explained variance.",
           "hint_2": "62% of something is explained by the model.",
           "hint_3": "The model explains 62% of the variance in the outcome variable. The remaining 38% is unexplained by the predictors.",
@@ -191,19 +442,127 @@
           "evaluation_mode": "contains",
           "points": 15
         }
+      ],
+      "quiz": [
+        {
+          "question": "In `Y = β₀ + β₁X + ε`, what does β₁ represent?",
+          "options": [
+            "The starting value of Y when X is 0",
+            "The slope — how much Y changes per one-unit change in X",
+            "The total error in the model",
+            "The correlation coefficient"
+          ],
+          "correct_index": 1,
+          "explanation": "β₁ is the slope coefficient: it quantifies exactly how much the predicted Y moves for every one-unit increase in X."
+        },
+        {
+          "question": "What does an R² of 0.75 mean?",
+          "options": [
+            "The model is 75% accurate on every individual prediction",
+            "X explains about 75% of the variance in Y",
+            "There's a 75% chance the relationship is causal",
+            "75% of the data points are outliers"
+          ],
+          "correct_index": 1,
+          "explanation": "R² measures the proportion of variance in the outcome variable explained by the predictor(s) — 0.75 means the model accounts for 75% of Y's variability, not accuracy per prediction."
+        },
+        {
+          "question": "What does the 'L' in the LINE assumptions of linear regression stand for?",
+          "options": [
+            "Logarithmic scale",
+            "Linearity — the relationship between X and Y should be linear",
+            "Large sample size",
+            "Low variance"
+          ],
+          "correct_index": 1,
+          "explanation": "Linearity is the first core assumption — linear regression assumes the true relationship between predictors and outcome is a straight line."
+        }
       ]
+    },
+    {
+      "id": "stats-anova",
+      "title": "ANOVA — Comparing 3+ Groups",
+      "description": "The t-test only compares two groups. ANOVA extends the same idea to three or more.",
+      "level": "advanced",
+      "prerequisites": [
+        "stats-hypothesis"
+      ],
+      "estimated_min": 40,
+      "theory_md": "## ANOVA — Analysis of Variance\n\nA t-test compares two groups. What about comparing average revenue across four regions, or satisfaction scores across five product lines? That's what ANOVA is for.\n\n### Why not just run multiple t-tests?\nRunning a t-test on every pair (North vs South, North vs East, South vs East...) inflates your false-positive rate — the more comparisons you run, the more likely one shows \"significant\" purely by chance. ANOVA tests all groups at once with a single, correctly-calibrated test.\n\n### One-way ANOVA\n```python\nfrom scipy import stats\n\nnorth = df[df['region'] == 'North']['revenue']\nsouth = df[df['region'] == 'South']['revenue']\neast = df[df['region'] == 'East']['revenue']\nwest = df[df['region'] == 'West']['revenue']\n\nf_stat, p_value = stats.f_oneway(north, south, east, west)\nprint(f\"F-statistic: {f_stat:.2f}, p-value: {p_value:.4f}\")\n\nif p_value < 0.05:\n    print(\"At least one region's average revenue differs significantly\")\n```\n\n### What ANOVA tells you — and what it doesn't\nA significant ANOVA result (p < 0.05) tells you **at least one group differs** from the others — it does *not* tell you which one(s). For that, you need a **post-hoc test**:\n\n```python\nfrom statsmodels.stats.multicomp import pairwise_tukeyhsd\n\ntukey = pairwise_tukeyhsd(df['revenue'], df['region'], alpha=0.05)\nprint(tukey)\n```\nTukey's HSD runs all pairwise comparisons while correctly controlling for the multiple-comparisons problem that plain repeated t-tests would create.\n\n### The logic behind the name\nANOVA works by comparing **variance between group means** to **variance within each group**. If groups truly differ, the spread between their means will be large relative to the natural noise inside each group — that ratio is the F-statistic.\n\n### Assumptions\n- Groups are independent of each other.\n- Data within each group is roughly normally distributed.\n- Similar variance across groups (homogeneity of variance) — check with Levene's test if unsure.\n\n**Business context:** \"Does average deal size differ by sales rep?\", \"Is patient recovery time different across three treatment protocols?\", \"Does satisfaction differ by store location?\" — any comparison of a numeric outcome across 3+ groups is an ANOVA question.\n\n## 🔗 How This Connects\n- **Business**: this directly extends KPI segmentation — ANOVA is the rigorous way to answer \"is the difference we see between segments real, or just noise?\" for numeric metrics, the same question chi-square answers for categorical ones.\n- **SQL**: computing each group's mean with a GROUP BY query is the first step before ANOVA — the test formalizes whether those group averages differ more than random chance would explain.",
+      "exercises": [
+        {
+          "id": "stats-anova-ex1",
+          "title": "Run a one-way ANOVA",
+          "prompt": "Given a DataFrame `df` with a numeric 'satisfaction' column and a categorical 'store' column with values 'A', 'B', 'C', write the code to test whether average satisfaction differs significantly across the three stores.",
+          "hint_1": "Split satisfaction into three separate arrays, one per store, then pass them to scipy's f_oneway.",
+          "hint_2": "stats.f_oneway(group1, group2, group3) returns the F-statistic and p-value.",
+          "hint_3": "from scipy import stats\na = df[df['store']=='A']['satisfaction']\nb = df[df['store']=='B']['satisfaction']\nc = df[df['store']=='C']['satisfaction']\nf_stat, p_value = stats.f_oneway(a, b, c)\nprint(f'F: {f_stat:.2f}, p: {p_value:.4f}')",
+          "solution": "from scipy import stats\na = df[df['store']=='A']['satisfaction']\nb = df[df['store']=='B']['satisfaction']\nc = df[df['store']=='C']['satisfaction']\nf_stat, p_value = stats.f_oneway(a, b, c)\nprint(f'F: {f_stat:.2f}, p: {p_value:.4f}')",
+          "evaluation_mode": "ai_review",
+          "points": 25,
+          "sort_order": 1
+        },
+        {
+          "id": "stats-anova-ex2",
+          "title": "Interpret a significant ANOVA",
+          "prompt": "Your one-way ANOVA across 5 sales regions returns p = 0.01. A manager asks 'great, so which region is different?' How do you respond, and what would you do next?",
+          "hint_1": "Think about exactly what a significant ANOVA result does and doesn't tell you.",
+          "hint_2": "ANOVA only tells you at least one group differs, not which specific one(s).",
+          "hint_3": "Explain that ANOVA only shows at least one region differs, not which — then run a post-hoc test like Tukey's HSD to identify the specific pairwise differences.",
+          "solution": "A significant ANOVA (p=0.01) only tells you that at least one region's average differs from the others — it doesn't identify which one. The next step is a post-hoc test, like Tukey's HSD, which runs all pairwise comparisons while correctly controlling for the multiple-comparisons problem.",
+          "evaluation_mode": "ai_review",
+          "points": 15,
+          "sort_order": 2
+        }
+      ],
+      "quiz": [
+        {
+          "question": "Why is ANOVA preferred over running many separate t-tests across multiple groups?",
+          "options": [
+            "ANOVA is always faster to compute",
+            "Running many t-tests inflates the false-positive rate; ANOVA tests all groups at once with a correctly-calibrated single test",
+            "t-tests can't handle numeric data",
+            "There's no real difference between the approaches"
+          ],
+          "correct_index": 1,
+          "explanation": "Each additional pairwise t-test adds another chance of a false positive purely by chance — ANOVA avoids this by testing all groups together in one properly-calibrated test."
+        },
+        {
+          "question": "What does a significant ANOVA result (p < 0.05) actually tell you?",
+          "options": [
+            "Exactly which group is different from the others",
+            "That at least one group's mean differs from the others, without specifying which",
+            "That all groups are different from each other",
+            "That the sample size was too small"
+          ],
+          "correct_index": 1,
+          "explanation": "ANOVA is a single overall test — it flags that a difference exists somewhere among the groups, but a follow-up post-hoc test is needed to identify which specific group(s) differ."
+        },
+        {
+          "question": "What is the purpose of a post-hoc test like Tukey's HSD?",
+          "options": [
+            "To replace ANOVA entirely",
+            "To identify which specific pairs of groups differ, while correctly controlling for multiple comparisons",
+            "To calculate the sample size needed",
+            "To test for normality"
+          ],
+          "correct_index": 1,
+          "explanation": "Tukey's HSD runs the pairwise comparisons a manager actually wants ('which region?'), but does so in a way that properly accounts for testing multiple pairs at once, unlike naive repeated t-tests."
+        }
+      ],
+      "sort_order": 8
     },
     {
       "id": "stats-abtesting",
       "title": "A/B Testing for Analysts",
-      "description": "Design and analyse experiments correctly \u2014 the skill every product and marketing team needs.",
+      "description": "Design and analyse experiments correctly — the skill every product and marketing team needs.",
       "level": "intermediate",
       "prerequisites": [
         "stats-hypothesis"
       ],
       "estimated_min": 50,
-      "sort_order": 6,
-      "theory_md": "## A/B Testing for Analysts\n\n### What is an A/B test?\nA controlled experiment where you split users randomly into:\n- **Control (A)** \u2014 current experience.\n- **Treatment (B)** \u2014 the change you want to test.\n\nRandomisation ensures any difference in outcomes is caused by the change, not by who happened to be in each group.\n\n### Sample size planning\nUnderpowered tests are the #1 mistake. Run a sample size calculation **before** starting.\n\nRule of thumb for conversion rates:\n```\nn \u2248 16 \u00d7 \u03c3\u00b2 / \u03b4\u00b2\n```\nwhere \u03b4 is the minimum detectable effect you care about.\n\nOnline calculators: statsig.com, evan.miller.org/ab-testing\n\n### Key metrics to track\n- **Primary metric** \u2014 the one that determines success/failure (e.g. conversion rate).\n- **Guardrail metrics** \u2014 metrics that must not get worse (e.g. page load time, error rate).\n- **Secondary metrics** \u2014 directional signals (session length, pages per visit).\n\n### Common mistakes\n1. **Peeking** \u2014 stopping early when you see a significant result inflates false positives.\n2. **Multiple testing** \u2014 testing 20 metrics at \u03b1=0.05 will produce 1 false positive on average.\n3. **Novelty effect** \u2014 users behave differently because something is new, not better.\n4. **Segment by segment analysis post-hoc** \u2014 only valid if pre-registered.\n\n**Business context:** Every product change should go through A/B testing. Analysts who run tests correctly give their companies a compounding advantage.\n\n## \ud83d\udd17 How This Connects\n- **Business**: this lesson is the statistical rigor behind any KPI change a business wants to validate \u2014 \"did this actually work\" is an A/B testing question at heart.\n- **Statistics**: builds directly on the Hypothesis Testing lesson's p-value framework.",
+      "sort_order": 9,
+      "theory_md": "## A/B Testing for Analysts\n\n### What is an A/B test?\nA controlled experiment where you split users randomly into:\n- **Control (A)** — current experience.\n- **Treatment (B)** — the change you want to test.\n\nRandomisation ensures any difference in outcomes is caused by the change, not by who happened to be in each group.\n\n### Sample size planning\nUnderpowered tests are the #1 mistake. Run a sample size calculation **before** starting.\n\nRule of thumb for conversion rates:\n```\nn ≈ 16 × σ² / δ²\n```\nwhere δ is the minimum detectable effect you care about.\n\nOnline calculators: statsig.com, evan.miller.org/ab-testing\n\n### Key metrics to track\n- **Primary metric** — the one that determines success/failure (e.g. conversion rate).\n- **Guardrail metrics** — metrics that must not get worse (e.g. page load time, error rate).\n- **Secondary metrics** — directional signals (session length, pages per visit).\n\n### Common mistakes\n1. **Peeking** — stopping early when you see a significant result inflates false positives.\n2. **Multiple testing** — testing 20 metrics at α=0.05 will produce 1 false positive on average.\n3. **Novelty effect** — users behave differently because something is new, not better.\n4. **Segment by segment analysis post-hoc** — only valid if pre-registered.\n\n**Business context:** Every product change should go through A/B testing. Analysts who run tests correctly give their companies a compounding advantage.\n\n## 🔗 How This Connects\n- **Business**: this lesson is the statistical rigor behind any KPI change a business wants to validate — \"did this actually work\" is an A/B testing question at heart.\n- **Statistics**: builds directly on the Hypothesis Testing lesson's p-value framework.",
       "exercises": [
         {
           "id": "stats-ab-e1",
@@ -222,24 +581,59 @@
           "prompt": "You start an A/B test. After 3 days, p = 0.04. You stop and declare success. What is the problem?",
           "hint_1": "You planned for 2 weeks of data.",
           "hint_2": "Stopping based on an interim result inflates error.",
-          "hint_3": "Peeking \u2014 stopping early when a significant result appears inflates the Type I error rate above your chosen alpha. The true false-positive rate is much higher than 5%.",
+          "hint_3": "Peeking — stopping early when a significant result appears inflates the Type I error rate above your chosen alpha. The true false-positive rate is much higher than 5%.",
           "solution": "Peeking inflates Type I error",
           "evaluation_mode": "contains",
           "points": 20
+        }
+      ],
+      "quiz": [
+        {
+          "question": "What is the purpose of randomization when splitting users into Control and Treatment groups?",
+          "options": [
+            "It makes the test run faster",
+            "It ensures any outcome difference is caused by the change being tested, not by who ended up in each group",
+            "It's only needed for large sample sizes",
+            "It removes the need for a sample size calculation"
+          ],
+          "correct_index": 1,
+          "explanation": "Random assignment balances out other differences between groups on average, isolating the treatment itself as the explanation for any observed difference."
+        },
+        {
+          "question": "According to the lesson, what is the #1 mistake in A/B testing?",
+          "options": [
+            "Choosing the wrong primary metric",
+            "Running an underpowered test — not calculating sample size beforehand",
+            "Testing too many variations at once",
+            "Running the test for too long"
+          ],
+          "correct_index": 1,
+          "explanation": "An underpowered test (too few users) can fail to detect a real effect or produce unreliable results — sample size planning before launch is called out as essential."
+        },
+        {
+          "question": "What is a 'guardrail metric' in an A/B test?",
+          "options": [
+            "The same thing as the primary metric",
+            "A metric that must not get worse, even if it isn't the main success measure",
+            "A metric only used after the test ends",
+            "The metric used to calculate sample size"
+          ],
+          "correct_index": 1,
+          "explanation": "Guardrail metrics protect against unintended harm — e.g. a checkout redesign that boosts conversion but must not increase page load time or support tickets."
         }
       ]
     },
     {
       "id": "stats-timeseries",
       "title": "Time Series Basics",
-      "description": "Decompose trends, seasonality, and noise \u2014 and make defensible forecasts.",
+      "description": "Decompose trends, seasonality, and noise — and make defensible forecasts.",
       "level": "advanced",
       "prerequisites": [
         "stats-regression"
       ],
       "estimated_min": 55,
-      "sort_order": 7,
-      "theory_md": "## Time Series Basics\n\n### Components of a time series\n- **Trend** \u2014 long-term direction (up, down, flat).\n- **Seasonality** \u2014 repeating pattern at a fixed frequency (weekly, monthly, yearly).\n- **Cyclical** \u2014 longer, irregular waves (economic cycles).\n- **Noise** \u2014 random variation that can't be predicted.\n\n### Decomposition\n```python\nfrom statsmodels.tsa.seasonal import seasonal_decompose\nresult = seasonal_decompose(df['sales'], model='additive', period=12)\nresult.plot()\n```\n\n### Moving averages \u2014 smooth out noise\n```python\ndf['7d_MA'] = df['sales'].rolling(window=7).mean()\ndf['30d_MA'] = df['sales'].rolling(window=30).mean()\n```\n\n### Stationarity\nA stationary series has constant mean and variance over time. Many forecasting models require it.\n\n**Augmented Dickey-Fuller test:**\n```python\nfrom statsmodels.tsa.stattools import adfuller\nresult = adfuller(df['sales'])\np_value = result[1]  # p < 0.05 \u2192 stationary\n```\n\n**Differencing** makes a non-stationary series stationary:\n```python\ndf['sales_diff'] = df['sales'].diff()\n```\n\n### Simple forecast: Exponential Smoothing\n```python\nfrom statsmodels.tsa.holtwinters import ExponentialSmoothing\nmodel = ExponentialSmoothing(df['sales'], trend='add', seasonal='add', seasonal_periods=12)\nfitted = model.fit()\nforecast = fitted.forecast(6)  # 6 months ahead\n```\n\n**Business context:** \"Are our sales really growing or is this just the usual Q4 bump?\" Time series decomposition answers that definitively.\n\n## \ud83d\udd17 How This Connects\n- **SQL**: window functions are how you'd calculate the rolling averages and trends this lesson discusses, directly in a database query.\n- **Power BI**: DAX's time intelligence functions (Advanced DAX lesson) implement the same year-over-year and trend comparisons covered here.",
+      "sort_order": 10,
+      "theory_md": "## Time Series Basics\n\n### Components of a time series\n- **Trend** — long-term direction (up, down, flat).\n- **Seasonality** — repeating pattern at a fixed frequency (weekly, monthly, yearly).\n- **Cyclical** — longer, irregular waves (economic cycles).\n- **Noise** — random variation that can't be predicted.\n\n### Decomposition\n```python\nfrom statsmodels.tsa.seasonal import seasonal_decompose\nresult = seasonal_decompose(df['sales'], model='additive', period=12)\nresult.plot()\n```\n\n### Moving averages — smooth out noise\n```python\ndf['7d_MA'] = df['sales'].rolling(window=7).mean()\ndf['30d_MA'] = df['sales'].rolling(window=30).mean()\n```\n\n### Stationarity\nA stationary series has constant mean and variance over time. Many forecasting models require it.\n\n**Augmented Dickey-Fuller test:**\n```python\nfrom statsmodels.tsa.stattools import adfuller\nresult = adfuller(df['sales'])\np_value = result[1]  # p < 0.05 → stationary\n```\n\n**Differencing** makes a non-stationary series stationary:\n```python\ndf['sales_diff'] = df['sales'].diff()\n```\n\n### Simple forecast: Exponential Smoothing\n```python\nfrom statsmodels.tsa.holtwinters import ExponentialSmoothing\nmodel = ExponentialSmoothing(df['sales'], trend='add', seasonal='add', seasonal_periods=12)\nfitted = model.fit()\nforecast = fitted.forecast(6)  # 6 months ahead\n```\n\n**Business context:** \"Are our sales really growing or is this just the usual Q4 bump?\" Time series decomposition answers that definitively.\n\n## 🔗 How This Connects\n- **SQL**: window functions are how you'd calculate the rolling averages and trends this lesson discusses, directly in a database query.\n- **Power BI**: DAX's time intelligence functions (Advanced DAX lesson) implement the same year-over-year and trend comparisons covered here.",
       "exercises": [
         {
           "id": "stats-ts-e1",
@@ -262,6 +656,41 @@
           "solution": "Smooths noise and reveals the underlying trend",
           "evaluation_mode": "contains",
           "points": 15
+        }
+      ],
+      "quiz": [
+        {
+          "question": "What does 'seasonality' mean in a time series?",
+          "options": [
+            "Random, unpredictable variation",
+            "A repeating pattern at a fixed frequency, like weekly or yearly cycles",
+            "The long-term overall direction",
+            "Missing data points"
+          ],
+          "correct_index": 1,
+          "explanation": "Seasonality is a predictable, recurring pattern — e.g. retail sales spiking every December — distinct from the long-term trend or random noise."
+        },
+        {
+          "question": "What is the purpose of a moving average like `df['sales'].rolling(window=7).mean()`?",
+          "options": [
+            "To delete outliers permanently",
+            "To smooth out short-term noise and reveal the underlying trend",
+            "To calculate a correlation",
+            "To convert the series into a bar chart"
+          ],
+          "correct_index": 1,
+          "explanation": "Rolling/moving averages average out short-term fluctuations, making the underlying trend easier to see and interpret."
+        },
+        {
+          "question": "What does it mean for a time series to be 'stationary'?",
+          "options": [
+            "It has no seasonality at all",
+            "Its mean and variance stay constant over time",
+            "It only contains positive values",
+            "It has exactly 12 data points"
+          ],
+          "correct_index": 1,
+          "explanation": "Stationarity means the statistical properties (mean, variance) don't systematically change over time — many forecasting models require this assumption to work correctly."
         }
       ]
     }

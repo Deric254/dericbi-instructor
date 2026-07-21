@@ -3,8 +3,9 @@ import {
   Users, Play, CheckCircle, ArrowLeft, Brain,
   ChevronRight, Star, Flag, Loader, Info,
 } from 'lucide-react'
-import { useAuthStore } from '../store'
+import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
+import { reportApiError } from '../lib/apiError'
 
 const SIMULATIONS = [
   {
@@ -157,6 +158,7 @@ function SimRunner({ sim, onExit }: { sim: typeof SIMULATIONS[0]; onExit: () => 
   const [showMentor, setShowMentor] = useState(false)
   const [done, setDone] = useState(false)
   const [sandboxReady, setSandboxReady] = useState(false)
+  const [sandboxError, setSandboxError] = useState(false)
   const sandboxId = useRef(`sim_${sim.id}_${user?.id}_${Date.now()}`)
   const current = sim.steps[step]
   const isLast = step === sim.steps.length - 1
@@ -164,19 +166,28 @@ function SimRunner({ sim, onExit }: { sim: typeof SIMULATIONS[0]; onExit: () => 
   useEffect(() => {
     if (!user) return
     const load = async () => {
-      for (const dsId of sim.datasets) {
-        await window.api.sql.loadDataset(sandboxId.current, dsId, 'bundled', user.id)
+      try {
+        for (const dsId of sim.datasets) {
+          await window.api.sql.loadDataset(sandboxId.current, dsId, 'bundled', user.id)
+        }
+        setSandboxReady(true)
+      } catch (err) {
+        reportApiError('set up this simulation', err)
+        setSandboxError(true)
       }
-      setSandboxReady(true)
     }
     load()
-    return () => { window.api.sql.closeSandbox(sandboxId.current) }
+    return () => { window.api.sql.closeSandbox(sandboxId.current).catch((err: any) => console.error('[close sandbox]', err)) }
   }, [user])
 
   const runSQL = async (query: string) => {
     if (!user) return
-    const r = await window.api.sql.execute(sandboxId.current, query, user.id)
-    setSqlResults(p => ({ ...p, [current.id]: r }))
+    try {
+      const r = await window.api.sql.execute(sandboxId.current, query, user.id)
+      setSqlResults(p => ({ ...p, [current.id]: r }))
+    } catch (err: any) {
+      setSqlResults(p => ({ ...p, [current.id]: { success: false, error: err?.message || 'Query failed. Try again.' } as any }))
+    }
   }
 
   const getFeedback = async () => {
@@ -193,6 +204,9 @@ function SimRunner({ sim, onExit }: { sim: typeof SIMULATIONS[0]; onExit: () => 
         context: { type: 'simulation', lesson: sim.role, exercise: current.title },
       })
       if (r.success) setFeedbacks(p => ({ ...p, [current.id]: r.message }))
+      else notify.error('Could not get feedback', 'Check your AI API key in Settings.')
+    } catch (err) {
+      reportApiError('get feedback on this step', err)
     } finally { setSubmitting(false) }
   }
 
@@ -266,6 +280,7 @@ function SimRunner({ sim, onExit }: { sim: typeof SIMULATIONS[0]; onExit: () => 
                 startSQL={(current as any).starter_sql}
                 sandboxId={sandboxId.current}
                 sandboxReady={sandboxReady}
+                sandboxError={sandboxError}
                 result={sqlResults[current.id]}
                 onRun={runSQL}
               />
@@ -312,8 +327,8 @@ function SimRunner({ sim, onExit }: { sim: typeof SIMULATIONS[0]; onExit: () => 
   )
 }
 
-function SqlBox({ startSQL, sandboxId, sandboxReady, result, onRun }: {
-  startSQL: string; sandboxId: string; sandboxReady: boolean; result: any; onRun: (q: string) => void
+function SqlBox({ startSQL, sandboxId, sandboxReady, sandboxError, result, onRun }: {
+  startSQL: string; sandboxId: string; sandboxReady: boolean; sandboxError?: boolean; result: any; onRun: (q: string) => void
 }) {
   const [query, setQuery] = useState(startSQL)
   const [running, setRunning] = useState(false)
@@ -324,7 +339,7 @@ function SqlBox({ startSQL, sandboxId, sandboxReady, result, onRun }: {
     <div style={{ background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden', marginBottom: 6 }}>
       <div style={{ padding: '7px 12px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8, background: 'var(--bg-surface)' }}>
         <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--sql-color)' }}>SQL Sandbox</span>
-        {!sandboxReady && <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>Loading dataset…</span>}
+        {!sandboxReady && <span style={{ fontSize: 10, color: sandboxError ? 'var(--error)' : 'var(--text-muted)' }}>{sandboxError ? "Couldn't set up this simulation's data — see notification" : 'Loading dataset…'}</span>}
         {sandboxReady && result?.row_count !== undefined && <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{result.row_count} rows · {result.exec_ms}ms</span>}
         <button className="btn btn-primary btn-sm" onClick={run} disabled={running || !sandboxReady} style={{ marginLeft: 'auto' }}>
           {running ? <><Loader size={11} className="animate-spin" />Running…</> : <><Play size={11} />Run  Ctrl+↵</>}

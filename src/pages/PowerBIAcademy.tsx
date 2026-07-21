@@ -4,19 +4,29 @@ import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
+import { PageError } from '../components/ui/PageState'
+import { reportApiError } from '../lib/apiError'
 import type { Lesson } from '../types'
 
 export default function PowerBIAcademy() {
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [showInstructor, setShowInstructor] = useState(false)
   const { user } = useAuthStore()
 
-  useEffect(() => {
+  const loadLessons = () => {
     if (!user) return
-    window.api.lessons.list(user.id, 'powerbi').then((d: any) => { setLessons(d); setLoading(false) })
-  }, [user])
+    setLoading(true)
+    setLoadError(false)
+    window.api.lessons.list(user.id, 'powerbi')
+      .then((d: any) => setLessons(d))
+      .catch((err) => { reportApiError('load Power BI lessons', err); setLoadError(true) })
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(loadLessons, [user])
 
   const MODULE_TOPICS = [
     { title: 'Data Modeling & Relationships', desc: 'Star schema, dimension tables, fact tables, cardinality', level: 'beginner', est: 45 },
@@ -51,10 +61,16 @@ export default function PowerBIAcademy() {
               </div>
               <button className="btn btn-primary" onClick={async () => {
                 if (!user) return
-                await window.api.lessons.complete(user.id, activeLesson.id, 0)
-                notify.success('Lesson marked complete!', activeLesson.title)
-                setActiveLesson(null)
-                window.api.lessons.list(user.id, 'powerbi').then(setLessons)
+                try {
+                  await window.api.lessons.complete(user.id, activeLesson.id, 0)
+                  notify.success('Lesson marked complete!', activeLesson.title)
+                  setActiveLesson(null)
+                  window.api.lessons.list(user.id, 'powerbi')
+                    .then(setLessons)
+                    .catch((err: any) => reportApiError('refresh your lessons', err))
+                } catch (err) {
+                  reportApiError('mark this lesson complete', err)
+                }
               }} style={{ marginTop: 20 }}>
                 <CheckCircle size={14} /> Mark as Complete
               </button>
@@ -82,7 +98,10 @@ export default function PowerBIAcademy() {
         </div>
       </div>
       <div style={{ flex: 1, overflow: 'auto', padding: 24 }}>
-        <div style={{ marginBottom: 20, padding: '12px 16px', background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.3)', borderRadius: 'var(--radius)', fontSize: 12, color: 'var(--powerbi-color)', display: 'flex', gap: 8 }}>
+        {loadError ? (
+          <PageError message="Couldn't load the Power BI Academy lessons." onRetry={loadLessons} />
+        ) : (
+        <><div style={{ marginBottom: 20, padding: '12px 16px', background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.3)', borderRadius: 'var(--radius)', fontSize: 12, color: 'var(--powerbi-color)', display: 'flex', gap: 8 }}>
           <Info size={14} style={{ flexShrink: 0, marginTop: 1 }} />
           <span>Power BI lessons use guided walkthroughs. You work in Power BI Desktop while the AI instructor coaches you step by step. <a href="https://powerbi.microsoft.com/downloads/" target="_blank" style={{ color: 'var(--powerbi-color)' }}>Download Power BI Desktop ↗</a></span>
         </div>
@@ -112,6 +131,8 @@ export default function PowerBIAcademy() {
               ))}
             </div>
           </>
+        )}
+        </>
         )}
       </div>
     </div>

@@ -1,0 +1,9 @@
+{
+  "name": "dericbi-seller-tools",
+  "private": true,
+  "description": "Seller-only license key generation. Never bundle this into the shipped app.",
+  "dependencies": {
+    "@noble/ed25519": "^3.1.0",
+    "@noble/hashes": "^2.2.0"
+  }
+}

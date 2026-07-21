@@ -5,12 +5,12 @@
     {
       "id": "py-basics",
       "title": "Python Fundamentals",
-      "description": "Variables, data types, loops, functions \u2014 analyst-focused",
+      "description": "Variables, data types, loops, functions — analyst-focused",
       "level": "beginner",
       "prerequisites": [],
       "estimated_min": 35,
       "sort_order": 1,
-      "theory_md": "## Python for Analysts \u2014 Starting From Zero\n\nIf you've never written a line of code before, start here. Everything after this lesson builds on these exact ideas.\n\n### What is Python, really?\nPython is a language for giving a computer step-by-step instructions. You type instructions (called **code**), the computer reads them top to bottom, and does exactly what they say \u2014 nothing more, nothing clever, nothing assumed. This app runs your code the moment you click Run.\n\n### Your first line of code\n```python\nprint(\"Hello, analyst\")\n```\n`print(...)` displays whatever is inside the parentheses on screen. Quotes (`\"...\"`) tell Python \"this is text, not an instruction.\" Run this exact line before reading further \u2014 seeing it work is the whole point.\n\n### Variables \u2014 giving a value a name\n```python\nrevenue = 150000\n```\nThis is NOT a math equation. `=` here means \"store this value under this name,\" not \"these are equal.\" Read it as *\"revenue is now 150000.\"* Once stored, you can reuse the name instead of retyping the number:\n```python\nrevenue = 150000\ncost = 95000\nprofit = revenue - cost\nprint(profit)          # 55000\n```\n\n### The basic data types\n- **int** \u2014 whole numbers: `42`\n- **float** \u2014 decimals: `3.14`\n- **str** \u2014 text, always in quotes: `\"North Region\"`\n- **bool** \u2014 True or False: `is_active = True`\n\nPython figures out the type automatically from how you write the value \u2014 you never have to declare it yourself.\n\n### Comments \u2014 notes the computer ignores\n```python\n# This line explains what's below it \u2014 Python skips anything after #\nmargin = profit / revenue  # profit divided by revenue\n```\nUse comments to explain *why*, not restate *what* \u2014 future-you (or a colleague) will thank you.\n\n### f-strings \u2014 building readable output\n```python\nmargin = profit / revenue * 100\nprint(f\"Profit: {profit:,}  Margin: {margin:.1f}%\")\n```\nThe `f` before the quote lets you drop variables directly inside `{}`. `:,` adds thousand separators; `:.1f` rounds to 1 decimal place. This is how you'll format almost every result you print in this course.\n\n### Lists \u2014 an ordered collection of values\n```python\nsales = [12000, 15000, 11000, 18000, 22000]\nprint(sales[0])          # 12000 \u2014 Python counts from 0, not 1\nprint(len(sales))        # 5 \u2014 how many items\nprint(sum(sales))        # 78000\nprint(sum(sales) / len(sales))   # average: 15600.0\n```\n\n### Dictionaries \u2014 a labelled record, like one row of a spreadsheet\n```python\nrecord = {\"name\": \"Alice\", \"sales\": 45000, \"region\": \"North\"}\nprint(record[\"name\"])    # Alice\nprint(record[\"sales\"])   # 45000\n```\nWhere a list is ordered by position (`sales[0]`), a dictionary is looked up by name (`record[\"name\"]`) \u2014 exactly like referring to a column by its header instead of its position.\n\n### Loops \u2014 doing something for every item\n```python\nfor amount in sales:\n    print(f\"Sale: {amount}\")\n```\nThis runs the indented line once for every value in `sales`, automatically. Indentation (the spaces at the start of the line) is not just style in Python \u2014 it's how Python knows which lines belong to the loop.\n\n### Functions \u2014 packaging up reusable logic\n```python\ndef calculate_margin(revenue, cost):\n    profit = revenue - cost\n    return profit / revenue * 100\n\nprint(calculate_margin(150000, 95000))   # 36.66666...\n```\n`def` defines a function once; you can call it as many times as you want with different numbers, instead of rewriting the same calculation everywhere.\n\n### Putting it together\n```python\nsales_data = [\n    {\"region\": \"North\", \"revenue\": 45000, \"cost\": 30000},\n    {\"region\": \"South\", \"revenue\": 38000, \"cost\": 28000},\n]\n\nfor row in sales_data:\n    margin = calculate_margin(row[\"revenue\"], row[\"cost\"])\n    print(f\"{row['region']}: {margin:.1f}% margin\")\n```\nThis single pattern \u2014 a list of dictionaries, looped over \u2014 is the shape of almost every real dataset you'll work with as an analyst, long before you ever load a spreadsheet with pandas.\n\n**Business context:** Every automated report, every dashboard refresh, every \"run this every Monday morning\" task an analyst builds starts from exactly these building blocks: store a value, check a condition, repeat an action, package it into a function.\n\n## \ud83d\udd17 How This Connects\n- **Everything downstream**: every later Python lesson \u2014 and the automation/ML lessons especially \u2014 builds directly on the variables, loops, and functions taught here. This is the one lesson every other Python lesson assumes you've completed.",
+      "theory_md": "## Python for Analysts — Starting From Zero\n\nIf you've never written a line of code before, start here. Everything after this lesson builds on these exact ideas.\n\n### What is Python, really?\nPython is a language for giving a computer step-by-step instructions. You type instructions (called **code**), the computer reads them top to bottom, and does exactly what they say — nothing more, nothing clever, nothing assumed. This app runs your code the moment you click Run.\n\n### Your first line of code\n```python\nprint(\"Hello, analyst\")\n```\n`print(...)` displays whatever is inside the parentheses on screen. Quotes (`\"...\"`) tell Python \"this is text, not an instruction.\" Run this exact line before reading further — seeing it work is the whole point.\n\n### Variables — giving a value a name\n```python\nrevenue = 150000\n```\nThis is NOT a math equation. `=` here means \"store this value under this name,\" not \"these are equal.\" Read it as *\"revenue is now 150000.\"* Once stored, you can reuse the name instead of retyping the number:\n```python\nrevenue = 150000\ncost = 95000\nprofit = revenue - cost\nprint(profit)          # 55000\n```\n\n### The basic data types\n- **int** — whole numbers: `42`\n- **float** — decimals: `3.14`\n- **str** — text, always in quotes: `\"North Region\"`\n- **bool** — True or False: `is_active = True`\n\nPython figures out the type automatically from how you write the value — you never have to declare it yourself.\n\n### Comments — notes the computer ignores\n```python\n# This line explains what's below it — Python skips anything after #\nmargin = profit / revenue  # profit divided by revenue\n```\nUse comments to explain *why*, not restate *what* — future-you (or a colleague) will thank you.\n\n### f-strings — building readable output\n```python\nmargin = profit / revenue * 100\nprint(f\"Profit: {profit:,}  Margin: {margin:.1f}%\")\n```\nThe `f` before the quote lets you drop variables directly inside `{}`. `:,` adds thousand separators; `:.1f` rounds to 1 decimal place. This is how you'll format almost every result you print in this course.\n\n### Lists — an ordered collection of values\n```python\nsales = [12000, 15000, 11000, 18000, 22000]\nprint(sales[0])          # 12000 — Python counts from 0, not 1\nprint(len(sales))        # 5 — how many items\nprint(sum(sales))        # 78000\nprint(sum(sales) / len(sales))   # average: 15600.0\n```\n\n### Dictionaries — a labelled record, like one row of a spreadsheet\n```python\nrecord = {\"name\": \"Alice\", \"sales\": 45000, \"region\": \"North\"}\nprint(record[\"name\"])    # Alice\nprint(record[\"sales\"])   # 45000\n```\nWhere a list is ordered by position (`sales[0]`), a dictionary is looked up by name (`record[\"name\"]`) — exactly like referring to a column by its header instead of its position.\n\n### Loops — doing something for every item\n```python\nfor amount in sales:\n    print(f\"Sale: {amount}\")\n```\nThis runs the indented line once for every value in `sales`, automatically. Indentation (the spaces at the start of the line) is not just style in Python — it's how Python knows which lines belong to the loop.\n\n### Functions — packaging up reusable logic\n```python\ndef calculate_margin(revenue, cost):\n    profit = revenue - cost\n    return profit / revenue * 100\n\nprint(calculate_margin(150000, 95000))   # 36.66666...\n```\n`def` defines a function once; you can call it as many times as you want with different numbers, instead of rewriting the same calculation everywhere.\n\n### Putting it together\n```python\nsales_data = [\n    {\"region\": \"North\", \"revenue\": 45000, \"cost\": 30000},\n    {\"region\": \"South\", \"revenue\": 38000, \"cost\": 28000},\n]\n\nfor row in sales_data:\n    margin = calculate_margin(row[\"revenue\"], row[\"cost\"])\n    print(f\"{row['region']}: {margin:.1f}% margin\")\n```\nThis single pattern — a list of dictionaries, looped over — is the shape of almost every real dataset you'll work with as an analyst, long before you ever load a spreadsheet with pandas.\n\n**Business context:** Every automated report, every dashboard refresh, every \"run this every Monday morning\" task an analyst builds starts from exactly these building blocks: store a value, check a condition, repeat an action, package it into a function.\n\n## 🔗 How This Connects\n- **Everything downstream**: every later Python lesson — and the automation/ML lessons especially — builds directly on the variables, loops, and functions taught here. This is the one lesson every other Python lesson assumes you've completed.",
       "exercises": [
         {
           "id": "py-b1-e1",
@@ -45,7 +45,7 @@
             "It prints 150000 to the screen"
           ],
           "correct_index": 1,
-          "explanation": "= is assignment, not equality \u2014 it stores a value under a name so you can reuse it later without retyping the number."
+          "explanation": "= is assignment, not equality — it stores a value under a name so you can reuse it later without retyping the number."
         },
         {
           "question": "Given `sales = [12000, 15000, 11000]`, what does `sales[0]` return?",
@@ -53,7 +53,7 @@
             "15000",
             "12000",
             "11000",
-            "An error \u2014 indexing starts at 1"
+            "An error — indexing starts at 1"
           ],
           "correct_index": 1,
           "explanation": "Python counts positions starting from 0, so sales[0] is the first item: 12000."
@@ -67,21 +67,21 @@
             "Dictionaries can't be looped over"
           ],
           "correct_index": 1,
-          "explanation": "A list is ordered and accessed by position (sales[0]); a dictionary is accessed by a named key (record[\"name\"]) \u2014 like referring to a column by header instead of position."
+          "explanation": "A list is ordered and accessed by position (sales[0]); a dictionary is accessed by a named key (record[\"name\"]) — like referring to a column by header instead of position."
         }
       ]
     },
     {
       "id": "py-pandas-intro",
       "title": "Pandas DataFrames",
-      "description": "The analyst's Python toolkit \u2014 load, inspect, filter data",
+      "description": "The analyst's Python toolkit — load, inspect, filter data",
       "level": "beginner",
       "prerequisites": [
         "py-basics"
       ],
       "estimated_min": 45,
       "sort_order": 2,
-      "theory_md": "## Pandas DataFrames\n\nA DataFrame is a table in Python \u2014 rows and columns, like SQL or Excel.\n\n```python\nimport pandas as pd\n\n# Create a DataFrame\ndata = {\n    'month': ['Jan', 'Feb', 'Mar'],\n    'sales': [12000, 15000, 11000],\n    'region': ['North', 'South', 'North']\n}\ndf = pd.DataFrame(data)\n\n# Inspect\nprint(df.shape)        # (rows, columns)\nprint(df.dtypes)       # column data types\nprint(df.head(3))      # first 3 rows\nprint(df.describe())   # statistics\n\n# Select columns\ndf['sales']            # one column (Series)\ndf[['sales', 'month']] # multiple columns\n\n# Filter rows\ndf[df['sales'] > 12000]\ndf[df['region'] == 'North']\n\n# Add a column\ndf['profit'] = df['sales'] * 0.3\n```\n\n**Key point:** DataFrame filtering is like SQL WHERE. `df[df['col'] > value]` is `WHERE col > value`.\n\n## \ud83d\udd17 How This Connects\n- **SQL**: a pandas DataFrame *is* a table \u2014 rows and columns, with the same mental model as a SQL result set.\n- **Excel**: a DataFrame is the code equivalent of a worksheet \u2014 same rows/columns idea, but scriptable and repeatable.",
+      "theory_md": "## Pandas DataFrames\n\nA DataFrame is a table in Python — rows and columns, like SQL or Excel.\n\n```python\nimport pandas as pd\n\n# Create a DataFrame\ndata = {\n    'month': ['Jan', 'Feb', 'Mar'],\n    'sales': [12000, 15000, 11000],\n    'region': ['North', 'South', 'North']\n}\ndf = pd.DataFrame(data)\n\n# Inspect\nprint(df.shape)        # (rows, columns)\nprint(df.dtypes)       # column data types\nprint(df.head(3))      # first 3 rows\nprint(df.describe())   # statistics\n\n# Select columns\ndf['sales']            # one column (Series)\ndf[['sales', 'month']] # multiple columns\n\n# Filter rows\ndf[df['sales'] > 12000]\ndf[df['region'] == 'North']\n\n# Add a column\ndf['profit'] = df['sales'] * 0.3\n```\n\n**Key point:** DataFrame filtering is like SQL WHERE. `df[df['col'] > value]` is `WHERE col > value`.\n\n## 🔗 How This Connects\n- **SQL**: a pandas DataFrame *is* a table — rows and columns, with the same mental model as a SQL result set.\n- **Excel**: a DataFrame is the code equivalent of a worksheet — same rows/columns idea, but scriptable and repeatable.",
       "exercises": [
         {
           "id": "py-pd1-e1",
@@ -105,6 +105,41 @@
           "evaluation_mode": "ai_review",
           "points": 25
         }
+      ],
+      "quiz": [
+        {
+          "question": "What is a pandas DataFrame most like?",
+          "options": [
+            "A single number",
+            "A table with rows and columns, like a SQL table or Excel sheet",
+            "A Python list only",
+            "A chart"
+          ],
+          "correct_index": 1,
+          "explanation": "A DataFrame is pandas' core structure — the same mental model as a SQL table or spreadsheet: rows are records, columns are fields."
+        },
+        {
+          "question": "What does `df[df['sales'] > 12000]` do?",
+          "options": [
+            "Deletes rows where sales <= 12000",
+            "Returns only the rows where sales is greater than 12000",
+            "Creates a new column called sales",
+            "Sorts by sales descending"
+          ],
+          "correct_index": 1,
+          "explanation": "This is boolean indexing — the pandas equivalent of SQL's WHERE clause — and returns a filtered copy, it doesn't modify the original DataFrame."
+        },
+        {
+          "question": "What does `df['profit'] = df['sales'] * 0.3` do?",
+          "options": [
+            "Filters rows where profit > 0.3",
+            "Creates a new 'profit' column as 30% of sales for every row",
+            "Deletes the sales column",
+            "Throws an error since 'profit' doesn't exist yet"
+          ],
+          "correct_index": 1,
+          "explanation": "Assigning to a DataFrame column that doesn't exist yet creates it — pandas applies the calculation to every row at once."
+        }
       ]
     },
     {
@@ -117,7 +152,7 @@
       ],
       "estimated_min": 50,
       "sort_order": 3,
-      "theory_md": "## Data Cleaning with Pandas\n\nReal data is messy. Cleaning is 60-80% of analyst work.\n\n**Missing values:**\n```python\ndf.isnull().sum()              # count nulls per column\ndf.dropna()                    # remove rows with any null\ndf.fillna(0)                   # fill nulls with 0\ndf['col'].fillna(df['col'].mean())  # fill with mean\n```\n\n**Duplicates:**\n```python\ndf.duplicated().sum()          # count duplicates\ndf.drop_duplicates()           # remove duplicate rows\ndf.drop_duplicates(subset=['id'])  # by specific column\n```\n\n**Data types:**\n```python\ndf['amount'] = pd.to_numeric(df['amount'], errors='coerce')\ndf['date'] = pd.to_datetime(df['date'])\ndf['category'] = df['category'].str.strip().str.lower()\n```\n\n**Rename and reorder:**\n```python\ndf.rename(columns={'old_name': 'new_name'}, inplace=True)\ndf = df[['col1', 'col2', 'col3']]  # reorder/select\n```\n\n**Business context:** Clean data produces accurate KPIs. Dirty data produces wrong decisions.\n\n## \ud83d\udd17 How This Connects\n- **Excel / Power BI**: this is the exact same job Power Query does in both tools \u2014 removing duplicates, fixing types, handling missing values \u2014 just written as pandas code instead of clicked through a UI.",
+      "theory_md": "## Data Cleaning with Pandas\n\nReal data is messy. Cleaning is 60-80% of analyst work.\n\n**Missing values:**\n```python\ndf.isnull().sum()              # count nulls per column\ndf.dropna()                    # remove rows with any null\ndf.fillna(0)                   # fill nulls with 0\ndf['col'].fillna(df['col'].mean())  # fill with mean\n```\n\n**Duplicates:**\n```python\ndf.duplicated().sum()          # count duplicates\ndf.drop_duplicates()           # remove duplicate rows\ndf.drop_duplicates(subset=['id'])  # by specific column\n```\n\n**Data types:**\n```python\ndf['amount'] = pd.to_numeric(df['amount'], errors='coerce')\ndf['date'] = pd.to_datetime(df['date'])\ndf['category'] = df['category'].str.strip().str.lower()\n```\n\n**Rename and reorder:**\n```python\ndf.rename(columns={'old_name': 'new_name'}, inplace=True)\ndf = df[['col1', 'col2', 'col3']]  # reorder/select\n```\n\n**Business context:** Clean data produces accurate KPIs. Dirty data produces wrong decisions.\n\n## 🔗 How This Connects\n- **Excel / Power BI**: this is the exact same job Power Query does in both tools — removing duplicates, fixing types, handling missing values — just written as pandas code instead of clicked through a UI.",
       "exercises": [
         {
           "id": "py-cl1-e1",
@@ -129,6 +164,41 @@
           "solution": "import pandas as pd\ndf = pd.DataFrame({'names': ['Alice', None, 'Bob', 'Carol'], 'sales': [1200, 800, None, 950], 'region': ['North', 'South', 'North', None]})\nprint('Nulls:', df.isnull().sum().to_dict())\ndf_clean = df.dropna()\nprint(df_clean)\nprint('Shape:', df_clean.shape)",
           "evaluation_mode": "ai_review",
           "points": 30
+        }
+      ],
+      "quiz": [
+        {
+          "question": "Roughly how much of a real analyst's time goes to data cleaning?",
+          "options": [
+            "Under 5%",
+            "60-80%",
+            "Exactly 50%",
+            "It's rarely needed"
+          ],
+          "correct_index": 1,
+          "explanation": "Real-world data is messy — cleaning is consistently the largest share of hands-on analyst time, which is why it gets its own dedicated lesson."
+        },
+        {
+          "question": "What's the difference between `df.dropna()` and `df.fillna(0)`?",
+          "options": [
+            "They do the same thing",
+            "dropna() removes rows with nulls; fillna(0) keeps the rows but replaces nulls with 0",
+            "fillna() removes rows; dropna() replaces values",
+            "dropna() only works on numeric columns"
+          ],
+          "correct_index": 1,
+          "explanation": "dropna() discards data (rows disappear); fillna() preserves every row but substitutes a value for missing entries — the right choice depends on whether missing rows are safe to lose."
+        },
+        {
+          "question": "What does `pd.to_datetime(df['date'])` do?",
+          "options": [
+            "Deletes the date column",
+            "Converts a text/date-like column into an actual datetime type pandas can compute with",
+            "Sorts the DataFrame by date",
+            "Formats the date as a string"
+          ],
+          "correct_index": 1,
+          "explanation": "Dates often arrive as plain text; to_datetime converts them into a real datetime type so you can filter, sort, and do date math correctly."
         }
       ]
     },
@@ -142,7 +212,7 @@
       ],
       "estimated_min": 40,
       "sort_order": 4,
-      "theory_md": "## GroupBy in Pandas\n\n```python\nimport pandas as pd\nimport numpy as np\n\n# Single aggregation\ndf.groupby('region')['sales'].sum()\n\n# Multiple aggregations\ndf.groupby('region')['sales'].agg(['sum', 'mean', 'count'])\n\n# Multiple columns\ndf.groupby('region').agg({\n    'sales': ['sum', 'mean'],\n    'units': 'sum'\n}).round(2)\n\n# Named aggregations (cleaner output)\nresult = df.groupby('region').agg(\n    total_sales=('sales', 'sum'),\n    avg_sales=('sales', 'mean'),\n    order_count=('sales', 'count')\n).reset_index()\n```\n\n**reset_index()** converts the group keys back into regular columns.\n\n**Business context:** GroupBy builds every KPI table \u2014 revenue by region, patients by ward, attrition by department.\n\n## \ud83d\udd17 How This Connects\n- **SQL**: pandas' `.groupby()` is named after SQL's GROUP BY for a reason \u2014 same concept, same name, different syntax.\n- **Excel**: the code equivalent of building a PivotTable.",
+      "theory_md": "## GroupBy in Pandas\n\n```python\nimport pandas as pd\nimport numpy as np\n\n# Single aggregation\ndf.groupby('region')['sales'].sum()\n\n# Multiple aggregations\ndf.groupby('region')['sales'].agg(['sum', 'mean', 'count'])\n\n# Multiple columns\ndf.groupby('region').agg({\n    'sales': ['sum', 'mean'],\n    'units': 'sum'\n}).round(2)\n\n# Named aggregations (cleaner output)\nresult = df.groupby('region').agg(\n    total_sales=('sales', 'sum'),\n    avg_sales=('sales', 'mean'),\n    order_count=('sales', 'count')\n).reset_index()\n```\n\n**reset_index()** converts the group keys back into regular columns.\n\n**Business context:** GroupBy builds every KPI table — revenue by region, patients by ward, attrition by department.\n\n## 🔗 How This Connects\n- **SQL**: pandas' `.groupby()` is named after SQL's GROUP BY for a reason — same concept, same name, different syntax.\n- **Excel**: the code equivalent of building a PivotTable.",
       "exercises": [
         {
           "id": "py-gb1-e1",
@@ -155,19 +225,127 @@
           "evaluation_mode": "ai_review",
           "points": 35
         }
+      ],
+      "quiz": [
+        {
+          "question": "What does `df.groupby('region')['sales'].sum()` compute?",
+          "options": [
+            "Total sales for the whole dataset",
+            "Total sales summed separately for each region",
+            "The average sale across all regions",
+            "A count of rows per region"
+          ],
+          "correct_index": 1,
+          "explanation": "groupby splits the data into one group per unique region value, then sum() is applied within each group separately — one total per region."
+        },
+        {
+          "question": "What does `.reset_index()` do after a groupby?",
+          "options": [
+            "Deletes the grouped data",
+            "Converts the group keys (like 'region') back into regular columns instead of an index",
+            "Sorts the result",
+            "Removes duplicate rows"
+          ],
+          "correct_index": 1,
+          "explanation": "groupby results use the group key as the index by default; reset_index() turns that back into a normal column, which is usually what you want for further use or export."
+        },
+        {
+          "question": "pandas' `.groupby()` is the code equivalent of which SQL clause?",
+          "options": [
+            "WHERE",
+            "ORDER BY",
+            "GROUP BY",
+            "JOIN"
+          ],
+          "correct_index": 2,
+          "explanation": "They're named the same for a reason — both split rows into groups and compute an aggregate per group."
+        }
+      ]
+    },
+    {
+      "id": "py-merging",
+      "title": "Merging & Combining DataFrames",
+      "description": "Combine multiple tables in pandas — the direct equivalent of SQL JOINs",
+      "level": "intermediate",
+      "prerequisites": [
+        "py-groupby"
+      ],
+      "estimated_min": 35,
+      "sort_order": 5,
+      "theory_md": "## Merging & Combining DataFrames\n\nReal analysis almost never lives in one table. Patients live in one table, billing in another — you need to bring them together, exactly like you did with SQL JOINs.\n\n### pd.merge() — the pandas JOIN\n```python\nimport pandas as pd\n\npatients = pd.DataFrame({'patient_id': [1,2,3], 'name': ['A','B','C']})\nbilling = pd.DataFrame({'patient_id': [1,2,4], 'amount': [500, 300, 900]})\n\n# INNER JOIN — only matched rows (default)\npd.merge(patients, billing, on='patient_id', how='inner')\n\n# LEFT JOIN — all patients, NULL (NaN) billing where no match\npd.merge(patients, billing, on='patient_id', how='left')\n\n# RIGHT / OUTER also supported\npd.merge(patients, billing, on='patient_id', how='outer')\n```\n`how` maps directly onto SQL: `'inner'`, `'left'`, `'right'`, `'outer'`. `on` is your join key — use `left_on=` / `right_on=` when the column names differ between the two tables.\n\n### Merging on multiple keys\n```python\npd.merge(orders, prices, on=['product_id', 'region'], how='left')\n```\n\n### pd.concat() — stacking, not matching\nUse `concat` when you're appending rows from the same shape of table (e.g. January's data + February's data), not matching on a key:\n```python\njan = pd.read_csv('jan.csv')\nfeb = pd.read_csv('feb.csv')\nfull_year = pd.concat([jan, feb], ignore_index=True)\n```\n\n### Checking your merge worked\nAlways sanity-check row counts before and after — a merge that unexpectedly multiplies rows usually means duplicate keys on one side:\n```python\nprint(f\"Before: {len(patients)} patients\")\nmerged = pd.merge(patients, billing, on='patient_id', how='left')\nprint(f\"After: {len(merged)} rows\")  # should still be 3 for a left join\n```\n\n**Business context:** Every real report — a patient's full record, an order with its customer and product details — comes from merging at least 2-3 tables. This is the single most-used pandas operation after filtering and grouping.\n\n## 🔗 How This Connects\n- **SQL**: `pd.merge(..., how='inner')` is `INNER JOIN`; `how='left'` is `LEFT JOIN` — literally the same operation, different syntax.\n- **Excel**: this replaces VLOOKUP/XLOOKUP entirely — instead of looking up one value at a time, a merge matches every row at once.\n- **Power BI**: this is exactly what a relationship between two tables in the data model does automatically once it's built.",
+      "exercises": [
+        {
+          "id": "py-merge-ex1",
+          "title": "Left join patients to billing",
+          "prompt": "Given two DataFrames `patients` (columns: patient_id, name) and `billing` (columns: patient_id, amount), write the pandas code to left-join them so every patient appears even with no billing record.",
+          "hint_1": "Use pd.merge() with the how parameter.",
+          "hint_2": "The join key is patient_id, and you want to keep every row from patients.",
+          "hint_3": "pd.merge(patients, billing, on='patient_id', how='left')",
+          "solution": "pd.merge(patients, billing, on='patient_id', how='left')",
+          "evaluation_mode": "contains",
+          "points": 15,
+          "sort_order": 1
+        },
+        {
+          "id": "py-merge-ex2",
+          "title": "Combine two months of sales data",
+          "prompt": "You have `jan_sales` and `feb_sales`, two DataFrames with identical columns. Write the code to stack them into one DataFrame called `all_sales`, with a fresh continuous index.",
+          "hint_1": "This is stacking rows, not matching on a key — that's a different pandas function than merge.",
+          "hint_2": "Use pd.concat() with a list of the two DataFrames.",
+          "hint_3": "all_sales = pd.concat([jan_sales, feb_sales], ignore_index=True)",
+          "solution": "all_sales = pd.concat([jan_sales, feb_sales], ignore_index=True)",
+          "evaluation_mode": "contains",
+          "points": 15,
+          "sort_order": 2
+        }
+      ],
+      "quiz": [
+        {
+          "question": "What does `pd.merge(patients, billing, on='patient_id', how='left')` return?",
+          "options": [
+            "Only patients who have a billing record",
+            "Every patient, with NaN in billing columns where there's no match",
+            "Only billing records with no matching patient",
+            "An error, since 'left' isn't a valid option"
+          ],
+          "correct_index": 1,
+          "explanation": "how='left' keeps every row from the left DataFrame (patients) regardless of whether a match exists on the right — exactly like SQL's LEFT JOIN."
+        },
+        {
+          "question": "When should you use pd.concat() instead of pd.merge()?",
+          "options": [
+            "When you need to match rows based on a shared key",
+            "When you're stacking rows from tables with the same shape, like combining monthly files",
+            "concat and merge always do the same thing",
+            "Only when working with SQL databases"
+          ],
+          "correct_index": 1,
+          "explanation": "concat stacks DataFrames on top of each other (or side by side) — it doesn't match on a key the way merge does. Use it for combining same-shaped data, like appending new months."
+        },
+        {
+          "question": "Why should you check row counts before and after a merge?",
+          "options": [
+            "It's not necessary — merges always preserve row count",
+            "An unexpectedly larger row count after merging usually signals duplicate keys on one side",
+            "It only matters for outer joins",
+            "Row counts are automatically validated by pandas"
+          ],
+          "correct_index": 1,
+          "explanation": "If a key isn't unique on one side of the merge, matching rows multiply — checking counts is a fast sanity check that catches this common mistake early."
+        }
       ]
     },
     {
       "id": "py-eda",
       "title": "Exploratory Data Analysis",
-      "description": "Profile any dataset \u2014 distributions, correlations, outliers",
+      "description": "Profile any dataset — distributions, correlations, outliers",
       "level": "intermediate",
       "prerequisites": [
         "py-groupby"
       ],
       "estimated_min": 55,
-      "sort_order": 5,
-      "theory_md": "## Exploratory Data Analysis (EDA)\n\nEDA is how analysts understand a new dataset before building anything.\n\n**Standard EDA checklist:**\n```python\nimport pandas as pd\nimport numpy as np\n\n# 1. Shape and types\nprint(df.shape)\nprint(df.dtypes)\n\n# 2. Missing data\nprint(df.isnull().sum())\nprint(df.isnull().mean() * 100)  # as percentage\n\n# 3. Basic statistics\nprint(df.describe())\n\n# 4. Distributions\nprint(df['amount'].value_counts())\nprint(df['category'].value_counts(normalize=True).round(2))\n\n# 5. Outlier detection\nQ1 = df['amount'].quantile(0.25)\nQ3 = df['amount'].quantile(0.75)\nIQR = Q3 - Q1\noutliers = df[(df['amount'] < Q1 - 1.5*IQR) | (df['amount'] > Q3 + 1.5*IQR)]\nprint(f'Outliers: {len(outliers)}')\n\n# 6. Correlation\nprint(df.select_dtypes(include='number').corr().round(2))\n```\n\n**Business context:** EDA surfaces data quality issues and patterns before you commit to a narrative. Skipping EDA leads to wrong conclusions.\n\n## \ud83d\udd17 How This Connects\n- **Statistics**: Exploratory Data Analysis is where the Descriptive Statistics lesson's concepts (mean, median, spread) get applied to a real, messy dataset for the first time.",
+      "sort_order": 6,
+      "theory_md": "## Exploratory Data Analysis (EDA)\n\nEDA is how analysts understand a new dataset before building anything.\n\n**Standard EDA checklist:**\n```python\nimport pandas as pd\nimport numpy as np\n\n# 1. Shape and types\nprint(df.shape)\nprint(df.dtypes)\n\n# 2. Missing data\nprint(df.isnull().sum())\nprint(df.isnull().mean() * 100)  # as percentage\n\n# 3. Basic statistics\nprint(df.describe())\n\n# 4. Distributions\nprint(df['amount'].value_counts())\nprint(df['category'].value_counts(normalize=True).round(2))\n\n# 5. Outlier detection\nQ1 = df['amount'].quantile(0.25)\nQ3 = df['amount'].quantile(0.75)\nIQR = Q3 - Q1\noutliers = df[(df['amount'] < Q1 - 1.5*IQR) | (df['amount'] > Q3 + 1.5*IQR)]\nprint(f'Outliers: {len(outliers)}')\n\n# 6. Correlation\nprint(df.select_dtypes(include='number').corr().round(2))\n```\n\n**Business context:** EDA surfaces data quality issues and patterns before you commit to a narrative. Skipping EDA leads to wrong conclusions.\n\n## 🔗 How This Connects\n- **Statistics**: Exploratory Data Analysis is where the Descriptive Statistics lesson's concepts (mean, median, spread) get applied to a real, messy dataset for the first time.",
       "exercises": [
         {
           "id": "py-eda1-e1",
@@ -180,19 +358,54 @@
           "evaluation_mode": "ai_review",
           "points": 50
         }
+      ],
+      "quiz": [
+        {
+          "question": "What is the main purpose of Exploratory Data Analysis (EDA)?",
+          "options": [
+            "To build the final report immediately",
+            "To understand a new dataset's shape, quality, and patterns before committing to any analysis",
+            "To delete all missing values",
+            "To train a machine learning model"
+          ],
+          "correct_index": 1,
+          "explanation": "EDA comes first — it's how you learn what you're working with (size, types, gaps, outliers, relationships) before deciding what analysis or story makes sense."
+        },
+        {
+          "question": "In the IQR outlier method, what defines the lower and upper bounds?",
+          "options": [
+            "The min and max of the column",
+            "Q1 - 1.5×IQR and Q3 + 1.5×IQR",
+            "The mean plus or minus 10",
+            "Always 0 and 100"
+          ],
+          "correct_index": 1,
+          "explanation": "This is the standard IQR rule: anything more than 1.5 times the interquartile range below Q1 or above Q3 is flagged as a potential outlier."
+        },
+        {
+          "question": "What does `df.isnull().mean() * 100` give you?",
+          "options": [
+            "The count of missing values",
+            "The percentage of missing values per column",
+            "The average of all non-null values",
+            "A list of column names"
+          ],
+          "correct_index": 1,
+          "explanation": "isnull() gives True/False per cell, mean() treats True as 1, so this computes what fraction (as a percentage) of each column is missing."
+        }
       ]
     },
     {
       "id": "python-visualisation",
       "title": "Data Visualisation with Matplotlib",
-      "description": "Create publication-quality charts in Python \u2014 the foundation for all data viz libraries.",
+      "description": "Create publication-quality charts in Python — the foundation for all data viz libraries.",
       "level": "intermediate",
       "prerequisites": [
-        "python-eda"
+        "py-eda"
       ],
       "estimated_min": 45,
-      "sort_order": 6,
-      "theory_md": "## Data Visualisation with Matplotlib\n\n```python\nimport matplotlib.pyplot as plt\nimport pandas as pd\n```\n\n### Line chart \u2014 trends over time\n```python\nfig, ax = plt.subplots(figsize=(10, 5))\nax.plot(df['month'], df['revenue'], marker='o', linewidth=2, color='#49A078')\nax.set_title('Monthly Revenue')\nax.set_xlabel('Month')\nax.set_ylabel('Revenue ($)')\nax.grid(axis='y', alpha=0.3)\nplt.tight_layout()\nplt.show()\n```\n\n### Bar chart \u2014 compare categories\n```python\nax.bar(df['region'], df['sales'], color='#49A078', edgecolor='white')\n```\n\n### Scatter plot \u2014 relationship between variables\n```python\nax.scatter(df['ad_spend'], df['revenue'], alpha=0.6)\nax.set_xlabel('Ad Spend ($)')\nax.set_ylabel('Revenue ($)')\n```\n\n### Subplots \u2014 multiple charts in one figure\n```python\nfig, axes = plt.subplots(1, 2, figsize=(14, 5))\naxes[0].plot(df['month'], df['revenue'])\naxes[1].bar(df['region'], df['sales'])\nplt.tight_layout()\n```\n\n### Quick wins for professional charts\n- `plt.tight_layout()` \u2014 prevents labels being cut off.\n- `ax.spines[['top','right']].set_visible(False)` \u2014 cleaner look.\n- `ax.set_title('...', fontsize=14, fontweight='bold')`.\n- Always label axes with units.\n\n## \ud83d\udd17 How This Connects\n- **Excel / Power BI**: the same \"pick the right chart for the data\" thinking from Excel's Charts lesson and Power BI's Report Design lesson applies here \u2014 matplotlib just gives you full code-level control over it.",
+      "sort_order": 7,
+      "theory_md": "## Data Visualisation with Matplotlib\n\n```python\nimport matplotlib.pyplot as plt\nimport pandas as pd\n```\n\n### Line chart — trends over time\n```python\nfig, ax = plt.subplots(figsize=(10, 5))\nax.plot(df['month'], df['revenue'], marker='o', linewidth=2, color='#49A078')\nax.set_title('Monthly Revenue')\nax.set_xlabel('Month')\nax.set_ylabel('Revenue ($)')\nax.grid(axis='y', alpha=0.3)\nplt.tight_layout()\nplt.show()\n```\n\n### Bar chart — compare categories\n```python\nax.bar(df['region'], df['sales'], color='#49A078', edgecolor='white')\n```\n\n### Scatter plot — relationship between variables\n```python\nax.scatter(df['ad_spend'], df['revenue'], alpha=0.6)\nax.set_xlabel('Ad Spend ($)')\nax.set_ylabel('Revenue ($)')\n```\n\n### Subplots — multiple charts in one figure\n```python\nfig, axes = plt.subplots(1, 2, figsize=(14, 5))\naxes[0].plot(df['month'], df['revenue'])\naxes[1].bar(df['region'], df['sales'])\nplt.tight_layout()\n```\n\n### Quick wins for professional charts\n- `plt.tight_layout()` — prevents labels being cut off.\n- `ax.spines[['top','right']].set_visible(False)` — cleaner look.\n- `ax.set_title('...', fontsize=14, fontweight='bold')`.\n- Always label axes with units.\n\n## 🔗 How This Connects\n- **Excel / Power BI**: the same \"pick the right chart for the data\" thinking from Excel's Charts lesson and Power BI's Report Design lesson applies here — matplotlib just gives you full code-level control over it.",
       "exercises": [
         {
           "id": "py-viz-e1",
@@ -216,6 +429,41 @@
           "evaluation_mode": "contains",
           "points": 15
         }
+      ],
+      "quiz": [
+        {
+          "question": "Which chart type is best for showing a trend over time, like monthly revenue?",
+          "options": [
+            "A scatter plot",
+            "A line chart",
+            "A pie chart",
+            "A bar chart with no order"
+          ],
+          "correct_index": 1,
+          "explanation": "Line charts are built for sequence and trend — the connecting lines make direction and rate of change visually obvious."
+        },
+        {
+          "question": "What is a scatter plot best used for?",
+          "options": [
+            "Comparing categories",
+            "Showing a trend over time",
+            "Showing the relationship between two numeric variables",
+            "Displaying a single total"
+          ],
+          "correct_index": 2,
+          "explanation": "Scatter plots show how two numeric variables relate to each other — e.g. does more ad spend correlate with more revenue?"
+        },
+        {
+          "question": "What does `fig, axes = plt.subplots(1, 2, ...)` create?",
+          "options": [
+            "One chart with two colors",
+            "A figure with two separate charts side by side",
+            "Two entirely separate windows",
+            "A single 3D chart"
+          ],
+          "correct_index": 1,
+          "explanation": "subplots(1, 2) creates a 1-row, 2-column grid of axes within one figure — a very common layout for comparing two related charts."
+        }
       ]
     },
     {
@@ -224,18 +472,18 @@
       "description": "Run statistical tests and summarise data with Python's core scientific libraries.",
       "level": "intermediate",
       "prerequisites": [
-        "python-groupby"
+        "py-groupby"
       ],
       "estimated_min": 45,
-      "sort_order": 7,
-      "theory_md": "## Statistical Analysis with NumPy & SciPy\n\n```python\nimport numpy as np\nfrom scipy import stats\n```\n\n### NumPy descriptive statistics\n```python\ndata = df['revenue'].values\n\nprint(np.mean(data))      # mean\nprint(np.median(data))    # median\nprint(np.std(data))       # standard deviation\nprint(np.percentile(data, [25, 50, 75]))  # quartiles\n```\n\n### Detect outliers with IQR\n```python\nQ1, Q3 = np.percentile(data, [25, 75])\nIQR = Q3 - Q1\nlower = Q1 - 1.5 * IQR\nupper = Q3 + 1.5 * IQR\noutliers = data[(data < lower) | (data > upper)]\n```\n\n### t-test \u2014 are two groups different?\n```python\ngroup_a = df[df['plan'] == 'annual']['revenue']\ngroup_b = df[df['plan'] == 'monthly']['revenue']\n\nt_stat, p_value = stats.ttest_ind(group_a, group_b)\nprint(f\"p-value: {p_value:.4f}\")\nif p_value < 0.05:\n    print(\"Significant difference between groups\")\n```\n\n### Pearson correlation\n```python\nr, p = stats.pearsonr(df['ad_spend'], df['sales'])\nprint(f\"r = {r:.3f}, p = {p:.4f}\")\n```\n\n### Chi-square test \u2014 categorical independence\n```python\ncontingency = pd.crosstab(df['gender'], df['churned'])\nchi2, p, dof, expected = stats.chi2_contingency(contingency)\n```\n\n## \ud83d\udd17 How This Connects\n- **Statistics**: this lesson is the hands-on, code companion to the entire Statistics module \u2014 everything taught conceptually there (mean, correlation, hypothesis tests) gets implemented here with numpy and scipy.",
+      "sort_order": 8,
+      "theory_md": "## Statistical Analysis with NumPy & SciPy\n\n```python\nimport numpy as np\nfrom scipy import stats\n```\n\n### NumPy descriptive statistics\n```python\ndata = df['revenue'].values\n\nprint(np.mean(data))      # mean\nprint(np.median(data))    # median\nprint(np.std(data))       # standard deviation\nprint(np.percentile(data, [25, 50, 75]))  # quartiles\n```\n\n### Detect outliers with IQR\n```python\nQ1, Q3 = np.percentile(data, [25, 75])\nIQR = Q3 - Q1\nlower = Q1 - 1.5 * IQR\nupper = Q3 + 1.5 * IQR\noutliers = data[(data < lower) | (data > upper)]\n```\n\n### t-test — are two groups different?\n```python\ngroup_a = df[df['plan'] == 'annual']['revenue']\ngroup_b = df[df['plan'] == 'monthly']['revenue']\n\nt_stat, p_value = stats.ttest_ind(group_a, group_b)\nprint(f\"p-value: {p_value:.4f}\")\nif p_value < 0.05:\n    print(\"Significant difference between groups\")\n```\n\n### Pearson correlation\n```python\nr, p = stats.pearsonr(df['ad_spend'], df['sales'])\nprint(f\"r = {r:.3f}, p = {p:.4f}\")\n```\n\n### Chi-square test — categorical independence\n```python\ncontingency = pd.crosstab(df['gender'], df['churned'])\nchi2, p, dof, expected = stats.chi2_contingency(contingency)\n```\n\n## 🔗 How This Connects\n- **Statistics**: this lesson is the hands-on, code companion to the entire Statistics module — everything taught conceptually there (mean, correlation, hypothesis tests) gets implemented here with numpy and scipy.",
       "exercises": [
         {
           "id": "py-stats-e1",
           "title": "IQR outlier bounds",
           "prompt": "A dataset has Q1 = 20 and Q3 = 80. Calculate the IQR and the upper outlier fence.",
-          "hint_1": "IQR = Q3 - Q1. Upper fence = Q3 + 1.5 \u00d7 IQR.",
-          "hint_2": "IQR = 80 - 20 = 60. Upper = 80 + (1.5 \u00d7 60).",
+          "hint_1": "IQR = Q3 - Q1. Upper fence = Q3 + 1.5 × IQR.",
+          "hint_2": "IQR = 80 - 20 = 60. Upper = 80 + (1.5 × 60).",
           "hint_3": "IQR = 60. Upper fence = 80 + 90 = 170.",
           "solution": "170",
           "evaluation_mode": "contains",
@@ -247,10 +495,45 @@
           "prompt": "You want to test whether annual-plan customers have higher average revenue than monthly-plan customers. Which SciPy test do you use?",
           "hint_1": "You are comparing the means of two independent groups.",
           "hint_2": "The t-test compares two group means.",
-          "hint_3": "stats.ttest_ind() \u2014 an independent samples t-test comparing means of two groups.",
+          "hint_3": "stats.ttest_ind() — an independent samples t-test comparing means of two groups.",
           "solution": "ttest_ind",
           "evaluation_mode": "contains",
           "points": 15
+        }
+      ],
+      "quiz": [
+        {
+          "question": "What does a t-test's p-value tell you?",
+          "options": [
+            "The exact difference between two group means",
+            "How likely the observed difference between groups is due to random chance",
+            "The correlation between two variables",
+            "The number of outliers"
+          ],
+          "correct_index": 1,
+          "explanation": "A small p-value (conventionally < 0.05) suggests the difference between groups is unlikely to be random noise — i.e., it's statistically significant."
+        },
+        {
+          "question": "In `stats.ttest_ind(group_a, group_b)`, what is being compared?",
+          "options": [
+            "Two columns from the same row",
+            "The means of two independent groups",
+            "A single column against a fixed number",
+            "Two entire DataFrames"
+          ],
+          "correct_index": 1,
+          "explanation": "An independent-samples t-test compares the means of two separate groups (e.g. annual-plan revenue vs. monthly-plan revenue) to see if they differ meaningfully."
+        },
+        {
+          "question": "What does a Pearson correlation coefficient measure?",
+          "options": [
+            "The average of two variables",
+            "The strength and direction of a linear relationship between two numeric variables",
+            "Whether a dataset has outliers",
+            "The total count of rows"
+          ],
+          "correct_index": 1,
+          "explanation": "Pearson's r ranges from -1 to 1, showing how strongly (and in which direction) two variables move together in a straight-line relationship."
         }
       ]
     },
@@ -260,11 +543,11 @@
       "description": "Automate repetitive analyst tasks: scheduled reports, email delivery, and file processing.",
       "level": "intermediate",
       "prerequisites": [
-        "python-cleaning"
+        "py-cleaning"
       ],
       "estimated_min": 50,
-      "sort_order": 8,
-      "theory_md": "## Automation & Reporting\n\n### Reading and writing Excel\n```python\nimport pandas as pd\n\n# Read\ndf = pd.read_excel('sales.xlsx', sheet_name='Data')\n\n# Write \u2014 multiple sheets\nwith pd.ExcelWriter('report.xlsx', engine='openpyxl') as writer:\n    df_summary.to_excel(writer, sheet_name='Summary', index=False)\n    df_detail.to_excel(writer, sheet_name='Detail', index=False)\n```\n\n### Generating PDF reports with matplotlib\n```python\nfrom matplotlib.backends.backend_pdf import PdfPages\n\nwith PdfPages('monthly_report.pdf') as pdf:\n    fig, ax = plt.subplots()\n    ax.bar(df['region'], df['sales'])\n    ax.set_title('Sales by Region')\n    pdf.savefig(fig)\n    plt.close()\n```\n\n### Automating with a schedule\nUse Python's `schedule` library for local automation:\n```python\nimport schedule, time\n\ndef run_report():\n    # ... all your report code ...\n    print(\"Report generated\")\n\nschedule.every().monday.at(\"08:00\").do(run_report)\n\nwhile True:\n    schedule.run_pending()\n    time.sleep(60)\n```\n\n### Processing multiple files in a folder\n```python\nfrom pathlib import Path\n\nresults = []\nfor file in Path('data/').glob('*.csv'):\n    df = pd.read_csv(file)\n    df['source'] = file.stem\n    results.append(df)\n\ncombined = pd.concat(results, ignore_index=True)\n```\n\n**Business context:** Any manual report you run more than once a week should be automated. This is one of the fastest ways an analyst creates recurring value.\n\n## \ud83d\udd17 How This Connects\n- **Business**: directly supports the Project Analytics lesson's point about automating recurring work \u2014 this is the concrete \"how\" behind that principle.\n- **Excel**: automating a report that used to be built by hand in Excel every week is one of the highest-value things a new Python analyst can do.",
+      "sort_order": 9,
+      "theory_md": "## Automation & Reporting\n\n### Reading and writing Excel\n```python\nimport pandas as pd\n\n# Read\ndf = pd.read_excel('sales.xlsx', sheet_name='Data')\n\n# Write — multiple sheets\nwith pd.ExcelWriter('report.xlsx', engine='openpyxl') as writer:\n    df_summary.to_excel(writer, sheet_name='Summary', index=False)\n    df_detail.to_excel(writer, sheet_name='Detail', index=False)\n```\n\n### Generating PDF reports with matplotlib\n```python\nfrom matplotlib.backends.backend_pdf import PdfPages\n\nwith PdfPages('monthly_report.pdf') as pdf:\n    fig, ax = plt.subplots()\n    ax.bar(df['region'], df['sales'])\n    ax.set_title('Sales by Region')\n    pdf.savefig(fig)\n    plt.close()\n```\n\n### Automating with a schedule\nUse Python's `schedule` library for local automation:\n```python\nimport schedule, time\n\ndef run_report():\n    # ... all your report code ...\n    print(\"Report generated\")\n\nschedule.every().monday.at(\"08:00\").do(run_report)\n\nwhile True:\n    schedule.run_pending()\n    time.sleep(60)\n```\n\n### Processing multiple files in a folder\n```python\nfrom pathlib import Path\n\nresults = []\nfor file in Path('data/').glob('*.csv'):\n    df = pd.read_csv(file)\n    df['source'] = file.stem\n    results.append(df)\n\ncombined = pd.concat(results, ignore_index=True)\n```\n\n**Business context:** Any manual report you run more than once a week should be automated. This is one of the fastest ways an analyst creates recurring value.\n\n## 🔗 How This Connects\n- **Business**: directly supports the Project Analytics lesson's point about automating recurring work — this is the concrete \"how\" behind that principle.\n- **Excel**: automating a report that used to be built by hand in Excel every week is one of the highest-value things a new Python analyst can do.",
       "exercises": [
         {
           "id": "py-auto-e1",
@@ -288,19 +571,54 @@
           "evaluation_mode": "contains",
           "points": 25
         }
+      ],
+      "quiz": [
+        {
+          "question": "What does `pd.ExcelWriter(...)` with multiple `to_excel()` calls produce?",
+          "options": [
+            "One Excel file with multiple sheets",
+            "Multiple separate Excel files",
+            "A CSV file",
+            "A PDF report"
+          ],
+          "correct_index": 0,
+          "explanation": "Each to_excel() call with a different sheet_name writes to a separate tab within the same workbook, opened via the same ExcelWriter context."
+        },
+        {
+          "question": "What is `PdfPages` used for in the automation lesson?",
+          "options": [
+            "Reading data from a PDF",
+            "Saving one or more matplotlib figures into a single PDF report file",
+            "Converting Excel files to PDF",
+            "Sending emails automatically"
+          ],
+          "correct_index": 1,
+          "explanation": "PdfPages lets you save multiple chart figures into one multi-page PDF — a common way to auto-generate a shareable report."
+        },
+        {
+          "question": "Why would an analyst automate a report with a script instead of doing it manually each time?",
+          "options": [
+            "Automation is always more accurate than a human, with no exceptions",
+            "It saves time and ensures consistency for repeated, recurring tasks",
+            "Manual reports are illegal in most companies",
+            "Scripts can only run once"
+          ],
+          "correct_index": 1,
+          "explanation": "The main value of automation is consistency and time savings on tasks that repeat on a schedule — the same steps run the same way every time."
+        }
       ]
     },
     {
       "id": "python-ml-intro",
       "title": "Machine Learning Introduction",
-      "description": "Your first ML models \u2014 classification, regression, and the workflow every analyst needs.",
+      "description": "Your first ML models — classification, regression, and the workflow every analyst needs.",
       "level": "advanced",
       "prerequisites": [
         "python-stats"
       ],
       "estimated_min": 60,
-      "sort_order": 9,
-      "theory_md": "## Machine Learning Introduction\n\n### ML types\n- **Supervised** \u2014 you have labelled examples (known inputs + outputs).\n  - *Regression* \u2014 predict a number (price, demand, churn probability).\n  - *Classification* \u2014 predict a category (churn/no-churn, fraud/not-fraud).\n- **Unsupervised** \u2014 find patterns without labels (clustering, anomaly detection).\n\n### The ML workflow\n```python\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.metrics import accuracy_score, classification_report\n\n# 1. Split\nX = df[['age', 'tenure', 'monthly_spend']]\ny = df['churned']\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\n\n# 2. Scale\nscaler = StandardScaler()\nX_train = scaler.fit_transform(X_train)\nX_test = scaler.transform(X_test)  # fit on train, transform both\n\n# 3. Train\nmodel = LogisticRegression()\nmodel.fit(X_train, y_train)\n\n# 4. Evaluate\ny_pred = model.predict(X_test)\nprint(accuracy_score(y_test, y_pred))\nprint(classification_report(y_test, y_pred))\n```\n\n### Decision Tree \u2014 interpretable model\n```python\nfrom sklearn.tree import DecisionTreeClassifier\nmodel = DecisionTreeClassifier(max_depth=4, random_state=42)\nmodel.fit(X_train, y_train)\n# Feature importance\nimportances = pd.Series(model.feature_importances_, index=X.columns)\nimportances.sort_values().plot(kind='barh')\n```\n\n### Confusion matrix \u2014 understanding classification errors\n```\n              Predicted No    Predicted Yes\nActual No         TN              FP\nActual Yes        FN              TP\n```\n- **Precision** = TP / (TP + FP) \u2014 when you predict positive, how often are you right?\n- **Recall** = TP / (TP + FN) \u2014 of all actual positives, how many did you catch?\n\n**Business context:** Analysts are increasingly expected to build simple predictive models, not just describe historical data. Logistic regression and decision trees are the starting point.\n\n## \ud83d\udd17 How This Connects\n- **Statistics**: linear regression here is the *exact same technique* taught conceptually in the Regression Analysis lesson \u2014 this is that concept, implemented in code with scikit-learn.\n- **Business**: predictive models like this are what eventually feed into the KPI and financial modelling work covered in the Business module.",
+      "sort_order": 10,
+      "theory_md": "## Machine Learning Introduction\n\n### ML types\n- **Supervised** — you have labelled examples (known inputs + outputs).\n  - *Regression* — predict a number (price, demand, churn probability).\n  - *Classification* — predict a category (churn/no-churn, fraud/not-fraud).\n- **Unsupervised** — find patterns without labels (clustering, anomaly detection).\n\n### The ML workflow\n```python\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.metrics import accuracy_score, classification_report\n\n# 1. Split\nX = df[['age', 'tenure', 'monthly_spend']]\ny = df['churned']\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\n\n# 2. Scale\nscaler = StandardScaler()\nX_train = scaler.fit_transform(X_train)\nX_test = scaler.transform(X_test)  # fit on train, transform both\n\n# 3. Train\nmodel = LogisticRegression()\nmodel.fit(X_train, y_train)\n\n# 4. Evaluate\ny_pred = model.predict(X_test)\nprint(accuracy_score(y_test, y_pred))\nprint(classification_report(y_test, y_pred))\n```\n\n### Decision Tree — interpretable model\n```python\nfrom sklearn.tree import DecisionTreeClassifier\nmodel = DecisionTreeClassifier(max_depth=4, random_state=42)\nmodel.fit(X_train, y_train)\n# Feature importance\nimportances = pd.Series(model.feature_importances_, index=X.columns)\nimportances.sort_values().plot(kind='barh')\n```\n\n### Confusion matrix — understanding classification errors\n```\n              Predicted No    Predicted Yes\nActual No         TN              FP\nActual Yes        FN              TP\n```\n- **Precision** = TP / (TP + FP) — when you predict positive, how often are you right?\n- **Recall** = TP / (TP + FN) — of all actual positives, how many did you catch?\n\n**Business context:** Analysts are increasingly expected to build simple predictive models, not just describe historical data. Logistic regression and decision trees are the starting point.\n\n## 🔗 How This Connects\n- **Statistics**: linear regression here is the *exact same technique* taught conceptually in the Regression Analysis lesson — this is that concept, implemented in code with scikit-learn.\n- **Business**: predictive models like this are what eventually feed into the KPI and financial modelling work covered in the Business module.",
       "exercises": [
         {
           "id": "py-ml-e1",
@@ -323,6 +641,41 @@
           "solution": "0.9",
           "evaluation_mode": "contains",
           "points": 20
+        }
+      ],
+      "quiz": [
+        {
+          "question": "What's the difference between supervised and unsupervised learning?",
+          "options": [
+            "Supervised needs labelled data (known outcomes); unsupervised finds patterns without labels",
+            "Unsupervised is always more accurate",
+            "Supervised only works with text data",
+            "They are the same thing"
+          ],
+          "correct_index": 0,
+          "explanation": "Supervised learning trains on examples where the correct answer is already known (e.g. did this customer churn or not); unsupervised learning looks for structure with no known answers at all."
+        },
+        {
+          "question": "Why split data into train_test_split before training a model?",
+          "options": [
+            "To make the dataset smaller for no reason",
+            "To test the model on data it has never seen, so you can honestly measure how well it generalizes",
+            "Because scikit-learn requires exactly two files",
+            "To remove outliers automatically"
+          ],
+          "correct_index": 1,
+          "explanation": "If you evaluate a model on the same data it trained on, it can look artificially good just from memorizing — a held-out test set checks real-world performance."
+        },
+        {
+          "question": "Predicting whether a customer will churn (yes/no) is an example of which ML task?",
+          "options": [
+            "Regression",
+            "Classification",
+            "Clustering",
+            "Anomaly detection"
+          ],
+          "correct_index": 1,
+          "explanation": "Predicting a category (churn / no-churn) rather than a number is classification. Predicting a number, like predicted revenue, would be regression instead."
         }
       ]
     }

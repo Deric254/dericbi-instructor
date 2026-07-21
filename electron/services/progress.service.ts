@@ -80,7 +80,15 @@ export function getMemory(userId: string, options?: {
   if (options?.memory_type) { query += ' AND memory_type = ?'; params.push(options.memory_type) }
 
   query += ' ORDER BY weight DESC, created_at DESC'
-  if (options?.limit) { query += ` LIMIT ${options.limit}` }
+  if (options?.limit) {
+    // Never interpolate a value from an IPC call directly into SQL — IPC
+    // payloads aren't runtime-type-checked (TypeScript types only apply at
+    // compile time), so options.limit could in principle be a crafted
+    // string here, not the number the type declares. Coercing to a bounded
+    // integer closes that off entirely rather than trusting the caller.
+    const safeLimit = Math.max(1, Math.min(1000, Math.floor(Number(options.limit)) || 20))
+    query += ` LIMIT ${safeLimit}`
+  }
 
   return db.prepare(query).all(...params) as LearningMemoryEntry[]
 }

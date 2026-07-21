@@ -10,7 +10,7 @@
       "prerequisites": [],
       "estimated_min": 35,
       "sort_order": 1,
-      "theory_md": "## Power BI Fundamentals\n\n### Why Power BI, when you already know SQL and Excel?\nYou already know how to query data (SQL) and calculate with it (Excel). Power BI's job is different: it turns that data into something a decision-maker can explore themselves, interactively, without ever writing a query \u2014 and it does this at a scale Excel starts to struggle with (millions of rows, live-connected to a database).\n\n### The three tools that make up Power BI\n- **Power BI Desktop** \u2014 where you build. Free, installed on your PC. Everything below happens here.\n- **Power BI Service** \u2014 the browser-based home for publishing and sharing what you built.\n- **Power BI Mobile** \u2014 a phone/tablet app for viewing published reports on the go.\n\nYou build in Desktop, publish to Service, view anywhere.\n\n### The five-stage workflow \u2014 the shape of every project\n1. **Get Data** \u2014 connect to Excel files, SQL databases, web APIs, folders of CSVs, and dozens of other sources.\n2. **Power Query** \u2014 clean and reshape the raw data (covered in depth next lesson). This is the same *idea* as Excel's Power Query, and if you've cleaned data in pandas, the transforms will feel familiar too.\n3. **Data Model** \u2014 define how your tables relate to each other (covered in \"Data Modelling & Relationships\"). This is conceptually identical to the JOIN logic you already know from SQL \u2014 you're just drawing it visually instead of writing `ON a.id = b.id`.\n4. **Report View** \u2014 build the actual charts, tables, and interactive elements business users will click through.\n5. **Publish** \u2014 push the finished report to Power BI Service so others can access it without needing Desktop installed.\n\n### Your first look at the interface\nWhen you open Power BI Desktop, three icons on the left sidebar matter most:\n- **Report view** (the default) \u2014 your visual canvas, page by page.\n- **Data view** \u2014 inspect the actual rows in each loaded table, like a read-only spreadsheet.\n- **Model view** \u2014 see and edit the relationships between your tables.\n\n### Why this workflow order matters\nDoing these steps out of order is the single most common cause of a frustrating Power BI experience. Cleaning data in Power Query *before* modelling saves you from building relationships on messy columns. Building the model *before* the report saves you from re-doing visuals every time you fix a relationship. Follow the order above, in that order, every time.\n\n**Business context:** A sales director who can't write SQL should still be able to open a Power BI report, click \"North Region,\" and instantly see every chart update. That self-serve exploration \u2014 with zero risk of them ever seeing or breaking the underlying query \u2014 is the entire value proposition of this tool.\n\n## \ud83d\udd17 How This Connects\n- **SQL**: the Get Data -> Data Model -> Report workflow mirrors how you'd query (SELECT), then join (JOIN), then present results - same pipeline, visual instead of code.\n- **Excel**: if you've used Power Query or PivotTables in Excel, the underlying engine here is genuinely the same one, just in a dedicated tool built for it.",
+      "theory_md": "## Power BI Fundamentals\n\n### Why Power BI, when you already know SQL and Excel?\nYou already know how to query data (SQL) and calculate with it (Excel). Power BI's job is different: it turns that data into something a decision-maker can explore themselves, interactively, without ever writing a query — and it does this at a scale Excel starts to struggle with (millions of rows, live-connected to a database).\n\n### The three tools that make up Power BI\n- **Power BI Desktop** — where you build. Free, installed on your PC. Everything below happens here.\n- **Power BI Service** — the browser-based home for publishing and sharing what you built.\n- **Power BI Mobile** — a phone/tablet app for viewing published reports on the go.\n\nYou build in Desktop, publish to Service, view anywhere.\n\n### The five-stage workflow — the shape of every project\n1. **Get Data** — connect to Excel files, SQL databases, web APIs, folders of CSVs, and dozens of other sources.\n2. **Power Query** — clean and reshape the raw data (covered in depth next lesson). This is the same *idea* as Excel's Power Query, and if you've cleaned data in pandas, the transforms will feel familiar too.\n3. **Data Model** — define how your tables relate to each other (covered in \"Data Modelling & Relationships\"). This is conceptually identical to the JOIN logic you already know from SQL — you're just drawing it visually instead of writing `ON a.id = b.id`.\n4. **Report View** — build the actual charts, tables, and interactive elements business users will click through.\n5. **Publish** — push the finished report to Power BI Service so others can access it without needing Desktop installed.\n\n### Your first look at the interface\nWhen you open Power BI Desktop, three icons on the left sidebar matter most:\n- **Report view** (the default) — your visual canvas, page by page.\n- **Data view** — inspect the actual rows in each loaded table, like a read-only spreadsheet.\n- **Model view** — see and edit the relationships between your tables.\n\n### Why this workflow order matters\nDoing these steps out of order is the single most common cause of a frustrating Power BI experience. Cleaning data in Power Query *before* modelling saves you from building relationships on messy columns. Building the model *before* the report saves you from re-doing visuals every time you fix a relationship. Follow the order above, in that order, every time.\n\n**Business context:** A sales director who can't write SQL should still be able to open a Power BI report, click \"North Region,\" and instantly see every chart update. That self-serve exploration — with zero risk of them ever seeing or breaking the underlying query — is the entire value proposition of this tool.\n\n## 🔗 How This Connects\n- **SQL**: the Get Data -> Data Model -> Report workflow mirrors how you'd query (SELECT), then join (JOIN), then present results - same pipeline, visual instead of code.\n- **Excel**: if you've used Power Query or PivotTables in Excel, the underlying engine here is genuinely the same one, just in a dedicated tool built for it.",
       "exercises": [
         {
           "id": "powerbi-intro-ex1",
@@ -19,8 +19,8 @@
           "prompt": "List the five stages of the Power BI workflow in the correct order and briefly describe what happens at each stage.",
           "hint_1": "Start with how data enters the system.",
           "hint_2": "The five stages are: Get Data, Transform, Model, Visualise, Share.",
-          "hint_3": "Get Data \u2192 Power Query (Transform) \u2192 Data Model \u2192 Report View \u2192 Publish/Share.",
-          "solution": "Get Data \u2192 Transform (Power Query) \u2192 Data Model (relationships) \u2192 Report View (visuals) \u2192 Publish (Service/Share)",
+          "hint_3": "Get Data → Power Query (Transform) → Data Model → Report View → Publish/Share.",
+          "solution": "Get Data → Transform (Power Query) → Data Model (relationships) → Report View (visuals) → Publish (Service/Share)",
           "evaluation_mode": "ai_review",
           "points": 15,
           "sort_order": 1
@@ -63,6 +63,77 @@
       ]
     },
     {
+      "id": "powerbi-powerquery",
+      "title": "Power Query in Power BI",
+      "description": "Clean and shape data before it hits the model — the right place to fix messy data.",
+      "level": "intermediate",
+      "prerequisites": [
+        "powerbi-intro"
+      ],
+      "estimated_min": 40,
+      "sort_order": 2,
+      "theory_md": "## Power Query in Power BI\n\n### Same tool, same job as Excel — bigger stage\nIf you completed Excel's Power Query lesson, almost everything here will feel familiar — it's genuinely the same engine under the hood. The difference is scale: Power BI's Power Query routinely handles millions of rows pulled live from a database, not a few thousand rows in a workbook.\n\n### Where cleaning belongs: before the model, not after\nTransform data in Power Query (**Get Data → Transform Data**), never in DAX. This is a rule, not a preference: Power Query transformations run once, at refresh time. DAX measures recalculate on every single click a user makes in the report. Doing cleanup work in DAX means paying that computational cost over and over, forever — cleaning it once in Power Query is dramatically more efficient.\n\n### Applied Steps — your undo-able recipe\nEvery transform you apply appears as a step in the **Applied Steps** panel on the right, in order. Click any earlier step to see exactly what the data looked like at that point — this makes Power Query far safer to experiment in than it looks; nothing is destructive until you click Close & Apply.\n\n### The essential transforms\n```\nRemove Duplicates → ensures one row per key (e.g. one row per patient_id)\nReplace Values    → fix typos: \"Online \" → \"Online\"\nSplit Column      → \"John Smith\" → \"John\" | \"Smith\"\nPivot / Unpivot   → reshape wide-format data to long, or long to wide\nMerge Queries     → the visual equivalent of a SQL JOIN — combine two tables on a matching column\nAppend Queries    → the visual equivalent of a SQL UNION — stack two tables with the same columns\nGroup By          → aggregate rows, like SQL's GROUP BY\n```\nIf you know SQL, every single one of these has a direct one-to-one equivalent you already understand — Power Query just does it with clicks instead of syntax.\n\n### Writing your own transform: the M language\nPower Query records every click as M code behind the scenes. You can also write custom columns directly:\n```\n= [Revenue] - [Cost]\n= Date.Year([OrderDate])\n= Text.Upper([ProductName])\n```\nThis is the same logic as an Excel formula or a Python calculated column — same idea, different syntax.\n\n### Incremental Refresh — for genuinely large tables\nOnce a table reaches millions of rows, reloading the *entire* table on every refresh becomes slow and wasteful. Incremental Refresh lets you set a date range parameter so Power BI only reloads new or changed rows going forward, not the whole history every time.\n\n**Business context:** A finance team refreshing a 5-million-row transactions table every morning at 6am needs this to finish before the workday starts — incremental refresh is often the difference between a report that's ready on time and one that isn't.\n\n## 🔗 How This Connects\n- **Excel**: this is the exact same Power Query engine as Excel's - everything transfers directly, just operating at a larger scale here.\n- **SQL**: Merge Queries and Group By are Power Query's point-and-click equivalents of JOIN and GROUP BY.",
+      "exercises": [
+        {
+          "id": "pbi-pq-e1",
+          "title": "Right tool",
+          "prompt": "You need to calculate Year-over-Year revenue growth. Should you do this in Power Query or DAX? Explain.",
+          "hint_1": "Which layer runs at query time vs refresh time?",
+          "hint_2": "YoY needs to compare across time using filter context.",
+          "hint_3": "DAX — YoY growth requires filter context from the date table, which only exists at query time. Power Query runs before the model is built.",
+          "solution": "DAX",
+          "evaluation_mode": "contains",
+          "points": 20
+        },
+        {
+          "id": "pbi-pq-e2",
+          "title": "Merge vs Append",
+          "prompt": "You have two tables: Q1_Sales and Q2_Sales with identical columns. What Power Query operation combines them into one table?",
+          "hint_1": "Same columns, combining rows.",
+          "hint_2": "This is like a SQL UNION.",
+          "hint_3": "Append Queries",
+          "solution": "Append Queries",
+          "evaluation_mode": "contains",
+          "points": 15
+        }
+      ],
+      "quiz": [
+        {
+          "question": "Why does the lesson say cleaning should happen in Power Query, not in DAX?",
+          "options": [
+            "DAX cannot clean data at all",
+            "Power Query transformations run once at refresh; DAX measures recalculate on every user click, making repeated cleanup far more expensive",
+            "Power Query is only for beginners",
+            "There's no real difference in performance"
+          ],
+          "correct_index": 1,
+          "explanation": "This is a performance rule, not a preference — doing cleanup once at refresh time (Power Query) is dramatically cheaper than repeating it on every interaction (DAX)."
+        },
+        {
+          "question": "Is Power Query in Power BI the same engine as Power Query in Excel?",
+          "options": [
+            "No, they're completely different tools",
+            "Yes — same engine, same concepts, just typically operating at much larger scale in Power BI",
+            "Only the interface looks similar; the logic is different",
+            "Power BI's version doesn't support transformations"
+          ],
+          "correct_index": 1,
+          "explanation": "It's genuinely the same underlying engine — skills transfer directly, though Power BI commonly handles millions of rows from live database connections rather than a few thousand in a workbook."
+        },
+        {
+          "question": "What triggers Power Query's recorded transformation steps to re-run?",
+          "options": [
+            "Opening the file in a text editor",
+            "Clicking Refresh",
+            "Publishing the report only",
+            "They run automatically every second"
+          ],
+          "correct_index": 1,
+          "explanation": "Every transformation is recorded as a step; Refresh re-runs the entire pipeline against the current source data, without requiring any manual rework."
+        }
+      ]
+    },
+    {
       "id": "powerbi-dax",
       "module": "powerbi",
       "title": "DAX Basics",
@@ -72,8 +143,8 @@
         "powerbi-intro"
       ],
       "estimated_min": 50,
-      "sort_order": 2,
-      "theory_md": "## DAX Basics \u2014 Data Analysis Expressions\n\n### The formula language of Power BI\nDAX is to Power BI what formulas are to Excel \u2014 the language you use to calculate anything beyond what's already in your raw data. If you've written an Excel formula, DAX's syntax will feel familiar; if you've written a SQL aggregate function like `SUM()` or `AVG()`, the underlying concepts will feel very familiar too.\n\n### Measures vs. Calculated Columns \u2014 the most important distinction to get right early\n| | Measure | Calculated Column |\n|---|---|---|\n| Evaluated | At query/interaction time | Once, at data refresh |\n| Responds to | Filter context (slicers, clicks) | Row context only |\n| Storage | Not stored \u2014 calculated live | Stored in the model, taking up memory |\n\n**Rule of thumb:** if the calculation should change as a user clicks a slicer (e.g. \"Total Sales\" that updates when they filter to North region), it's a measure. If it's a fixed value per row that doesn't depend on what's filtered (e.g. a \"Full Name\" column combining first + last name), it's a calculated column.\n\n### Essential functions to know first\n```dax\nSUM(table[column])              -- total a column\nAVERAGE(table[column])          -- same idea as SQL's AVG()\nCOUNTROWS(table)                -- row count, like SQL's COUNT(*)\nCALCULATE(expression, filter)   -- re-evaluate an expression under a different filter \u2014 covered fully next lesson\nDIVIDE(numerator, denominator, [alternate_result])  -- division that won't crash on divide-by-zero\nRELATED(table[column])          -- pull a value across a relationship, like a JOIN would in SQL\n```\n\n### Your first real measure\n```dax\nTotal Revenue = SUM(FactBilling[bill_amount])\nAverage Bill = AVERAGE(FactBilling[bill_amount])\nBill Count = COUNTROWS(FactBilling)\n```\nCreate these by right-clicking a table \u2192 **New Measure**, then typing the formula. Once created, drag the measure onto any visual \u2014 it will automatically recalculate as the user filters the report.\n\n### Why DIVIDE instead of the `/` operator\n```dax\nMargin % = DIVIDE([Profit], [Revenue])\n```\nIf Revenue happens to be zero for some filter combination, `/` throws a visible error in your report. `DIVIDE` returns blank (or a value you specify) instead \u2014 always prefer it over a raw division symbol.\n\n**Business context:** The exact same \"average bill amount\" you'd calculate with `AVG(bill_amount)` in SQL, or `AVERAGE()` in Excel, or `df['bill_amount'].mean()` in pandas \u2014 is `AVERAGE(FactBilling[bill_amount])` here. Four tools, one concept, four syntaxes. Once you notice this pattern, learning each new tool gets faster.\n\n## \ud83d\udd17 How This Connects\n- **SQL**: SUM(), AVERAGE(), COUNTROWS() are DAX's versions of SQL's SUM(), AVG(), COUNT() - same aggregation concepts, different syntax.\n- **Excel**: DAX measures play the same role Excel formulas do - calculating something beyond what's in the raw data.",
+      "sort_order": 3,
+      "theory_md": "## DAX Basics — Data Analysis Expressions\n\n### The formula language of Power BI\nDAX is to Power BI what formulas are to Excel — the language you use to calculate anything beyond what's already in your raw data. If you've written an Excel formula, DAX's syntax will feel familiar; if you've written a SQL aggregate function like `SUM()` or `AVG()`, the underlying concepts will feel very familiar too.\n\n### Measures vs. Calculated Columns — the most important distinction to get right early\n| | Measure | Calculated Column |\n|---|---|---|\n| Evaluated | At query/interaction time | Once, at data refresh |\n| Responds to | Filter context (slicers, clicks) | Row context only |\n| Storage | Not stored — calculated live | Stored in the model, taking up memory |\n\n**Rule of thumb:** if the calculation should change as a user clicks a slicer (e.g. \"Total Sales\" that updates when they filter to North region), it's a measure. If it's a fixed value per row that doesn't depend on what's filtered (e.g. a \"Full Name\" column combining first + last name), it's a calculated column.\n\n### Essential functions to know first\n```dax\nSUM(table[column])              -- total a column\nAVERAGE(table[column])          -- same idea as SQL's AVG()\nCOUNTROWS(table)                -- row count, like SQL's COUNT(*)\nCALCULATE(expression, filter)   -- re-evaluate an expression under a different filter — covered fully next lesson\nDIVIDE(numerator, denominator, [alternate_result])  -- division that won't crash on divide-by-zero\nRELATED(table[column])          -- pull a value across a relationship, like a JOIN would in SQL\n```\n\n### Your first real measure\n```dax\nTotal Revenue = SUM(FactBilling[bill_amount])\nAverage Bill = AVERAGE(FactBilling[bill_amount])\nBill Count = COUNTROWS(FactBilling)\n```\nCreate these by right-clicking a table → **New Measure**, then typing the formula. Once created, drag the measure onto any visual — it will automatically recalculate as the user filters the report.\n\n### Why DIVIDE instead of the `/` operator\n```dax\nMargin % = DIVIDE([Profit], [Revenue])\n```\nIf Revenue happens to be zero for some filter combination, `/` throws a visible error in your report. `DIVIDE` returns blank (or a value you specify) instead — always prefer it over a raw division symbol.\n\n**Business context:** The exact same \"average bill amount\" you'd calculate with `AVG(bill_amount)` in SQL, or `AVERAGE()` in Excel, or `df['bill_amount'].mean()` in pandas — is `AVERAGE(FactBilling[bill_amount])` here. Four tools, one concept, four syntaxes. Once you notice this pattern, learning each new tool gets faster.\n\n## 🔗 How This Connects\n- **SQL**: SUM(), AVERAGE(), COUNTROWS() are DAX's versions of SQL's SUM(), AVG(), COUNT() - same aggregation concepts, different syntax.\n- **Excel**: DAX measures play the same role Excel formulas do - calculating something beyond what's in the raw data.",
       "exercises": [
         {
           "id": "powerbi-dax-ex1",
@@ -88,7 +159,117 @@
           "points": 20,
           "sort_order": 1
         }
+      ],
+      "quiz": [
+        {
+          "question": "What is the key difference between a Measure and a Calculated Column?",
+          "options": [
+            "They're identical in every way",
+            "A Measure is evaluated live based on filter context; a Calculated Column is computed once at refresh and stored in the model",
+            "Calculated Columns respond to slicers; Measures don't",
+            "Measures take up more memory than Calculated Columns"
+          ],
+          "correct_index": 1,
+          "explanation": "This is the single most important DAX distinction: Measures recalculate dynamically as a user filters/clicks, while Calculated Columns are fixed values computed once when data refreshes."
+        },
+        {
+          "question": "If you need a value that changes depending on which slicer the user clicks, should you use a Measure or a Calculated Column?",
+          "options": [
+            "A Calculated Column, since it's stored and faster",
+            "A Measure, since it responds to filter context",
+            "Either works exactly the same",
+            "Neither — this requires Power Query"
+          ],
+          "correct_index": 1,
+          "explanation": "Only Measures respond to filter context (slicers, clicks, cross-filtering) — Calculated Columns are fixed once computed and won't react to user interaction."
+        },
+        {
+          "question": "DAX is described as being to Power BI what what is to Excel?",
+          "options": [
+            "Charts",
+            "Formulas",
+            "PivotTables",
+            "Slicers"
+          ],
+          "correct_index": 1,
+          "explanation": "DAX is Power BI's formula language — the tool for calculating anything beyond what already exists in the raw imported data, just like Excel formulas."
+        }
       ]
+    },
+    {
+      "id": "powerbi-visuals",
+      "title": "Choosing the Right Visual",
+      "description": "Match the visual to the question — the difference between a chart that informs and one that confuses",
+      "level": "intermediate",
+      "prerequisites": [
+        "powerbi-dax"
+      ],
+      "estimated_min": 35,
+      "theory_md": "## Choosing the Right Visual\n\nPower BI has 30+ visual types. Most reports only need five or six, used well.\n\n### The core set and when to use each\n| Visual | Best for |\n|---|---|\n| Card | One headline KPI number |\n| Line chart | Trend over time |\n| Bar/Column chart | Comparing categories |\n| Table/Matrix | Precise values the user needs to read exactly |\n| Scatter chart | Relationship between two numeric measures |\n| Map | Data with a real geographic dimension |\n\n### Common mistakes to avoid\n- **Pie charts with more than 4-5 slices** — humans can't compare angles accurately; use a sorted bar chart instead.\n- **3D anything** — 3D distorts perceived size and adds zero information. Always use 2D.\n- **Dual-axis line/bar combos** — easy to misread; only use when the two measures genuinely need different scales, and label axes clearly.\n- **A gauge for something that isn't literally a target vs. actual** — gauges are consistently misread; a card with a comparison line is usually clearer.\n\n### Formatting for clarity, not decoration\n- Sort bar charts by value, not alphabetically — the eye reads rank order instantly.\n- Use conditional formatting (data bars, color scales) in a Matrix instead of a separate chart, when the data is already tabular.\n- One accent color for \"the number that matters,\" neutral grey for everything else — don't rainbow every category.\n\n### Tooltips and drillthrough\nRight-click a visual → **Add Report Page Tooltip** lets you build a mini-report that appears on hover — useful for showing detail without cluttering the main page. **Drillthrough** lets a user right-click a data point and jump to a detail page filtered to exactly that context.\n\n**Business context:** The wrong visual doesn't just look worse — it actively causes a stakeholder to draw the wrong conclusion. Chart choice is an accuracy decision, not just an aesthetic one.\n\n## 🔗 How This Connects\n- **Excel**: the same chart-selection table (bar for compare, line for trend, scatter for relationship) applies identically — the tool changed, the visual grammar didn't.\n- **Statistics**: a scatter chart here is the same statistical object as a scatter plot in the Correlation Analysis lesson — visually checking for a relationship before you ever compute Pearson's r.",
+      "exercises": [
+        {
+          "id": "powerbi-visuals-ex1",
+          "exercise_type": "freeform",
+          "title": "Pick the right visual",
+          "prompt": "You need to show monthly revenue for the last 24 months, and separately, the split of revenue across 8 product categories this quarter. Which visual would you use for each, and why?",
+          "hint_1": "Think about what each visual is naturally good at reading.",
+          "hint_2": "24 months is a trend; 8 categories is more than a pie chart can handle cleanly.",
+          "hint_3": "24 months of revenue: a line chart, since it's a trend over time. 8 categories: a sorted bar chart, not a pie chart, since 8 slices is too many to compare by angle.",
+          "solution": "Line chart for the 24-month trend (time series). Sorted bar chart for the 8 categories (too many for a readable pie chart; sorting by value makes ranking instantly clear).",
+          "evaluation_mode": "ai_review",
+          "points": 15,
+          "sort_order": 1
+        },
+        {
+          "id": "powerbi-visuals-ex2",
+          "exercise_type": "freeform",
+          "title": "Diagnose a bad chart",
+          "prompt": "A colleague built a 3D pie chart with 12 slices to show market share by competitor. What's wrong with this choice, and what would you build instead?",
+          "hint_1": "Consider both the chart type (pie) and the extra dimension (3D).",
+          "hint_2": "12 slices is far too many for a pie chart, and 3D distorts perceived size on top of that.",
+          "hint_3": "Both 3D and too many slices make it unreadable. Replace with a sorted, 2D horizontal bar chart — easy to compare exact rank and size at a glance.",
+          "solution": "Two problems stack: 3D distorts how large each slice looks, and 12 slices is far beyond what a pie chart can communicate clearly. A sorted 2D bar chart would let viewers compare competitors accurately at a glance.",
+          "evaluation_mode": "ai_review",
+          "points": 15,
+          "sort_order": 2
+        }
+      ],
+      "quiz": [
+        {
+          "question": "Why does the lesson recommend against pie charts with more than 4-5 slices?",
+          "options": [
+            "Power BI has a hard technical limit of 5 slices",
+            "Humans can't accurately compare angles beyond a small number of slices",
+            "Pie charts are always the wrong choice",
+            "It's a stylistic preference with no real basis"
+          ],
+          "correct_index": 1,
+          "explanation": "Comparing angles is a weak perceptual skill — beyond a handful of slices, a sorted bar chart communicates the same proportions far more accurately."
+        },
+        {
+          "question": "What should bar charts typically be sorted by?",
+          "options": [
+            "Always alphabetically",
+            "By value, so rank order is instantly visible",
+            "Randomly, to avoid bias",
+            "By color"
+          ],
+          "correct_index": 1,
+          "explanation": "Sorting by value lets the eye read 'biggest to smallest' immediately — alphabetical order forces the viewer to hunt for the ranking manually."
+        },
+        {
+          "question": "What does Drillthrough allow a report user to do?",
+          "options": [
+            "Change the underlying data source",
+            "Right-click a data point and jump to a detail page filtered to that specific context",
+            "Export the report to PDF",
+            "Automatically refresh the dataset"
+          ],
+          "correct_index": 1,
+          "explanation": "Drillthrough is an interaction pattern for going from summary to detail — the target page opens pre-filtered to whatever was clicked."
+        }
+      ],
+      "sort_order": 4
     },
     {
       "id": "powerbi-datamodel",
@@ -99,8 +280,8 @@
         "powerbi-dax"
       ],
       "estimated_min": 45,
-      "sort_order": 3,
-      "theory_md": "## Data Modelling & Relationships\n\n### The model is the foundation \u2014 get this wrong and everything after is harder\nThe model determines what you're even able to calculate. A badly structured model makes every DAX formula a fight; a well-structured one makes most formulas almost write themselves. This is worth slowing down for.\n\n### Star schema \u2014 the standard shape\n- **Fact table** \u2014 the large table of transactions or events (e.g. every hospital bill, every sale). Has foreign keys pointing outward.\n- **Dimension tables** \u2014 smaller lookup tables describing *who, what, where, when* (e.g. a table of patients, a table of dates, a table of products). Each has a primary key.\n\n```\nDimDate \u2500\u2500\u2500\u2500 FactSales \u2500\u2500\u2500\u2500 DimProduct\n                \u2502\n            DimCustomer\n```\n\nIf this looks familiar, it should \u2014 it's the exact same relational structure you already learned in SQL's JOIN lesson. A `FactSales` table full of foreign keys joining out to smaller dimension tables *is* what you were writing `INNER JOIN ... ON` statements against. Power BI just draws the relationship instead of you typing it every query.\n\n### Creating a relationship\nIn **Model view**, drag a field from one table onto the matching field in another. Power BI detects the cardinality automatically in most cases:\n- Primary key (unique values) \u2192 foreign key (repeating values) = **one-to-many** \u2713 \u2014 this is the relationship type you want in almost every real model.\n- Many-to-many relationships are usually a sign the model needs restructuring, not a feature to reach for casually.\n\n### Cardinality reference\n| Setting | When to use |\n|---|---|\n| One-to-many | The standard fact-to-dimension relationship |\n| One-to-one | Splitting one logical table into two for readability |\n| Many-to-many | Bridge tables, or \"role-playing\" dimensions used more than once |\n\n### Cross-filter direction \u2014 the setting that causes the most confusion\n- **Single** (the default, and almost always correct) \u2014 filters flow from the dimension table to the fact table. Click \"North\" on a region slicer, and every fact-table visual filters accordingly.\n- **Both** \u2014 filters flow in both directions. This can produce results that look wrong (ambiguous filtering) if used without understanding exactly why. Reach for Single first; only switch to Both when you have a specific, well-understood reason to.\n\n**Business context:** Exactly the same hospital patients/billing relationship you queried with `JOIN` in SQL \u2014 one patient, many bills \u2014 is the relationship you'd model here as one-to-many between DimPatients and FactBilling. The logic never changes across tools; only the syntax does.\n\n## \ud83d\udd17 How This Connects\n- **SQL**: a relationship here is exactly what a JOIN is in SQL - Power BI just draws the connection instead of writing ON a.id = b.id.\n- **Excel**: this replaces the need for most VLOOKUP/XLOOKUP formulas once your model is built correctly.",
+      "sort_order": 5,
+      "theory_md": "## Data Modelling & Relationships\n\n### The model is the foundation — get this wrong and everything after is harder\nThe model determines what you're even able to calculate. A badly structured model makes every DAX formula a fight; a well-structured one makes most formulas almost write themselves. This is worth slowing down for.\n\n### Star schema — the standard shape\n- **Fact table** — the large table of transactions or events (e.g. every hospital bill, every sale). Has foreign keys pointing outward.\n- **Dimension tables** — smaller lookup tables describing *who, what, where, when* (e.g. a table of patients, a table of dates, a table of products). Each has a primary key.\n\n```\nDimDate ──── FactSales ──── DimProduct\n                │\n            DimCustomer\n```\n\nIf this looks familiar, it should — it's the exact same relational structure you already learned in SQL's JOIN lesson. A `FactSales` table full of foreign keys joining out to smaller dimension tables *is* what you were writing `INNER JOIN ... ON` statements against. Power BI just draws the relationship instead of you typing it every query.\n\n### Creating a relationship\nIn **Model view**, drag a field from one table onto the matching field in another. Power BI detects the cardinality automatically in most cases:\n- Primary key (unique values) → foreign key (repeating values) = **one-to-many** ✓ — this is the relationship type you want in almost every real model.\n- Many-to-many relationships are usually a sign the model needs restructuring, not a feature to reach for casually.\n\n### Cardinality reference\n| Setting | When to use |\n|---|---|\n| One-to-many | The standard fact-to-dimension relationship |\n| One-to-one | Splitting one logical table into two for readability |\n| Many-to-many | Bridge tables, or \"role-playing\" dimensions used more than once |\n\n### Cross-filter direction — the setting that causes the most confusion\n- **Single** (the default, and almost always correct) — filters flow from the dimension table to the fact table. Click \"North\" on a region slicer, and every fact-table visual filters accordingly.\n- **Both** — filters flow in both directions. This can produce results that look wrong (ambiguous filtering) if used without understanding exactly why. Reach for Single first; only switch to Both when you have a specific, well-understood reason to.\n\n**Business context:** Exactly the same hospital patients/billing relationship you queried with `JOIN` in SQL — one patient, many bills — is the relationship you'd model here as one-to-many between DimPatients and FactBilling. The logic never changes across tools; only the syntax does.\n\n## 🔗 How This Connects\n- **SQL**: a relationship here is exactly what a JOIN is in SQL - Power BI just draws the connection instead of writing ON a.id = b.id.\n- **Excel**: this replaces the need for most VLOOKUP/XLOOKUP formulas once your model is built correctly.",
       "exercises": [
         {
           "id": "pbi-model-e1",
@@ -119,10 +300,116 @@
           "prompt": "You have DimCustomer (one) and FactOrders (many). Which cross-filter direction should you use?",
           "hint_1": "Standard star schemas use single direction.",
           "hint_2": "Filter flows from the one side to the many side.",
-          "hint_3": "Single \u2014 filter flows from DimCustomer to FactOrders",
+          "hint_3": "Single — filter flows from DimCustomer to FactOrders",
           "solution": "Single",
           "evaluation_mode": "contains",
           "points": 20
+        }
+      ],
+      "quiz": [
+        {
+          "question": "In a star schema, what does the fact table contain?",
+          "options": [
+            "Descriptive lookup data like customer names",
+            "The large table of transactions or events, with foreign keys pointing to dimension tables",
+            "Only date values",
+            "Nothing — it's just a placeholder"
+          ],
+          "correct_index": 1,
+          "explanation": "The fact table holds the measurable events (sales, bills, orders) — the 'what happened' — while dimension tables describe the who/what/where/when context around it."
+        },
+        {
+          "question": "What do dimension tables typically describe?",
+          "options": [
+            "Only numeric totals",
+            "Who, what, where, when — descriptive context like customers, products, or dates",
+            "Nothing — they're optional and rarely used",
+            "The same data as the fact table, duplicated"
+          ],
+          "correct_index": 1,
+          "explanation": "Dimension tables are the smaller lookup tables (DimDate, DimProduct, DimCustomer) that give meaning and filtering context to the fact table's raw events."
+        },
+        {
+          "question": "Why does the lesson say to slow down and get the data model right first?",
+          "options": [
+            "It has no real effect on later work",
+            "A badly structured model makes every DAX formula a fight; a well-structured one makes formulas nearly write themselves",
+            "Power BI requires a model before it will even open",
+            "Models can never be changed after import"
+          ],
+          "correct_index": 1,
+          "explanation": "The model determines what's calculable at all — poor relationships create incorrect or impossible calculations downstream, no matter how good the DAX is."
+        }
+      ]
+    },
+    {
+      "id": "powerbi-design",
+      "title": "Report Design & UX",
+      "description": "Build reports people actually use — layout, colour, and interaction patterns.",
+      "level": "intermediate",
+      "prerequisites": [
+        "powerbi-dax"
+      ],
+      "estimated_min": 45,
+      "sort_order": 6,
+      "theory_md": "## Report Design & UX\n\n### The 5-second rule\nA business user should understand the main message of a report page within 5 seconds of looking at it — before reading a single label. If they can't, the page has too much competing for attention, or nothing is actually prioritized.\n\n### Layout — the Z-pattern\nEyes naturally scan in a Z: top-left → top-right → bottom-left → bottom-right. Use this:\n- **Top-left**: the single most important KPI card.\n- **Top-right**: the primary trend chart (context for that KPI over time).\n- **Bottom-left**: a breakdown (by region, by category — whatever explains *why*).\n- **Bottom-right**: supporting detail.\n\nAlign every visual to a grid (**View → Snap to Grid**) — misaligned visuals are one of the fastest ways a report reads as unpolished, even when the data itself is solid.\n\n### Colour — restraint is the skill\n- Pick **one accent colour** for the metric that matters most on a page. Everything else should be a neutral grey.\n- Colouring every visual a different colour looks decorative, not informative — it actively works against the 5-second rule.\n- Reserve red/green specifically for conditional formatting (below/above target) — don't also use red/green decoratively elsewhere, or the meaning gets diluted.\n\n### Slicers vs. Filters — a distinction worth getting right\n- **Slicers** are visible on the canvas — the user sees and controls them directly. Use these for exploration you *want* the user doing themselves (e.g. \"pick your region\").\n- **The Filters pane** applies a constraint invisibly — the user never sees or changes it. Use this for things you, the report builder, need fixed (e.g. \"only show active accounts\").\n\n### Tooltips and Bookmarks — the two features that make a report feel \"built,\" not just \"assembled\"\n- A custom **tooltip page** (Page → Page type → Tooltip) shows rich detail on hover, without permanently cluttering the main canvas with every possible number.\n- **Bookmarks** (View → Bookmarks) save a specific filter state, which you can then wire to a button — letting a user click \"By Region\" vs \"By Product\" and instantly reconfigure the whole page without touching a single slicer.\n\n**Business context:** The same report, with good layout and restrained colour, gets used daily. The same data with a cluttered, rainbow-coloured, misaligned layout gets opened once and never again — design quality directly determines whether analytical work actually gets used.\n\n## 🔗 How This Connects\n- **Excel**: the Dashboard Design lesson's layout and colour principles apply directly here, just in a more interactive canvas.\n- **Business**: the Data Storytelling lesson's \"lead with the insight\" principle is what should drive every layout decision on this page.",
+      "exercises": [
+        {
+          "id": "pbi-design-e1",
+          "title": "5 second test",
+          "prompt": "You open a Power BI report and it has 12 visuals of equal size with no clear hierarchy. What is the main design problem?",
+          "hint_1": "Think about what a user sees first.",
+          "hint_2": "Everything the same size means nothing is prioritised.",
+          "hint_3": "No visual hierarchy — the user cannot tell what the most important metric is, and the 5-second rule fails.",
+          "solution": "No visual hierarchy",
+          "evaluation_mode": "contains",
+          "points": 15
+        },
+        {
+          "id": "pbi-design-e2",
+          "title": "Slicer vs filter",
+          "prompt": "A manager wants to filter the report by region but doesn't want the slicer visible on the canvas. Where should you put the filter?",
+          "hint_1": "There are two places to apply filters in Power BI.",
+          "hint_2": "One is on-canvas, one is in the sidebar.",
+          "hint_3": "The Filters pane — it applies the filter without a visible slicer on the canvas.",
+          "solution": "Filters pane",
+          "evaluation_mode": "contains",
+          "points": 15
+        }
+      ],
+      "quiz": [
+        {
+          "question": "What is the '5-second rule' in report design?",
+          "options": [
+            "Reports must load within 5 seconds",
+            "A business user should understand the main message of a page within 5 seconds of looking at it",
+            "Every report needs exactly 5 visuals",
+            "Data refreshes every 5 seconds"
+          ],
+          "correct_index": 1,
+          "explanation": "If the main takeaway isn't obvious almost immediately, the page likely has too much competing for attention or nothing has been clearly prioritized."
+        },
+        {
+          "question": "In the Z-pattern layout, what goes in the top-left position?",
+          "options": [
+            "Supporting detail",
+            "The single most important KPI card",
+            "A footer with data sources",
+            "Nothing — it should be left empty"
+          ],
+          "correct_index": 1,
+          "explanation": "Eyes naturally scan top-left first, so the most critical number belongs there — everything else supports or explains that headline metric."
+        },
+        {
+          "question": "Why does misaligned visual placement hurt a report, according to the lesson?",
+          "options": [
+            "It has no real effect",
+            "It's one of the fastest ways a report reads as unpolished, even when the underlying data is solid",
+            "It causes Power BI to crash",
+            "It only matters for print, not screens"
+          ],
+          "correct_index": 1,
+          "explanation": "Visual polish (grid alignment) shapes a viewer's trust in the report just as much as the underlying accuracy does — sloppy alignment undermines credibility."
         }
       ]
     },
@@ -135,8 +422,8 @@
         "powerbi-datamodel"
       ],
       "estimated_min": 60,
-      "sort_order": 4,
-      "theory_md": "## Advanced DAX\n\n### CALCULATE \u2014 the single most important function in DAX\n`CALCULATE` re-evaluates an expression under a modified filter \u2014 it's the mechanism behind almost every non-trivial DAX measure you'll ever write.\n```dax\nSales YTD = CALCULATE(\n    SUM(FactSales[Revenue]),\n    DATESYTD(DimDate[Date])\n)\n\nSales North = CALCULATE(\n    [Total Revenue],\n    DimRegion[Region] = \"North\"\n)\n```\nRead the second example as: *\"Take the Total Revenue measure, but force the filter to only 'North', regardless of whatever the user has actually clicked.\"* This is how you build a fixed comparison point (e.g. \"vs North\") that sits alongside whatever the user is currently filtering to.\n\n### Time Intelligence \u2014 comparing across time periods\nThis requires a proper Date table, explicitly marked as one (**Table tools \u2192 Mark as Date Table**) \u2014 Power BI's time functions depend on this to work correctly.\n```dax\nRevenue LY = CALCULATE([Total Revenue], SAMEPERIODLASTYEAR(DimDate[Date]))\nRevenue MoM % = DIVIDE([Total Revenue] - [Revenue LM], [Revenue LM])\n```\n`SAMEPERIODLASTYEAR` shifts the current filter back exactly one year \u2014 the same comparison a financial analyst does manually in Excel by referencing last year's column, just automatic and correct regardless of which period the user is currently viewing.\n\n### Variables \u2014 making complex DAX readable\n```dax\nRevenue Growth =\nVAR CurrentRev = [Total Revenue]\nVAR LastYearRev = [Revenue LY]\nRETURN DIVIDE(CurrentRev - LastYearRev, LastYearRev, 0)\n```\nWithout variables, this same formula would need to repeat the `[Total Revenue]` and `[Revenue LY]` calculations inline, twice, making it both harder to read and slower to calculate (DAX would otherwise compute each measure reference separately). `VAR` computes each once, then reuses the result \u2014 always prefer this pattern once a formula has more than one moving part.\n\n### A worked example, start to finish\nSay you want \"this month's revenue vs. the same month last year, as a percentage\":\n```dax\nRevenue = SUM(FactBilling[bill_amount])\n\nRevenue LY =\nCALCULATE([Revenue], SAMEPERIODLASTYEAR(DimDate[Date]))\n\nRevenue YoY % =\nVAR Current = [Revenue]\nVAR Prior = [Revenue LY]\nRETURN DIVIDE(Current - Prior, Prior, BLANK())\n```\nEach measure builds on the one before it \u2014 this layering (simple measure \u2192 time-shifted version \u2192 comparison) is the standard pattern for almost every real KPI you'll build.\n\n**Business context:** \"Are we up or down versus this time last year?\" is one of the three most common questions any manager asks of any report. `CALCULATE` + `SAMEPERIODLASTYEAR` is how you answer it correctly, automatically, for every single filter combination a user might click into.\n\n## \ud83d\udd17 How This Connects\n- **Statistics**: the Time Series lesson's trend and moving-average concepts are exactly what CALCULATE + time intelligence functions implement here.\n- **Business**: year-over-year comparisons built here are usually the exact KPI a stakeholder presentation leads with.",
+      "sort_order": 7,
+      "theory_md": "## Advanced DAX\n\n### CALCULATE — the single most important function in DAX\n`CALCULATE` re-evaluates an expression under a modified filter — it's the mechanism behind almost every non-trivial DAX measure you'll ever write.\n```dax\nSales YTD = CALCULATE(\n    SUM(FactSales[Revenue]),\n    DATESYTD(DimDate[Date])\n)\n\nSales North = CALCULATE(\n    [Total Revenue],\n    DimRegion[Region] = \"North\"\n)\n```\nRead the second example as: *\"Take the Total Revenue measure, but force the filter to only 'North', regardless of whatever the user has actually clicked.\"* This is how you build a fixed comparison point (e.g. \"vs North\") that sits alongside whatever the user is currently filtering to.\n\n### Time Intelligence — comparing across time periods\nThis requires a proper Date table, explicitly marked as one (**Table tools → Mark as Date Table**) — Power BI's time functions depend on this to work correctly.\n```dax\nRevenue LY = CALCULATE([Total Revenue], SAMEPERIODLASTYEAR(DimDate[Date]))\nRevenue MoM % = DIVIDE([Total Revenue] - [Revenue LM], [Revenue LM])\n```\n`SAMEPERIODLASTYEAR` shifts the current filter back exactly one year — the same comparison a financial analyst does manually in Excel by referencing last year's column, just automatic and correct regardless of which period the user is currently viewing.\n\n### Variables — making complex DAX readable\n```dax\nRevenue Growth =\nVAR CurrentRev = [Total Revenue]\nVAR LastYearRev = [Revenue LY]\nRETURN DIVIDE(CurrentRev - LastYearRev, LastYearRev, 0)\n```\nWithout variables, this same formula would need to repeat the `[Total Revenue]` and `[Revenue LY]` calculations inline, twice, making it both harder to read and slower to calculate (DAX would otherwise compute each measure reference separately). `VAR` computes each once, then reuses the result — always prefer this pattern once a formula has more than one moving part.\n\n### A worked example, start to finish\nSay you want \"this month's revenue vs. the same month last year, as a percentage\":\n```dax\nRevenue = SUM(FactBilling[bill_amount])\n\nRevenue LY =\nCALCULATE([Revenue], SAMEPERIODLASTYEAR(DimDate[Date]))\n\nRevenue YoY % =\nVAR Current = [Revenue]\nVAR Prior = [Revenue LY]\nRETURN DIVIDE(Current - Prior, Prior, BLANK())\n```\nEach measure builds on the one before it — this layering (simple measure → time-shifted version → comparison) is the standard pattern for almost every real KPI you'll build.\n\n**Business context:** \"Are we up or down versus this time last year?\" is one of the three most common questions any manager asks of any report. `CALCULATE` + `SAMEPERIODLASTYEAR` is how you answer it correctly, automatically, for every single filter combination a user might click into.\n\n## 🔗 How This Connects\n- **Statistics**: the Time Series lesson's trend and moving-average concepts are exactly what CALCULATE + time intelligence functions implement here.\n- **Business**: year-over-year comparisons built here are usually the exact KPI a stakeholder presentation leads with.",
       "exercises": [
         {
           "id": "pbi-dax2-e1",
@@ -160,79 +447,192 @@
           "evaluation_mode": "contains",
           "points": 20
         }
+      ],
+      "quiz": [
+        {
+          "question": "What does the CALCULATE function fundamentally do?",
+          "options": [
+            "Deletes rows from the model",
+            "Re-evaluates an expression under a modified filter context",
+            "Only formats numbers",
+            "Creates a new table"
+          ],
+          "correct_index": 1,
+          "explanation": "CALCULATE is the mechanism behind nearly every non-trivial DAX measure — it lets you override or add filters to change what an expression computes."
+        },
+        {
+          "question": "In `CALCULATE([Total Revenue], DimRegion[Region] = \"North\")`, what happens?",
+          "options": [
+            "It sums revenue for every region combined",
+            "It forces the Total Revenue measure to always evaluate as if only 'North' were selected, regardless of the user's actual filter",
+            "It deletes all other regions from the model",
+            "It creates a calculated column"
+          ],
+          "correct_index": 1,
+          "explanation": "This is a fixed comparison point — useful for building 'vs North' style comparisons that stay constant no matter what the report user has clicked."
+        },
+        {
+          "question": "What's required for Time Intelligence functions like DATESYTD to work correctly?",
+          "options": [
+            "Nothing special — they work on any column",
+            "A proper Date table, explicitly marked as a date table",
+            "A calculated column instead of a measure",
+            "Publishing the report first"
+          ],
+          "correct_index": 1,
+          "explanation": "Time intelligence functions depend on a contiguous, properly-marked Date table to correctly compute things like year-to-date or same-period-last-year."
+        }
       ]
     },
     {
-      "id": "powerbi-powerquery",
-      "title": "Power Query in Power BI",
-      "description": "Clean and shape data before it hits the model \u2014 the right place to fix messy data.",
-      "level": "intermediate",
+      "id": "powerbi-rls",
+      "title": "Row-Level Security",
+      "description": "Make sure each viewer of a shared report only sees the rows they're supposed to",
+      "level": "advanced",
       "prerequisites": [
-        "powerbi-fundamentals"
+        "powerbi-datamodel"
       ],
       "estimated_min": 40,
-      "sort_order": 2,
-      "theory_md": "## Power Query in Power BI\n\n### Same tool, same job as Excel \u2014 bigger stage\nIf you completed Excel's Power Query lesson, almost everything here will feel familiar \u2014 it's genuinely the same engine under the hood. The difference is scale: Power BI's Power Query routinely handles millions of rows pulled live from a database, not a few thousand rows in a workbook.\n\n### Where cleaning belongs: before the model, not after\nTransform data in Power Query (**Get Data \u2192 Transform Data**), never in DAX. This is a rule, not a preference: Power Query transformations run once, at refresh time. DAX measures recalculate on every single click a user makes in the report. Doing cleanup work in DAX means paying that computational cost over and over, forever \u2014 cleaning it once in Power Query is dramatically more efficient.\n\n### Applied Steps \u2014 your undo-able recipe\nEvery transform you apply appears as a step in the **Applied Steps** panel on the right, in order. Click any earlier step to see exactly what the data looked like at that point \u2014 this makes Power Query far safer to experiment in than it looks; nothing is destructive until you click Close & Apply.\n\n### The essential transforms\n```\nRemove Duplicates \u2192 ensures one row per key (e.g. one row per patient_id)\nReplace Values    \u2192 fix typos: \"Online \" \u2192 \"Online\"\nSplit Column      \u2192 \"John Smith\" \u2192 \"John\" | \"Smith\"\nPivot / Unpivot   \u2192 reshape wide-format data to long, or long to wide\nMerge Queries     \u2192 the visual equivalent of a SQL JOIN \u2014 combine two tables on a matching column\nAppend Queries    \u2192 the visual equivalent of a SQL UNION \u2014 stack two tables with the same columns\nGroup By          \u2192 aggregate rows, like SQL's GROUP BY\n```\nIf you know SQL, every single one of these has a direct one-to-one equivalent you already understand \u2014 Power Query just does it with clicks instead of syntax.\n\n### Writing your own transform: the M language\nPower Query records every click as M code behind the scenes. You can also write custom columns directly:\n```\n= [Revenue] - [Cost]\n= Date.Year([OrderDate])\n= Text.Upper([ProductName])\n```\nThis is the same logic as an Excel formula or a Python calculated column \u2014 same idea, different syntax.\n\n### Incremental Refresh \u2014 for genuinely large tables\nOnce a table reaches millions of rows, reloading the *entire* table on every refresh becomes slow and wasteful. Incremental Refresh lets you set a date range parameter so Power BI only reloads new or changed rows going forward, not the whole history every time.\n\n**Business context:** A finance team refreshing a 5-million-row transactions table every morning at 6am needs this to finish before the workday starts \u2014 incremental refresh is often the difference between a report that's ready on time and one that isn't.\n\n## \ud83d\udd17 How This Connects\n- **Excel**: this is the exact same Power Query engine as Excel's - everything transfers directly, just operating at a larger scale here.\n- **SQL**: Merge Queries and Group By are Power Query's point-and-click equivalents of JOIN and GROUP BY.",
+      "theory_md": "## Row-Level Security (RLS)\n\nOne report, published once — but a regional manager should only see their region's data, not every region's. That's what Row-Level Security enforces.\n\n### How RLS works\n1. **Modeling → Manage Roles**, create a role (e.g. \"Regional Manager\").\n2. Add a DAX filter expression on a table — this defines what rows that role can see:\n```dax\n[Region] = USERPRINCIPALNAME()\n```\nOr, more commonly, a lookup against a mapping table:\n```dax\n[Region] IN VALUES(RegionAccess[Region])\n```\n3. Assign users (or groups) to the role in Power BI Service under the dataset's security settings.\n\n### Static vs. dynamic RLS\n- **Static RLS** — hardcode a fixed value per role (e.g. Role \"North\" → `[Region] = \"North\"`). Simple, but needs a new role for every region.\n- **Dynamic RLS** — filter based on who's logged in (`USERPRINCIPALNAME()`), matched against a table mapping users to what they're allowed to see. One role, works for everyone — the standard approach for anything beyond a handful of fixed groups.\n\n### RLS filters propagate through relationships\nIf RLS is applied to a dimension table (e.g. DimRegion), and that table has a relationship to the fact table, the filter automatically restricts the fact table too — you don't need to apply RLS separately to every table.\n\n### Testing RLS before publishing\n**Modeling → View As Roles** lets you preview the report exactly as a specific role would see it, without needing a second account. Always test this before publishing — an RLS mistake means either a security leak or a manager who mysteriously sees no data at all.\n\n**Business context:** Any report shared across multiple departments, regions, or clients that shouldn't see each other's data needs RLS. Getting it wrong is a real business risk, not just a bug.\n\n## 🔗 How This Connects\n- **SQL**: RLS is conceptually the same as adding `WHERE region = current_user_region` to every query automatically — Power BI just applies it for you at the model level instead of per-query.\n- **Business**: this is a direct implementation of the stakeholder-awareness principle from Stakeholder Presentations — different audiences should see different levels of detail, and RLS enforces that at the data layer, not just the slide layer.",
       "exercises": [
         {
-          "id": "pbi-pq-e1",
-          "title": "Right tool",
-          "prompt": "You need to calculate Year-over-Year revenue growth. Should you do this in Power Query or DAX? Explain.",
-          "hint_1": "Which layer runs at query time vs refresh time?",
-          "hint_2": "YoY needs to compare across time using filter context.",
-          "hint_3": "DAX \u2014 YoY growth requires filter context from the date table, which only exists at query time. Power Query runs before the model is built.",
-          "solution": "DAX",
-          "evaluation_mode": "contains",
-          "points": 20
+          "id": "powerbi-rls-ex1",
+          "exercise_type": "freeform",
+          "title": "Write a dynamic RLS filter",
+          "prompt": "You have a UserRegionMap table with columns Email and Region, linked to DimRegion. Write the DAX filter expression for a dynamic RLS role that restricts each user to only their assigned region(s).",
+          "hint_1": "You need to match the logged-in user's email against the mapping table.",
+          "hint_2": "USERPRINCIPALNAME() returns the current user's login; filter the mapping table by it, then check DimRegion is in that filtered result.",
+          "hint_3": "[Region] IN CALCULATETABLE(VALUES(UserRegionMap[Region]), UserRegionMap[Email] = USERPRINCIPALNAME())",
+          "solution": "[Region] IN CALCULATETABLE(VALUES(UserRegionMap[Region]), UserRegionMap[Email] = USERPRINCIPALNAME())",
+          "evaluation_mode": "ai_review",
+          "points": 20,
+          "sort_order": 1
         },
         {
-          "id": "pbi-pq-e2",
-          "title": "Merge vs Append",
-          "prompt": "You have two tables: Q1_Sales and Q2_Sales with identical columns. What Power Query operation combines them into one table?",
-          "hint_1": "Same columns, combining rows.",
-          "hint_2": "This is like a SQL UNION.",
-          "hint_3": "Append Queries",
-          "solution": "Append Queries",
-          "evaluation_mode": "contains",
-          "points": 15
+          "id": "powerbi-rls-ex2",
+          "exercise_type": "freeform",
+          "title": "Static vs dynamic RLS decision",
+          "prompt": "A company has 4 fixed sales regions that never change and about 15 regional managers total. Would you recommend static or dynamic RLS, and why?",
+          "hint_1": "Consider how many roles you'd need to maintain under each approach, and how often the structure changes.",
+          "hint_2": "With only 4 fixed regions, static RLS (4 roles) is simple to build and doesn't need a mapping table.",
+          "hint_3": "Static RLS is reasonable here — only 4 roles to create and maintain, and the region structure is stable. Dynamic RLS becomes worth the extra setup once you have many users or the assignments change frequently.",
+          "solution": "Static RLS is a reasonable choice here: only 4 fixed regions means just 4 roles to create, with no ongoing mapping table to maintain. Dynamic RLS earns its complexity when there are many users, frequent access changes, or dozens of possible values — none of which apply in this small, stable case.",
+          "evaluation_mode": "ai_review",
+          "points": 20,
+          "sort_order": 2
         }
-      ]
+      ],
+      "quiz": [
+        {
+          "question": "What is the main difference between static and dynamic RLS?",
+          "options": [
+            "They produce different security outcomes",
+            "Static hardcodes a fixed filter value per role; dynamic filters based on who's currently logged in via a mapping table",
+            "Dynamic RLS doesn't use DAX",
+            "Static RLS only works with numeric data"
+          ],
+          "correct_index": 1,
+          "explanation": "Static RLS needs one role per fixed group (simple, but doesn't scale); dynamic RLS uses the logged-in user's identity to look up their access, working for any number of users with one single role."
+        },
+        {
+          "question": "If RLS is applied to a dimension table connected to a fact table, what happens to the fact table?",
+          "options": [
+            "Nothing — RLS must be applied separately to every table",
+            "The RLS filter automatically propagates through the relationship to restrict the fact table too",
+            "The fact table becomes completely inaccessible",
+            "The relationship breaks"
+          ],
+          "correct_index": 1,
+          "explanation": "Filters (including RLS filters) flow through model relationships — filtering the 'one' side of a relationship automatically filters the connected 'many' side too."
+        },
+        {
+          "question": "What does 'View As Roles' let you do before publishing?",
+          "options": [
+            "Change who owns the report",
+            "Preview the report exactly as a specific role would see it, without needing a second account",
+            "Automatically fix any RLS mistakes",
+            "Export the report as a role-specific file"
+          ],
+          "correct_index": 1,
+          "explanation": "This is the essential pre-publish testing step — it lets you verify RLS is working correctly (not leaking data, and not hiding data that should be visible) before anyone else sees the report."
+        }
+      ],
+      "sort_order": 8
     },
     {
-      "id": "powerbi-design",
-      "title": "Report Design & UX",
-      "description": "Build reports people actually use \u2014 layout, colour, and interaction patterns.",
-      "level": "intermediate",
+      "id": "powerbi-performance",
+      "title": "Performance Optimization",
+      "description": "Keep large models fast — query folding, aggregations, and trimming model size",
+      "level": "advanced",
       "prerequisites": [
-        "powerbi-dax"
+        "powerbi-dax-advanced"
       ],
-      "estimated_min": 45,
-      "sort_order": 5,
-      "theory_md": "## Report Design & UX\n\n### The 5-second rule\nA business user should understand the main message of a report page within 5 seconds of looking at it \u2014 before reading a single label. If they can't, the page has too much competing for attention, or nothing is actually prioritized.\n\n### Layout \u2014 the Z-pattern\nEyes naturally scan in a Z: top-left \u2192 top-right \u2192 bottom-left \u2192 bottom-right. Use this:\n- **Top-left**: the single most important KPI card.\n- **Top-right**: the primary trend chart (context for that KPI over time).\n- **Bottom-left**: a breakdown (by region, by category \u2014 whatever explains *why*).\n- **Bottom-right**: supporting detail.\n\nAlign every visual to a grid (**View \u2192 Snap to Grid**) \u2014 misaligned visuals are one of the fastest ways a report reads as unpolished, even when the data itself is solid.\n\n### Colour \u2014 restraint is the skill\n- Pick **one accent colour** for the metric that matters most on a page. Everything else should be a neutral grey.\n- Colouring every visual a different colour looks decorative, not informative \u2014 it actively works against the 5-second rule.\n- Reserve red/green specifically for conditional formatting (below/above target) \u2014 don't also use red/green decoratively elsewhere, or the meaning gets diluted.\n\n### Slicers vs. Filters \u2014 a distinction worth getting right\n- **Slicers** are visible on the canvas \u2014 the user sees and controls them directly. Use these for exploration you *want* the user doing themselves (e.g. \"pick your region\").\n- **The Filters pane** applies a constraint invisibly \u2014 the user never sees or changes it. Use this for things you, the report builder, need fixed (e.g. \"only show active accounts\").\n\n### Tooltips and Bookmarks \u2014 the two features that make a report feel \"built,\" not just \"assembled\"\n- A custom **tooltip page** (Page \u2192 Page type \u2192 Tooltip) shows rich detail on hover, without permanently cluttering the main canvas with every possible number.\n- **Bookmarks** (View \u2192 Bookmarks) save a specific filter state, which you can then wire to a button \u2014 letting a user click \"By Region\" vs \"By Product\" and instantly reconfigure the whole page without touching a single slicer.\n\n**Business context:** The same report, with good layout and restrained colour, gets used daily. The same data with a cluttered, rainbow-coloured, misaligned layout gets opened once and never again \u2014 design quality directly determines whether analytical work actually gets used.\n\n## \ud83d\udd17 How This Connects\n- **Excel**: the Dashboard Design lesson's layout and colour principles apply directly here, just in a more interactive canvas.\n- **Business**: the Data Storytelling lesson's \"lead with the insight\" principle is what should drive every layout decision on this page.",
+      "estimated_min": 40,
+      "theory_md": "## Performance Optimization\n\nA report that takes 15 seconds to respond to a click gets abandoned, regardless of how good the analysis underneath it is. Performance is a usability feature, not a nice-to-have.\n\n### Query folding — push work back to the source\nWhen Power Query transformations can be translated back into the source system's own query language (SQL, for a database source), the *source* does the filtering/aggregating instead of pulling everything into Power BI first. This is dramatically faster for large sources.\n- Filtering, renaming, and basic type changes usually fold.\n- Custom M functions, merges across different source types, and some text transformations often **break** folding.\n- Check folding status: right-click a step → if \"View Native Query\" is available, that step is folding.\n\n### Reduce model size\n- **Remove unused columns** before loading — every column costs memory, whether or not any visual uses it.\n- **Prefer Import mode aggregation tables** for huge fact tables — pre-summarize at a coarser grain (e.g. daily instead of transaction-level) for visuals that don't need row-level detail.\n- **Disable auto date/time** (File → Options → Data Load) unless you need it — it silently creates a hidden date table per date column, which adds up fast on wide models.\n\n### DAX performance\n- Prefer `SUMX`/`CALCULATE` combinations that operate on fewer rows over iterating a huge unfiltered table.\n- Avoid calculated columns where a measure would do — calculated columns are stored and recomputed on every refresh; measures compute on demand and never bloat the model.\n- Variables (`VAR`) inside a measure prevent Power BI from recalculating the same sub-expression multiple times:\n```dax\nMargin % =\nVAR Revenue = SUM(Sales[Revenue])\nVAR Cost = SUM(Sales[Cost])\nRETURN DIVIDE(Revenue - Cost, Revenue)\n```\n\n### Diagnose, don't guess\n**Performance Analyzer** (View → Performance Analyzer → Start Recording → interact with the report) shows exactly how long each visual took and whether the time was spent in the DAX query or the visual rendering — fix what's actually slow, not what you assume is slow.\n\n**Business context:** Large enterprise models with millions of rows and dozens of report pages live or die on performance discipline — this is precisely what separates an amateur build from a production-grade one.\n\n## 🔗 How This Connects\n- **SQL**: query folding is the same instinct as filtering with WHERE before selecting — do the narrowing as early and as close to the source as possible.\n- **Python**: avoiding calculated columns in favor of measures mirrors avoiding unnecessary intermediate DataFrame copies in pandas — compute only what you need, when you need it.",
       "exercises": [
         {
-          "id": "pbi-design-e1",
-          "title": "5 second test",
-          "prompt": "You open a Power BI report and it has 12 visuals of equal size with no clear hierarchy. What is the main design problem?",
-          "hint_1": "Think about what a user sees first.",
-          "hint_2": "Everything the same size means nothing is prioritised.",
-          "hint_3": "No visual hierarchy \u2014 the user cannot tell what the most important metric is, and the 5-second rule fails.",
-          "solution": "No visual hierarchy",
-          "evaluation_mode": "contains",
-          "points": 15
+          "id": "powerbi-perf-ex1",
+          "exercise_type": "freeform",
+          "title": "Diagnose a folding break",
+          "prompt": "A Power Query step applies a custom M function to reformat a text column, and afterward, 'View Native Query' is no longer available on later steps. What likely happened, and why does it matter for performance?",
+          "hint_1": "Think about what 'View Native Query' being unavailable indicates about where the work is happening.",
+          "hint_2": "Custom M functions often can't be translated back into the source system's query language.",
+          "hint_3": "The custom function broke query folding — from that step onward, Power BI has to pull the data locally and do the work itself instead of letting the source database do it, which is much slower on large sources.",
+          "solution": "The custom M function broke query folding at that step. Once folding breaks, every subsequent step runs locally in Power BI instead of being pushed back to the source database — meaning all the rows get pulled across first, which is far slower for large source tables.",
+          "evaluation_mode": "ai_review",
+          "points": 20,
+          "sort_order": 1
         },
         {
-          "id": "pbi-design-e2",
-          "title": "Slicer vs filter",
-          "prompt": "A manager wants to filter the report by region but doesn't want the slicer visible on the canvas. Where should you put the filter?",
-          "hint_1": "There are two places to apply filters in Power BI.",
-          "hint_2": "One is on-canvas, one is in the sidebar.",
-          "hint_3": "The Filters pane \u2014 it applies the filter without a visible slicer on the canvas.",
-          "solution": "Filters pane",
-          "evaluation_mode": "contains",
-          "points": 15
+          "id": "powerbi-perf-ex2",
+          "exercise_type": "freeform",
+          "title": "Measure vs calculated column",
+          "prompt": "You need a 'Profit Margin %' value that should always reflect whatever filters/slicers the user has currently applied. Should this be a measure or a calculated column, and why?",
+          "hint_1": "Consider which one responds to filter context and which one is fixed at refresh time.",
+          "hint_2": "Only one of these two recalculates live as the user interacts with slicers.",
+          "hint_3": "It should be a measure — measures recalculate live based on filter context (slicers, clicks), which is exactly what's needed here. A calculated column would be frozen at its refresh-time value and wouldn't respond to user interaction.",
+          "solution": "This should be a measure. Measures recalculate dynamically based on whatever filter context the user has applied (slicers, cross-filtering), which is exactly the behavior needed. A calculated column is computed once at refresh and stored as a fixed value — it wouldn't update as the user interacts with the report.",
+          "evaluation_mode": "ai_review",
+          "points": 20,
+          "sort_order": 2
         }
-      ]
+      ],
+      "quiz": [
+        {
+          "question": "What is query folding?",
+          "options": [
+            "Collapsing visuals to save screen space",
+            "Power Query steps being translated back into the source system's own query language so the source does the work",
+            "A way to compress the .pbix file",
+            "A DAX function for combining tables"
+          ],
+          "correct_index": 1,
+          "explanation": "When folding works, filtering/aggregating happens at the source (e.g. the database) instead of after pulling all the raw data into Power BI — much faster for large sources."
+        },
+        {
+          "question": "Why does the lesson recommend measures over calculated columns where possible?",
+          "options": [
+            "Calculated columns are deprecated",
+            "Calculated columns are stored and recomputed on every refresh, bloating the model; measures compute on demand without that cost",
+            "Measures are easier to write",
+            "There's no real performance difference"
+          ],
+          "correct_index": 1,
+          "explanation": "Calculated columns add permanent storage and refresh-time cost to the model; measures are computed only when needed, keeping the model leaner."
+        },
+        {
+          "question": "What does Performance Analyzer show you?",
+          "options": [
+            "The list of all users who viewed the report",
+            "Exactly how long each visual took to render and where that time was spent",
+            "A history of past data refreshes",
+            "The DAX formulas used in each measure"
+          ],
+          "correct_index": 1,
+          "explanation": "Performance Analyzer gives real, measured timing per visual — the right tool for finding actual bottlenecks instead of guessing which visual is slow."
+        }
+      ],
+      "sort_order": 9
     },
     {
       "id": "powerbi-publish",
@@ -240,11 +640,11 @@
       "description": "Publish to Power BI Service, manage workspaces, and set up scheduled refresh.",
       "level": "beginner",
       "prerequisites": [
-        "powerbi-fundamentals"
+        "powerbi-intro"
       ],
       "estimated_min": 35,
-      "sort_order": 6,
-      "theory_md": "## Publishing & Sharing\n\n### From Desktop to the world: Publish\n**Home \u2192 Publish \u2192 select a workspace.** This uploads your report (and the dataset behind it) to Power BI Service, where others can access it through a browser \u2014 no Desktop installation required on their end.\n\n### The vocabulary of Power BI Service\n| Term | Meaning |\n|---|---|\n| Workspace | A shared folder/team space \u2014 where reports and datasets live together |\n| Dataset | The data model \u2014 separate from any report built on top of it |\n| Report | The visual layer \u2014 the pages and charts a viewer actually sees |\n| Dashboard | A single page of pinned tiles pulled from one or more reports |\n| App | A packaged, polished version of a workspace, published for end-users who should never see the underlying build |\n\nOne dataset can support several different reports \u2014 this is exactly why keeping the model (Lesson: Data Modelling) clean matters even after you've built your first report; you're not starting over for the next one.\n\n### Scheduled Refresh \u2014 keeping published data current\nOnce published, the report is a snapshot until you configure refresh:\n1. Dataset settings \u2192 **Data source credentials** \u2192 sign in so the Service can reach the original source.\n2. **Scheduled refresh** \u2192 set a frequency (up to 48 times a day on Premium capacity, 8 times a day on Pro).\n\n### Sharing options, and when to use each\n- **Share a report** \u2014 grants access to specific named users or security groups. The default, safest choice for anything containing real business data.\n- **Publish to web** \u2014 generates a public URL with no login required. \u26a0\ufe0f Never use this for anything containing real customer, financial, or employee data \u2014 anyone with the link can view it, forever, with no audit trail.\n- **Embed** \u2014 puts the report inside SharePoint, Teams, or a custom web application, respecting the same permissions as Power BI itself.\n- **Power BI App** \u2014 the cleanest option for a polished, end-user-facing deployment; it hides the workspace's internal structure entirely.\n\n### Row-Level Security (RLS) \u2014 one report, personalized per viewer\n```dax\n[Region] = USERPRINCIPALNAME()\n```\nSet this in Desktop (**Modelling \u2192 Manage Roles**), test it locally with **View as Role**, then assign real users to that role once published in Service. The result: every regional manager opens the exact same report and dashboard, but each only ever sees their own region's data \u2014 one build, personalized automatically per viewer.\n\n**Business context:** This is the payoff for everything in this module \u2014 a report built once, modelled correctly, refreshed automatically, and shared securely to exactly the right audience, each seeing only what they're supposed to. That's the difference between a one-off analysis and a real production reporting system.\n\n## \ud83d\udd17 How This Connects\n- **Business**: the Stakeholder Presentations lesson's delivery considerations (who sees what, how it's revisited later) are exactly what Sharing and Row-Level Security solve here technically.",
+      "sort_order": 10,
+      "theory_md": "## Publishing & Sharing\n\n### From Desktop to the world: Publish\n**Home → Publish → select a workspace.** This uploads your report (and the dataset behind it) to Power BI Service, where others can access it through a browser — no Desktop installation required on their end.\n\n### The vocabulary of Power BI Service\n| Term | Meaning |\n|---|---|\n| Workspace | A shared folder/team space — where reports and datasets live together |\n| Dataset | The data model — separate from any report built on top of it |\n| Report | The visual layer — the pages and charts a viewer actually sees |\n| Dashboard | A single page of pinned tiles pulled from one or more reports |\n| App | A packaged, polished version of a workspace, published for end-users who should never see the underlying build |\n\nOne dataset can support several different reports — this is exactly why keeping the model (Lesson: Data Modelling) clean matters even after you've built your first report; you're not starting over for the next one.\n\n### Scheduled Refresh — keeping published data current\nOnce published, the report is a snapshot until you configure refresh:\n1. Dataset settings → **Data source credentials** → sign in so the Service can reach the original source.\n2. **Scheduled refresh** → set a frequency (up to 48 times a day on Premium capacity, 8 times a day on Pro).\n\n### Sharing options, and when to use each\n- **Share a report** — grants access to specific named users or security groups. The default, safest choice for anything containing real business data.\n- **Publish to web** — generates a public URL with no login required. ⚠️ Never use this for anything containing real customer, financial, or employee data — anyone with the link can view it, forever, with no audit trail.\n- **Embed** — puts the report inside SharePoint, Teams, or a custom web application, respecting the same permissions as Power BI itself.\n- **Power BI App** — the cleanest option for a polished, end-user-facing deployment; it hides the workspace's internal structure entirely.\n\n### Row-Level Security (RLS) — one report, personalized per viewer\n```dax\n[Region] = USERPRINCIPALNAME()\n```\nSet this in Desktop (**Modelling → Manage Roles**), test it locally with **View as Role**, then assign real users to that role once published in Service. The result: every regional manager opens the exact same report and dashboard, but each only ever sees their own region's data — one build, personalized automatically per viewer.\n\n**Business context:** This is the payoff for everything in this module — a report built once, modelled correctly, refreshed automatically, and shared securely to exactly the right audience, each seeing only what they're supposed to. That's the difference between a one-off analysis and a real production reporting system.\n\n## 🔗 How This Connects\n- **Business**: the Stakeholder Presentations lesson's delivery considerations (who sees what, how it's revisited later) are exactly what Sharing and Row-Level Security solve here technically.",
       "exercises": [
         {
           "id": "pbi-pub-e1",
@@ -252,7 +652,7 @@
           "prompt": "You update the underlying data in your SQL database. After refreshing the Power BI dataset, do you need to republish the report?",
           "hint_1": "The report is separate from the dataset.",
           "hint_2": "Refresh updates the dataset; the report reads from the dataset.",
-          "hint_3": "No \u2014 refreshing the dataset updates the data. The report automatically reflects the new data without republishing.",
+          "hint_3": "No — refreshing the dataset updates the data. The report automatically reflects the new data without republishing.",
           "solution": "No",
           "evaluation_mode": "contains",
           "points": 15
@@ -263,10 +663,45 @@
           "prompt": "A colleague asks you to use Publish to Web for a report containing employee salaries. Should you? Why?",
           "hint_1": "Think about who can access a public URL.",
           "hint_2": "Anyone with the URL can see the data.",
-          "hint_3": "No \u2014 Publish to Web creates a public URL accessible to anyone, which is inappropriate for sensitive data like employee salaries. Use share or embed with authentication instead.",
+          "hint_3": "No — Publish to Web creates a public URL accessible to anyone, which is inappropriate for sensitive data like employee salaries. Use share or embed with authentication instead.",
           "solution": "No",
           "evaluation_mode": "contains",
           "points": 20
+        }
+      ],
+      "quiz": [
+        {
+          "question": "What does 'Publish' do in Power BI Desktop?",
+          "options": [
+            "Deletes the local file",
+            "Uploads the report and its underlying dataset to Power BI Service so others can view it via browser",
+            "Only exports a PDF",
+            "Sends the file by email automatically"
+          ],
+          "correct_index": 1,
+          "explanation": "Publishing moves both the report (visual layer) and dataset (data model) to the cloud-based Power BI Service, where viewers don't need Desktop installed."
+        },
+        {
+          "question": "What's the difference between a Dataset and a Report in Power BI Service vocabulary?",
+          "options": [
+            "They're the same thing with two names",
+            "A Dataset is the underlying data model; a Report is the visual pages/charts built on top of it",
+            "A Report contains the raw data; a Dataset contains only charts",
+            "Datasets are only used in Excel, not Power BI"
+          ],
+          "correct_index": 1,
+          "explanation": "This separation matters because one Dataset can support multiple different Reports built on top of it, reusing the same underlying model."
+        },
+        {
+          "question": "What is an 'App' in Power BI Service terms?",
+          "options": [
+            "A mobile-only feature with no desktop equivalent",
+            "A packaged, polished version of a workspace published for end-users who shouldn't see the underlying build",
+            "Another name for a Dashboard",
+            "A type of DAX function"
+          ],
+          "correct_index": 1,
+          "explanation": "An App presents a clean, curated experience to consumers — hiding the workspace's in-progress reports, drafts, and build clutter that collaborators see."
         }
       ]
     }
