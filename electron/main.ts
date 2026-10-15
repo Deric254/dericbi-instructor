@@ -6,6 +6,7 @@ import { registerAllHandlers } from './ipc/handlers'
 import { runFirstTimeSetup } from './services/setup.service'
 
 // ─────────────────────────────────────────────
+// Trigger rebuild comment
 // SINGLE INSTANCE LOCK
 // ─────────────────────────────────────────────
 const gotLock = app.requestSingleInstanceLock()
