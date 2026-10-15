@@ -1,6 +1,6 @@
 {
   "name": "dericbi-instructor",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "description": "DericBI Instructor — Personal Analytics Mentor and Training Platform",
   "main": "dist-electron/main.js",
   "scripts": {
