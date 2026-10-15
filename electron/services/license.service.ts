@@ -3,12 +3,15 @@ import * as os from 'os'
 import * as crypto from 'crypto'
 import * as fs from 'fs'
 import * as path from 'path'
-import * as ed from '@noble/ed25519'
-import { sha512 } from '@noble/hashes/sha2.js'
 
-// @noble/ed25519 v3 needs a sha512 implementation wired in manually (it has no
-// built-in dependency on a hash library, by design, to stay dependency-free).
-ed.hashes.sha512 = sha512
+// Ed25519 verification uses Node's BUILT-IN crypto (no third-party package).
+// The previous implementation imported @noble/ed25519 v3, which is ES-module-only:
+// require()-ing it from this CommonJS main process throws ERR_REQUIRE_ESM on
+// Electron's Node 20, so the installed app crashed at launch before any window
+// appeared. Signatures/keys are standard Ed25519 (RFC 8032), so every key issued
+// earlier still verifies.
+// DER prefix that wraps a raw 32-byte Ed25519 public key into an SPKI structure.
+const ED25519_SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex')
 
 // ─────────────────────────────────────────────
 // SELLER PUBLIC KEY
@@ -109,9 +112,14 @@ async function verifyKey(licenseKey: string): Promise<VerifyResult> {
     const [payloadB64, sigB64] = parts
     const payloadBytes = base64UrlDecode(payloadB64)
     const signature = base64UrlDecode(sigB64)
-    const publicKey = Buffer.from(SELLER_PUBLIC_KEY_HEX, 'hex')
+    const publicKey = crypto.createPublicKey({
+      key: Buffer.concat([ED25519_SPKI_PREFIX, Buffer.from(SELLER_PUBLIC_KEY_HEX, 'hex')]),
+      format: 'der',
+      type: 'spki',
+    })
 
-    const ok = await ed.verifyAsync(new Uint8Array(signature), new Uint8Array(payloadBytes), new Uint8Array(publicKey))
+    // Ed25519 signatures are always exactly 64 bytes; anything else is garbage.
+    const ok = signature.length === 64 && crypto.verify(null, payloadBytes, publicKey, signature)
     if (!ok) {
       return { valid: false, error: 'This license key is not valid.' }
     }

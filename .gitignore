@@ -79,3 +79,7 @@ $RECYCLE.BIN/
 # Misc temp files
 *.tmp
 *.temp
+seller-tools/issued-keys.log
+
+# Stray PowerShell cache that was once committed
+Microsoft/

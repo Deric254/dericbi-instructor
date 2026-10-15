@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import Editor from '@monaco-editor/react'
+import '@/lib/monacoLocal'
 import { TrendingUp, CheckCircle, ChevronRight, Lock, Brain, Info, Play, Loader } from 'lucide-react'
 import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'

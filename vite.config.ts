@@ -13,7 +13,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom'],
-          monaco: ['@monaco-editor/react'],
+          monaco: ['@monaco-editor/react', 'monaco-editor'],
           charts: ['recharts'],
           formulas: ['hyperformula'],
         }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Editor from '@monaco-editor/react'
+import '@/lib/monacoLocal'
 import {
   Terminal, Play, BookOpen, RotateCcw, Loader, CheckCircle,
   AlertCircle, Lightbulb, ChevronRight, Download, Star,

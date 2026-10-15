@@ -73,8 +73,9 @@ export default function LicenseGate({ onActivated }: { onActivated: () => void }
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 20, paddingTop: 16, borderTop: '1px solid var(--border)' }}>
               <ShieldCheck size={14} color="var(--text-muted)" style={{ flexShrink: 0, marginTop: 1 }} />
               <p style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                This activates on one device. No account or internet connection is required after
-                activation — everything runs locally on your machine.
+                This activates on one device and is verified on your computer, so activation needs no
+                internet connection. Lessons, SQL, Excel and your progress all run locally; the AI
+                Instructor and the Python runtime (first use) need internet.
               </p>
             </div>
           </div>

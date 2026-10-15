@@ -30,6 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write   # needed to push the commit and tag back to the repo
+      actions: write    # needed to start the installer build below
 
     steps:
       - name: Checkout
@@ -99,3 +100,12 @@ jobs:
 
           echo "new_version=$NEW" >> "$GITHUB_OUTPUT"
           echo "tag=v$NEW"        >> "$GITHUB_OUTPUT"
+
+      # IMPORTANT: GitHub deliberately does NOT start other workflows for tags pushed with the
+      # built-in GITHUB_TOKEN, so release.yml's `on: push: tags` trigger never fires from this job
+      # (v1.4.1 ... v1.4.5 were all tagged, yet no installer was ever published). Starting the
+      # build explicitly with workflow_dispatch is allowed and fixes that.
+      - name: Start the installer build for the new tag
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run release.yml --ref "${{ steps.bump.outputs.tag }}"

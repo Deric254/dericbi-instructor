@@ -148,9 +148,26 @@ function createWindow(): void {
     mainWindow!.focus()
   })
 
+  // Only ever hand ordinary web/mail links to the OS. Anything else (file:, ms-msdt:, custom
+  // protocols...) is dropped, so lesson or AI-tutor text can never launch a local program.
+  const isSafeExternal = (target: string): boolean => {
+    try { return ['https:', 'http:', 'mailto:'].includes(new URL(target).protocol) } catch { return false }
+  }
+
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url)
+    if (isSafeExternal(url)) shell.openExternal(url)
     return { action: 'deny' }
+  })
+
+  // A plain <a href> inside lesson/AI markdown would otherwise REPLACE the whole app window with a
+  // web page (no back button, app unusable until restart). Keep the app on its own page; open
+  // outside links in the user's browser instead.
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    const current = mainWindow?.webContents.getURL() ?? ''
+    if (url.split('#')[0] === current.split('#')[0]) return          // same page (hash/reload)
+    if (!app.isPackaged && url.startsWith('http://localhost:5173')) return // dev server hot reload
+    event.preventDefault()
+    if (isSafeExternal(url)) shell.openExternal(url)
   })
 
   mainWindow.on('closed', () => { mainWindow = null })

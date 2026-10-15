@@ -26,6 +26,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Warn if the placeholder (test) license key is still in use
+        shell: bash
+        run: |
+          if grep -q "e5376d7d073b7c307dc4aade4243330a0915bd795e20b847a116e9501659273b" electron/services/license.service.ts; then
+            echo "::warning title=Test license key::This build still uses the DEVELOPMENT public key whose private key was exposed in an earlier chat. Generate your own keypair (seller-tools/generate-license-key.js --new-keypair) and replace SELLER_PUBLIC_KEY_HEX before selling licenses."
+          fi
+
       - name: Build and publish
         # publish:win chains `npm run build` (Vite + TypeScript compile)
         # before electron-builder — skipping straight to electron-builder

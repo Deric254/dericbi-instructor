@@ -1,98 +1,120 @@
 #!/usr/bin/env node
 /**
- * DericBI Instructor — license key generator (SELLER USE ONLY)
- * ──────────────────────────────────────────────────────────────
- * This script never ships inside the app. Keep it, and the private key file
- * it creates, on your own machine only — never commit them to a public
- * repo, never bundle them into the Electron app, never send the private
- * key to anyone.
+ * DericBI Instructor - license key generator (SELLER USE ONLY)
+ * ------------------------------------------------------------
+ * This script never ships inside the app. Keep it, and the private key file it
+ * creates, on your own machine only - never commit them to a public repo, never
+ * bundle them into the Electron app, never send the private key to anyone.
  *
- * SETUP (one time):
+ * No npm install needed: it uses Node's built-in Ed25519 (Node 18+).
+ *
+ * ONE-TIME SETUP
  *   cd seller-tools
- *   npm install @noble/ed25519 @noble/hashes
  *   node generate-license-key.js --new-keypair
+ *     -> prints a PUBLIC key and saves the PRIVATE key to seller-tools/private-key.txt
+ *        (gitignored). BACK UP private-key.txt somewhere safe and OFFLINE: if you lose it you
+ *        can never issue another key that this build accepts, and if you run --new-keypair
+ *        again, every key you already sold stops working in new builds.
+ *   Copy the PUBLIC key into electron/services/license.service.ts (SELLER_PUBLIC_KEY_HEX),
+ *   then release a new version of the app.
  *
- * This prints a PUBLIC key and a PRIVATE key, and saves the private key to
- * seller-tools/private-key.txt (gitignored — check your .gitignore!).
- * Copy the PUBLIC key into electron/services/license.service.ts, replacing
- * the SELLER_PUBLIC_KEY_HEX placeholder, then rebuild the app.
- *
- * ISSUING A KEY FOR EACH SALE:
+ * EACH SALE
  *   node generate-license-key.js --ref "order-12345"
+ *     -> prints the key to send to the buyer, and appends a line to issued-keys.log (gitignored)
  *
- * Paste the printed key into your delivery email/page for that buyer. The
- * "ref" is just a label for your own records (e.g. an order ID or the
- * buyer's email) — it isn't checked against anything at runtime, since the
- * app validates keys fully offline with no server. Use whatever helps you
- * keep track of who has which key, for support purposes.
+ * OTHER COMMANDS
+ *   node generate-license-key.js --show-public        print the public key for the stored private key
+ *   node generate-license-key.js --check "<key>"      verify a key against the stored private key
+ *   node generate-license-key.js --new-keypair --force   REPLACE an existing keypair (dangerous)
+ *
+ * The "ref" is only a label for your records (order id, buyer email...). The app validates keys
+ * fully offline and never looks it up.
  */
-
 const fs = require('fs')
 const path = require('path')
-const ed = require('@noble/ed25519')
-const { sha512 } = require('@noble/hashes/sha2.js')
-
-ed.hashes.sha512 = sha512
+const crypto = require('crypto')
 
 const PRIVATE_KEY_PATH = path.join(__dirname, 'private-key.txt')
+const ISSUED_LOG_PATH = path.join(__dirname, 'issued-keys.log')
 
-function toBase64Url(bytes) {
-  return Buffer.from(bytes).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+// DER wrappers that turn raw 32-byte Ed25519 keys into the formats Node's crypto understands.
+const PKCS8_PREFIX = Buffer.from('302e020100300506032b657004220420', 'hex')
+const SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex')
+
+const toBase64Url = (bytes) =>
+  Buffer.from(bytes).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+const fromBase64Url = (s) => Buffer.from(s.replace(/-/g, '+').replace(/_/g, '/'), 'base64')
+
+function privateKeyObject(seedHex) {
+  return crypto.createPrivateKey({ key: Buffer.concat([PKCS8_PREFIX, Buffer.from(seedHex, 'hex')]), format: 'der', type: 'pkcs8' })
 }
-
-async function newKeypair() {
-  const privateKey = ed.utils.randomSecretKey()
-  const publicKey = await ed.getPublicKeyAsync(privateKey)
-
-  const privHex = Buffer.from(privateKey).toString('hex')
-  const pubHex = Buffer.from(publicKey).toString('hex')
-
-  fs.writeFileSync(PRIVATE_KEY_PATH, privHex, 'utf8')
-
-  console.log('\n=== New signing keypair generated ===\n')
-  console.log('PUBLIC key (paste into electron/services/license.service.ts):')
-  console.log(pubHex)
-  console.log('\nPRIVATE key (saved to private-key.txt — keep this secret, never share or commit it):')
-  console.log(privHex)
-  console.log('\nNext steps:')
-  console.log('1. Open electron/services/license.service.ts')
-  console.log('2. Replace SELLER_PUBLIC_KEY_HEX with the PUBLIC key above')
-  console.log('3. Rebuild the app (npm run build)')
-  console.log('4. Add seller-tools/private-key.txt to .gitignore if it isn\'t already\n')
+function publicHexOf(privateKey) {
+  return crypto.createPublicKey(privateKey).export({ format: 'der', type: 'spki' }).subarray(-32).toString('hex')
 }
-
-async function issueKey(ref) {
+function loadPrivateSeed() {
   if (!fs.existsSync(PRIVATE_KEY_PATH)) {
-    console.error('No private-key.txt found. Run with --new-keypair first.')
+    console.error('No private-key.txt found. Run:  node generate-license-key.js --new-keypair')
     process.exit(1)
   }
-  const privateKey = Buffer.from(fs.readFileSync(PRIVATE_KEY_PATH, 'utf8').trim(), 'hex')
+  const hex = fs.readFileSync(PRIVATE_KEY_PATH, 'utf8').trim()
+  if (!/^[0-9a-f]{64}$/i.test(hex)) {
+    console.error('private-key.txt is not a valid 64-character hex key.')
+    process.exit(1)
+  }
+  return hex
+}
 
+function newKeypair(force) {
+  if (fs.existsSync(PRIVATE_KEY_PATH) && !force) {
+    console.error('\nSTOP: seller-tools/private-key.txt already exists.')
+    console.error('Creating a new keypair would REPLACE it, and every license key you have already sold')
+    console.error('would stop being accepted by new builds of the app.')
+    console.error('To see your current public key run:  node generate-license-key.js --show-public')
+    console.error('If you really intend to replace it, run again with --force (back up the old file first).\n')
+    process.exit(1)
+  }
+  const { privateKey } = crypto.generateKeyPairSync('ed25519')
+  const seedHex = privateKey.export({ format: 'der', type: 'pkcs8' }).subarray(-32).toString('hex')
+  fs.writeFileSync(PRIVATE_KEY_PATH, seedHex, { encoding: 'utf8', mode: 0o600 })
+  console.log('\n=== New signing keypair generated ===\n')
+  console.log('PUBLIC key (paste into electron/services/license.service.ts as SELLER_PUBLIC_KEY_HEX):')
+  console.log(publicHexOf(privateKey))
+  console.log('\nThe PRIVATE key was saved to seller-tools/private-key.txt - keep it secret and BACK IT UP offline.')
+  console.log('\nNext steps:')
+  console.log('1. Open electron/services/license.service.ts and replace SELLER_PUBLIC_KEY_HEX with the PUBLIC key above')
+  console.log('2. Commit and push so the app is rebuilt and released with the new key')
+  console.log('3. Never commit private-key.txt (it is already in .gitignore)\n')
+}
+
+function sign(ref) {
+  const privateKey = privateKeyObject(loadPrivateSeed())
   const payload = { ref: ref || `key-${Date.now()}`, iat: Math.floor(Date.now() / 1000) }
   const payloadBytes = Buffer.from(JSON.stringify(payload), 'utf8')
+  const signature = crypto.sign(null, payloadBytes, privateKey)
+  return { licenseKey: `DBI-${toBase64Url(payloadBytes)}.${toBase64Url(signature)}`, payload }
+}
 
-  const signature = await ed.signAsync(new Uint8Array(payloadBytes), new Uint8Array(privateKey))
-
-  const licenseKey = `DBI-${toBase64Url(payloadBytes)}.${toBase64Url(signature)}`
-
+function issueKey(ref) {
+  const { licenseKey, payload } = sign(ref)
+  fs.appendFileSync(ISSUED_LOG_PATH, `${new Date().toISOString()}\t${payload.ref}\t${licenseKey}\n`, 'utf8')
   console.log('\n=== License key ===\n')
   console.log(licenseKey)
-  console.log(`\n(ref: ${payload.ref})\n`)
-  return licenseKey
+  console.log(`\n(ref: ${payload.ref} - also recorded in issued-keys.log)\n`)
 }
 
-async function main() {
-  const args = process.argv.slice(2)
-  if (args.includes('--new-keypair')) {
-    await newKeypair()
-    return
-  }
-  const refIndex = args.indexOf('--ref')
-  const ref = refIndex !== -1 ? args[refIndex + 1] : undefined
-  await issueKey(ref)
+function checkKey(key) {
+  const privateKey = privateKeyObject(loadPrivateSeed())
+  const publicKey = crypto.createPublicKey(privateKey)
+  const m = /^DBI-([A-Za-z0-9_-]+)\.([A-Za-z0-9_-]+)$/.exec((key || '').replace(/\s+/g, ''))
+  if (!m) { console.log('INVALID: not in DBI-<payload>.<signature> format'); process.exit(1) }
+  const ok = crypto.verify(null, fromBase64Url(m[1]), publicKey, fromBase64Url(m[2]))
+  console.log(ok ? 'VALID for your current keypair.' : 'INVALID: signature does not match your current keypair.')
+  process.exit(ok ? 0 : 1)
 }
 
-main().catch((err) => {
-  console.error(err)
-  process.exit(1)
-})
+const args = process.argv.slice(2)
+const after = (flag) => { const i = args.indexOf(flag); return i !== -1 ? args[i + 1] : undefined }
+if (args.includes('--new-keypair')) newKeypair(args.includes('--force'))
+else if (args.includes('--show-public')) console.log(publicHexOf(privateKeyObject(loadPrivateSeed())))
+else if (args.includes('--check')) checkKey(after('--check'))
+else issueKey(after('--ref'))
