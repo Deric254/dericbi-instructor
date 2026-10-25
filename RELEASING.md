@@ -1,61 +1,55 @@
-# Releasing DericBI Instructor (owner's guide)
+# DericBI Instructor: owner's guide
 
-Do **A once**, then **B every release**. The website page
-(`/dericbi-instructor/` on dericbiskills.vercel.app) reads the newest release automatically.
+Everything for selling and licensing the app happens **inside the app, on your computer**. You never run
+commands to licence a customer.
 
-## A. One-time setup (before you sell anything)
+## One-time setup (about 10 minutes)
 
-1. **Make your own signing keypair.** The key currently in `electron/services/license.service.ts`
-   is a development key whose private half was exposed in an earlier chat. Anyone holding it could
-   create keys this app accepts.
-   ```
-   cd seller-tools
-   node generate-license-key.js --new-keypair
-   ```
-   It prints a PUBLIC key and saves the PRIVATE key to `seller-tools/private-key.txt`
-   (git-ignored). **Back that file up somewhere safe and offline.** If you lose it you can never
-   issue another key; if you run `--new-keypair` again, every key you sold stops working in new builds.
-   (The tool refuses to overwrite an existing private key unless you add `--force`.)
-2. Paste the PUBLIC key into `SELLER_PUBLIC_KEY_HEX` in `electron/services/license.service.ts`.
-3. Commit and push to `main`.
+1. **Create your owner key.** Double-click `CREATE-OWNER-KEY.bat`. It makes your private key file in
+   `Documents\DericBI Owner Key\` and puts the matching public key into the project.
+   **Copy that key file to a USB stick or other safe place now.** If it is lost you can never licence another
+   customer, and anyone who gets it can create licences. Never send it to anyone. (The tool refuses to run twice.)
+2. **Publish a version.** Commit and push the change to `electron/licensing/licensing.config.json`
+   (GitHub Desktop is fine). After about 10 minutes check the repo's **Actions** tab is green and **Releases** shows
+   `DericBI-Instructor-Setup.exe`. A build with no owner key stops by design, so it can never reach customers.
+3. **Claim your computer.** Install that version on your own PC, open it, choose **Owner sign-in** and pick your key
+   file. The **Owner Console** now appears in the sidebar. No other computer has it.
+4. **Retire the old version.** Delete the older releases (v1.4.x) on GitHub: they use the previous licence design.
 
-## B. Every release
+## Licensing a customer (30 seconds)
 
-1. Push to `main`. The **Version Bump** workflow raises the patch version, tags it and now
-   **starts the Build and Release workflow itself** (GitHub never starts it automatically from a
-   tag pushed by another workflow, which is why earlier tags had no installer).
-2. Wait about 10 minutes, then open the repo's **Actions** tab. Both workflows should be green.
-   A yellow warning "Test license key" means step A is not finished.
-3. Open **Releases**: you should see `DericBI-Instructor-Setup.exe`. The website's download button then
-   shows the version, size and date on its own.
-4. Test the installer on a clean Windows machine (see checklist), then sell.
+1. The customer installs the app. It shows a 12-character **activation code** and a button to send it to you on WhatsApp.
+2. In **Owner Console**: click **Unlock signing** once per session (choose your key file; it is held in memory only and
+   locks itself after 30 idle minutes).
+3. Paste the code, type their name and phone, choose how many months they paid, click **Generate licence**.
+4. Click **Send on WhatsApp** (or **Copy licence**). The customer pastes it into the app and clicks Activate.
 
-## Selling a license
+The licence works only on the computer that showed that code, and checks itself offline.
 
-```
-cd seller-tools
-node generate-license-key.js --ref "order-123"
-```
-Send the printed key (starts with `DBI-`) to the buyer. Each key is also logged in
-`seller-tools/issued-keys.log` (git-ignored). `--check "<key>"` verifies a key; `--show-public`
-prints your public key.
+## Every month
 
-## Clean-machine checklist
+When a customer pays, tick that month in their row (the "Paid" box, or open the row for the full year). Click
+**Renew** and send the new licence. A licence runs to the **end of the last paid month plus grace days** (default 5,
+change it under Licence settings). If a customer does not pay, their licence simply reaches its end date and the app
+asks for a renewal. Nothing needs switching off. A licence can run at most 365 days.
 
-- [ ] Installer runs (click "More info" > "Run anyway" on the SmartScreen warning)
-- [ ] Activation accepts a fresh key and rejects a garbled one
-- [ ] Create account, finish onboarding, reach the dashboard
-- [ ] Complete one SQL exercise (code editor loads with no internet)
-- [ ] Python lesson runs (needs internet the first time)
-- [ ] Close and reopen: still activated and signed in
-- [ ] Uninstall and reinstall: progress is still there
+## Your customer list
 
-## Notes
+The console shows total users, active, expiring in 7 days, expired, who has paid this month and the amount received.
+**Export Excel** (customers + a month-by-month payments sheet) and **Export CSV** save a file you choose.
+**Back up** copies the list (`owner-ledger.json`, in the app's data folder on your PC). The app also keeps
+`owner-ledger.json.bak` automatically. The list exists only on your computer.
 
-- The installer is not code-signed, so Windows SmartScreen warns on first run. A code-signing
-  certificate removes the warning; until then the website explains it.
-- Installer size: `package.json > build.files` leaves out packages only the interface uses
-  (they are already compiled into `dist/`). `npm run build:win` and `publish:win` run
-  `scripts/verify-packaged-deps.js`, which fails the build if the main process ever needs a package
-  that was excluded.
-- Run `npm run build` locally before pushing if you changed code: it type-checks everything.
+## Every release
+
+Push to `main`. The **Version Bump** workflow raises the version, tags it and starts **Build and Release**, which
+publishes `DericBI-Instructor-Setup.exe`. The website download button follows the newest release automatically.
+
+## Good to know
+
+- A customer who gets a new computer sends you the new computer's code; create their licence for it
+  (open their row, change the code, press **Renew**).
+- The installer is not code-signed, so Windows SmartScreen warns once on first install (the website explains it).
+- `npm run build` type-checks everything. `npm test` runs the licensing and ledger tests.
+- `npm run build:win` / `publish:win` also run `scripts/verify-packaged-deps.js`, which fails the build if the app
+  ever needs a package that was left out of the installer, to keep it small.

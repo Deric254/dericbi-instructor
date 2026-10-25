@@ -43,12 +43,14 @@ interface UIStore {
   sidebarCollapsed: boolean
   instructorOpen: boolean
   theme: 'dark' | 'light'
+  isOwner: boolean
   setActiveSection: (section: NavSection) => void
   toggleSidebar: () => void
   setSidebarCollapsed: (collapsed: boolean) => void
   toggleInstructor: () => void
   setInstructorOpen: (open: boolean) => void
   toggleTheme: () => void
+  setOwner: (isOwner: boolean) => void
 }
 
 export const useUIStore = create<UIStore>()(
@@ -58,12 +60,14 @@ export const useUIStore = create<UIStore>()(
       sidebarCollapsed: false,
       instructorOpen: false,
       theme: 'dark',
+      isOwner: false,
       setActiveSection: (activeSection) => set({ activeSection }),
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
       setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
       toggleInstructor: () => set((s) => ({ instructorOpen: !s.instructorOpen })),
       setInstructorOpen: (instructorOpen) => set({ instructorOpen }),
       toggleTheme: () => set((s) => ({ theme: s.theme === 'dark' ? 'light' : 'dark' })),
+      setOwner: (isOwner) => set({ isOwner }),
     }),
     {
       name: 'dericbi-ui',

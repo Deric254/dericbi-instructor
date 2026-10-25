@@ -1,22 +1,9 @@
 import path from 'path'
 import fs from 'fs'
-import { app, ipcMain, shell } from 'electron'
+import { app, shell } from 'electron'
 import { v4 as uuidv4 } from 'uuid'
 import { getDb } from '../db/database'
-
-/** Same rationale as the wrapper in electron/ipc/handlers.ts: log failures
- * with their channel name before they propagate, since a packaged app has
- * no visible console otherwise. */
-function safeHandle(channel: string, listener: (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any) {
-  ipcMain.handle(channel, async (event, ...args) => {
-    try {
-      return await listener(event, ...args)
-    } catch (err) {
-      console.error(`[ipc:${channel}]`, err)
-      throw err
-    }
-  })
-}
+import { safeHandle } from '../ipc/safe-handle'
 
 // ─────────────────────────────────────────────
 // TYPES

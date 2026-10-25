@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Database, FileSpreadsheet, Terminal,
   BarChart3, TrendingUp, Briefcase, FlaskConical,
   Table2, FolderOpen, BookOpen, Trophy, Settings,
-  ChevronLeft, ChevronRight, Cpu, Users, LogOut, ShieldCheck,
+  ChevronLeft, ChevronRight, Users, LogOut, ShieldCheck, KeyRound,
 } from 'lucide-react'
 import { useAuthStore, useUIStore } from '../../store'
 import type { NavSection } from '../../types'
@@ -40,10 +40,11 @@ const NAV_ITEMS: NavItem[] = [
   // Config
   { id: 'settings',    label: 'Settings',     icon: <Settings size={16} />,                                       section: 'System' },
   { id: 'admin',       label: 'Admin',        icon: <ShieldCheck size={16} /> },
+  { id: 'owner',       label: 'Owner Console', icon: <KeyRound size={16} /> },
 ]
 
 export default function Sidebar() {
-  const { activeSection, sidebarCollapsed, setActiveSection, toggleSidebar } = useUIStore()
+  const { activeSection, sidebarCollapsed, isOwner, setActiveSection, toggleSidebar } = useUIStore()
   const { user, token, logout: storeLogout } = useAuthStore()
   const [confirmingLogout, setConfirmingLogout] = useState(false)
   const confirmTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -158,7 +159,7 @@ export default function Sidebar() {
   function renderNavItems() {
     const elements: React.ReactNode[] = []
     let currentSection = ''
-    const visibleItems = NAV_ITEMS.filter(item => item.id !== 'admin' || user?.is_admin)
+    const visibleItems = NAV_ITEMS.filter(item => (item.id !== 'admin' || user?.is_admin) && (item.id !== 'owner' || isOwner))
 
     for (const item of visibleItems) {
       if (item.section && item.section !== currentSection) {

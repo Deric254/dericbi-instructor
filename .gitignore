@@ -40,12 +40,6 @@ yarn-error.log*
 *.p12
 *.pfx
 
-# License signing private key — NEVER commit this. Anyone with this file
-# could mint license keys the app will accept as genuine. It's covered by
-# *.key above too, but called out explicitly since leaking it is uniquely
-# high-stakes (it can't be rotated without re-issuing every past key).
-seller-tools/private-key.txt
-
 # Testing / coverage
 coverage/
 .nyc_output/
@@ -79,7 +73,6 @@ $RECYCLE.BIN/
 # Misc temp files
 *.tmp
 *.temp
-seller-tools/issued-keys.log
 
 # Stray PowerShell cache that was once committed
 Microsoft/

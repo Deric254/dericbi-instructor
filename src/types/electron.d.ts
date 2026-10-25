@@ -10,10 +10,25 @@ declare global {
         close: () => Promise<void>
         isMaximized: () => Promise<boolean>
       }
-      license: {
-        status: () => Promise<{ activated: boolean; ref?: string }>
-        activate: (licenseKey: string) => Promise<{ success: boolean; error?: string }>
-        deactivate: () => Promise<{ success: boolean }>
+      licence: {
+        state: () => Promise<import('./index').LicenceState>
+        activate: (token: string) => Promise<{ success: boolean; error?: string }>
+        claimOwner: (pastedKey?: string) => Promise<{ success: boolean; error?: string; cancelled?: boolean }>
+      }
+      owner: {
+        overview: () => Promise<import('./index').OwnerOverview>
+        unlockFile: () => Promise<import('./index').OwnerResult>
+        unlockSaved: () => Promise<import('./index').OwnerResult>
+        unlockPasted: (keyText: string) => Promise<import('./index').OwnerResult>
+        lock: () => Promise<{ success: boolean }>
+        issueNew: (input: import('./index').OwnerIssueInput) => Promise<import('./index').OwnerResult<import('./index').IssuedLicence>>
+        renew: (id: string) => Promise<import('./index').OwnerResult<import('./index').IssuedLicence>>
+        setPayment: (id: string, month: string, paid: boolean) => Promise<import('./index').OwnerResult>
+        updateCustomer: (id: string, patch: { name?: string; contact?: string; code?: string; notes?: string }) => Promise<import('./index').OwnerResult>
+        deleteCustomer: (id: string) => Promise<import('./index').OwnerResult>
+        updateSettings: (patch: { graceDays?: number; defaultAmount?: number | null }) => Promise<import('./index').OwnerResult>
+        export: (format: 'xlsx' | 'csv') => Promise<import('./index').OwnerResult<{ path: string }>>
+        backup: () => Promise<import('./index').OwnerResult<{ path: string }>>
       }
       auth: {
         register: (params: any) => Promise<any>

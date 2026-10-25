@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import {
   Eye, EyeOff, Save, CheckCircle, Loader, LogOut,
-  Key, User, Info, RefreshCw, Bell, Moon, Cpu, ShieldQuestion, Lock,
+  Key, User, Info, RefreshCw, Cpu, ShieldQuestion, Lock,
 } from 'lucide-react'
 import { useAuthStore, useUIStore, notify } from '../store'
+import type { LicenceState } from '../types'
 import { reportApiError } from '../lib/apiError'
 
 export default function Settings() {
@@ -357,9 +358,9 @@ export default function Settings() {
           </div>
         </Section>
 
-        {/* ── License ── */}
-        <Section icon={<Key size={15} />} title="License">
-          <LicenseSection />
+        {/* ── Licence ── */}
+        <Section icon={<Key size={15} />} title="Licence">
+          <LicenceSection />
         </Section>
 
 
@@ -563,53 +564,78 @@ function SecuritySection() {
 }
 
 // ─────────────────────────────────────────────
-// LICENSE SECTION COMPONENT
+// LICENCE SECTION COMPONENT
 // ─────────────────────────────────────────────
 
-function LicenseSection() {
-  const [ref, setRef] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [confirming, setConfirming] = useState(false)
+function LicenceSection() {
+  const [state, setState] = useState<LicenceState | null>(null)
+  const [token, setToken] = useState('')
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [copied, setCopied] = useState(false)
 
-  useEffect(() => {
-    window.api.license.status()
-      .then((r) => setRef(r.ref ?? null))
-      .catch((err: any) => reportApiError('load license status', err))
-      .finally(() => setLoading(false))
-  }, [])
+  const load = () => window.api.licence.state()
+    .then(setState)
+    .catch((err: any) => reportApiError('load the licence status', err))
 
-  const deactivate = async () => {
-    if (!confirming) {
-      setConfirming(true)
-      setTimeout(() => setConfirming(false), 3000)
-      return
-    }
+  useEffect(() => { load() }, [])
+
+  const renew = async () => {
+    setError('')
+    setBusy(true)
     try {
-      await window.api.license.deactivate()
-      notify.success('Device deactivated', 'Restart the app to activate it again — with this key or a different one.')
-      setConfirming(false)
+      const r = await window.api.licence.activate(token)
+      if (r.success) {
+        setToken('')
+        notify.success('Licence updated', 'Your new licence is active.')
+        await load()
+      } else {
+        setError(r.error ?? 'This licence could not be applied.')
+      }
     } catch (err) {
-      reportApiError('deactivate this device', err)
+      reportApiError('apply your licence', err)
+    } finally {
+      setBusy(false)
     }
   }
+
+  const copyCode = async () => {
+    if (!state) return
+    await navigator.clipboard.writeText(state.installCode)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (!state) return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Checking…</div>
 
   return (
     <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.8 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <CheckCircle size={13} color="var(--success)" />
         <span style={{ color: 'var(--text-secondary)' }}>
-          {loading ? 'Checking…' : 'Active on this device'}
+          {state.kind === 'owner' ? 'Owner copy: no expiry' : `Active until ${state.expires}`}
         </span>
       </div>
-      {ref && <div>Reference: <span style={{ fontFamily: 'var(--font-mono)' }}>{ref}</span></div>}
-      <div style={{ marginTop: 16, padding: '10px 14px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius)', border: '1px solid var(--border)', fontSize: 11, lineHeight: 1.6 }}>
-        This license is locked to this device. Deactivating clears it locally — use this before
-        reinstalling on the same machine, or if you're moving to a new one and want to activate
-        there instead.
+      {state.user && <div>Licensed to: <span style={{ color: 'var(--text-secondary)' }}>{state.user}</span></div>}
+      {state.daysLeft !== undefined && <div>Days left: <span style={{ color: 'var(--text-secondary)' }}>{state.daysLeft}</span></div>}
+      <div>
+        Activation code: <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>{state.installCode}</span>{' '}
+        <button className="btn btn-ghost btn-sm" onClick={copyCode}>{copied ? 'Copied' : 'Copy'}</button>
       </div>
-      <button className="btn btn-secondary btn-sm" style={{ marginTop: 12 }} onClick={deactivate}>
-        {confirming ? 'Click again to confirm' : 'Deactivate This Device'}
-      </button>
+
+      {state.kind === 'licensed' && (
+        <div style={{ marginTop: 16, padding: '12px 14px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+          <div style={{ marginBottom: 8, lineHeight: 1.6 }}>
+            Paid for the next period? Paste the renewal licence we send you. It works only for this computer's activation code.
+          </div>
+          <textarea className="input" style={{ minHeight: 70, fontFamily: 'var(--font-mono)', fontSize: 11 }}
+            placeholder="Paste your renewal licence" value={token} onChange={e => setToken(e.target.value)} spellCheck={false} />
+          {error && <div style={{ color: 'var(--error)', fontSize: 12, marginTop: 8 }}>{error}</div>}
+          <button className="btn btn-secondary btn-sm" style={{ marginTop: 10 }} disabled={busy || !token.trim()} onClick={renew}>
+            {busy ? 'Applying…' : 'Apply renewal'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }

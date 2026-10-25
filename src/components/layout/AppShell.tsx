@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useAuthStore, useUIStore } from '../../store'
+import { useUIStore } from '../../store'
 import Titlebar from './Titlebar'
 import Sidebar from './Sidebar'
 import NotificationStack from '../ui/NotificationStack'
@@ -22,6 +22,7 @@ import Portfolio from '../../pages/Portfolio'
 import Achievements from '../../pages/Achievements'
 import Settings from '../../pages/Settings'
 import AdminPanel from '../../pages/AdminPanel'
+import OwnerConsole from '../../pages/OwnerConsole'
 import type { NavSection } from '../../types'
 
 const PAGES: Record<NavSection, React.ReactNode> = {
@@ -40,6 +41,7 @@ const PAGES: Record<NavSection, React.ReactNode> = {
   achievements: <Achievements />,
   settings:     <Settings />,
   admin:        <AdminPanel />,
+  owner:        <OwnerConsole />,
 }
 
 export default function AppShell() {

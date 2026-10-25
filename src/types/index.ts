@@ -191,6 +191,7 @@ export interface Achievement {
 // ─────────────────────────────────────────────
 
 export type NavSection =
+  | 'owner'
   | 'dashboard'
   | 'sql'
   | 'excel'
@@ -206,3 +207,48 @@ export type NavSection =
   | 'achievements'
   | 'settings'
   | 'admin'
+
+// ── Licensing and the Owner Console ──
+export interface LicenceState {
+  ok: boolean
+  kind: 'owner' | 'licensed' | 'unlicensed' | 'unconfigured'
+  message: string
+  installCode: string
+  user?: string
+  expires?: string
+  daysLeft?: number
+}
+
+export type OwnerResult<T extends object = {}> = ({ success: true } & T) | { success: false; error: string; cancelled?: boolean }
+
+export type CustomerStatus = 'none' | 'active' | 'expiring' | 'expired'
+
+export interface OwnerCustomer {
+  id: string
+  name: string
+  contact: string
+  code: string
+  notes: string
+  createdAt: string
+  payments: Record<string, { paidAt: string; amount: number | null }>
+  status: CustomerStatus
+  paidThrough: string | null
+  needsRenewal: boolean
+  licenceExpires: string | null
+  daysLeft: number | null
+  lastLicence: { issuedAt: string; expires: string; token: string } | null
+  history: { issuedAt: string; expires: string; token: string }[]
+}
+
+export interface OwnerOverview {
+  signing: { unlocked: boolean; until: number | null }
+  settings: { graceDays: number; defaultAmount: number | null; keyPath: string }
+  summary: {
+    total: number; active: number; expiring: number; expired: number; notIssued: number
+    paidThisMonth: number; unpaidThisMonth: number; received: number; month: string
+  }
+  customers: OwnerCustomer[]
+}
+
+export interface OwnerIssueInput { code: string; name: string; contact?: string; notes?: string; months?: number; amount?: number | null }
+export interface IssuedLicence { licence: string; expires: string; name: string; contact: string; customerId: string }

@@ -1,17 +1,24 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useAuthStore, useUIStore } from './store'
 import AppShell from './components/layout/AppShell'
 import AuthScreen from './pages/AuthScreen'
-import LicenseGate from './pages/LicenseGate'
+import LicenceGate from './pages/LicenceGate'
+import LicenceBanner from './components/ui/LicenceBanner'
 import UpdateBanner from './components/ui/UpdateBanner'
 import { MinimalTitlebar } from './components/layout/Titlebar'
+import type { LicenceState } from './types'
 import './styles/globals.css'
+
+// A licence can run out while the app is open, so it is re-checked every few minutes.
+const LICENCE_RECHECK_MS = 5 * 60 * 1000
 
 export default function App() {
   const { user, token, isLoading, setUser, setToken, setLoading } = useAuthStore()
   const theme = useUIStore((s) => s.theme)
-  const [licenseChecked, setLicenseChecked] = useState(false)
-  const [activated, setActivated] = useState(false)
+  const setOwner = useUIStore((s) => s.setOwner)
+  const [licence, setLicence] = useState<LicenceState | null>(null)
+  const licenceChecked = licence !== null
+  const activated = licence?.ok === true
 
   // Apply the persisted theme to the document root so the CSS variable
   // overrides in globals.css take effect everywhere, immediately.
@@ -19,18 +26,26 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
 
-  // Check license activation first, before anything else in the app runs.
-  useEffect(() => {
-    window.api.license.status()
-      .then((r) => setActivated(r.activated))
-      .catch((err) => { console.error('[license status]', err); setActivated(false) })
-      .finally(() => setLicenseChecked(true))
-  }, [])
+  // Check the licence first, before anything else in the app runs, and keep checking.
+  const refreshLicence = useCallback(() => {
+    window.api.licence.state()
+      .then((s) => { setLicence(s); setOwner(s.kind === 'owner') })
+      .catch((err) => {
+        console.error('[licence state]', err)
+        setLicence({ ok: false, kind: 'unlicensed', message: 'The licence could not be checked.', installCode: '' })
+      })
+  }, [setOwner])
 
-  // Restore session on mount — only once the license is confirmed active,
+  useEffect(() => {
+    refreshLicence()
+    const timer = setInterval(refreshLicence, LICENCE_RECHECK_MS)
+    return () => clearInterval(timer)
+  }, [refreshLicence])
+
+  // Restore session on mount — only once the licence is confirmed active,
   // so an unlicensed copy never gets far enough to touch user data.
   useEffect(() => {
-    if (!licenseChecked || !activated) return
+    if (!licenceChecked || !activated) return
     const restore = async () => {
       if (!token) {
         setLoading(false)
@@ -55,13 +70,13 @@ export default function App() {
     }
 
     restore()
-  }, [licenseChecked, activated]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [licenceChecked, activated]) // eslint-disable-line react-hooks/exhaustive-deps
 
   let content: React.ReactNode
-  if (!licenseChecked) {
+  if (!licenceChecked) {
     content = <BootSplash />
   } else if (!activated) {
-    content = <LicenseGate onActivated={() => setActivated(true)} />
+    content = <LicenceGate state={licence} onChanged={refreshLicence} />
   } else if (isLoading) {
     content = <BootSplash />
   } else if (!user) {
@@ -73,6 +88,7 @@ export default function App() {
   return (
     <>
       {content}
+      <LicenceBanner state={licence} />
       <UpdateBanner />
     </>
   )

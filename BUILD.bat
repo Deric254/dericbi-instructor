@@ -51,6 +51,19 @@ if %errorlevel% neq 0 (
     pause & exit /b 1
 )
 
+call npm run verify:licence
+if %errorlevel% neq 0 (
+    echo.
+    echo  ERROR: Licence check failed. See the message above.
+    pause & exit /b 1
+)
+call npm run verify:packaging
+if %errorlevel% neq 0 (
+    echo.
+    echo  ERROR: Packaging check failed. See the message above.
+    pause & exit /b 1
+)
+
 :: -- Packaging: electron-builder needs to download a small set of
 ::   helper binaries (NSIS, 7zip, etc.) the first time it runs. If your
 ::   network/firewall/antivirus blocks GitHub release downloads, this

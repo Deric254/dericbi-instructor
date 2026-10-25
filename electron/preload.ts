@@ -14,11 +14,28 @@ const api = {
     isMaximized: () => ipcRenderer.invoke('window:is-maximized'),
   },
 
-  // License
-  license: {
-    status: () => ipcRenderer.invoke('license:status'),
-    activate: (licenseKey: string) => ipcRenderer.invoke('license:activate', licenseKey),
-    deactivate: () => ipcRenderer.invoke('license:deactivate'),
+  // Licence (works before activation)
+  licence: {
+    state: () => ipcRenderer.invoke('licence:state'),
+    activate: (token: string) => ipcRenderer.invoke('licence:activate', token),
+    claimOwner: (pastedKey?: string) => ipcRenderer.invoke('licence:claim-owner', pastedKey),
+  },
+
+  // Owner Console (the main process refuses these unless this computer was claimed with the owner key)
+  owner: {
+    overview: () => ipcRenderer.invoke('owner:overview'),
+    unlockFile: () => ipcRenderer.invoke('owner:unlock-file'),
+    unlockSaved: () => ipcRenderer.invoke('owner:unlock-saved'),
+    unlockPasted: (keyText: string) => ipcRenderer.invoke('owner:unlock-pasted', keyText),
+    lock: () => ipcRenderer.invoke('owner:lock'),
+    issueNew: (input: unknown) => ipcRenderer.invoke('owner:issue-new', input),
+    renew: (id: string) => ipcRenderer.invoke('owner:renew', id),
+    setPayment: (id: string, month: string, paid: boolean) => ipcRenderer.invoke('owner:set-payment', id, month, paid),
+    updateCustomer: (id: string, patch: unknown) => ipcRenderer.invoke('owner:update-customer', id, patch),
+    deleteCustomer: (id: string) => ipcRenderer.invoke('owner:delete-customer', id),
+    updateSettings: (patch: unknown) => ipcRenderer.invoke('owner:update-settings', patch),
+    export: (format: 'xlsx' | 'csv') => ipcRenderer.invoke('owner:export', format),
+    backup: () => ipcRenderer.invoke('owner:backup'),
   },
 
   // Auth

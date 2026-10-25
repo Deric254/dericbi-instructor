@@ -1,34 +1,15 @@
-import { ipcMain, dialog, app } from 'electron'
+import { dialog, app } from 'electron'
 import * as AuthService from '../services/auth.service'
 import * as ProgressService from '../services/progress.service'
 import * as SqlService from '../services/sql.service'
 import * as AiService from '../services/ai.service'
-import * as LicenseService from '../services/license.service'
 import { registerPortfolioHandlers } from '../services/portfolio.service'
 import { getDb } from '../db/database'
+import { safeHandle } from './safe-handle'
+import { registerLicenceHandlers } from './licence-handlers'
 import { v4 as uuidv4 } from 'uuid'
 
 let _handlersRegistered = false
-
-/**
- * Wraps ipcMain.handle so every failure is logged with its channel name
- * before propagating to the renderer. Without this, a thrown error in a
- * packaged app (no devtools console open by default) leaves no trace
- * anywhere — the renderer just sees a rejected promise with a generic
- * "Error invoking remote method" message and there's nothing to debug from.
- * The renderer's own error message is unaffected: this only adds logging,
- * it still rethrows the original error so existing behavior is preserved.
- */
-function safeHandle(channel: string, listener: (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any) {
-  ipcMain.handle(channel, async (event, ...args) => {
-    try {
-      return await listener(event, ...args)
-    } catch (err) {
-      console.error(`[ipc:${channel}]`, err)
-      throw err
-    }
-  })
-}
 
 // ─────────────────────────────────────────────
 // AUTH HANDLERS
@@ -76,24 +57,6 @@ export function registerAuthHandlers() {
 
   safeHandle('auth:reset-password', async (_, params) => {
     return AuthService.resetPasswordWithAnswer(params)
-  })
-}
-
-// ─────────────────────────────────────────────
-// LICENSE HANDLERS
-// ─────────────────────────────────────────────
-
-export function registerLicenseHandlers() {
-  safeHandle('license:status', async () => {
-    return LicenseService.getStatus()
-  })
-
-  safeHandle('license:activate', async (_, licenseKey: string) => {
-    return LicenseService.activate(licenseKey)
-  })
-
-  safeHandle('license:deactivate', async () => {
-    return LicenseService.deactivate()
   })
 }
 
@@ -603,7 +566,7 @@ export function registerAllHandlers() {
   _handlersRegistered = true
 
   registerAuthHandlers()
-  registerLicenseHandlers()
+  registerLicenceHandlers()
   registerProgressHandlers()
   registerLessonHandlers()
   registerExerciseHandlers()

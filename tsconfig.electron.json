@@ -20,7 +20,8 @@
     "typeRoots": [
       "./node_modules/@types"
     ],
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "allowJs": true
   },
   "include": [
     "electron/**/*"
