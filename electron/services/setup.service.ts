@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs'
 import { app } from 'electron'
 // sql.js is used via getDb() — no direct import needed
-import { getDb, getDatasetsPath } from '../db/database'
+import { getDb,getDatasetsPath } from '../db/database'
 import { v4 as uuidv4 } from 'uuid'
 
 const SETUP_VERSION = 4 // increment to force re-seed on app update

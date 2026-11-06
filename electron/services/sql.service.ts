@@ -1,7 +1,7 @@
 import path from 'path'
 import fs from 'fs'
 import { v4 as uuidv4 } from 'uuid'
-import { getDb, getDatasetsPath } from '../db/database'
+import { getDb,getDatasetsPath } from '../db/database'
 import Papa from 'papaparse'
 import * as XLSX from 'xlsx'
 
@@ -56,38 +56,45 @@ export async function executeSQL(params: {
   const start = Date.now()
 
   try {
+    await ensureDefaultDatasetsLoaded(params.sandboxId)
     const sandbox = await getSandbox(params.sandboxId)
-    const norm = params.query.trim().toUpperCase()
+    // Classify on the statement itself: leading "-- notes" or "/* notes */"
+    // must not change how a query runs (the playground starts with a comment).
+    const norm = params.query.replace(/^(\s+|--[^\n]*(\n|$)|\/\*[\s\S]*?\*\/)+/, '').toUpperCase()
     if (norm.startsWith('DROP DATABASE')) {
       return { success: false, error: 'DROP DATABASE is not permitted in the sandbox.' }
     }
+    if (!norm) {
+      return { success: false, error: 'Write a query first - there is nothing to run.' }
+    }
 
-    const isSelect = norm.startsWith('SELECT') || norm.startsWith('WITH') || norm.startsWith('EXPLAIN')
     let rows: any[] = []
     let columns: string[] = []
     let affected = 0
 
-    if (isSelect) {
-      const res = sandbox.exec(params.query)
-      if (res && res.length > 0) {
-        columns = res[0].columns
-        rows = res[0].values.map((v: any[]) => {
-          const o: any = {}
-          columns.forEach((c: string, i: number) => { o[c] = v[i] })
-          return o
-        })
-      }
+    // exec() runs every statement and returns one result set per SELECT;
+    // show the last one, like any SQL console.
+    const res = sandbox.exec(params.query)
+    if (res && res.length > 0) {
+      const last = res[res.length - 1]
+      columns = last.columns
+      rows = last.values.map((v: any[]) => {
+        const o: any = {}
+        columns.forEach((c: string, i: number) => { o[c] = v[i] })
+        return o
+      })
     } else {
-      sandbox.run(params.query)
-      const c = sandbox.exec('SELECT changes()')[0]?.values[0]?.[0] ?? 0
-      affected = c as number
+      affected = (sandbox.exec('SELECT changes()')[0]?.values[0]?.[0] ?? 0) as number
     }
 
     const exec_ms = Date.now() - start
-    mainDb.prepare(`
-      INSERT INTO sql_query_history (id, user_id, query, success, row_count, exec_ms)
-      VALUES (?, ?, ?, 1, ?, ?)
-    `).run(uuidv4(), params.userId, params.query, rows.length, exec_ms)
+    // History is a convenience; a failure to record it must never fail the query.
+    try {
+      mainDb.prepare(`
+        INSERT INTO sql_query_history (id, user_id, query, success, row_count, exec_ms)
+        VALUES (?, ?, ?, 1, ?, ?)
+      `).run(uuidv4(), params.userId, params.query, rows.length, exec_ms)
+    } catch (e) { console.warn('[SQL] history not saved:', (e as Error).message) }
 
     return { success: true, rows, columns, row_count: rows.length, exec_ms, affected_rows: affected }
   } catch (err: any) {

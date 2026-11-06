@@ -27,15 +27,6 @@ export function updateSkillScore(userId: string, skill: string, delta: number): 
   `).run(delta, userId, skill)
 }
 
-export function setSkillScore(userId: string, skill: string, score: number): void {
-  const db = getDb()
-  db.prepare(`
-    UPDATE skill_ratings
-    SET score = ?, updated_at = datetime('now')
-    WHERE user_id = ? AND skill = ?
-  `).run(Math.min(100, Math.max(0, score)), userId, skill)
-}
-
 // ─────────────────────────────────────────────
 // LEARNING MEMORY
 // ─────────────────────────────────────────────

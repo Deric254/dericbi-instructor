@@ -1,4 +1,4 @@
-import { dialog, app } from 'electron'
+import { dialog,app } from 'electron'
 import * as AuthService from '../services/auth.service'
 import * as ProgressService from '../services/progress.service'
 import * as SqlService from '../services/sql.service'
@@ -394,6 +394,10 @@ export function registerAiHandlers() {
   safeHandle('ai:save-key', async (_, { userId, provider, key }) => {
     AiService.saveApiKey(userId, provider, key)
     return { success: true }
+  })
+
+  safeHandle('ai:list-models', async (_, { userId, provider }) => {
+    return AiService.listModels(userId, provider)
   })
 
   safeHandle('ai:has-key', async (_, { userId, provider }) => {

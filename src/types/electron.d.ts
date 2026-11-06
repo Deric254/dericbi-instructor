@@ -77,6 +77,7 @@ declare global {
         exerciseFeedback: (params: any) => Promise<any>
         saveKey: (userId: string, provider: string, key: string) => Promise<any>
         hasKey: (userId: string, provider: string) => Promise<{ has_key: boolean }>
+        listModels: (userId: string, provider: string) => Promise<{ success: boolean; models: string[]; selected?: string; error?: string }>
         getProvider: (userId: string) => Promise<{ provider: string }>
         setProvider: (provider: string) => Promise<any>
       }

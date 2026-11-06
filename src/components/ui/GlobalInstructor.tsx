@@ -1,4 +1,3 @@
-import React from 'react'
 import { X } from 'lucide-react'
 import { useUIStore } from '../../store'
 import InstructorPanel from './InstructorPanel'

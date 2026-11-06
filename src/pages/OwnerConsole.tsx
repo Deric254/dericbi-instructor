@@ -1,13 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React,{ useCallback,useEffect,useMemo,useState } from 'react'
 import {
-  KeyRound, Lock, LockOpen, Users, CheckCircle, Clock, AlertTriangle, Wallet, Download, FileSpreadsheet,
-  Save, ChevronDown, ChevronRight, MessageCircle, Copy, X, RefreshCw,
+KeyRound,Lock,LockOpen,Users,CheckCircle,Clock,AlertTriangle,Wallet,Download,FileSpreadsheet,
+Save,ChevronDown,ChevronRight,MessageCircle,Copy,X,RefreshCw,
 } from 'lucide-react'
 import OwnerKeyInput from '../components/ui/OwnerKeyInput'
 import { notify } from '../store'
 import { reportApiError } from '../lib/apiError'
-import { toWhatsAppNumber, whatsappLink } from '../lib/contact'
-import type { CustomerStatus, IssuedLicence, OwnerCustomer, OwnerOverview } from '../types'
+import { toWhatsAppNumber,whatsappLink } from '../lib/contact'
+import type { CustomerStatus,IssuedLicence,OwnerCustomer,OwnerOverview } from '../types'
 
 const STATUS_LABEL: Record<CustomerStatus, string> = { none: 'No licence yet', active: 'Active', expiring: 'Expiring soon', expired: 'Expired' }
 const STATUS_BADGE: Record<CustomerStatus, string> = { none: 'badge-common', active: 'badge-success', expiring: 'badge-warning', expired: 'badge-error' }

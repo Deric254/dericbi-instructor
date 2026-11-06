@@ -1,14 +1,14 @@
-import React, { useEffect, useState, type ReactNode } from 'react'
+import React,{ useEffect,useState } from 'react'
 import {
-  BookOpen, CheckCircle, Clock, TrendingUp,
-  Award, ChevronRight, Database, FileSpreadsheet,
-  Terminal, BarChart3, Briefcase, Users, FlaskConical,
-  Table2, FolderOpen, Trophy, Sparkles,
+BookOpen,CheckCircle,Clock,TrendingUp,
+Award,ChevronRight,Database,FileSpreadsheet,
+Terminal,BarChart3,Briefcase,Users,FlaskConical,
+Table2,FolderOpen,Trophy,Sparkles,
 } from 'lucide-react'
-import { useAuthStore, useUIStore } from '../store'
-import type { DashboardStats, SkillRating, NavSection } from '../types'
+import { useAuthStore,useUIStore } from '../store'
+import type { DashboardStats,SkillRating,NavSection } from '../types'
 import AppLogo from '../components/ui/AppLogo'
-import { PageLoader, PageError } from '../components/ui/PageState'
+import { PageLoader,PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'
 
 const SKILL_META: Record<string, { label: string; color: string; icon: React.ReactNode }> = {

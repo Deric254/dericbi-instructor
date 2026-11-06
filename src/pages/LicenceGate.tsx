@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
-import { Copy, Check, ArrowRight, ShieldCheck, MessageCircle } from 'lucide-react'
+import React,{ useState } from 'react'
+import { Copy,Check,ArrowRight,ShieldCheck,MessageCircle } from 'lucide-react'
 import AppLogo from '../components/ui/AppLogo'
 import OwnerKeyInput from '../components/ui/OwnerKeyInput'
 import { MinimalTitlebar } from '../components/layout/Titlebar'
 import { reportApiError } from '../lib/apiError'
-import { SUPPORT_WHATSAPP, whatsappLink } from '../lib/contact'
+import { SUPPORT_WHATSAPP,whatsappLink } from '../lib/contact'
 import type { LicenceState } from '../types'
 
 /** Shown until this copy has a valid licence for its own activation code (or is claimed by the owner). */

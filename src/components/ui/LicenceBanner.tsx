@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Clock, X } from 'lucide-react'
+import { Clock,X } from 'lucide-react'
 import { useUIStore } from '../../store'
 import type { LicenceState } from '../../types'
 

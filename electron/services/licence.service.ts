@@ -6,9 +6,9 @@
  * public key that is built into the app. The app can only VERIFY; creating licences needs the owner key
  * (see owner.service.ts), which is never stored by the app.
  */
-import { app, dialog } from 'electron'
+import { app,dialog } from 'electron'
 import * as fs from 'fs'
-import { Licensing, FileStore, LicenceError } from '../licensing/licensing'
+import { Licensing,FileStore,LicenceError } from '../licensing/licensing'
 import config from '../licensing/licensing.config.json'
 
 export interface LicenceState {

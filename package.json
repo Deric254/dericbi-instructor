@@ -1,6 +1,6 @@
 {
   "name": "dericbi-instructor",
-  "version": "1.4.10",
+  "version": "1.7.1",
   "description": "DericBI Instructor — Personal Analytics Mentor and Training Platform",
   "main": "dist-electron/main.js",
   "scripts": {
@@ -14,7 +14,7 @@
     "publish:win": "npm run build && npm run verify:licence && npm run verify:packaging && electron-builder --win --x64 --publish always",
     "verify:packaging": "node scripts/verify-packaged-deps.js",
     "verify:licence": "node scripts/check-owner-key.js",
-    "test": "npm run build:electron && node --test tests/licence.test.js tests/owner-ledger.test.js"
+    "test": "npm run build:electron && node --test tests/*.test.js"
   },
   "keywords": [],
   "author": "Deric",

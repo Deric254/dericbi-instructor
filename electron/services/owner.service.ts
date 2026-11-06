@@ -5,15 +5,15 @@
  * Signing needs the owner key. It is read from the owner's key file, held in memory for this session only
  * (auto-locks after 30 idle minutes, or when the app closes) and never written anywhere by the app.
  */
-import { app, dialog } from 'electron'
+import { app,dialog } from 'electron'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as XLSX from 'xlsx'
 import { LicenceError } from '../licensing/licensing'
 import * as Licence from './licence.service'
 import {
-  OwnerLedger, Customer, LedgerSettings, addMonths, daysBetween, lastLicence, licenceDays, monthKey,
-  needsRenewal, paidThrough, statusOf, utcDay,
+OwnerLedger,Customer,LedgerSettings,addMonths,daysBetween,lastLicence,licenceDays,monthKey,
+needsRenewal,paidThrough,statusOf,utcDay,
 } from './owner-ledger'
 
 const SIGNING_IDLE_MS = 30 * 60 * 1000

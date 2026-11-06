@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge,ipcRenderer } from 'electron'
 
 // ─────────────────────────────────────────────
 // TYPED IPC BRIDGE
@@ -107,6 +107,7 @@ const api = {
     saveKey: (userId: string, provider: string, key: string) =>
       ipcRenderer.invoke('ai:save-key', { userId, provider, key }),
     hasKey: (userId: string, provider: string) => ipcRenderer.invoke('ai:has-key', { userId, provider }),
+    listModels: (userId: string, provider: string) => ipcRenderer.invoke('ai:list-models', { userId, provider }),
     getProvider: (userId: string) => ipcRenderer.invoke('ai:get-provider', userId),
     setProvider: (provider: string) => ipcRenderer.invoke('ai:set-provider', { provider }),
   },

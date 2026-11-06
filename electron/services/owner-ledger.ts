@@ -9,10 +9,10 @@
  * next month is paid and ticked, the owner issues a renewal. Nobody has to be "switched off": an unpaid
  * month simply lets the signed expiry date arrive.
  */
-import * as fs from 'fs'
-import * as path from 'path'
-import { v4 as uuidv4 } from 'uuid'
-import { normCode } from '../licensing/licensing'
+import * as fs from 'fs';
+import * as path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import { normCode } from '../licensing/licensing';
 
 interface Payment { paidAt: string; amount: number | null }
 interface LicenceRecord { issuedAt: string; expires: string; token: string }

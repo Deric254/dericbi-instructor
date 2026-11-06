@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { Trophy, Star, Lock, CheckCircle, Zap, Award } from 'lucide-react'
+import { useState,useEffect } from 'react'
+import { Trophy,Star,CheckCircle,Zap,Award } from 'lucide-react'
 import { useAuthStore } from '../store'
 import { PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'

@@ -76,3 +76,8 @@ $RECYCLE.BIN/
 
 # Stray PowerShell cache that was once committed
 Microsoft/
+
+# Owner signing key and old key-system leftovers: never commit
+*-owner.key
+*.key
+private-key.txt

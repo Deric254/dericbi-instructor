@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { User, NavSection, Achievement } from '../types'
+import type { User,NavSection,Achievement } from '../types'
 
 // ─────────────────────────────────────────────
 // AUTH STORE

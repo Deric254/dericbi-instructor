@@ -1,122 +1,18 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React,{ useState,useEffect,useRef,useCallback } from 'react'
 import Editor from '@monaco-editor/react'
 import '@/lib/monacoLocal'
 import {
-  Terminal, Play, BookOpen, RotateCcw, Loader, CheckCircle,
-  AlertCircle, Lightbulb, ChevronRight, Download, Star,
-  Cpu, Zap,
+Terminal,Play,BookOpen,RotateCcw,Loader,CheckCircle,ChevronRight,Cpu
 } from 'lucide-react'
-import { useAuthStore, notify } from '../store'
+import { useAuthStore,notify } from '../store'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
 import { PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'
+import { usePyodide } from '../hooks/usePyodide'
 import type { Lesson } from '../types'
 
 type View = 'lessons' | 'playground'
-type RuntimeStatus = 'idle' | 'loading' | 'ready' | 'running' | 'error'
-
-// ─────────────────────────────────────────────
-// PYODIDE RUNTIME HOOK
-// Loads Pyodide once, exposes runCode()
-// ─────────────────────────────────────────────
-
-function usePyodide() {
-  const [status, setStatus] = useState<RuntimeStatus>('idle')
-  const pyodideRef = useRef<any>(null)
-
-  const loadRuntime = useCallback(async () => {
-    if (pyodideRef.current || status === 'loading') return
-    setStatus('loading')
-
-    try {
-      // Inject Pyodide CDN script if not already present
-      if (!(window as any).loadPyodide) {
-        await new Promise<void>((resolve, reject) => {
-          const script = document.createElement('script')
-          script.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js'
-          script.onload = () => resolve()
-          script.onerror = () => reject(new Error('Failed to load Pyodide script'))
-          document.head.appendChild(script)
-        })
-      }
-
-      const pyodide = await (window as any).loadPyodide({
-        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.1/full/',
-      })
-
-      // Pre-install common packages
-      await pyodide.loadPackagesFromImports('import pandas, numpy, matplotlib')
-
-      pyodideRef.current = pyodide
-      setStatus('ready')
-    } catch (err: any) {
-      console.error('[Pyodide]', err)
-      setStatus('error')
-    }
-  }, [status])
-
-  const runCode = useCallback(async (code: string): Promise<{
-    output: string; error: string | null; exec_ms: number
-  }> => {
-    if (!pyodideRef.current) {
-      return { output: '', error: 'Python runtime not loaded.', exec_ms: 0 }
-    }
-
-    setStatus('running')
-    const start = Date.now()
-
-    try {
-      // Redirect stdout/stderr
-      pyodideRef.current.runPython(`
-import sys, io
-_stdout_capture = io.StringIO()
-_stderr_capture = io.StringIO()
-sys.stdout = _stdout_capture
-sys.stderr = _stderr_capture
-      `)
-
-      let result = ''
-      try {
-        const out = pyodideRef.current.runPython(code)
-        if (out !== undefined && out !== null) {
-          result = String(out)
-        }
-      } catch (err: any) {
-        // Restore stdout before reading error
-        pyodideRef.current.runPython(`
-sys.stdout = sys.__stdout__
-sys.stderr = sys.__stderr__
-        `)
-        setStatus('ready')
-        return { output: '', error: err.message, exec_ms: Date.now() - start }
-      }
-
-      const stdout = pyodideRef.current.runPython('_stdout_capture.getvalue()')
-      const stderr = pyodideRef.current.runPython('_stderr_capture.getvalue()')
-
-      // Restore
-      pyodideRef.current.runPython(`
-sys.stdout = sys.__stdout__
-sys.stderr = sys.__stderr__
-      `)
-
-      const output = [stdout, result].filter(Boolean).join('\n').trim()
-      setStatus('ready')
-      return {
-        output,
-        error: stderr || null,
-        exec_ms: Date.now() - start,
-      }
-    } catch (err: any) {
-      setStatus('ready')
-      return { output: '', error: err.message, exec_ms: Date.now() - start }
-    }
-  }, [])
-
-  return { status, loadRuntime, runCode }
-}
-
 // ─────────────────────────────────────────────
 // MAIN PAGE
 // ─────────────────────────────────────────────

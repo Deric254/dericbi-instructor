@@ -7,7 +7,7 @@
 import path from 'path'
 import fs from 'fs'
 import { app } from 'electron'
-import { CREATE_TABLES, SCHEMA_VERSION } from './schema'
+import { CREATE_TABLES,SCHEMA_VERSION } from './schema'
 
 let _db: any = null
 let dbPath = ''

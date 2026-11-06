@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { useAuthStore, useUIStore } from './store'
+import React,{ useCallback,useEffect,useState } from 'react'
+import { useAuthStore,useUIStore } from './store'
 import AppShell from './components/layout/AppShell'
 import AuthScreen from './pages/AuthScreen'
 import LicenceGate from './pages/LicenceGate'

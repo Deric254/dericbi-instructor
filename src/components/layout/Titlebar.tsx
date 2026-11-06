@@ -1,20 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import { Minus, Square, X, Sparkles, Sun, Moon } from 'lucide-react'
-import { useAuthStore, useUIStore } from '../../store'
+import React, { useState } from 'react'
+import { Minus,Square,X,Sparkles,Sun,Moon } from 'lucide-react'
+import { useAuthStore,useUIStore } from '../../store'
 import { LogoMark } from '../ui/AppLogo'
 import { SECTIONS_WITH_OWN_INSTRUCTOR } from '../ui/GlobalInstructor'
 
 export function MinimalTitlebar({ showBranding = true }: { showBranding?: boolean }) {
-  const [isMaximized, setIsMaximized] = useState(false)
-
-  useEffect(() => {
-    window.api?.window.isMaximized().then(setIsMaximized)
-  }, [])
 
   const handleMaximize = async () => {
     await window.api?.window.maximize()
-    const max = await window.api?.window.isMaximized()
-    setIsMaximized(max ?? false)
   }
 
   return (
@@ -49,19 +42,12 @@ export function MinimalTitlebar({ showBranding = true }: { showBranding?: boolea
 }
 
 export default function Titlebar() {
-  const [isMaximized, setIsMaximized] = useState(false)
   const { user } = useAuthStore()
   const { activeSection, instructorOpen, toggleInstructor, theme, toggleTheme } = useUIStore()
   const showInstructorToggle = !!user && !SECTIONS_WITH_OWN_INSTRUCTOR.has(activeSection)
 
-  useEffect(() => {
-    window.api?.window.isMaximized().then(setIsMaximized)
-  }, [])
-
   const handleMaximize = async () => {
     await window.api?.window.maximize()
-    const max = await window.api?.window.isMaximized()
-    setIsMaximized(max ?? false)
   }
 
   return (

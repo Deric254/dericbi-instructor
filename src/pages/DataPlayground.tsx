@@ -1,5 +1,4 @@
-import React from 'react'
-import { FlaskConical, Database, Terminal, Table2 } from 'lucide-react'
+import { FlaskConical,Database,Terminal,Table2 } from 'lucide-react'
 import { useUIStore } from '../store'
 
 export default function DataPlayground() {
