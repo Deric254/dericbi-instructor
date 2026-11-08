@@ -111,7 +111,8 @@ function cleanCode(v: unknown): string {
 }
 const cleanText = (v: unknown, max: number): string => String(v ?? '').trim().slice(0, max)
 
-const DEFAULT_SETTINGS: LedgerSettings = { graceDays: 5, defaultAmount: null, keyPath: '' }
+// The app itself already allows GRACE_DAYS (5) of full use after a licence ends, so extra days baked into the licence start at 0.
+const DEFAULT_SETTINGS: LedgerSettings = { graceDays: 0, defaultAmount: null, keyPath: '' }
 
 export class OwnerLedger {
   private data: LedgerFile

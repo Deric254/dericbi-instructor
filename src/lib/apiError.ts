@@ -1,5 +1,9 @@
 import { notify } from '../store'
 
+/** Part of READ_ONLY_MESSAGE in electron/licensing/licence-gate.ts (a test keeps the two in step). */
+const VIEW_ONLY_MARK = 'this is view-only'
+let viewOnlyToastAt = 0
+
 /**
  * Standard failure handler for window.api.* (IPC) calls and other async
  * data loads. Use in a `.catch()` on every call site that isn't already
@@ -15,6 +19,14 @@ export function reportApiError(context: string, err: unknown): undefined {
   // eslint-disable-next-line no-console
   console.error(`[${context}]`, err)
   const raw = err instanceof Error ? err.message : typeof err === 'string' ? err : ''
+  // An expired licence refuses every change (electron/licensing/licence-gate.ts): say so once, not per click.
+  if (raw.includes(VIEW_ONLY_MARK)) {
+    if (Date.now() - viewOnlyToastAt > 4000) {
+      viewOnlyToastAt = Date.now()
+      notify.warning('View-only', 'Your licence has expired, so this is view-only. Renew your licence in Settings to add or change anything.')
+    }
+    return undefined
+  }
   // IPC failures often carry a long "Error invoking remote method..." wrapper —
   // keep only the tail after the last colon-space if it looks like that, and
   // fall back to a generic message if what's left is empty or unhelpfully long.

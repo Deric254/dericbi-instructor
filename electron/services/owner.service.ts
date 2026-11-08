@@ -132,24 +132,26 @@ export function rememberKeyPath(keyPath: string) {
 }
 
 // ── licences ──
-function issueFor(l: OwnerLedger, c: Customer, now: Date) {
-  const days = licenceDays(c, now, l.settings().graceDays, Licence.MAX_LICENCE_DAYS)
-  const issued = Licence.licensing().issue(seedForSigning(), c.code, c.name, days)
+function issueFor(l: OwnerLedger, c: Customer, now: Date, lifetime = false) {
+  // A lifetime licence (paid once) has no paid months to count; it expires in 2099 and the app never nags.
+  const days = lifetime ? undefined : licenceDays(c, now, l.settings().graceDays, Licence.MAX_LICENCE_DAYS)
+  const issued = Licence.licensing().issue(seedForSigning(), c.code, c.name, days, undefined, lifetime)
   l.recordLicence(c.id, { issuedAt: now.toISOString(), expires: issued.expires, token: issued.licence })
   return { licence: issued.licence, expires: issued.expires, name: c.name, contact: c.contact, customerId: c.id }
 }
 
 /** New customer: add them, tick the months they paid now (from this month), and sign their first licence. */
-export function issueNew(input: { code: string; name: string; contact?: string; notes?: string; months?: number; amount?: number | null }, now = new Date()) {
+export function issueNew(input: { code: string; name: string; contact?: string; notes?: string; months?: number; amount?: number | null; lifetime?: boolean }, now = new Date()) {
   const l = owner()
   return guard(() => {
-    const months = Math.trunc(Number(input.months ?? 1))
-    if (!(months >= 1 && months <= MAX_MONTHS_AT_ONCE)) throw new Error(`Months paid must be from 1 to ${MAX_MONTHS_AT_ONCE}.`)
+    const lifetime = input.lifetime === true
+    const months = lifetime ? 0 : Math.trunc(Number(input.months ?? 1))
+    if (!lifetime && !(months >= 1 && months <= MAX_MONTHS_AT_ONCE)) throw new Error(`Months paid must be from 1 to ${MAX_MONTHS_AT_ONCE}.`)
     seedForSigning() // fail early, before anything is added, if signing is locked
     const c = l.addCustomer(input, now)
     try {
       for (let i = 0; i < months; i++) l.setPayment(c.id, addMonths(monthKey(now), i), true, input.amount ?? undefined, now)
-      return issueFor(l, c, now)
+      return issueFor(l, c, now, lifetime)
     } catch (e) {
       l.deleteCustomer(c.id) // do not leave a half-created customer behind
       throw e
@@ -157,12 +159,12 @@ export function issueNew(input: { code: string; name: string; contact?: string; 
   })
 }
 
-export function renew(id: string, now = new Date()) {
+export function renew(id: string, lifetime = false, now = new Date()) {
   const l = owner()
   return guard(() => {
     const c = l.find(id)
     if (!c) throw new Error('That customer was not found.')
-    return issueFor(l, c, now)
+    return issueFor(l, c, now, lifetime === true)
   })
 }
 

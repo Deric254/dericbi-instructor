@@ -18,7 +18,8 @@ export default function App() {
   const setOwner = useUIStore((s) => s.setOwner)
   const [licence, setLicence] = useState<LicenceState | null>(null)
   const licenceChecked = licence !== null
-  const activated = licence?.ok === true
+  // An expired licence is view-only, not locked: the person still signs in and reads their data.
+  const activated = licence?.ok === true || licence?.readOnly === true
 
   // Apply the persisted theme to the document root so the CSS variable
   // overrides in globals.css take effect everywhere, immediately.
@@ -39,7 +40,8 @@ export default function App() {
   useEffect(() => {
     refreshLicence()
     const timer = setInterval(refreshLicence, LICENCE_RECHECK_MS)
-    return () => clearInterval(timer)
+    window.addEventListener('licence-changed', refreshLicence)
+    return () => { clearInterval(timer); window.removeEventListener('licence-changed', refreshLicence) }
   }, [refreshLicence])
 
   // Restore session on mount — only once the licence is confirmed active,

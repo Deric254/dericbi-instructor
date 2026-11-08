@@ -6,6 +6,7 @@ Key,User,Info,RefreshCw,Cpu,ShieldQuestion,Lock,
 import { useAuthStore,useUIStore,notify } from '../store'
 import type { LicenceState } from '../types'
 import { reportApiError } from '../lib/apiError'
+import PayPlans from '../components/ui/PayWindow'
 
 export default function Settings() {
   const { user, token, logout: storeLogout } = useAuthStore()
@@ -541,6 +542,7 @@ function LicenceSection() {
       if (r.success) {
         setToken('')
         notify.success('Licence updated', 'Your new licence is active.')
+        window.dispatchEvent(new Event('licence-changed')) // lets the app drop its renewal notice now
         await load()
       } else {
         setError(r.error ?? 'This licence could not be applied.')
@@ -566,20 +568,25 @@ function LicenceSection() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <CheckCircle size={13} color="var(--success)" />
         <span style={{ color: 'var(--text-secondary)' }}>
-          {state.kind === 'owner' ? 'Owner copy: no expiry' : `Active until ${state.expires}`}
+          {state.kind === 'owner' ? 'Owner copy: no expiry'
+            : state.lifetime ? 'Lifetime licence'
+            : state.readOnly ? `Expired on ${state.expires}: view-only`
+            : state.grace ? `Expired on ${state.expires}: renew within ${state.graceDaysLeft} day${state.graceDaysLeft === 1 ? '' : 's'}`
+            : `Active until ${state.expires}`}
         </span>
       </div>
       {state.user && <div>Licensed to: <span style={{ color: 'var(--text-secondary)' }}>{state.user}</span></div>}
-      {state.daysLeft !== undefined && <div>Days left: <span style={{ color: 'var(--text-secondary)' }}>{state.daysLeft}</span></div>}
+      {state.daysLeft !== undefined && state.daysLeft >= 0 && !state.lifetime && <div>Days left: <span style={{ color: 'var(--text-secondary)' }}>{state.daysLeft}</span></div>}
       <div>
         Activation code: <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>{state.installCode}</span>{' '}
         <button className="btn btn-ghost btn-sm" onClick={copyCode}>{copied ? 'Copied' : 'Copy'}</button>
       </div>
 
-      {state.kind === 'licensed' && (
+      {(state.kind === 'licensed' || state.kind === 'expired') && !state.lifetime && (
         <div style={{ marginTop: 16, padding: '12px 14px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
+          <div style={{ marginBottom: 10 }}><PayPlans installCode={state.installCode} renewUrl={state.renewUrl} /></div>
           <div style={{ marginBottom: 8, lineHeight: 1.6 }}>
-            Paid for the next period? Paste the renewal licence we send you. It works only for this computer's activation code.
+            Paid? Paste the renewal licence we send you. It works only for this computer's activation code.
           </div>
           <textarea className="input" style={{ minHeight: 70, fontFamily: 'var(--font-mono)', fontSize: 11 }}
             placeholder="Paste your renewal licence" value={token} onChange={e => setToken(e.target.value)} spellCheck={false} />

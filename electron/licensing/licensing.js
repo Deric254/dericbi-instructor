@@ -6,7 +6,7 @@
  *   const { Licensing, FileStore } = require('./licensing');
  *   const lic = new Licensing({ appId: 'Acme CRM', prefix: 'ACM', publicKeyHex: OWNER_PUBLIC_KEY,
  *                               store: new FileStore(app.getPath('userData')) });
- *   const st = lic.state();           // { ok, kind: 'owner'|'licensed'|'unlicensed'|'unconfigured', message, ... }
+ *   const st = lic.state();           // { ok, kind: 'owner'|'licensed'|'expired'|'unlicensed'|'unconfigured', message, ... }
  *   if (!st.ok) showActivationScreen(lic.installId(), st.message);
  *
  * Verification happens in every copy of the app. Issuing (issue) is only reachable from the Owner Console, which
@@ -19,6 +19,7 @@ const path = require('path');
 const SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex');
 const PKCS8_PREFIX = Buffer.from('302e020100300506032b657004220420', 'hex');
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+const LIFETIME_END = '2099-12-31'; // a lifetime licence is an ordinary licence that expires far beyond any computer's life
 
 class LicenceError extends Error {}
 
@@ -69,17 +70,21 @@ class Licensing {
   }
   ownerKeyMatches(seed) { return !!this.publicRaw && crypto.timingSafeEqual(publicFromSeed(seed), this.publicRaw); }
 
-  issue(seed, code, user, days, features) {
+  issue(seed, code, user, days, features, lifetime = false) {
     if (!this.ownerKeyMatches(seed)) throw new LicenceError("That owner key doesn't belong to this app. Use the key made for this app's installer.");
     const norm = normCode(code);
     if (norm.length !== 12) throw new Error('The activation code is 12 letters and numbers, like ABCD-EFGH-JKLM.');
     user = String(user || '').trim().replace(/\s+/g, ' ');
     if (user.length < 1 || user.length > 60) throw new Error("Give the licence holder's name (1 to 60 characters).");
-    days = Math.trunc(Number(days));
-    if (!(days >= 1 && days <= this.maxDays)) throw new Error(`A licence lasts 1 to ${this.maxDays} days.`);
     const today = this._today();
-    const expires = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + days));
-    const body = { app: this.appId, expires: isoDate(expires), for: norm, issued: isoDate(today), role: 'member', user, v: this.version };
+    let expires = LIFETIME_END;
+    if (!lifetime) {
+      days = Math.trunc(Number(days));
+      if (!(days >= 1 && days <= this.maxDays)) throw new Error(`A licence lasts 1 to ${this.maxDays} days.`);
+      expires = isoDate(new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + days)));
+    }
+    const body = { app: this.appId, expires, for: norm, issued: isoDate(today), role: 'member', user, v: this.version };
+    if (lifetime) body.plan = 'lifetime';
     if (features && features.length) body.features = [...new Set(features.map(String))].sort();
     // keys in sorted order, no spaces: identical bytes to the Python module (verification does not depend on it)
     const payload = Buffer.from(JSON.stringify(Object.fromEntries(Object.entries(body).sort(([a], [b]) => (a < b ? -1 : 1)))));
@@ -97,7 +102,8 @@ class Licensing {
     return code;
   }
 
-  read(token, forInstall) {
+  /** Checks signature, app, computer and that the expiry is a date. Whether it has run out is judged by the caller. */
+  _verify(token, forInstall) {
     if (!this.configured()) throw new LicenceError("This copy of the app can't check licences yet (the owner key isn't set in the build).");
     const bad = new LicenceError("That doesn't look like a licence. Paste the whole text the owner sent you.");
     const parts = String(token || '').replace(/\s+/g, '').split('.');
@@ -112,9 +118,18 @@ class Licensing {
     if (data.for !== normCode(forInstall || this.installId())) throw new LicenceError('This licence was made for a different computer. Send the owner the activation code shown on this screen.');
     const exp = /^\d{4}-\d{2}-\d{2}$/.test(data.expires || '') ? new Date(`${data.expires}T00:00:00Z`) : null;
     if (!exp || isNaN(exp)) throw new LicenceError('That licence has no valid expiry date.');
+    return data;
+  }
+
+  _daysLeft(data) {
     const t = this._today();
-    const todayUtc = Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate());
-    if (exp.getTime() + this.graceDays * 86400000 < todayUtc) throw new LicenceError('This licence has expired. Ask the owner for a new one.');
+    return Math.round((new Date(`${data.expires}T00:00:00Z`).getTime() - Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate())) / 86400000);
+  }
+
+  /** Checks signature, app, computer and expiry (grace included). Returns the licence data or throws LicenceError. */
+  read(token, forInstall) {
+    const data = this._verify(token, forInstall);
+    if (this._daysLeft(data) + this.graceDays < 0) throw new LicenceError('This licence has expired. Ask the owner for a new one.');
     return data;
   }
 
@@ -153,11 +168,15 @@ class Licensing {
     const unlicensed = (message) => ({ ok: false, kind: 'unlicensed', message, install_id: this.installId() });
     if (!token) return unlicensed("This computer isn't licensed yet.");
     let data;
-    try { data = this.read(token); } catch (e) { if (e instanceof LicenceError) return unlicensed(e.message); throw e; }
+    try { data = this._verify(token); } catch (e) { if (e instanceof LicenceError) return unlicensed(e.message); throw e; }
     if (!this.clockOk()) return unlicensed("This computer's clock was set back. Fix the date and time to continue.");
-    const t = this._today();
-    const left = Math.round((new Date(`${data.expires}T00:00:00Z`).getTime() - Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate())) / 86400000);
-    return { ok: true, kind: 'licensed', message: '', expires: data.expires, days_left: left, user: data.user, features: data.features || [] };
+    const left = this._daysLeft(data);
+    const info = { expires: data.expires, days_left: left, user: data.user, features: data.features || [], lifetime: data.plan === 'lifetime', install_id: this.installId() };
+    if (left >= 0) return { ok: true, kind: 'licensed', message: '', ...info };
+    // just lapsed: everything keeps working while the owner is asked to renew
+    if (left >= -this.graceDays) return { ok: true, kind: 'licensed', message: '', grace: true, grace_days_left: this.graceDays + left, ...info };
+    // past the grace period: the data stays readable, premium work stops (the host decides what "read" means)
+    return { ok: false, kind: 'expired', read_only: true, message: 'Your licence has expired. You can still sign in and view your data. Renew to add or change anything.', ...info };
   }
 }
 

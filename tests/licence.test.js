@@ -32,7 +32,7 @@ test('owner channels only delegate to the owner service; licence channels are th
   const handlers = read('electron/ipc/licence-handlers.ts')
   for (const m of handlers.matchAll(/safeHandle\('owner:[\w-]+'.*$/gm)) assert.match(m[0], /Owner\.\w+\(/, m[0])
   const ungated = read('electron/ipc/safe-handle.ts').match(/UNGATED = new Set\(\[([^\]]*)\]\)/)[1]
-  assert.deepEqual(ungated.split(',').map((s) => s.trim().replace(/'/g, '')).sort(), ['licence:activate', 'licence:claim-owner', 'licence:state'])
+  assert.deepEqual(ungated.split(',').map((s) => s.trim().replace(/'/g, '')).sort(), ['licence:activate', 'licence:claim-owner', 'licence:open-link', 'licence:state'])
 })
 
 test('every data channel goes through the shared gated wrapper (nothing registers ipcMain directly)', () => {

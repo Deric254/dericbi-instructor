@@ -2,6 +2,7 @@ import React,{ useState } from 'react'
 import { Copy,Check,ArrowRight,ShieldCheck,MessageCircle } from 'lucide-react'
 import AppLogo from '../components/ui/AppLogo'
 import OwnerKeyInput from '../components/ui/OwnerKeyInput'
+import PayPlans from '../components/ui/PayWindow'
 import { MinimalTitlebar } from '../components/layout/Titlebar'
 import { reportApiError } from '../lib/apiError'
 import { SUPPORT_WHATSAPP,whatsappLink } from '../lib/contact'
@@ -53,8 +54,8 @@ export default function LicenceGate({ state, onChanged }: { state: LicenceState;
                 {state.kind === 'unconfigured'
                   ? state.message
                   : lapsed
-                    ? 'Send us your activation code once your next payment is made and we will send a renewal licence.'
-                    : 'Send us the activation code below. We reply with your personal licence, which you paste here.'}
+                    ? 'Pay below and email us the proof. We send a renewal licence for your activation code, which you paste here.'
+                    : 'Pay below and email us the proof, or send us the activation code. We reply with your personal licence, which you paste here.'}
               </p>
             </div>
 
@@ -69,6 +70,7 @@ export default function LicenceGate({ state, onChanged }: { state: LicenceState;
                     {copied ? <Check size={14} /> : <Copy size={14} />}
                   </button>
                 </div>
+                <div style={{ marginBottom: 10 }}><PayPlans installCode={state.installCode} renewUrl={state.renewUrl} /></div>
                 <a className="btn btn-secondary" style={{ width: '100%', justifyContent: 'center', marginBottom: 20, textDecoration: 'none' }}
                    href={whatsappLink(SUPPORT_WHATSAPP, message)} target="_blank" rel="noopener noreferrer">
                   <MessageCircle size={14} /> Send my code on WhatsApp
