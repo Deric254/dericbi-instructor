@@ -2,7 +2,7 @@ import CryptoJS from 'crypto-js'
 import { safeStorage } from 'electron'
 import { v4 as uuidv4 } from 'uuid'
 import { getDb } from '../db/database'
-import { getMemorySummary,getSkillRatings } from './progress.service'
+import { getMemorySummary, getSkillRatings } from './progress.service'
 
 // Legacy fallback only — kept so any key saved before this file switched to
 // safeStorage can still be read back and transparently re-saved in the new
@@ -213,8 +213,34 @@ export async function chat(params: {
   // Call AI provider
   let response: string
 
+  // ── OpenAI-compatible providers ──────────────────────────────────────
+  // Every provider below exposes the same /v1/chat/completions shape as
+  // OpenAI, so they all reuse callOpenAI() — only the base URL and default
+  // model differ. Model can be overridden per-provider via app_settings
+  // (key: "{provider}_model"), which is how the Settings model pickers work.
+  const OPENAI_COMPATIBLE: Record<string, { baseUrl: string; defaultModel: string }> = {
+    openai:      { baseUrl: 'https://api.openai.com/v1',              defaultModel: 'gpt-4o-mini' },
+    openrouter:  { baseUrl: 'https://openrouter.ai/api/v1',           defaultModel: 'openai/gpt-4o-mini' },
+    nvidia:      { baseUrl: 'https://integrate.api.nvidia.com/v1',    defaultModel: 'meta/llama-3.3-70b-instruct' },
+    groq:        { baseUrl: 'https://api.groq.com/openai/v1',        defaultModel: 'llama-3.3-70b-versatile' },
+    cerebras:    { baseUrl: 'https://api.cerebras.ai/v1',             defaultModel: 'llama-3.3-70b' },
+    mistral:     { baseUrl: 'https://api.mistral.ai/v1',              defaultModel: 'mistral-small-latest' },
+    cohere:      { baseUrl: 'https://api.cohere.ai/compatibility/v1', defaultModel: 'command-a-03-2025' },
+    huggingface: { baseUrl: 'https://api-inference.huggingface.co/v1', defaultModel: 'meta-llama/Llama-3.3-70B-Instruct' },
+    github:      { baseUrl: 'https://models.github.ai/inference',     defaultModel: 'openai/gpt-4o-mini' },
+  }
+
   try {
-    response = await callProvider(provider, apiKey, systemPrompt, params.history, params.message)
+    if (provider === 'gemini') {
+      response = await callGemini(apiKey, systemPrompt, params.history, params.message)
+    } else if (OPENAI_COMPATIBLE[provider]) {
+      const { baseUrl, defaultModel } = OPENAI_COMPATIBLE[provider]
+      const modelRow = db.prepare('SELECT value FROM app_settings WHERE key = ?').get(`${provider}_model`) as any
+      const model = modelRow?.value ?? defaultModel
+      response = await callOpenAI(apiKey, systemPrompt, params.history, params.message, baseUrl, model)
+    } else {
+      return { success: false, error: `Unknown provider: ${provider}` }
+    }
   } catch (err: unknown) {
     const e = err as any
     return { success: false, error: `AI error: ${e.message}` }
@@ -264,136 +290,7 @@ export async function getExerciseFeedback(params: {
 // PROVIDERS
 // ─────────────────────────────────────────────
 
-// Every provider except Gemini exposes OpenAI's /chat/completions and /models
-// shapes, so only the base URL is configured here. Model names are NEVER
-// pinned: they are discovered from each provider's own /models list, so a
-// retired model cannot break the tutor. FALLBACK_MODEL is used only when
-// that list cannot be fetched (offline, rate-limited) and nothing is saved.
-const OPENAI_COMPATIBLE: Record<string, { baseUrl: string; fallback: string }> = {
-  openai:      { baseUrl: 'https://api.openai.com/v1',               fallback: 'gpt-4o-mini' },
-  openrouter:  { baseUrl: 'https://openrouter.ai/api/v1',            fallback: 'openrouter/auto' },
-  nvidia:      { baseUrl: 'https://integrate.api.nvidia.com/v1',     fallback: 'meta/llama-3.3-70b-instruct' },
-  groq:        { baseUrl: 'https://api.groq.com/openai/v1',          fallback: 'llama-3.3-70b-versatile' },
-  cerebras:    { baseUrl: 'https://api.cerebras.ai/v1',              fallback: 'llama-3.3-70b' },
-  mistral:     { baseUrl: 'https://api.mistral.ai/v1',               fallback: 'mistral-small-latest' },
-  cohere:      { baseUrl: 'https://api.cohere.ai/compatibility/v1',  fallback: 'command-a-03-2025' },
-  huggingface: { baseUrl: 'https://router.huggingface.co/v1',        fallback: 'meta-llama/Llama-3.3-70B-Instruct' },
-  github:      { baseUrl: 'https://models.github.ai/inference',      fallback: 'openai/gpt-4o-mini' },
-}
-const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta'
-const GEMINI_FALLBACK = 'gemini-flash-latest' // Google-maintained alias
-
-const NOT_CHAT = /embed|whisper|tts|speech|audio|transcri|image|vision-preview|dall|moderation|guard|rerank|safety|imagen|veo|video|realtime|search-preview|aqa|computer-use/i
-// Preference when choosing a default: fast, general, instruction-tuned models.
-const PREFER = [/flash(?!.*(lite|8b))/i, /mini|small|instant|versatile/i, /instruct|chat|turbo|70b/i]
-
-const modelCache = new Map<string, { at: number; ids: string[] }>()
-const CACHE_MS = 6 * 3600_000
-
-async function fetchJson(url: string, headers: Record<string, string> = {}): Promise<any> {
-  const ctl = new AbortController()
-  const t = setTimeout(() => ctl.abort(), 15_000)
-  try {
-    const res = await fetch(url, { headers, signal: ctl.signal })
-    if (!res.ok) {
-      const body = await res.json().catch(() => ({})) as any
-      throw new HttpError(res.status, body?.error?.message ?? body?.message ?? `HTTP ${res.status}`)
-    }
-    return await res.json()
-  } catch (err: any) {
-    if (err instanceof HttpError) throw err
-    throw new Error(err.name === 'AbortError' ? 'The provider took too long to answer.' : `Could not reach the provider: ${err.message}`)
-  } finally { clearTimeout(t) }
-}
-
-class HttpError extends Error {
-  constructor(public status: number, message: string) { super(message) }
-}
-
-function explain(provider: string, err: any): Error {
-  if (err instanceof HttpError && (err.status === 401 || err.status === 403)) {
-    return new Error(`${provider} rejected the API key (${err.message}). It may be wrong, expired or revoked - paste a fresh key in Settings -> AI Configuration.`)
-  }
-  if (err instanceof HttpError && err.status === 429) {
-    return new Error(`${provider} says you have hit its free-tier limit. Wait a minute, or switch provider in Settings.`)
-  }
-  return err instanceof Error ? err : new Error(String(err))
-}
-
-// Live, chat-capable model ids for a provider, newest/most-suitable first.
-export async function discoverModels(provider: string, apiKey: string, force = false): Promise<string[]> {
-  const hit = modelCache.get(provider)
-  if (!force && hit && Date.now() - hit.at < CACHE_MS) return hit.ids
-
-  let ids: string[]
-  if (provider === 'gemini') {
-    const data = await fetchJson(`${GEMINI_BASE}/models?pageSize=200`, { 'x-goog-api-key': apiKey })
-    ids = (data.models ?? [])
-      .filter((m: any) => (m.supportedGenerationMethods ?? []).includes('generateContent'))
-      .map((m: any) => String(m.name).replace(/^models\//, ''))
-  } else if (OPENAI_COMPATIBLE[provider]) {
-    const data = await fetchJson(`${OPENAI_COMPATIBLE[provider].baseUrl}/models`, { Authorization: `Bearer ${apiKey}` })
-    const list: any[] = Array.isArray(data) ? data : (data.data ?? data.models ?? [])
-    ids = list.sort((a, b) => (b.created ?? 0) - (a.created ?? 0)).map(m => String(m.id ?? m.name))
-  } else {
-    throw new Error(`Unknown provider: ${provider}`)
-  }
-
-  ids = ids.filter(id => !NOT_CHAT.test(id))
-  if (ids.length === 0) throw new Error('The provider returned no chat models for this key.')
-  // Stable sort: models matching an earlier PREFER pattern first, provider order kept inside a group.
-  const rank = (id: string) => { const i = PREFER.findIndex(r => r.test(id)); return i < 0 ? PREFER.length : i }
-  ids = ids.map((id, i) => ({ id, i })).sort((a, b) => rank(a.id) - rank(b.id) || a.i - b.i).map(x => x.id)
-  modelCache.set(provider, { at: Date.now(), ids })
-  return ids
-}
-
-// The model to call: the student's saved choice if it still exists, otherwise
-// the best live model, otherwise the last-resort fallback.
-async function resolveModel(provider: string, apiKey: string, force = false): Promise<string> {
-  const saved = (getDb().prepare('SELECT value FROM app_settings WHERE key = ?').get(`${provider}_model`) as any)?.value as string | undefined
-  const fallback = provider === 'gemini' ? GEMINI_FALLBACK : OPENAI_COMPATIBLE[provider]?.fallback
-  try {
-    const ids = await discoverModels(provider, apiKey, force)
-    return saved && ids.includes(saved) ? saved : ids[0]
-  } catch (err: any) {
-    if (err instanceof HttpError && (err.status === 401 || err.status === 403)) throw explain(provider, err)
-    return saved ?? fallback
-  }
-}
-
-export async function listModels(userId: string, provider: string): Promise<{ success: boolean; models: string[]; selected?: string; error?: string }> {
-  const apiKey = getApiKey(userId, provider)
-  if (!apiKey) return { success: false, models: [], error: `Add your ${provider} key first to see its models.` }
-  try {
-    const models = await discoverModels(provider, apiKey, true)
-    return { success: true, models, selected: await resolveModel(provider, apiKey) }
-  } catch (err: any) {
-    return { success: false, models: [], error: explain(provider, err).message }
-  }
-}
-
-const isModelGone = (e: any) => e instanceof HttpError && (e.status === 404 || (e.status === 400 && /model|decommission|deprecat|retired|not found/i.test(e.message)))
-
-async function callProvider(provider: string, apiKey: string, systemPrompt: string, history: ChatMessage[], message: string): Promise<string> {
-  if (provider !== 'gemini' && !OPENAI_COMPATIBLE[provider]) throw new Error(`Unknown provider: ${provider}`)
-  const attempt = async (model: string) => provider === 'gemini'
-    ? callGemini(apiKey, model, systemPrompt, history, message)
-    : callOpenAI(apiKey, systemPrompt, history, message, OPENAI_COMPATIBLE[provider].baseUrl, model)
-
-  const model = await resolveModel(provider, apiKey)
-  try {
-    return await attempt(model)
-  } catch (err: any) {
-    if (!isModelGone(err)) throw explain(provider, err)
-    // The model was retired since we last looked: re-discover once and retry.
-    const fresh = await resolveModel(provider, apiKey, true)
-    if (fresh === model) throw explain(provider, err)
-    try { return await attempt(fresh) } catch (e2: any) { throw explain(provider, e2) }
-  }
-}
-
-async function callGemini(apiKey: string, model: string, systemPrompt: string, history: ChatMessage[], userMessage: string): Promise<string> {
+async function callGemini(apiKey: string, systemPrompt: string, history: ChatMessage[], userMessage: string): Promise<string> {
   const contents = [
     ...history.map(m => ({
       role: m.role === 'assistant' ? 'model' : 'user',
@@ -413,11 +310,14 @@ async function callGemini(apiKey: string, model: string, systemPrompt: string, h
 
   let res: Response
   try {
+    // gemini-flash-latest is Google's own maintained alias — it always points
+    // at the current Flash model, so this stays correct even as Google
+    // retires specific dated model names (which is what broke this before).
     res = await fetch(
-      `${GEMINI_BASE}/models/${model}:generateContent`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           system_instruction: { parts: [{ text: systemPrompt }] },
           contents,
@@ -437,7 +337,7 @@ async function callGemini(apiKey: string, model: string, systemPrompt: string, h
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({})) as any
-    throw new HttpError(res.status, err.error?.message ?? `Gemini error ${res.status}`)
+    throw new Error(err.error?.message ?? `Gemini error ${res.status}`)
   }
 
   const data = await res.json() as any
@@ -481,7 +381,7 @@ async function callOpenAI(apiKey: string, systemPrompt: string, history: ChatMes
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({})) as any
-    throw new HttpError(res.status, err.error?.message ?? `API error ${res.status}`)
+    throw new Error(err.error?.message ?? `API error ${res.status}`)
   }
 
   const data = await res.json() as any

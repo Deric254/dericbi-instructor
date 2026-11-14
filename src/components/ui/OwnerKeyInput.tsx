@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { FolderOpen } from 'lucide-react';
-import { reportApiError } from '../../lib/apiError';
+import { useState } from 'react'
+import { FolderOpen } from 'lucide-react'
+import { reportApiError } from '../../lib/apiError'
 
 type Outcome = { success: boolean; error?: string; cancelled?: boolean }
 

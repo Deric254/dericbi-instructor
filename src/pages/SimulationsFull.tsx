@@ -1,9 +1,9 @@
-import { useState,useEffect,useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
-Users,Play,CheckCircle,ArrowLeft,Brain,
-ChevronRight,Star,Flag,Loader,Info,
+  Users, Play, CheckCircle, ArrowLeft, Brain,
+  ChevronRight, Star, Flag, Loader, Info,
 } from 'lucide-react'
-import { useAuthStore,notify } from '../store'
+import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
 import { reportApiError } from '../lib/apiError'
 

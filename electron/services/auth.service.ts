@@ -161,6 +161,11 @@ export function logout(token: string): void {
   db.prepare('DELETE FROM sessions WHERE token_hash = ?').run(tokenHash)
 }
 
+export function logoutAllSessions(userId: string): void {
+  const db = getDb()
+  db.prepare('DELETE FROM sessions WHERE user_id = ?').run(userId)
+}
+
 // ─────────────────────────────────────────────
 // USER HELPERS
 // ─────────────────────────────────────────────

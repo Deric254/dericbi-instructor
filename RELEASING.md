@@ -29,16 +29,9 @@ The licence works only on the computer that showed that code, and checks itself 
 ## Every month
 
 When a customer pays, tick that month in their row (the "Paid" box, or open the row for the full year). Click
-**Renew** and send the new licence. A licence runs to the **end of the last paid month** (plus any extra days you set
-under Licence settings, default 0). The app itself gives **5 grace days** after that: everything works and a notice
-says "Licence expired. Renew within N days". After the grace days the app is **view-only**: the customer can still
-sign in, read lessons and progress and export their portfolio, but exercises, AI tutor, imports and edits are refused
-with a renewal message. Pasting a new licence restores full use at once. A licence can run at most 365 days.
-
-Customers can also pay inside the app ($100 / month or $1000 for life, PayPal to dericmarangu@gmail.com) and email
-the proof. For a **lifetime** plan, tick **Lifetime licence** when creating the customer, or open an existing row and
-click **Issue lifetime licence**. It expires in 2099 and never shows a notice. If you saved Licence settings before,
-set **Grace days** to 0, because the 5 app grace days now apply on top.
+**Renew** and send the new licence. A licence runs to the **end of the last paid month plus grace days** (default 5,
+change it under Licence settings). If a customer does not pay, their licence simply reaches its end date and the app
+asks for a renewal. Nothing needs switching off. A licence can run at most 365 days.
 
 ## Your customer list
 

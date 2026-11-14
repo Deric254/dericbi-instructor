@@ -1,9 +1,10 @@
-import React,{ useState,useEffect,useRef,useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { HyperFormula } from 'hyperformula'
 import {
-FileSpreadsheet,BookOpen,Play,CheckCircle,ChevronRight,AlertCircle
+  FileSpreadsheet, BookOpen, Play, CheckCircle, ChevronRight,
+  RefreshCw, Info, Lightbulb, AlertCircle,
 } from 'lucide-react'
-import { useAuthStore,notify } from '../store'
+import { useAuthStore, notify } from '../store'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
 import { PageError } from '../components/ui/PageState'

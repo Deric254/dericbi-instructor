@@ -1,8 +1,8 @@
-import { useState,useEffect,useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Editor from '@monaco-editor/react'
 import '@/lib/monacoLocal'
-import { TrendingUp,CheckCircle,ChevronRight,Lock,Brain,Info,Play,Loader } from 'lucide-react'
-import { useAuthStore,notify } from '../store'
+import { TrendingUp, CheckCircle, ChevronRight, Lock, Brain, Info, Play, Loader } from 'lucide-react'
+import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
@@ -240,7 +240,7 @@ function StatExercise({ exercise }: { exercise: any }) {
           </button>
           <button className="btn btn-secondary btn-sm" onClick={getHint} disabled={hintsUsed >= 3}>💡 Hint {hintsUsed > 0 ? `(${hintsUsed}/3)` : ''}</button>
           <button className="btn btn-ghost btn-sm" onClick={() => setCode('')}>Reset</button>
-          <span style={{ marginLeft: 'auto', fontSize: 10, color: status === 'ready' ? 'var(--success)' : 'var(--text-muted)' }}>● {status === 'ready' ? 'Python ready' : status === 'error' ? 'Python needs internet - click Run to retry' : status}</span>
+          <span style={{ marginLeft: 'auto', fontSize: 10, color: status === 'ready' ? 'var(--success)' : 'var(--text-muted)' }}>● {status === 'ready' ? 'Python ready' : status}</span>
         </div>
       </div>
 

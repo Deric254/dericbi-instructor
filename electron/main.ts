@@ -1,7 +1,7 @@
-import { app,BrowserWindow,shell,ipcMain,dialog } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import path from 'path'
-import { initDb,closeDb,backupDb } from './db/database'
+import { initDb, closeDb, backupDb } from './db/database'
 import { registerAllHandlers } from './ipc/handlers'
 import { runFirstTimeSetup } from './services/setup.service'
 

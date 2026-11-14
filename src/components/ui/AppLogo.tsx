@@ -76,3 +76,7 @@ export function LogoMark({ size = 40 }: { size?: number }) {
     </div>
   )
 }
+
+export function LogoInline({ size = 22 }: { size?: number }) {
+  return <LogoMark size={size} />
+}

@@ -1,7 +1,7 @@
-import React,{ useState,useEffect,useRef } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
-Send,Loader,X,ChevronDown,ChevronUp,
-Sparkles,AlertCircle,Settings,Brain,RotateCcw
+  MessageSquare, Send, Loader, X, ChevronDown, ChevronUp,
+  Sparkles, AlertCircle, Settings, Brain, RotateCcw,
 } from 'lucide-react'
 import { useAuthStore } from '../../store'
 import { useInstructor } from '../../hooks/useInstructor'
@@ -27,6 +27,7 @@ export default function InstructorPanel({
   const [collapsed, setCollapsed] = useState(compact)
   const [apiKeyOk, setApiKeyOk] = useState<boolean | null>(null)
   const [checkingKey, setCheckingKey] = useState(true)
+  const [keyCheckFailed, setKeyCheckFailed] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const lastSentPrompt = useRef<string | null>(null)
@@ -36,12 +37,14 @@ export default function InstructorPanel({
     if (!user) return
     const check = async () => {
       setCheckingKey(true)
+      setKeyCheckFailed(false)
       try {
         const provider = await window.api.ai.getProvider(user.id)
         const res = await window.api.ai.hasKey(user.id, provider.provider)
         setApiKeyOk(res.has_key)
       } catch (err) {
         reportApiError('check your AI instructor setup', err)
+        setKeyCheckFailed(true)
       } finally {
         setCheckingKey(false)
       }

@@ -1,6 +1,6 @@
 import path from 'path'
 import fs from 'fs'
-import { app,shell } from 'electron'
+import { app, shell } from 'electron'
 import { v4 as uuidv4 } from 'uuid'
 import { getDb } from '../db/database'
 import { safeHandle } from '../ipc/safe-handle'
@@ -104,7 +104,7 @@ async function exportPDF(project: ProjectData, user: any, dir: string): Promise<
 
 async function exportDOCX(project: ProjectData, user: any, dir: string): Promise<ExportResult> {
   try {
-    const { Document, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, Packer } = await import('docx')
+    const { Document, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, Table, TableRow, TableCell, WidthType, Packer } = await import('docx')
 
     const safeText = (t?: string) => t || 'Not provided'
     const dateStr = (d?: string) => d ? new Date(d).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'

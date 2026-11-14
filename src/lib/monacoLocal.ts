@@ -7,11 +7,12 @@
  *
  * Imported once by every page that uses <Editor>.
  */
-import * as monaco from 'monaco-editor';
-import { loader } from '@monaco-editor/react';
+import * as monaco from 'monaco-editor'
+import { loader } from '@monaco-editor/react'
 // `?worker&inline` embeds the worker in the bundle so it also works from file:// in the packaged app.
-import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker&inline';
-(self as unknown as { MonacoEnvironment: unknown }).MonacoEnvironment = {
+import EditorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker&inline'
+
+;(self as unknown as { MonacoEnvironment: unknown }).MonacoEnvironment = {
   getWorker: () => new EditorWorker(),
 }
 

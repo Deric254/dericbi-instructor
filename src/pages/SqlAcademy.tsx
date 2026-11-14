@@ -1,17 +1,20 @@
-import React,{ useState,useEffect,useRef,useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Editor from '@monaco-editor/react'
 import '@/lib/monacoLocal'
 import {
-Database,Play,ChevronRight,Lock,CheckCircle,Circle,
-Clock,BookOpen,Lightbulb,Loader,AlertCircle,RotateCcw,Star
+  Database, Play, ChevronRight, Lock, CheckCircle, Circle,
+  Clock, BookOpen, Lightbulb, X, Loader, AlertCircle,
+  ChevronDown, RotateCcw, HelpCircle, MessageSquare, Star,
+  Brain,
 } from 'lucide-react'
-import { useAuthStore,notify } from '../store'
+import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
+import { useInstructor } from '../hooks/useInstructor'
 import { PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'
-import type { Lesson,SqlResult } from '../types'
+import type { Lesson, SqlResult } from '../types'
 
 type View = 'lessons' | 'lesson' | 'playground'
 
@@ -80,9 +83,7 @@ export default function SqlAcademy() {
       {/* Content */}
       <div style={{ flex: 1, overflow: 'hidden' }}>
         {view === 'lessons' && (
-          loadError
-            ? <PageError message="Couldn't load the SQL Academy lessons." onRetry={loadLessons} />
-            : <LessonList lessons={lessons} loading={loading} onOpen={openLesson} />
+          <LessonList lessons={lessons} loading={loading} onOpen={openLesson} />
         )}
         {view === 'lesson' && activeLessonId && (
           <LessonView
@@ -345,7 +346,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
   const [hintsUsed, setHintsUsed] = useState(0)
   const [hint, setHint] = useState<string | null>(null)
   const [running, setRunning] = useState(false)
-  const [preview, setPreview] = useState<SqlResult | null>(null)
+  const [correct, setCorrect] = useState<boolean | null>(null)
   const sandboxId = useRef(`ex_${exercise?.id}_${user?.id}`)
 
   useEffect(() => {
@@ -354,7 +355,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
     setFeedback(null)
     setHint(null)
     setHintsUsed(0)
-    setPreview(null)
+    setCorrect(null)
   }, [exercise?.id])
 
   // Each exercise gets its own in-memory sql.js sandbox (loaded with the
@@ -368,23 +369,8 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
     return () => { window.api.sql.closeSandbox(sandboxId.current).catch((err: any) => console.error('[close sandbox]', err)) }
   }, [])
 
-  // Preview: run the query and show the rows without grading it, so a
-  // student can explore the tables before submitting.
-  const handlePreview = async () => {
-    if (!user) return
-    setRunning(true)
-    try {
-      setPreview(await window.api.sql.execute(sandboxId.current, code, user.id))
-    } catch (err: any) {
-      setPreview({ success: false, error: err?.message || 'Could not run this query.' })
-    } finally {
-      setRunning(false)
-    }
-  }
-
   const handleRun = async () => {
     if (!user || !exercise) return
-    setPreview(null)
     setRunning(true)
     setResult(null)
     setFeedback(null)
@@ -399,6 +385,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
       })
 
       setResult(res.validation)
+      setCorrect(res.validation.correct)
 
       if (res.validation.feedback && res.validation.feedback !== 'ai_review_required') {
         setFeedback(res.validation.feedback)
@@ -494,16 +481,6 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
           />
         </div>
 
-        {preview && (
-          <div style={{ maxHeight: 180, overflow: 'auto', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-            {preview.success
-              ? (preview.rows && preview.columns?.length
-                  ? <ResultsGrid rows={preview.rows} columns={preview.columns} />
-                  : <div style={{ padding: 12, fontSize: 12, color: 'var(--text-muted)' }}>Done. {preview.affected_rows ?? 0} row(s) changed.</div>)
-              : <div style={{ padding: 12, fontSize: 12, color: 'var(--error)' }}>{preview.error}</div>}
-          </div>
-        )}
-
         {/* Results */}
         {result && (
           <div style={{
@@ -535,14 +512,9 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
           background: 'var(--bg-surface)',
           display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0,
         }}>
-          {lessonModule === 'sql' && (
-            <button className="btn btn-secondary btn-sm" onClick={handlePreview} disabled={running || !code.trim()}>
-              <Play size={12} /> Run
-            </button>
-          )}
           <button className="btn btn-primary btn-sm" onClick={handleRun} disabled={running || !code.trim()}>
-            {running ? <Loader size={12} className="animate-spin" /> : <CheckCircle size={12} />}
-            {running ? 'Checking...' : 'Submit'}
+            {running ? <Loader size={12} className="animate-spin" /> : <Play size={12} />}
+            {running ? 'Running...' : 'Run'}
           </button>
           <button className="btn btn-secondary btn-sm" onClick={getHint} disabled={hintsUsed >= 3}>
             <Lightbulb size={12} />
@@ -592,14 +564,14 @@ function SqlPlayground() {
   const [activeDataset, setActiveDataset] = useState<any>(null)
   const sandboxId = useRef(`playground_${user?.id}`)
 
-  const loadDataset = async (ds: any, type: 'bundled' | 'imported', quiet = false) => {
+  const loadDataset = async (ds: any, type: 'bundled' | 'imported') => {
     if (!user) return
     try {
       const res = await window.api.sql.loadDataset(sandboxId.current, ds.id, type, user.id)
       if (res.success) {
         setActiveDataset({ ...ds, type })
         setQuery(`-- Dataset: ${ds.name}\n-- Table: ${ds.table_name}\nSELECT * FROM ${ds.table_name} LIMIT 20;`)
-        if (!quiet) notify.success(`Loaded: ${ds.name}`)
+        notify.success(`Loaded: ${ds.name}`)
       } else {
         notify.error('Failed to load dataset', res.error)
       }
@@ -620,13 +592,10 @@ function SqlPlayground() {
       // foundational table every SQL lesson starts from. Falling back to
       // whatever sorts first alphabetically would default to "Billing"
       // instead, which is the more complex, derived table.
-      // Every bundled table is loaded up front so JOINs across datasets work
-      // straight away; the Patients table is the one shown first.
       const preferred = ds.bundled.find((d: any) => d.id === 'ds-hospital-patients') ?? ds.bundled[0]
-      for (const d of ds.bundled) {
-        if (d !== preferred) await loadDataset(d, 'bundled', true)
+      if (preferred) {
+        await loadDataset(preferred, 'bundled')
       }
-      if (preferred) await loadDataset(preferred, 'bundled', true)
     }).catch((err: any) => reportApiError('load your datasets', err))
     return () => { window.api.sql.closeSandbox(sandboxId.current) }
     // eslint-disable-next-line react-hooks/exhaustive-deps

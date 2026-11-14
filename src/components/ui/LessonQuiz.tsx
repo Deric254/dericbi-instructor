@@ -1,5 +1,5 @@
-import React,{ useState } from 'react'
-import { CheckCircle,XCircle,Sparkles,RotateCcw } from 'lucide-react'
+import React, { useState } from 'react'
+import { CheckCircle, XCircle, Sparkles, RotateCcw } from 'lucide-react'
 
 export interface QuizQuestion {
   question: string

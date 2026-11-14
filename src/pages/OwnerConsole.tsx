@@ -1,13 +1,13 @@
-import React,{ useCallback,useEffect,useMemo,useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-KeyRound,Lock,LockOpen,Users,CheckCircle,Clock,AlertTriangle,Wallet,Download,FileSpreadsheet,
-Save,ChevronDown,ChevronRight,MessageCircle,Copy,X,RefreshCw,
+  KeyRound, Lock, LockOpen, Users, CheckCircle, Clock, AlertTriangle, Wallet, Download, FileSpreadsheet,
+  Save, ChevronDown, ChevronRight, MessageCircle, Copy, X, RefreshCw,
 } from 'lucide-react'
 import OwnerKeyInput from '../components/ui/OwnerKeyInput'
 import { notify } from '../store'
 import { reportApiError } from '../lib/apiError'
-import { toWhatsAppNumber,whatsappLink } from '../lib/contact'
-import type { CustomerStatus,IssuedLicence,OwnerCustomer,OwnerOverview } from '../types'
+import { toWhatsAppNumber, whatsappLink } from '../lib/contact'
+import type { CustomerStatus, IssuedLicence, OwnerCustomer, OwnerOverview } from '../types'
 
 const STATUS_LABEL: Record<CustomerStatus, string> = { none: 'No licence yet', active: 'Active', expiring: 'Expiring soon', expired: 'Expired' }
 const STATUS_BADGE: Record<CustomerStatus, string> = { none: 'badge-common', active: 'badge-success', expiring: 'badge-warning', expired: 'badge-error' }
@@ -200,7 +200,6 @@ function IssueForm({ signingUnlocked, defaultAmount, onIssued }: { signingUnlock
   const [name, setName] = useState('')
   const [contact, setContact] = useState('')
   const [months, setMonths] = useState(1)
-  const [lifetime, setLifetime] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -209,10 +208,10 @@ function IssueForm({ signingUnlocked, defaultAmount, onIssued }: { signingUnlock
     setError('')
     setBusy(true)
     try {
-      const r = await window.api.owner.issueNew({ code, name, contact, months, amount: defaultAmount, lifetime })
+      const r = await window.api.owner.issueNew({ code, name, contact, months, amount: defaultAmount })
       if (r.success) {
         onIssued(r)
-        setCode(''); setName(''); setContact(''); setMonths(1); setLifetime(false)
+        setCode(''); setName(''); setContact(''); setMonths(1)
       } else {
         setError(r.error)
       }
@@ -244,15 +243,11 @@ function IssueForm({ signingUnlocked, defaultAmount, onIssued }: { signingUnlock
         </div>
         <div className="input-group">
           <label className="input-label">Months paid now</label>
-          <select className="input" value={months} disabled={lifetime} onChange={(e) => setMonths(Number(e.target.value))}>
+          <select className="input" value={months} onChange={(e) => setMonths(Number(e.target.value))}>
             {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n} month{n > 1 ? 's' : ''}</option>)}
           </select>
         </div>
       </div>
-      <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, marginTop: 12, cursor: 'pointer' }}>
-        <input type="checkbox" checked={lifetime} onChange={(e) => setLifetime(e.target.checked)} />
-        Lifetime licence (paid once, never expires). Ignores the months above.
-      </label>
       {error && <div style={{ color: 'var(--error)', fontSize: 12, marginTop: 12 }}>{error}</div>}
       <button className="btn btn-primary" style={{ marginTop: 14 }} type="submit" disabled={busy || !signingUnlocked || !code.trim() || !name.trim()}>
         <KeyRound size={14} /> {busy ? 'Creating…' : 'Generate licence'}
@@ -341,8 +336,6 @@ function CustomerRow({ customer: c, index, currentMonth, signingUnlocked, stripe
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
             <button className="btn btn-secondary btn-sm" onClick={() => act('save the customer', () => window.api.owner.updateCustomer(c.id, edit), () => notify.success('Saved', 'Customer updated.'))}>Save details</button>
-            <button className="btn btn-secondary btn-sm" disabled={!signingUnlocked} title={signingUnlocked ? 'Create a lifetime licence (paid once, never expires)' : 'Unlock signing first'}
-              onClick={() => act('create the lifetime licence', () => window.api.owner.renew(c.id, true), (r) => onIssued(r))}>Issue lifetime licence</button>
             <span style={{ flex: 1 }} />
             <button className="btn btn-danger btn-sm" onClick={() => {
               if (!confirmDelete) { setConfirmDelete(true); setTimeout(() => setConfirmDelete(false), 3000); return }
@@ -365,7 +358,7 @@ function SettingsCard({ settings, onSave }: { settings: OwnerOverview['settings'
     <div className="card" style={{ padding: 18 }}>
       <h3 style={{ fontSize: 15, marginBottom: 4 }}>Licence settings</h3>
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
-        A licence runs to the end of the last month you ticked as paid. The app itself already allows 5 days of full use after that (with a renewal notice), then goes view-only. Add extra days below only to lengthen that.
+        A licence runs to the end of the last month you ticked as paid, plus the grace days below, so a customer is not locked out the moment the month turns.
       </p>
       <div style={{ display: 'flex', gap: 14, alignItems: 'flex-end', flexWrap: 'wrap' }}>
         <div className="input-group" style={{ width: 170 }}>

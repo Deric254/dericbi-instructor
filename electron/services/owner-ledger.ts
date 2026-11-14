@@ -9,10 +9,10 @@
  * next month is paid and ticked, the owner issues a renewal. Nobody has to be "switched off": an unpaid
  * month simply lets the signed expiry date arrive.
  */
-import * as fs from 'fs';
-import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
-import { normCode } from '../licensing/licensing';
+import * as fs from 'fs'
+import * as path from 'path'
+import { v4 as uuidv4 } from 'uuid'
+import { normCode } from '../licensing/licensing'
 
 interface Payment { paidAt: string; amount: number | null }
 interface LicenceRecord { issuedAt: string; expires: string; token: string }
@@ -111,8 +111,7 @@ function cleanCode(v: unknown): string {
 }
 const cleanText = (v: unknown, max: number): string => String(v ?? '').trim().slice(0, max)
 
-// The app itself already allows GRACE_DAYS (5) of full use after a licence ends, so extra days baked into the licence start at 0.
-const DEFAULT_SETTINGS: LedgerSettings = { graceDays: 0, defaultAmount: null, keyPath: '' }
+const DEFAULT_SETTINGS: LedgerSettings = { graceDays: 5, defaultAmount: null, keyPath: '' }
 
 export class OwnerLedger {
   private data: LedgerFile

@@ -1,8 +1,4 @@
-import { useState,useCallback,useRef } from 'react'
-
-// One pinned runtime: Pyodide's packages are built for its exact version, so the
-// script and the package index must always come from the same release.
-const PYODIDE_BASE = 'https://cdn.jsdelivr.net/pyodide/v0.26.1/full/'
+import { useState, useCallback, useRef } from 'react'
 
 type RuntimeStatus = 'idle' | 'loading' | 'ready' | 'running' | 'error'
 
@@ -18,7 +14,7 @@ export function usePyodide() {
       if (!(window as any).loadPyodide) {
         await new Promise<void>((resolve, reject) => {
           const script = document.createElement('script')
-          script.src = PYODIDE_BASE + 'pyodide.js'
+          script.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js'
           script.onload = () => resolve()
           script.onerror = () => reject(new Error('Failed to load Pyodide'))
           document.head.appendChild(script)
@@ -26,7 +22,7 @@ export function usePyodide() {
       }
 
       const pyodide = await (window as any).loadPyodide({
-        indexURL: PYODIDE_BASE,
+        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.1/full/',
       })
 
       // Pre-load analytics packages
@@ -63,8 +59,6 @@ sys.stderr = _stderr
 
       let returnValue: any = undefined
       try {
-        // Fetch whatever the code imports (matplotlib, scipy, statsmodels...) on demand.
-        await pyodideRef.current.loadPackagesFromImports(code)
         returnValue = pyodideRef.current.runPython(code)
       } catch (err: any) {
         pyodideRef.current.runPython(`sys.stdout = sys.__stdout__\nsys.stderr = sys.__stderr__`)

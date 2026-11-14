@@ -1,4 +1,5 @@
-import { AlertTriangle,RotateCcw } from 'lucide-react'
+import React from 'react'
+import { AlertTriangle, RotateCcw } from 'lucide-react'
 
 /** Centered spinner for a page's initial data load. */
 export function PageLoader() {

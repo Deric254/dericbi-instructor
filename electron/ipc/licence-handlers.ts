@@ -8,9 +8,6 @@ export function registerLicenceHandlers() {
 
   safeHandle('licence:activate', async (_, token: string) => Licence.activate(token))
 
-  // The pay window's links open in the person's own browser or mail app, from a fixed allowlist only.
-  safeHandle('licence:open-link', async (_, url: string) => Licence.openLink(url))
-
   // The owner key is used once, in memory, to mark this computer as the owner's. Chosen as a file or pasted.
   safeHandle('licence:claim-owner', async (_, pasted?: string) => {
     let text = pasted
@@ -33,7 +30,7 @@ export function registerLicenceHandlers() {
   safeHandle('owner:unlock-pasted', async (_, keyText: string) => Owner.unlockWithPastedKey(keyText))
   safeHandle('owner:lock', async () => Owner.lockSigning())
   safeHandle('owner:issue-new', async (_, input) => Owner.issueNew(input))
-  safeHandle('owner:renew', async (_, id: string, lifetime?: boolean) => Owner.renew(id, lifetime))
+  safeHandle('owner:renew', async (_, id: string) => Owner.renew(id))
   safeHandle('owner:set-payment', async (_, id: string, month: string, paid: boolean) => Owner.setPayment(id, month, paid))
   safeHandle('owner:update-customer', async (_, id: string, patch) => Owner.updateCustomer(id, patch))
   safeHandle('owner:delete-customer', async (_, id: string) => Owner.deleteCustomer(id))

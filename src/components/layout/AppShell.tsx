@@ -1,4 +1,4 @@
-import React,{ useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useUIStore } from '../../store'
 import Titlebar from './Titlebar'
 import Sidebar from './Sidebar'

@@ -1,11 +1,11 @@
-import React,{ useState,useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import {
-LayoutDashboard,Database,FileSpreadsheet,Terminal,
-BarChart3,TrendingUp,Briefcase,FlaskConical,
-Table2,FolderOpen,BookOpen,Trophy,Settings,
-ChevronLeft,ChevronRight,Users,LogOut,ShieldCheck,KeyRound,
+  LayoutDashboard, Database, FileSpreadsheet, Terminal,
+  BarChart3, TrendingUp, Briefcase, FlaskConical,
+  Table2, FolderOpen, BookOpen, Trophy, Settings,
+  ChevronLeft, ChevronRight, Users, LogOut, ShieldCheck, KeyRound,
 } from 'lucide-react'
-import { useAuthStore,useUIStore } from '../../store'
+import { useAuthStore, useUIStore } from '../../store'
 import type { NavSection } from '../../types'
 
 interface NavItem {

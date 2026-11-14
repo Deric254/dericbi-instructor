@@ -5,15 +5,15 @@
  * Signing needs the owner key. It is read from the owner's key file, held in memory for this session only
  * (auto-locks after 30 idle minutes, or when the app closes) and never written anywhere by the app.
  */
-import { app,dialog } from 'electron'
+import { app, dialog } from 'electron'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as XLSX from 'xlsx'
 import { LicenceError } from '../licensing/licensing'
 import * as Licence from './licence.service'
 import {
-OwnerLedger,Customer,LedgerSettings,addMonths,daysBetween,lastLicence,licenceDays,monthKey,
-needsRenewal,paidThrough,statusOf,utcDay,
+  OwnerLedger, Customer, LedgerSettings, addMonths, daysBetween, lastLicence, licenceDays, monthKey,
+  needsRenewal, paidThrough, statusOf, utcDay,
 } from './owner-ledger'
 
 const SIGNING_IDLE_MS = 30 * 60 * 1000
@@ -132,26 +132,24 @@ export function rememberKeyPath(keyPath: string) {
 }
 
 // ── licences ──
-function issueFor(l: OwnerLedger, c: Customer, now: Date, lifetime = false) {
-  // A lifetime licence (paid once) has no paid months to count; it expires in 2099 and the app never nags.
-  const days = lifetime ? undefined : licenceDays(c, now, l.settings().graceDays, Licence.MAX_LICENCE_DAYS)
-  const issued = Licence.licensing().issue(seedForSigning(), c.code, c.name, days, undefined, lifetime)
+function issueFor(l: OwnerLedger, c: Customer, now: Date) {
+  const days = licenceDays(c, now, l.settings().graceDays, Licence.MAX_LICENCE_DAYS)
+  const issued = Licence.licensing().issue(seedForSigning(), c.code, c.name, days)
   l.recordLicence(c.id, { issuedAt: now.toISOString(), expires: issued.expires, token: issued.licence })
   return { licence: issued.licence, expires: issued.expires, name: c.name, contact: c.contact, customerId: c.id }
 }
 
 /** New customer: add them, tick the months they paid now (from this month), and sign their first licence. */
-export function issueNew(input: { code: string; name: string; contact?: string; notes?: string; months?: number; amount?: number | null; lifetime?: boolean }, now = new Date()) {
+export function issueNew(input: { code: string; name: string; contact?: string; notes?: string; months?: number; amount?: number | null }, now = new Date()) {
   const l = owner()
   return guard(() => {
-    const lifetime = input.lifetime === true
-    const months = lifetime ? 0 : Math.trunc(Number(input.months ?? 1))
-    if (!lifetime && !(months >= 1 && months <= MAX_MONTHS_AT_ONCE)) throw new Error(`Months paid must be from 1 to ${MAX_MONTHS_AT_ONCE}.`)
+    const months = Math.trunc(Number(input.months ?? 1))
+    if (!(months >= 1 && months <= MAX_MONTHS_AT_ONCE)) throw new Error(`Months paid must be from 1 to ${MAX_MONTHS_AT_ONCE}.`)
     seedForSigning() // fail early, before anything is added, if signing is locked
     const c = l.addCustomer(input, now)
     try {
       for (let i = 0; i < months; i++) l.setPayment(c.id, addMonths(monthKey(now), i), true, input.amount ?? undefined, now)
-      return issueFor(l, c, now, lifetime)
+      return issueFor(l, c, now)
     } catch (e) {
       l.deleteCustomer(c.id) // do not leave a half-created customer behind
       throw e
@@ -159,12 +157,12 @@ export function issueNew(input: { code: string; name: string; contact?: string; 
   })
 }
 
-export function renew(id: string, lifetime = false, now = new Date()) {
+export function renew(id: string, now = new Date()) {
   const l = owner()
   return guard(() => {
     const c = l.find(id)
     if (!c) throw new Error('That customer was not found.')
-    return issueFor(l, c, now, lifetime === true)
+    return issueFor(l, c, now)
   })
 }
 
