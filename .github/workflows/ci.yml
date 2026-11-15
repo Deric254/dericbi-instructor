@@ -1,0 +1,80 @@
+name: CI
+
+# Runs on every push to main and on every pull request, so a change (or a dependency upgrade) that
+# breaks the SQL playground, data loading, the AI tutor, Excel, Python or the course content is
+# caught before it is merged or released.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        # The app ships for Windows; Linux is the quick everyday signal.
+        os: [ubuntu-latest, windows-latest]
+    env:
+      # pandas/numpy/matplotlib are proven in their own job below.
+      DBI_PY_PACKAGES: skip
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the app (interface + main process)
+        run: npm run build
+
+      - name: Run the tests
+        run: npm test
+
+      - name: Type-check the interface (informational)
+        # Currently reports 3 errors, all in leftover files of the old licence design
+        # (src/pages/LicenseGate.tsx, src/components/ui/PayWindow.tsx). Delete them, then remove
+        # `continue-on-error` to make this check blocking.
+        continue-on-error: true
+        run: npm run typecheck
+
+  python-packages:
+    name: Python playground (pandas, numpy, matplotlib)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      DBI_PY_PACKAGES: required
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache the Pyodide packages
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/pyodide-0.26.1
+          key: pyodide-0.26.1-${{ hashFiles('package-lock.json') }}
+
+      - name: Run the Python tests
+        run: node scripts/run-tests.js python-runtime

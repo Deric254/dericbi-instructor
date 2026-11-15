@@ -66,6 +66,14 @@ declare global {
         datasets: (userId: string) => Promise<any>
         closeSandbox: (sandboxId: string) => Promise<any>
       }
+      userdb: {
+        list: (userId: string) => Promise<{ id: string; name: string; created_at: string; updated_at: string; size_bytes: number; table_count: number }[]>
+        create: (userId: string, name: string) => Promise<{ success: boolean; database?: any; error?: string }>
+        rename: (userId: string, dbId: string, name: string) => Promise<{ success: boolean; error?: string }>
+        delete: (userId: string, dbId: string) => Promise<{ success: boolean; error?: string }>
+        describe: (userId: string, dbId: string) => Promise<{ success: boolean; name?: string; error?: string; tables?: { name: string; row_count: number; columns: { name: string; type: string; pk: boolean; notnull: boolean }[] }[] }>
+        export: (userId: string, dbId: string) => Promise<{ success: boolean; cancelled?: boolean; savedTo?: string; error?: string }>
+      }
       files: {
         pick: () => Promise<{ canceled: boolean; path?: string }>
         import: (userId: string, filePath: string, fileName: string) => Promise<any>
@@ -79,6 +87,7 @@ declare global {
         hasKey: (userId: string, provider: string) => Promise<{ has_key: boolean }>
         getProvider: (userId: string) => Promise<{ provider: string }>
         setProvider: (provider: string) => Promise<any>
+        listModels: (userId: string, provider: string) => Promise<{ success: boolean; models?: string[]; selected?: string; error?: string }>
       }
       settings: {
         get: (key: string) => Promise<{ value: string | null }>

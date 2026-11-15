@@ -10,6 +10,7 @@ import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
 import { PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'
+import { SplitPane, AsideSplit } from '../components/ui/SplitPane'
 import type { Lesson } from '../types'
 
 export function BusinessAcademy() {
@@ -256,16 +257,22 @@ function BusinessLessonView({ lesson, exercises, onBack }: { lesson: any; exerci
           <button onClick={handleComplete} className="btn btn-primary btn-sm"><CheckCircle size={12} /> Complete</button>
         </div>
       </div>
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <div style={{ width: 340, flexShrink: 0, borderRight: '1px solid var(--border)', overflow: 'auto', padding: 18 }}>
+      <SplitPane id="biz-lesson" defaultRatio={0.38} minFirst={260} minSecond={380} stackBelow={820}
+        first={
+        <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: 18 }}>
           <LessonTheory markdown={lesson.theory_md} />
           <LessonQuiz quizJson={lesson.quiz} accentColor="var(--business-color)" />
         </div>
+        }
+        second={
+        <AsideSplit id="biz-ai" asidePx={290} minMain={280}
+          aside={showInstructor && <InstructorPanel context={{ type: 'lesson', lesson: lesson.title }} />}
+          main={
         <div style={{ flex: 1, overflow: 'auto', padding: 20 }}>
           {exercises.length === 0 ? <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>No exercises yet.</p> : exercises.map((ex: any, i: number) => <WrittenExercise key={ex.id} exercise={ex} index={i+1} />)}
         </div>
-        {showInstructor && <div style={{ width: 280, flexShrink: 0 }}><InstructorPanel context={{ type: 'lesson', lesson: lesson.title }} /></div>}
-      </div>
+          } />
+        } />
     </div>
   )
 }

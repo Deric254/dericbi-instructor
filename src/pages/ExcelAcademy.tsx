@@ -9,6 +9,8 @@ import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
 import { PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'
+import { normalizeFormula } from '../lib/excelFormula'
+import { SplitPane, LessonWorkspace } from '../components/ui/SplitPane'
 import type { Lesson } from '../types'
 
 type View = 'lessons' | 'spreadsheet'
@@ -80,9 +82,9 @@ export default function ExcelAcademy() {
           />
         )}
         {view === 'spreadsheet' && (
-          <div style={{ height: '100%', display: 'flex', overflow: 'hidden' }}>
-            {activeLessonId && (
-              <div style={{ width: 340, flexShrink: 0, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <LessonWorkspace id="excel-lesson" hasLesson={!!activeLessonId}
+            lesson={activeLessonId && (
+              <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                 <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
                   <button onClick={() => { setActiveLessonId(null); setView('lessons') }} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 12, padding: 0, marginBottom: 10 }}>
                     ← Back to lessons
@@ -110,10 +112,8 @@ export default function ExcelAcademy() {
                 </div>
               </div>
             )}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <SpreadsheetEnv />
-            </div>
-          </div>
+            workspace={<SpreadsheetEnv />}
+          />
         )}
       </div>
     </div>
@@ -253,7 +253,7 @@ function SpreadsheetEnv() {
     for (const [ref, val] of Object.entries(data)) {
       const { row, col } = cellRefToRC(ref)
       try {
-        hf.setCellContents({ sheet: sheetId, row, col }, val)
+        hf.setCellContents({ sheet: sheetId, row, col }, normalizeFormula(val))
       } catch {}
     }
   }
@@ -298,7 +298,7 @@ function SpreadsheetEnv() {
     if (hfRef.current) {
       const { row, col } = cellRefToRC(ref)
       try {
-        hfRef.current.setCellContents({ sheet: sheetIdRef.current, row, col }, value)
+        hfRef.current.setCellContents({ sheet: sheetIdRef.current, row, col }, normalizeFormula(value))
       } catch {}
     }
   }
@@ -316,7 +316,7 @@ function SpreadsheetEnv() {
     try {
       // Put formula in a temp cell (row 99)
       const formula = formulaInput.startsWith('=') ? formulaInput : `=${formulaInput}`
-      hfRef.current.setCellContents({ sheet: sheetIdRef.current, row: 99, col: 0 }, formula)
+      hfRef.current.setCellContents({ sheet: sheetIdRef.current, row: 99, col: 0 }, normalizeFormula(formula))
       const result = hfRef.current.getCellValue({ sheet: sheetIdRef.current, row: 99, col: 0 })
 
       if (result instanceof Error) {
@@ -335,9 +335,10 @@ function SpreadsheetEnv() {
   }
 
   return (
-    <div style={{ height: '100%', display: 'flex', overflow: 'hidden' }}>
-      {/* Main spreadsheet area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <SplitPane id="excel-grid-lab" defaultRatio={0.74} minFirst={300} minSecond={220} stackBelow={700}
+      first={
+      /* Main spreadsheet area */
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Formula bar */}
         <div style={{
           padding: '6px 12px', borderBottom: '1px solid var(--border)',
@@ -485,11 +486,11 @@ function SpreadsheetEnv() {
           Double-click to edit · Type a formula starting with = · Green cells contain formulas
         </div>
       </div>
-
-      {/* Formula lab panel */}
+      }
+      second={
+      /* Formula lab panel */
       <div style={{
-        width: 280, flexShrink: 0,
-        borderLeft: '1px solid var(--border)',
+        flex: 1, minHeight: 0,
         display: 'flex', flexDirection: 'column',
         background: 'var(--bg-surface)',
         overflow: 'hidden',
@@ -594,7 +595,7 @@ function SpreadsheetEnv() {
           ))}
         </div>
       </div>
-    </div>
+      } />
   )
 }
 

@@ -40,7 +40,7 @@ export default function GlobalInstructor() {
       top: 'calc(var(--titlebar-height) + 12px)',
       right: 16,
       bottom: 16,
-      width: 360,
+      width: 'min(360px, calc(100vw - 32px))',
       zIndex: 9500,
       display: 'flex',
       flexDirection: 'column',

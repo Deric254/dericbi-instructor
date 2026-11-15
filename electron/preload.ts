@@ -91,6 +91,16 @@ const api = {
     closeSandbox: (sandboxId: string) => ipcRenderer.invoke('sql:close-sandbox', sandboxId),
   },
 
+  // My Databases: databases the learner builds from scratch
+  userdb: {
+    list: (userId: string) => ipcRenderer.invoke('userdb:list', userId),
+    create: (userId: string, name: string) => ipcRenderer.invoke('userdb:create', { userId, name }),
+    rename: (userId: string, dbId: string, name: string) => ipcRenderer.invoke('userdb:rename', { userId, dbId, name }),
+    delete: (userId: string, dbId: string) => ipcRenderer.invoke('userdb:delete', { userId, dbId }),
+    describe: (userId: string, dbId: string) => ipcRenderer.invoke('userdb:describe', { userId, dbId }),
+    export: (userId: string, dbId: string) => ipcRenderer.invoke('userdb:export', { userId, dbId }),
+  },
+
   // Files
   files: {
     pick: () => ipcRenderer.invoke('files:pick'),
@@ -109,6 +119,7 @@ const api = {
     hasKey: (userId: string, provider: string) => ipcRenderer.invoke('ai:has-key', { userId, provider }),
     getProvider: (userId: string) => ipcRenderer.invoke('ai:get-provider', userId),
     setProvider: (provider: string) => ipcRenderer.invoke('ai:set-provider', { provider }),
+    listModels: (userId: string, provider: string) => ipcRenderer.invoke('ai:list-models', { userId, provider }),
   },
 
   // Settings

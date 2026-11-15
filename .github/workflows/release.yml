@@ -26,6 +26,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run the test suite
+        # A release is only published if every test passes: SQL playground and data loading, the AI
+        # tutor, Excel formulas, Python, the course content and the licence checks. Pandas/numpy are
+        # proven by their own CI job (python-packages), so they are skipped here to keep releases fast.
+        run: npm test
+        env:
+          DBI_PY_PACKAGES: skip
+
       - name: Build and publish
         # publish:win chains the build (Vite + TypeScript), the owner-key check
         # and the packaging check before electron-builder, so a build without

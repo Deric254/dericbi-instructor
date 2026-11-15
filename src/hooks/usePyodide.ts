@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react'
+import { runPythonCaptured, type PythonRunResult } from '../lib/pythonRunner'
 
 type RuntimeStatus = 'idle' | 'loading' | 'ready' | 'running' | 'error'
 
@@ -36,55 +37,15 @@ export function usePyodide() {
     }
   }, [status])
 
-  const runCode = useCallback(async (code: string): Promise<{
-    output: string
-    error: string | null
-    exec_ms: number
-  }> => {
+  const runCode = useCallback(async (code: string): Promise<PythonRunResult> => {
     if (!pyodideRef.current) {
       return { output: '', error: 'Python runtime not loaded.', exec_ms: 0 }
     }
-
     setStatus('running')
-    const start = Date.now()
-
     try {
-      pyodideRef.current.runPython(`
-import sys, io
-_stdout = io.StringIO()
-_stderr = io.StringIO()
-sys.stdout = _stdout
-sys.stderr = _stderr
-      `)
-
-      let returnValue: any = undefined
-      try {
-        returnValue = pyodideRef.current.runPython(code)
-      } catch (err: any) {
-        pyodideRef.current.runPython(`sys.stdout = sys.__stdout__\nsys.stderr = sys.__stderr__`)
-        setStatus('ready')
-        return { output: '', error: err.message, exec_ms: Date.now() - start }
-      }
-
-      const stdout = pyodideRef.current.runPython('_stdout.getvalue()')
-      const stderr = pyodideRef.current.runPython('_stderr.getvalue()')
-      pyodideRef.current.runPython(`sys.stdout = sys.__stdout__\nsys.stderr = sys.__stderr__`)
-
-      const parts = [stdout]
-      if (returnValue !== undefined && returnValue !== null && typeof returnValue !== 'undefined') {
-        const s = String(returnValue)
-        if (s !== 'undefined' && s !== 'None') parts.push(s)
-      }
-
+      return runPythonCaptured(pyodideRef.current, code)
+    } finally {
       setStatus('ready')
-      return {
-        output: parts.filter(Boolean).join('\n').trim(),
-        error: stderr || null,
-        exec_ms: Date.now() - start,
-      }
-    } catch (err: any) {
-      setStatus('ready')
-      return { output: '', error: err.message, exec_ms: Date.now() - start }
     }
   }, [])
 

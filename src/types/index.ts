@@ -131,6 +131,8 @@ export interface SqlResult {
   exec_ms?: number
   error?: string
   affected_rows?: number
+  truncated?: boolean
+  notice?: string
 }
 
 export interface Dataset {

@@ -9,6 +9,8 @@ import {
 } from 'lucide-react'
 import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
+import { SplitPane } from '../components/ui/SplitPane'
+import MyDatabases from '../components/sql/MyDatabases'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
 import { useInstructor } from '../hooks/useInstructor'
@@ -16,7 +18,7 @@ import { PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'
 import type { Lesson, SqlResult } from '../types'
 
-type View = 'lessons' | 'lesson' | 'playground'
+type View = 'lessons' | 'lesson' | 'playground' | 'mydbs'
 
 export default function SqlAcademy() {
   const [view, setView] = useState<View>('lessons')
@@ -77,6 +79,9 @@ export default function SqlAcademy() {
           <TabBtn active={view === 'playground'} onClick={() => setView('playground')}>
             <Play size={13} /> Playground
           </TabBtn>
+          <TabBtn active={view === 'mydbs'} onClick={() => setView('mydbs')}>
+            <Database size={13} /> My Databases
+          </TabBtn>
         </div>
       </div>
 
@@ -97,6 +102,7 @@ export default function SqlAcademy() {
           />
         )}
         {view === 'playground' && <SqlPlayground />}
+        {view === 'mydbs' && <MyDatabases />}
       </div>
     </div>
   )
@@ -251,14 +257,10 @@ function LessonView({ lessonId, onBack, onComplete }: {
   const { lesson, exercises } = data
 
   return (
-    <div style={{ height: '100%', display: 'flex', overflow: 'hidden' }}>
-      {/* Theory panel */}
-      <div style={{
-        width: 340, flexShrink: 0,
-        borderRight: '1px solid var(--border)',
-        display: 'flex', flexDirection: 'column',
-        overflow: 'hidden',
-      }}>
+    <SplitPane id="sql-lesson" defaultRatio={0.4} minFirst={260} minSecond={380} stackBelow={820}
+      first={
+      /* Theory panel - the learning window gets the larger share by default; drag the divider to change it */
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
           <button onClick={onBack} style={{
             display: 'flex', alignItems: 'center', gap: 6,
@@ -286,9 +288,10 @@ function LessonView({ lessonId, onBack, onComplete }: {
           </button>
         </div>
       </div>
-
-      {/* Exercise panel */}
-      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+      }
+      second={
+      /* Exercise panel */
+      <div style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
         {exercises.length === 0 ? (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>No exercises for this lesson yet.</p>
@@ -328,7 +331,7 @@ function LessonView({ lessonId, onBack, onComplete }: {
           </>
         )}
       </div>
-    </div>
+      } />
   )
 }
 
@@ -424,11 +427,13 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
   if (!exercise) return null
 
   return (
-    <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-      {/* Left: editor + results */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Prompt */}
-        <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', background: 'var(--bg-surface)' }}>
+    <SplitPane id="sql-exercise-ai" defaultRatio={0.72} minFirst={340} minSecond={240} stackBelow={640}
+      first={
+      /* Left: task + editor + results */
+      <SplitPane id="sql-exercise-task" direction="vertical" defaultRatio={0.3} minFirst={90} minSecond={200}
+      first={
+        /* Prompt */
+        <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: '14px 18px', background: 'var(--bg-surface)' }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 6 }}>
             {exercise.title}
           </div>
@@ -459,9 +464,11 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
             </div>
           )}
         </div>
-
+      }
+      second={
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Editor */}
-        <div style={{ flex: 1, overflow: 'hidden' }}>
+        <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
           <Editor
             height="100%"
             language={lessonModule === 'sql' ? 'sql' : 'python'}
@@ -477,6 +484,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
               padding: { top: 12 },
               suggestOnTriggerCharacters: true,
               tabSize: 2,
+              automaticLayout: true,
             }}
           />
         </div>
@@ -529,9 +537,11 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
           </div>
         </div>
       </div>
-
-      {/* Right: AI Instructor */}
-      <div style={{ width: 290, flexShrink: 0 }}>
+      } />
+      }
+      second={
+      /* Right: AI Instructor */
+      <div style={{ flex: 1, minHeight: 0 }}>
         <InstructorPanel
           context={{
             type: 'exercise',
@@ -547,7 +557,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
           }
         />
       </div>
-    </div>
+      } />
   )
 }
 
@@ -617,14 +627,10 @@ function SqlPlayground() {
   }
 
   return (
-    <div style={{ height: '100%', display: 'flex', overflow: 'hidden' }}>
-      {/* Dataset sidebar */}
-      <div style={{
-        width: 220, flexShrink: 0,
-        borderRight: '1px solid var(--border)',
-        display: 'flex', flexDirection: 'column',
-        overflow: 'hidden',
-      }}>
+    <SplitPane id="sql-playground-side" defaultFirstPx={210} minFirst={150} minSecond={420} stackBelow={640}
+      first={
+      /* Dataset sidebar */
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>
           <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             Datasets
@@ -660,11 +666,12 @@ function SqlPlayground() {
           )}
         </div>
       </div>
-
-      {/* Editor + results */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Editor */}
-        <div style={{ flex: '0 0 40%', borderBottom: '1px solid var(--border)' }}>
+      }
+      second={
+      /* Editor above, results below - drag the divider to give either more room */
+      <SplitPane id="sql-playground-main" direction="vertical" defaultRatio={0.45} minFirst={130} minSecond={150}
+      first={
+        <div style={{ flex: 1, minHeight: 0 }}>
           <Editor
             height="100%"
             language="sql"
@@ -674,11 +681,13 @@ function SqlPlayground() {
             options={{
               fontSize: 13, fontFamily: 'var(--font-mono)',
               minimap: { enabled: false }, scrollBeyondLastLine: false,
-              padding: { top: 10 }, lineNumbers: 'on',
+              padding: { top: 10 }, lineNumbers: 'on', automaticLayout: true,
             }}
           />
         </div>
-
+      }
+      second={
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Toolbar */}
         <div style={{
           padding: '6px 14px', borderBottom: '1px solid var(--border)',
@@ -739,12 +748,18 @@ function SqlPlayground() {
               </div>
             </div>
           )}
+          {result?.success && result.notice && (
+            <div style={{ padding: '8px 14px', fontSize: 12, background: 'var(--warning-dim, rgba(250,204,21,0.12))', color: 'var(--warning, #facc15)', borderBottom: '1px solid var(--border)' }}>
+              {result.notice}
+            </div>
+          )}
           {result?.success && result.rows && (
             <ResultsGrid rows={result.rows} columns={result.columns ?? []} />
           )}
         </div>
       </div>
-    </div>
+      } />
+      } />
   )
 }
 

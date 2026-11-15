@@ -5,7 +5,13 @@ import { app } from 'electron'
 import { getDb, getDatasetsPath } from '../db/database'
 import { v4 as uuidv4 } from 'uuid'
 
-const SETUP_VERSION = 4 // increment to force re-seed on app update
+const SETUP_VERSION = 5 // increment to force re-seed on app update
+
+// Bump when the generated CSV *contents* change shape, so installs that already have older
+// CSVs on disk get them regenerated (generateDatasets() otherwise skips files that exist).
+// v2: some patients are now genuinely still admitted (see generatePatients).
+const DATASET_VERSION = 2
+const DATASET_VERSION_FILE = '.dataset-version'
 
 // ─────────────────────────────────────────────
 // ENTRY POINT — called from main.ts after initDb()
@@ -100,6 +106,11 @@ function initAnalystRank(userId: string): void {
 // DATASET GENERATION
 // ─────────────────────────────────────────────
 
+/** Re-creates the bundled practice CSVs if any are missing or outdated. Safe to call any time. */
+export async function ensureDatasetFiles(): Promise<void> {
+  await generateDatasets()
+}
+
 async function generateDatasets(): Promise<void> {
   const datasetsDir = getDatasetsPath()
 
@@ -112,12 +123,16 @@ async function generateDatasets(): Promise<void> {
   ]
 
   const allExist = files.every(f => fs.existsSync(path.join(datasetsDir, f)))
-  if (allExist) return
+  const versionFile = path.join(datasetsDir, DATASET_VERSION_FILE)
+  let onDiskVersion = 0
+  try { onDiskVersion = parseInt(fs.readFileSync(versionFile, 'utf-8'), 10) || 0 } catch { /* no marker yet */ }
+  if (allExist && onDiskVersion >= DATASET_VERSION) return
 
   generatePatients(datasetsDir, 500)
   generateBilling(datasetsDir, 480)
   generateSales(datasetsDir, 1200)
   generateEmployees(datasetsDir, 800)
+  fs.writeFileSync(versionFile, String(DATASET_VERSION))
 }
 
 function rand(min: number, max: number): number {
@@ -155,7 +170,13 @@ function generatePatients(dir: string, n: number): void {
     const stay = rand(1, 30)
     const discharge = new Date(admission)
     discharge.setDate(discharge.getDate() + stay)
-    const dischargeStr = discharge <= new Date() ? fmtDate(discharge) : ''
+    // Every 10th patient is still in hospital (no discharge date), plus anyone whose computed
+    // discharge would be in the future. The old rule only used the "in the future" test, but
+    // all admission dates are in 2024, so once that year passed NOBODY was ever still admitted:
+    // every `discharge_date IS NULL` exercise returned zero rows - an empty "correct" answer
+    // that also accepted any other empty result.
+    const stillAdmitted = i % 10 === 0 || discharge > new Date()
+    const dischargeStr = stillAdmitted ? '' : fmtDate(discharge)
     rows.push(`${i},"${name}",${age},${gender},${ward},"${diagnosis}",${fmtDate(admission)},${dischargeStr}`)
   }
   fs.writeFileSync(path.join(dir, 'hospital_patients.csv'), rows.join('\n'))

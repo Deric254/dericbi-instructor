@@ -8,6 +8,7 @@ import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
 import { PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'
+import { SplitPane, AsideSplit } from '../components/ui/SplitPane'
 import type { Lesson } from '../types'
 
 // Pyodide hook inline (reused from PythonAcademy pattern)
@@ -151,11 +152,17 @@ function StatLessonView({ lesson, exercises, onBack }: { lesson: any; exercises:
           <button onClick={handleComplete} className="btn btn-primary btn-sm"><CheckCircle size={12} /> Complete</button>
         </div>
       </div>
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <div style={{ width: 320, flexShrink: 0, borderRight: '1px solid var(--border)', overflow: 'auto', padding: 16 }}>
+      <SplitPane id="stats-lesson" defaultRatio={0.38} minFirst={260} minSecond={380} stackBelow={820}
+        first={
+        <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: 16 }}>
           <LessonTheory markdown={lesson.theory_md} />
           <LessonQuiz quizJson={lesson.quiz} accentColor="var(--stats-color)" />
         </div>
+        }
+        second={
+        <AsideSplit id="stats-ai" asidePx={290} minMain={280}
+          aside={showInstructor && exercises.length === 0 && <InstructorPanel context={{ type: 'lesson', lesson: lesson.title }} />}
+          main={
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           {exercises.length > 0 ? (
             <>
@@ -172,12 +179,8 @@ function StatLessonView({ lesson, exercises, onBack }: { lesson: any; exercises:
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 13 }}>No exercises yet.</div>
           )}
         </div>
-        {showInstructor && exercises.length === 0 && (
-          <div style={{ width: 280, flexShrink: 0 }}>
-            <InstructorPanel context={{ type: 'lesson', lesson: lesson.title }} />
-          </div>
-        )}
-      </div>
+          } />
+        } />
     </div>
   )
 }
@@ -220,16 +223,25 @@ function StatExercise({ exercise }: { exercise: any }) {
 
   if (!exercise) return null
   return (
-    <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
-        <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', background: 'var(--bg-surface)', flexShrink: 0 }}>
+    <SplitPane id="stats-exercise-ai" defaultRatio={0.72} minFirst={340} minSecond={240} stackBelow={640}
+      first={
+      <SplitPane id="stats-exercise-task" direction="vertical" defaultRatio={0.28} minFirst={90} minSecond={220}
+      first={
+        <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: '12px 16px', background: 'var(--bg-surface)' }}>
           <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 5 }}>{exercise.title}</div>
           <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{exercise.prompt}</div>
           {hint && <div style={{ marginTop: 8, padding: '7px 10px', background: 'var(--warning-dim)', border: '1px solid var(--warning)', borderRadius: 'var(--radius)', fontSize: 11, color: 'var(--warning)' }}>💡 {hint}</div>}
         </div>
-        <div style={{ flex: '0 0 50%', borderBottom: '1px solid var(--border)' }}>
-          <Editor height="100%" language="python" value={code} onChange={v => setCode(v ?? '')} theme="vs-dark" options={{ fontSize: 13, fontFamily: 'var(--font-mono)', minimap: { enabled: false }, scrollBeyondLastLine: false, padding: { top: 10 }, tabSize: 4 }} />
+      }
+      second={
+      <SplitPane id="stats-exercise-output" direction="vertical" defaultRatio={0.55} minFirst={130} minSecond={110}
+      first={
+        <div style={{ flex: 1, minHeight: 0 }}>
+          <Editor height="100%" language="python" value={code} onChange={v => setCode(v ?? '')} theme="vs-dark" options={{ fontSize: 13, fontFamily: 'var(--font-mono)', minimap: { enabled: false }, scrollBeyondLastLine: false, padding: { top: 10 }, tabSize: 4, automaticLayout: true }} />
         </div>
+      }
+      second={
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
         <div style={{ flex: 1, overflow: 'auto', padding: '10px 14px', background: '#0d1117', fontFamily: 'var(--font-mono)', fontSize: 12, lineHeight: 1.6, color: isError ? 'var(--error)' : '#a5d6a7', whiteSpace: 'pre-wrap' }}>
           {output || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Output appears here…</span>}
         </div>
@@ -243,10 +255,13 @@ function StatExercise({ exercise }: { exercise: any }) {
           <span style={{ marginLeft: 'auto', fontSize: 10, color: status === 'ready' ? 'var(--success)' : 'var(--text-muted)' }}>● {status === 'ready' ? 'Python ready' : status}</span>
         </div>
       </div>
-
-      {/* AI Instructor — kicks in automatically after every run, since there's
-          no single mechanical "correct" output to check freeform code against. */}
-      <div style={{ width: 290, flexShrink: 0 }}>
+      } />
+      } />
+      }
+      second={
+      /* AI Instructor — kicks in automatically after every run, since there's
+         no single mechanical "correct" output to check freeform code against. */
+      <div style={{ flex: 1, minHeight: 0 }}>
         <InstructorPanel
           context={{ type: 'exercise', lesson: 'statistics', exercise: exercise.title }}
           initialPrompt={
@@ -256,6 +271,6 @@ function StatExercise({ exercise }: { exercise: any }) {
           }
         />
       </div>
-    </div>
+      } />
   )
 }

@@ -6,6 +6,7 @@ import {
 import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
 import { reportApiError } from '../lib/apiError'
+import { AsideSplit } from '../components/ui/SplitPane'
 
 const SIMULATIONS = [
   {
@@ -259,7 +260,10 @@ function SimRunner({ sim, onExit }: { sim: typeof SIMULATIONS[0]; onExit: () => 
         <button onClick={() => setShowMentor(v => !v)} className="btn btn-ghost btn-sm"><Brain size={12} /> Mentor</button>
       </div>
 
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', overflow: 'hidden' }}>
+        <AsideSplit id="simulations-ai" asidePx={290} minMain={320}
+          aside={showMentor && <InstructorPanel context={{ type: 'simulation', lesson: sim.role, exercise: current.title }} />}
+          main={
         <div style={{ flex: 1, overflow: 'auto', padding: 24 }}>
           <div style={{ maxWidth: 720 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 18 }}>
@@ -316,12 +320,7 @@ function SimRunner({ sim, onExit }: { sim: typeof SIMULATIONS[0]; onExit: () => 
             )}
           </div>
         </div>
-
-        {showMentor && (
-          <div style={{ width: 290, flexShrink: 0 }}>
-            <InstructorPanel context={{ type: 'simulation', lesson: sim.role, exercise: current.title }} />
-          </div>
-        )}
+          } />
       </div>
     </div>
   )

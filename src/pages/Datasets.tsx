@@ -3,6 +3,7 @@ import { Table2, Upload, Trash2, Eye, Database, ChevronRight, CheckCircle } from
 import { useAuthStore, useUIStore, notify } from '../store'
 import { PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'
+import { AsideSplit } from '../components/ui/SplitPane'
 
 export default function Datasets() {
   const { user } = useAuthStore()
@@ -90,7 +91,8 @@ export default function Datasets() {
       </div>
 
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* Dataset list */}
+        <AsideSplit id="datasets-profile" asidePx={340} minAside={260} minMain={300} stackBelow={0}
+          main={
         <div style={{ flex: 1, overflow: 'auto', padding: 24 }}>
           {loadError ? (
             <PageError message="Couldn't load your datasets." onRetry={load} />
@@ -135,10 +137,9 @@ export default function Datasets() {
             </>
           )}
         </div>
-
-        {/* Profile panel */}
-        {profile && (
-          <div style={{ width: 320, flexShrink: 0, borderLeft: '1px solid var(--border)', overflow: 'auto', padding: 18, background: 'var(--bg-surface)' }}>
+          }
+          aside={profile && (
+          <div style={{ height: '100%', overflow: 'auto', padding: 18, background: 'var(--bg-surface)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <h3 style={{ fontSize: 14 }}>Data Profile</h3>
               <button onClick={() => { setProfile(null); setProfileFor(null) }} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 18 }}>×</button>
@@ -186,7 +187,7 @@ export default function Datasets() {
               </div>
             ))}
           </div>
-        )}
+        )} />
       </div>
     </div>
   )

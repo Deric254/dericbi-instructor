@@ -1,8 +1,9 @@
-import { dialog, app } from 'electron'
+import { dialog, app, BrowserWindow } from 'electron'
 import * as AuthService from '../services/auth.service'
 import * as ProgressService from '../services/progress.service'
 import * as SqlService from '../services/sql.service'
 import * as AiService from '../services/ai.service'
+import * as UserDb from '../services/userdb.service'
 import { registerPortfolioHandlers } from '../services/portfolio.service'
 import { getDb } from '../db/database'
 import { safeHandle } from './safe-handle'
@@ -314,11 +315,19 @@ export function registerSqlHandlers() {
   })
 
   safeHandle('sql:load-dataset', async (_, { sandboxId, datasetId, type, userId }) => {
-    if (type === 'bundled') {
-      return await SqlService.loadBundledDataset(sandboxId, datasetId)
-    } else {
-      return await SqlService.loadImportedDataset(sandboxId, userId, datasetId)
+    const isUserDb = typeof sandboxId === 'string' && sandboxId.startsWith(UserDb.SANDBOX_PREFIX)
+    if (isUserDb) {
+      const opened = await UserDb.openUserDatabase(userId, sandboxId)
+      if (!opened.success) return opened
     }
+    const res = type === 'bundled'
+      ? await SqlService.loadBundledDataset(sandboxId, datasetId)
+      : await SqlService.loadImportedDataset(sandboxId, userId, datasetId)
+    if (isUserDb && res.success) {
+      const saved = await UserDb.persistUserDatabase(userId, sandboxId)
+      if (!saved.success) return { success: false, error: saved.error }
+    }
+    return res
   })
 
   safeHandle('sql:history', async (_, { userId, limit }) => {
@@ -334,6 +343,23 @@ export function registerSqlHandlers() {
       SELECT * FROM imported_datasets WHERE user_id = ? ORDER BY imported_at DESC
     `).all(userId)
     return { bundled, imported }
+  })
+
+  // ── My Databases (databases built from scratch) ──
+  safeHandle('userdb:list', async (_, userId: string) => UserDb.listUserDatabases(userId))
+  safeHandle('userdb:create', async (_, { userId, name }) => UserDb.createUserDatabase(userId, name))
+  safeHandle('userdb:rename', async (_, { userId, dbId, name }) => UserDb.renameUserDatabase(userId, dbId, name))
+  safeHandle('userdb:delete', async (_, { userId, dbId }) => UserDb.deleteUserDatabase(userId, dbId))
+  safeHandle('userdb:describe', async (_, { userId, dbId }) => UserDb.describeUserDatabase(userId, dbId))
+  safeHandle('userdb:export', async (_, { userId, dbId }) => {
+    const src = await UserDb.exportUserDatabasePath(userId, dbId)
+    if (!src.success || !src.path) return src
+    const win = BrowserWindow.getFocusedWindow()
+    const opts = { title: 'Export database', defaultPath: src.name, filters: [{ name: 'SQLite database', extensions: ['sqlite', 'db'] }] }
+    const pick = win ? await dialog.showSaveDialog(win, opts) : await dialog.showSaveDialog(opts)
+    if (pick.canceled || !pick.filePath) return { success: false, cancelled: true }
+    require('fs').copyFileSync(src.path, pick.filePath)
+    return { success: true, savedTo: pick.filePath }
   })
 
   safeHandle('sql:close-sandbox', async (_, sandboxId: string) => {
@@ -405,9 +431,18 @@ export function registerAiHandlers() {
     return { provider: AiService.getActiveProvider(userId) }
   })
 
+  safeHandle('ai:list-models', async (_, { userId, provider }) => {
+    return AiService.listModels(userId, provider)
+  })
+
   safeHandle('ai:set-provider', async (_, { provider }) => {
     const db = getDb()
-    db.prepare("UPDATE app_settings SET value = ? WHERE key = 'ai_provider'").run(provider)
+    // UPSERT, not UPDATE: nothing seeds an 'ai_provider' row, and a bare UPDATE on a missing row
+    // changes nothing - the Settings screen showed the new provider while the AI kept using the default.
+    db.prepare(`
+      INSERT INTO app_settings (key, value) VALUES ('ai_provider', ?)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')
+    `).run(provider)
     return { success: true }
   })
 }

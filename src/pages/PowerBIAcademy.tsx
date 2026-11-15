@@ -6,6 +6,7 @@ import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
 import { PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'
+import { AsideSplit } from '../components/ui/SplitPane'
 import type { Lesson } from '../types'
 
 export default function PowerBIAcademy() {
@@ -50,7 +51,10 @@ export default function PowerBIAcademy() {
             <Brain size={12} /> {showInstructor ? 'Hide' : 'Ask'} Instructor
           </button>
         </div>
-        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', overflow: 'hidden' }}>
+          <AsideSplit id="powerbi-ai" asidePx={320} minMain={320}
+            aside={showInstructor && <InstructorPanel context={{ type: 'lesson', lesson: activeLesson.title }} />}
+            main={
           <div style={{ flex: 1, overflow: 'auto', padding: 24 }}>
             <div style={{ maxWidth: 680 }}>
               <LessonTheory markdown={activeLesson.theory_md} />
@@ -76,11 +80,7 @@ export default function PowerBIAcademy() {
               </button>
             </div>
           </div>
-          {showInstructor && (
-            <div style={{ width: 300, flexShrink: 0 }}>
-              <InstructorPanel context={{ type: 'lesson', lesson: activeLesson.title }} />
-            </div>
-          )}
+            } />
         </div>
       </div>
     )

@@ -8,6 +8,7 @@ import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
 import { PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'
+import { AsideSplit } from '../components/ui/SplitPane'
 
 type Screen = 'list' | 'editor'
 
@@ -274,7 +275,10 @@ function ProjectEditor({ project, onBack, onSave }: { project: any; onBack: () =
         </div>
       </div>
 
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', overflow: 'hidden' }}>
+        <AsideSplit id="projects-ai" asidePx={290} minMain={320}
+          aside={showInstructor && <InstructorPanel context={{ type: 'exercise', exercise: form.title }} />}
+          main={
         <div style={{ flex: 1, overflow: 'auto', padding: 24 }}>
           <div style={{ maxWidth: 700 }}>
             <Field label="Project Title"><input className="input" value={form.title} onChange={set('title')} /></Field>
@@ -299,12 +303,7 @@ function ProjectEditor({ project, onBack, onSave }: { project: any; onBack: () =
             </div>
           </div>
         </div>
-
-        {showInstructor && (
-          <div style={{ width: 290, flexShrink: 0 }}>
-            <InstructorPanel context={{ type: 'exercise', exercise: form.title }} />
-          </div>
-        )}
+          } />
       </div>
     </div>
   )

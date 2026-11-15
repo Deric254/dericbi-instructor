@@ -168,6 +168,17 @@ CREATE TABLE IF NOT EXISTS bundled_datasets (
 -- ─────────────────────────────────────────────
 -- USER IMPORTED DATASETS
 -- ─────────────────────────────────────────────
+-- Databases a learner builds from scratch in the SQL screen. The data itself lives in a .sqlite file
+-- under userData/user-databases/; this table is the index (name, owner, timestamps).
+CREATE TABLE IF NOT EXISTS user_databases (
+  id          TEXT PRIMARY KEY,
+  user_id     TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name        TEXT NOT NULL,
+  file_name   TEXT NOT NULL,
+  created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS imported_datasets (
   id           TEXT PRIMARY KEY,
   user_id      TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,

@@ -11,7 +11,9 @@ import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
 import { PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'
+import { SplitPane, LessonWorkspace } from '../components/ui/SplitPane'
 import type { Lesson } from '../types'
+import { runPythonCaptured, type PythonRunResult } from '../lib/pythonRunner'
 
 type View = 'lessons' | 'playground'
 type RuntimeStatus = 'idle' | 'loading' | 'ready' | 'running' | 'error'
@@ -56,61 +58,15 @@ function usePyodide() {
     }
   }, [status])
 
-  const runCode = useCallback(async (code: string): Promise<{
-    output: string; error: string | null; exec_ms: number
-  }> => {
+  const runCode = useCallback(async (code: string): Promise<PythonRunResult> => {
     if (!pyodideRef.current) {
       return { output: '', error: 'Python runtime not loaded.', exec_ms: 0 }
     }
-
     setStatus('running')
-    const start = Date.now()
-
     try {
-      // Redirect stdout/stderr
-      pyodideRef.current.runPython(`
-import sys, io
-_stdout_capture = io.StringIO()
-_stderr_capture = io.StringIO()
-sys.stdout = _stdout_capture
-sys.stderr = _stderr_capture
-      `)
-
-      let result = ''
-      try {
-        const out = pyodideRef.current.runPython(code)
-        if (out !== undefined && out !== null) {
-          result = String(out)
-        }
-      } catch (err: any) {
-        // Restore stdout before reading error
-        pyodideRef.current.runPython(`
-sys.stdout = sys.__stdout__
-sys.stderr = sys.__stderr__
-        `)
-        setStatus('ready')
-        return { output: '', error: err.message, exec_ms: Date.now() - start }
-      }
-
-      const stdout = pyodideRef.current.runPython('_stdout_capture.getvalue()')
-      const stderr = pyodideRef.current.runPython('_stderr_capture.getvalue()')
-
-      // Restore
-      pyodideRef.current.runPython(`
-sys.stdout = sys.__stdout__
-sys.stderr = sys.__stderr__
-      `)
-
-      const output = [stdout, result].filter(Boolean).join('\n').trim()
+      return runPythonCaptured(pyodideRef.current, code)
+    } finally {
       setStatus('ready')
-      return {
-        output,
-        error: stderr || null,
-        exec_ms: Date.now() - start,
-      }
-    } catch (err: any) {
-      setStatus('ready')
-      return { output: '', error: err.message, exec_ms: Date.now() - start }
     }
   }, [])
 
@@ -185,9 +141,9 @@ export default function PythonAcademy() {
           />
         )}
         {view === 'playground' && (
-          <div style={{ height: '100%', display: 'flex', overflow: 'hidden' }}>
-            {activeLessonId && (
-              <div style={{ width: 340, flexShrink: 0, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <LessonWorkspace id="py-lesson" hasLesson={!!activeLessonId}
+            lesson={activeLessonId && (
+              <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
                 <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
                   <button onClick={() => { setActiveLessonId(null); setView('lessons') }} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: 12, padding: 0, marginBottom: 10 }}>
                     ← Back to lessons
@@ -215,10 +171,8 @@ export default function PythonAcademy() {
                 </div>
               </div>
             )}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <PythonPlayground contextLessonId={activeLessonId ?? undefined} />
-            </div>
-          </div>
+            workspace={<PythonPlayground contextLessonId={activeLessonId ?? undefined} />}
+          />
         )}
       </div>
     </div>
@@ -456,9 +410,9 @@ function PythonPlayground({ contextLessonId }: { contextLessonId?: string }) {
       </div>
 
       {/* Editor + output split */}
-      <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        {/* Editor */}
-        <div style={{ flex: 1, borderRight: '1px solid var(--border)' }}>
+      <SplitPane id="py-editor-output" defaultRatio={0.62} minFirst={260} minSecond={200} stackBelow={720}
+      first={
+        <div style={{ flex: 1, minHeight: 0 }}>
           <Editor
             height="100%"
             language="python"
@@ -474,13 +428,15 @@ function PythonPlayground({ contextLessonId }: { contextLessonId?: string }) {
               lineNumbers: 'on',
               suggestOnTriggerCharacters: true,
               tabSize: 4,
+              automaticLayout: true,
             }}
           />
         </div>
-
-        {/* Output terminal */}
+      }
+      second={
+        /* Output terminal */
         <div style={{
-          width: 400, flexShrink: 0,
+          flex: 1, minHeight: 0,
           display: 'flex', flexDirection: 'column',
           background: '#0d1117',
         }}>
@@ -543,7 +499,7 @@ function PythonPlayground({ contextLessonId }: { contextLessonId?: string }) {
             </div>
           )}
         </div>
-      </div>
+      } />
     </div>
   )
 }
