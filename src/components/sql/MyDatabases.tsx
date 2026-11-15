@@ -21,6 +21,7 @@ CREATE TABLE customers (
 INSERT INTO customers (name, city) VALUES ('Amina', 'Nairobi'), ('Brian', 'Mombasa');
 SELECT * FROM customers;`
 
+const LAST_KEY = 'dbi.mydb.last'
 const label: React.CSSProperties = { fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }
 
 export default function MyDatabases() {
@@ -32,6 +33,9 @@ export default function MyDatabases() {
   const [result, setResult] = useState<SqlResult | null>(null)
   const [running, setRunning] = useState(false)
   const [designer, setDesigner] = useState(false)
+  // Electron cannot show the browser's naming box, so naming happens in our own dialog.
+  const [deleting, setDeleting] = useState<Db | null>(null)
+  const [naming, setNaming] = useState<{ mode: 'create' } | { mode: 'rename'; db: Db } | null>(null)
   const [datasets, setDatasets] = useState<{ bundled: any[]; imported: any[] }>({ bundled: [], imported: [] })
   const activeRef = useRef<Db | null>(null)
   activeRef.current = active
@@ -61,40 +65,47 @@ export default function MyDatabases() {
 
   const open = async (d: Db) => {
     if (activeRef.current && activeRef.current.id !== d.id) window.api.sql.closeSandbox(sandbox(activeRef.current)).catch(() => {})
-    setActive(d); setResult(null)
+    setActive(d); setResult(null); setTables([])
+    try { window.localStorage.setItem(LAST_KEY, d.id) } catch { /* remembering is optional */ }
     await refreshSchema(d)
   }
 
-  const create = async () => {
-    if (!user) return
-    const name = window.prompt('Name your new database (for example: My Clinic, Shop Sales, School Records)')
-    if (name === null) return
-    const r = await window.api.userdb.create(user.id, name)
-    if (!r.success) { notify.error('Could not create the database', r.error); return }
-    await refreshList()
-    const fresh: Db = { ...r.database }
-    await open(fresh)
-    setQuery(STARTER)
-    notify.success(`Created "${fresh.name}"`)
-  }
+  // Coming back to this tab, carry on where the student left off instead of showing an empty screen.
+  useEffect(() => {
+    if (!dbs || active || dbs.length === 0) return
+    let last: string | null = null
+    try { last = window.localStorage.getItem(LAST_KEY) } catch { /* ignore */ }
+    open(dbs.find((d) => d.id === last) ?? dbs[0])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dbs])
 
-  const rename = async (d: Db) => {
-    if (!user) return
-    const name = window.prompt('New name', d.name)
-    if (name === null || name.trim() === d.name) return
+  /** Returns an error message to show in the dialog, or null when it worked (the dialog then closes). */
+  const submitName = async (name: string): Promise<string | null> => {
+    if (!user || !naming) return 'Please sign in again.'
+    if (naming.mode === 'create') {
+      const r = await window.api.userdb.create(user.id, name)
+      if (!r.success) return r.error ?? 'Could not create the database.'
+      await refreshList()
+      await open({ ...r.database })
+      setQuery(STARTER)
+      notify.success(`Created "${r.database.name}"`)
+      return null
+    }
+    const d = naming.db
     const r = await window.api.userdb.rename(user.id, d.id, name)
-    if (!r.success) { notify.error('Could not rename', r.error); return }
+    if (!r.success) return r.error ?? 'Could not rename.'
     await refreshList()
-    if (active?.id === d.id) setActive({ ...d, name: name.trim().replace(/\s+/g, ' ') })
+    if (activeRef.current?.id === d.id) setActive({ ...d, name: name.trim().replace(/\s+/g, ' ') })
+    return null
   }
 
-  const remove = async (d: Db) => {
-    if (!user) return
-    if (!window.confirm(`Delete "${d.name}" and everything in it? This cannot be undone.\n\nTip: use Export first if you want a copy.`)) return
+  const remove = async (d: Db): Promise<string | null> => {
+    if (!user) return 'Please sign in again.'
     const r = await window.api.userdb.delete(user.id, d.id)
-    if (!r.success) { notify.error('Could not delete', r.error); return }
-    if (active?.id === d.id) { setActive(null); setTables([]); setResult(null) }
+    if (!r.success) return r.error ?? 'Could not delete.'
+    if (activeRef.current?.id === d.id) { setActive(null); setTables([]); setResult(null) }
     await refreshList()
+    return null
   }
 
   const exportDb = async (d: Db) => {
@@ -128,7 +139,7 @@ export default function MyDatabases() {
     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <div style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={label}>My databases</span>
-        <button className="btn btn-primary btn-sm" onClick={create}><Plus size={12} /> New</button>
+        <button className="btn btn-primary btn-sm" onClick={() => setNaming({ mode: 'create' })}><Plus size={12} /> New</button>
       </div>
       <div style={{ flex: 1, overflow: 'auto', padding: 6 }}>
         {dbs === null && <div style={{ padding: 12, fontSize: 12, color: 'var(--text-muted)' }}><Loader size={12} /> Loading…</div>}
@@ -151,9 +162,9 @@ export default function MyDatabases() {
               <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{d.table_count} table{d.table_count === 1 ? '' : 's'} · {(d.size_bytes / 1024).toFixed(0)} KB</div>
               {active?.id === d.id && (
                 <div style={{ display: 'flex', gap: 4, marginTop: 6 }} onClick={(e) => e.stopPropagation()}>
-                  <button className="btn btn-ghost btn-sm" title="Rename" onClick={() => rename(d)}><Pencil size={11} /></button>
+                  <button className="btn btn-ghost btn-sm" title="Rename" onClick={() => setNaming({ mode: 'rename', db: d })}><Pencil size={11} /></button>
                   <button className="btn btn-ghost btn-sm" title="Export as a .sqlite file" onClick={() => exportDb(d)}><Download size={11} /></button>
-                  <button className="btn btn-ghost btn-sm" title="Delete" onClick={() => remove(d)}><Trash2 size={11} /></button>
+                  <button className="btn btn-ghost btn-sm" title="Delete" onClick={() => setDeleting(d)}><Trash2 size={11} /></button>
                 </div>
               )}
             </div>
@@ -210,6 +221,11 @@ export default function MyDatabases() {
       first={
         <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           <div style={{ padding: '6px 10px', display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap', borderBottom: '1px solid var(--border)' }}>
+            <Database size={13} color="var(--accent)" />
+            <select className="input" aria-label="Database to work in" value={active.id} style={{ fontSize: 12, maxWidth: 200 }}
+              onChange={(e) => { const d = dbs?.find((x) => x.id === e.target.value); if (d) open(d) }}>
+              {dbs?.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
+            </select>
             <button className="btn btn-primary btn-sm" onClick={run} disabled={running}>{running ? <Loader size={12} /> : <Play size={12} />} Run (Ctrl+Enter)</button>
             <span style={{ ...label, marginLeft: 6 }}>Starters:</span>
             {snippets(table).map((s) => <button key={s.label} className="btn btn-ghost btn-sm" onClick={() => setQuery(s.sql)}>{s.label}</button>)}
@@ -250,6 +266,9 @@ export default function MyDatabases() {
       <SplitPane id="sql-mydb-side" defaultFirstPx={260} minFirst={190} minSecond={420} stackBelow={640}
         first={side}
         second={<div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>{main}</div>} />
+      {naming && <NameDialog title={naming.mode === 'create' ? 'Name your new database' : 'Rename database'} initial={naming.mode === 'rename' ? naming.db.name : ''}
+        hint="For example: My Clinic, Shop Sales, School Records" confirm={naming.mode === 'create' ? 'Create' : 'Save'} onSubmit={submitName} onClose={() => setNaming(null)} />}
+      {deleting && <ConfirmDialog title={`Delete "${deleting.name}"?`} body="Everything in it will be removed and this cannot be undone. Tip: use Export first if you want a copy." confirm="Delete" onConfirm={() => remove(deleting)} onClose={() => setDeleting(null)} />}
       {designer && active && <TableDesigner onClose={() => setDesigner(false)} onUse={(sql) => { setQuery(sql); setDesigner(false) }} />}
     </>
   )
@@ -295,6 +314,62 @@ function TableDesigner({ onClose, onUse }: { onClose: () => void; onUse: (sql: s
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
           <button className="btn btn-secondary btn-sm" onClick={onClose}>Cancel</button>
           <button className="btn btn-primary btn-sm" onClick={submit}>Create SQL</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function NameDialog({ title, initial, hint, confirm, onSubmit, onClose }: {
+  title: string; initial: string; hint: string; confirm: string
+  onSubmit: (name: string) => Promise<string | null>; onClose: () => void
+}) {
+  const [name, setName] = useState(initial)
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+  const submit = async () => {
+    if (busy) return
+    setBusy(true); setError('')
+    try {
+      const err = await onSubmit(name)
+      if (err) setError(err); else onClose()
+    } catch (e: any) { setError(e?.message || 'Something went wrong. Try again.') }
+    finally { setBusy(false) }
+  }
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={onClose}>
+      <div role="dialog" aria-label={title} onClick={(e) => e.stopPropagation()} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 18, width: 'min(420px, 100%)' }}>
+        <h3 style={{ color: 'var(--text-primary)', marginBottom: 4 }}>{title}</h3>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>{hint}</p>
+        <input className="input" autoFocus maxLength={60} placeholder="Database name" value={name} style={{ width: '100%' }}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') submit(); if (e.key === 'Escape') onClose() }} />
+        {error && <p role="alert" style={{ color: 'var(--danger, #f87171)', fontSize: 12, marginTop: 8 }}>{error}</p>}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
+          <button className="btn btn-secondary btn-sm" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary btn-sm" onClick={submit} disabled={busy}>{busy ? 'Working…' : confirm}</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ConfirmDialog({ title, body, confirm, onConfirm, onClose }: { title: string; body: string; confirm: string; onConfirm: () => Promise<string | null>; onClose: () => void }) {
+  const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
+  const go = async () => {
+    setBusy(true); setError('')
+    try { const err = await onConfirm(); if (err) setError(err); else onClose() } catch (e: any) { setError(e?.message || 'Something went wrong.') } finally { setBusy(false) }
+  }
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }} onClick={onClose}>
+      <div role="alertdialog" aria-label={title} onClick={(e) => e.stopPropagation()} style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 10, padding: 18, width: 'min(420px, 100%)' }}>
+        <h3 style={{ color: 'var(--text-primary)', marginBottom: 6 }}>{title}</h3>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6 }}>{body}</p>
+        {error && <p role="alert" style={{ color: 'var(--danger, #f87171)', fontSize: 12, marginTop: 8 }}>{error}</p>}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 14 }}>
+          <button className="btn btn-secondary btn-sm" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary btn-sm" onClick={go} disabled={busy}>{busy ? 'Working…' : confirm}</button>
         </div>
       </div>
     </div>

@@ -510,7 +510,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
             display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0,
           }}>
             {result.correct ? <CheckCircle size={14} /> : <AlertCircle size={14} />}
-            <span style={{ flex: 1 }}>{feedback ?? (result.correct ? 'Correct!' : 'Not quite right.')}</span>
+            <span style={{ flex: 1, whiteSpace: 'pre-wrap', maxHeight: 130, overflow: 'auto' }}>{feedback ?? (result.correct ? 'Correct!' : 'Not quite right.')}</span>
             {result.row_count !== undefined && (
               <span style={{ fontSize: 11, opacity: 0.8 }}>{result.row_count} rows</span>
             )}

@@ -179,3 +179,21 @@ test('every SELECT exercise answer in the SQL course returns rows through the sa
   }
   assert.ok(checked >= 20, `expected the course's SELECT exercises, found ${checked}`)
 })
+
+test('no screen uses window.prompt() or alert() (Electron does not support prompt: the button silently does nothing)', () => {
+  const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]))
+  const ORPHANS = ['LicenseGate.tsx', 'PayWindow.tsx']
+  for (const f of walk(path.join(ROOT, 'src')).filter((x) => /\.tsx?$/.test(x) && !ORPHANS.includes(path.basename(x)))) {
+    const text = fs.readFileSync(f, 'utf8')
+    assert.doesNotMatch(text, /\bwindow\.prompt\(|[^.\w]prompt\(['"`]/, `${path.relative(ROOT, f)} uses prompt()`)
+    assert.doesNotMatch(text, /\bwindow\.alert\(|[^.\w]alert\(/, `${path.relative(ROOT, f)} uses alert()`)
+  }
+})
+
+test('My Databases: naming and deleting use in-app dialogs, there is a database switcher, and the last one is reopened', () => {
+  const page = src('src/components/sql/MyDatabases.tsx')
+  assert.match(page, /function NameDialog/)
+  assert.match(page, /function ConfirmDialog/)
+  assert.match(page, /aria-label="Database to work in"/)
+  assert.match(page, /dbi\.mydb\.last/)
+})

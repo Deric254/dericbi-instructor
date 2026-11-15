@@ -273,6 +273,79 @@ async function ensureDefaultDatasetsLoaded(sandboxId: string): Promise<void> {
   }
 }
 
+// ─────────────────────────────────────────────
+// COMPARING A STUDENT'S ANSWER WITH THE MODEL ANSWER
+// ─────────────────────────────────────────────
+// A correct query can legitimately differ from the model answer in ways a student cannot be expected to know:
+// the order rows come back in when the task never asked for sorting, the order of columns, or the 15th decimal
+// of a sum. None of those are mistakes, so they must not be marked wrong. When the answer IS wrong, the message
+// says exactly how it differs (columns, row count, first differing row) so the student can see why.
+
+const cell = (v: any): string => {
+  if (v === null || v === undefined) return 'NULL'
+  if (typeof v === 'number' || (typeof v === 'string' && v.trim() !== '' && Number.isFinite(Number(v)))) {
+    const n = Math.round(Number(v) * 1e6) / 1e6
+    return String(Object.is(n, -0) ? 0 : n)
+  }
+  return String(v)
+}
+const rowKey = (cells: string[]) => JSON.stringify(cells)
+const matrix = (rows: any[]) => rows.map((r) => Object.values(r).map(cell))
+const sameMultiset = (a: string[], b: string[]) => {
+  if (a.length !== b.length) return false
+  const x = [...a].sort(); const y = [...b].sort()
+  return x.every((v, i) => v === y[i])
+}
+const preview = (cols: string[], cells: string[]) => cols.map((c, i) => `${c} = ${cells[i] ?? '?'}`).join(', ')
+
+/** True when the model answer sorts its output, so the student's rows must come back in that order too. */
+export function requiresOrder(solutionSql: string): boolean {
+  const noStrings = solutionSql.replace(/'(?:[^']|'')*'/g, "''").replace(/--[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '')
+  return /\border\s+by\b/i.test(noStrings)
+}
+
+export function compareAnswers(user: { columns: string[]; rows: any[] }, expected: { columns: string[]; rows: any[] }, ordered: boolean): ValidationResult {
+  const u = matrix(user.rows); const e = matrix(expected.rows)
+  const base = { actual_rows: user.rows, expected_rows: expected.rows }
+  const rowsEqual = (a: string[][], b: string[][], inOrder: boolean) => {
+    if (a.length !== b.length) return false
+    return inOrder ? a.every((r, i) => rowKey(r) === rowKey(b[i])) : sameMultiset(a.map(rowKey), b.map(rowKey))
+  }
+  const ok = (note = '') => ({ correct: true, score: 100, feedback: `Correct! Your query produces the expected result.${note}`, ...base })
+
+  if (rowsEqual(u, e, ordered)) return ok()
+
+  // Same rows and columns, but sorted differently when the task asked for a particular order.
+  if (ordered && rowsEqual(u, e, false)) {
+    return { correct: false, score: 50, ...base, feedback: 'You have the right rows, but not in the order the task asks for. Check your ORDER BY (the column to sort by, and ASC or DESC).' }
+  }
+  // Same data with the columns in another order (e.g. age, name instead of name, age): the substance is right.
+  if (user.columns.length === expected.columns.length && user.columns.length > 1) {
+    const perm = (rows: string[][]) => rows.map((r) => rowKey([...r].sort()))
+    const a = perm(u); const b = perm(e)
+    if (ordered ? a.length === b.length && a.every((v, i) => v === b[i]) : sameMultiset(a, b)) {
+      return ok(' (Your columns are in a different order from the model answer; that is fine.)')
+    }
+  }
+
+  if (user.columns.length !== expected.columns.length) {
+    return { correct: false, score: 0, ...base, feedback:
+      `Your query returns ${user.columns.length} column${user.columns.length === 1 ? '' : 's'} (${user.columns.join(', ') || 'none'}) but the task expects ${expected.columns.length} (${expected.columns.join(', ') || 'none'}). Check what follows SELECT.` }
+  }
+  if (u.length !== e.length) {
+    const sample = e.slice(0, 2).map((r) => `  ${preview(expected.columns, r)}`).join('\n')
+    return { correct: false, score: 0, ...base, feedback:
+      `Expected ${e.length} row${e.length === 1 ? '' : 's'}, got ${u.length}. ${u.length > e.length ? 'Your query returns too many rows: check your WHERE filter or JOIN.' : 'Your query is missing rows: check your WHERE filter or JOIN.'}${sample ? `\nThe first expected row${e.length > 1 ? 's are' : ' is'}:\n${sample}` : ''}` }
+  }
+  // Same shape, different values: show the first row that differs.
+  const mismatchAt = ordered
+    ? u.findIndex((r, i) => rowKey(r) !== rowKey(e[i]))
+    : (() => { const have = new Set(e.map(rowKey)); return u.findIndex((r) => !have.has(rowKey(r))) })()
+  const i = Math.max(0, mismatchAt)
+  return { correct: false, score: 50, ...base, feedback:
+    `The number of rows matches (${u.length}) but some values differ.\nYour row ${i + 1}:     ${preview(user.columns, u[i])}\nExpected row: ${preview(expected.columns, ordered ? e[i] : (e.find((r) => !new Set(u.map(rowKey)).has(rowKey(r))) ?? e[i]))}\nCheck your calculation or filter.` }
+}
+
 export async function validateSQLAnswer(params: {
   sandboxId: string; userQuery: string; solutionQuery: string
   evaluationMode: string; expectedOutput?: any
@@ -287,35 +360,38 @@ export async function validateSQLAnswer(params: {
 
     const sandbox = await getSandbox(params.sandboxId)
 
-    const runQuery = (q: string): any[] => {
+    const runQuery = (q: string): { columns: string[]; rows: any[] } => {
       const res = execBounded(sandbox, q, { maxRows: 100_000 })
       if (res[0]?.truncated) throw new Error(`Your query returned far too many rows or ran too long. ${TRUNCATION_HELP}`)
-      if (!res?.length) return []
+      if (!res?.length) return { columns: [], rows: [] }
       const { columns, values } = res[0]
-      return values.map((v: any[]) => {
-        const o: any = {}
-        columns.forEach((c: string, i: number) => { o[c] = v[i] })
-        return o
-      })
+      return {
+        columns,
+        rows: values.map((v: any[]) => {
+          const o: any = {}
+          columns.forEach((c: string, i: number) => { o[c] = v[i] })
+          return o
+        }),
+      }
     }
 
     if (params.evaluationMode === 'exact' || params.evaluationMode === 'result_match') {
-      let userRows: any[]
-      try { userRows = runQuery(params.userQuery) }
+      let user: { columns: string[]; rows: any[] }
+      try { user = runQuery(params.userQuery) }
       catch (e: any) { return { correct: false, score: 0, feedback: `Query error: ${e.message}` } }
 
-      const expected = params.evaluationMode === 'result_match' && params.expectedOutput
-        ? params.expectedOutput
-        : runQuery(params.solutionQuery)
+      if (!user.columns.length) {
+        return { correct: false, score: 0, feedback: 'Your query did not return a table of results. Start with SELECT, and run exactly the statement the task describes.' }
+      }
 
-      const userStr = JSON.stringify(userRows.map(r => Object.values(r).map(String)))
-      const expStr = JSON.stringify(expected.map((r: any) => Object.values(r).map(String)))
-
-      if (userStr === expStr) return { correct: true, score: 100, feedback: 'Correct! Your query produces the expected result.', actual_rows: userRows }
-
-      const sameCount = userRows.length === expected.length
-      if (sameCount) return { correct: false, score: 50, feedback: `Row count matches (${userRows.length}) but some values differ. Check your calculations or filters.`, actual_rows: userRows, expected_rows: expected }
-      return { correct: false, score: 0, feedback: `Expected ${expected.length} rows, got ${userRows.length}. Review your query logic.`, actual_rows: userRows, expected_rows: expected }
+      let expected: { columns: string[]; rows: any[] }
+      if (params.evaluationMode === 'result_match' && params.expectedOutput) {
+        const rows: any[] = params.expectedOutput
+        expected = { columns: rows[0] ? Object.keys(rows[0]) : user.columns, rows }
+      } else {
+        expected = runQuery(params.solutionQuery)
+      }
+      return compareAnswers(user, expected, requiresOrder(params.solutionQuery))
     }
 
     return { correct: false, score: -1, feedback: 'ai_review_required' }
