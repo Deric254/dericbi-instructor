@@ -350,6 +350,8 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
   const [hint, setHint] = useState<string | null>(null)
   const [running, setRunning] = useState(false)
   const [correct, setCorrect] = useState<boolean | null>(null)
+  // What the student's query actually returns, shown under the editor (SELECT-style queries only).
+  const [output, setOutput] = useState<SqlResult | null>(null)
   const sandboxId = useRef(`ex_${exercise?.id}_${user?.id}`)
 
   useEffect(() => {
@@ -359,6 +361,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
     setHint(null)
     setHintsUsed(0)
     setCorrect(null)
+    setOutput(null)
   }, [exercise?.id])
 
   // Each exercise gets its own in-memory sql.js sandbox (loaded with the
@@ -377,6 +380,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
     setRunning(true)
     setResult(null)
     setFeedback(null)
+    setOutput(null)
 
     try {
       const res = await window.api.exercises.submit({
@@ -396,6 +400,12 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
 
       if (res.new_achievements?.length > 0) {
         notify.success('Achievement Unlocked!')
+      }
+
+      // Show the student what their query returned. Only for queries that read data: running anything that
+      // writes a second time (after grading) could change the practice tables twice.
+      if (lessonModule === 'sql' && /^(select|with|values|pragma|explain)\b/i.test(stripSqlComments(code))) {
+        try { setOutput(await window.api.sql.execute(sandboxId.current, code, user.id)) } catch { /* the grading result is already shown */ }
       }
     } catch (err: any) {
       // Without this, any unexpected failure (not a normal wrong-answer
@@ -430,7 +440,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
     <SplitPane id="sql-exercise-ai" defaultRatio={0.72} minFirst={340} minSecond={240} stackBelow={640}
       first={
       /* Left: task + editor + results */
-      <SplitPane id="sql-exercise-task" direction="vertical" defaultRatio={0.3} minFirst={90} minSecond={200}
+      <SplitPane id="sql-exercise-task" direction="vertical" defaultRatio={0.22} minFirst={90} minSecond={200}
       first={
         /* Prompt */
         <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: '14px 18px', background: 'var(--bg-surface)' }}>
@@ -467,8 +477,8 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
       }
       second={
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Editor */}
-        <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+        {/* Editor, with the query output underneath (drag the divider to resize) */}
+        <ExerciseEditorArea showOutput={lessonModule === 'sql'} output={output} running={running}>
           <Editor
             height="100%"
             language={lessonModule === 'sql' ? 'sql' : 'python'}
@@ -487,7 +497,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
               automaticLayout: true,
             }}
           />
-        </div>
+        </ExerciseEditorArea>
 
         {/* Results */}
         {result && (
@@ -760,6 +770,44 @@ function SqlPlayground() {
       </div>
       } />
       } />
+  )
+}
+
+/** Leading whitespace and comments removed, so the first real keyword can be inspected. */
+function stripSqlComments(sql: string): string {
+  let t = sql
+  for (;;) {
+    t = t.replace(/^\s+/, '')
+    if (t.startsWith('--')) { const i = t.indexOf('\n'); t = i === -1 ? '' : t.slice(i + 1); continue }
+    if (t.startsWith('/*')) { const i = t.indexOf('*/'); t = i === -1 ? '' : t.slice(i + 2); continue }
+    return t
+  }
+}
+
+/** Editor on top; for SQL exercises the query output sits below it. */
+function ExerciseEditorArea({ children, showOutput, output, running }: {
+  children: React.ReactNode; showOutput: boolean; output: SqlResult | null; running: boolean
+}) {
+  const editor = <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>{children}</div>
+  if (!showOutput) return <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>{editor}</div>
+  return (
+    <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+      <SplitPane id="sql-exercise-editor-output" direction="vertical" defaultRatio={0.48} minFirst={110} minSecond={90}
+        first={editor}
+        second={
+          <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: 'var(--bg-surface)' }}>
+            <div style={{ padding: '5px 14px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--border)' }}>
+              Output{output?.success ? ` · ${output.row_count} row${output.row_count === 1 ? '' : 's'}` : ''}
+            </div>
+            <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
+              {!output && <div style={{ padding: 14, fontSize: 12, color: 'var(--text-muted)' }}>{running ? 'Running…' : 'Press Run to see what your query returns here.'}</div>}
+              {output && !output.success && <div style={{ padding: 14, fontSize: 12, color: 'var(--error)', fontFamily: 'var(--font-mono)', whiteSpace: 'pre-wrap' }}>{output.error}</div>}
+              {output?.success && output.notice && <div style={{ padding: '6px 14px', fontSize: 12, color: 'var(--warning)' }}>{output.notice}</div>}
+              {output?.success && output.rows && <ResultsGrid rows={output.rows} columns={output.columns ?? []} />}
+            </div>
+          </div>
+        } />
+    </div>
   )
 }
 

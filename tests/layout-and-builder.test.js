@@ -153,3 +153,29 @@ test('the SQL screen offers My Databases and still has its playground defaults t
   assert.match(page, /view === 'mydbs' && <MyDatabases/)
   assert.match(page, /useState\('(-- Write your SQL here[^']*)'\)/)
 })
+
+test('SQL exercises show what the query returned, and only re-run read-only queries to do so', () => {
+  const page = src('src/pages/SqlAcademy.tsx')
+  assert.match(page, /ExerciseEditorArea showOutput=\{lessonModule === 'sql'\}/)
+  assert.match(page, /\^\(select\|with\|values\|pragma\|explain\)\\b/i, 'writes must never be run a second time just to display them')
+  assert.match(page, /setOutput\(await window\.api\.sql\.execute\(sandboxId\.current, code, user\.id\)\)/)
+})
+
+test('every SELECT exercise answer in the SQL course returns rows through the same path the output panel uses', async () => {
+  const { boot, makeUser } = require('./helpers/harness')
+  const h = boot({ prefix: 'dbi-exout' })
+  const db = h.req('db/database'); await db.initDb(); makeUser(db, 'u')
+  await h.req('services/setup.service').runFirstTimeSetup(() => {})
+  const sql = h.req('services/sql.service')
+  const { lessons } = JSON.parse(fs.readFileSync(path.join(ROOT, 'content', 'sql', 'curriculum.json'), 'utf8'))
+  let checked = 0
+  for (const l of lessons) for (const e of l.exercises || []) {
+    const q = (e.solution || '').trim()
+    if (!/^(select|with)\b/i.test(q)) continue
+    const r = await sql.executeSQL({ sandboxId: `ex_${e.id}_u`, userId: 'u', query: q })
+    assert.equal(r.success, true, `${e.id}: ${r.error}`)
+    assert.ok(Array.isArray(r.rows) && r.columns.length > 0, `${e.id} shows nothing`)
+    checked++
+  }
+  assert.ok(checked >= 20, `expected the course's SELECT exercises, found ${checked}`)
+})
