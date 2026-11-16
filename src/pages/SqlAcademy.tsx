@@ -9,11 +9,13 @@ import {
 } from 'lucide-react'
 import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
-import { SplitPane } from '../components/ui/SplitPane'
+import { SplitPane, AsideSplit } from '../components/ui/SplitPane'
 import MyDatabases from '../components/sql/MyDatabases'
+import { registerSqlCompletion, refreshSqlSchema } from '../lib/sqlCompletion'
+import { explainPrompt } from '../lib/explainPrompt'
+import ComparePanel, { hasComparison, type Comparison } from '../components/sql/ComparePanel'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
-import { useInstructor } from '../hooks/useInstructor'
 import { PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'
 import type { Lesson, SqlResult } from '../types'
@@ -364,6 +366,8 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
     setOutput(null)
   }, [exercise?.id])
 
+  useEffect(() => { if (lessonModule === 'sql') refreshSqlSchema(user?.id, sandboxId.current) }, [exercise?.id, user?.id, lessonModule])
+
   // Each exercise gets its own in-memory sql.js sandbox (loaded with the
   // hospital dataset). Without closing it on unmount, every exercise a
   // student has ever attempted stays allocated for the entire app session
@@ -393,6 +397,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
 
       setResult(res.validation)
       setCorrect(res.validation.correct)
+      if (lessonModule === 'sql') refreshSqlSchema(user.id, sandboxId.current)
 
       if (res.validation.feedback && res.validation.feedback !== 'ai_review_required') {
         setFeedback(res.validation.feedback)
@@ -416,6 +421,13 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
     } finally {
       setRunning(false)
     }
+  }
+
+  // Starting over also restores the practice tables, in case a query (e.g. DROP TABLE) changed them.
+  const resetExercise = async () => {
+    setCode(''); setResult(null); setFeedback(null); setOutput(null); setCorrect(null)
+    try { await window.api.sql.closeSandbox(sandboxId.current) } catch (err) { console.error('[reset exercise]', err) }
+    if (lessonModule === 'sql') refreshSqlSchema(user?.id, sandboxId.current)
   }
 
   const getHint = async () => {
@@ -478,10 +490,11 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
       second={
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Editor, with the query output underneath (drag the divider to resize) */}
-        <ExerciseEditorArea showOutput={lessonModule === 'sql'} output={output} running={running}>
+        <ExerciseEditorArea showOutput={lessonModule === 'sql'} output={output} running={running} comparison={result && !result.correct ? result : null}>
           <Editor
             height="100%"
             language={lessonModule === 'sql' ? 'sql' : 'python'}
+            beforeMount={registerSqlCompletion}
             value={code}
             onChange={v => setCode(v ?? '')}
             theme="vs-dark"
@@ -538,7 +551,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
             <Lightbulb size={12} />
             Hint {hintsUsed > 0 ? `(${hintsUsed}/3)` : ''}
           </button>
-          <button className="btn btn-ghost btn-sm" onClick={() => setCode('')}>
+          <button className="btn btn-ghost btn-sm" onClick={resetExercise} title="Clear your answer and restore the practice tables">
             <RotateCcw size={12} /> Reset
           </button>
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -583,6 +596,8 @@ function SqlPlayground() {
   const [datasets, setDatasets] = useState<{ bundled: any[]; imported: any[] }>({ bundled: [], imported: [] })
   const [activeDataset, setActiveDataset] = useState<any>(null)
   const sandboxId = useRef(`playground_${user?.id}`)
+  const [tutorOpen, setTutorOpen] = useState(false)
+  const [tutorRequest, setTutorRequest] = useState<{ id: number; text: string } | undefined>()
 
   const loadDataset = async (ds: any, type: 'bundled' | 'imported') => {
     if (!user) return
@@ -590,6 +605,7 @@ function SqlPlayground() {
       const res = await window.api.sql.loadDataset(sandboxId.current, ds.id, type, user.id)
       if (res.success) {
         setActiveDataset({ ...ds, type })
+        refreshSqlSchema(user.id, sandboxId.current)
         setQuery(`-- Dataset: ${ds.name}\n-- Table: ${ds.table_name}\nSELECT * FROM ${ds.table_name} LIMIT 20;`)
         notify.success(`Loaded: ${ds.name}`)
       } else {
@@ -621,12 +637,26 @@ function SqlPlayground() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
+  const explain = () => {
+    setTutorOpen(true)
+    setTutorRequest((prev) => ({ id: (prev?.id ?? 0) + 1, text: explainPrompt(query, result) }))
+  }
+
+  // Closing the sandbox and loading the dataset again puts back any table a query changed or dropped.
+  const resetDataset = async () => {
+    if (!user || !activeDataset) return
+    try { await window.api.sql.closeSandbox(sandboxId.current) } catch (err) { console.error('[reset playground]', err) }
+    setResult(null)
+    await loadDataset(activeDataset, activeDataset.type)
+  }
+
   const runQuery = async () => {
     if (!user || !query.trim()) return
     setRunning(true)
     try {
       const res = await window.api.sql.execute(sandboxId.current, query, user.id)
       setResult(res)
+      if (res.success) refreshSqlSchema(user.id, sandboxId.current)
     } catch (err: any) {
       // Without this, any unexpected failure left the screen exactly as it
       // was before clicking Run — no error, no result, nothing visible.
@@ -678,6 +708,9 @@ function SqlPlayground() {
       </div>
       }
       second={
+      <AsideSplit id="sql-playground-ai" aside={tutorOpen && (
+        <InstructorPanel context={{ type: 'playground', lesson: 'sql', code: query }} request={tutorRequest} />
+      )} main={
       /* Editor above, results below - drag the divider to give either more room */
       <SplitPane id="sql-playground-main" direction="vertical" defaultRatio={0.45} minFirst={130} minSecond={150}
       first={
@@ -685,6 +718,7 @@ function SqlPlayground() {
           <Editor
             height="100%"
             language="sql"
+            beforeMount={registerSqlCompletion}
             value={query}
             onChange={v => setQuery(v ?? '')}
             theme="vs-dark"
@@ -707,6 +741,17 @@ function SqlPlayground() {
           <button className="btn btn-primary btn-sm" onClick={runQuery} disabled={running || !activeDataset}>
             {running ? <Loader size={12} className="animate-spin" /> : <Play size={12} />}
             {running ? 'Running…' : 'Run  ⌘↵'}
+          </button>
+          <button className="btn btn-secondary btn-sm" onClick={explain} disabled={!query.trim()} title="Ask the AI tutor to explain this query and its result">
+            <Brain size={12} /> Explain
+          </button>
+          {tutorOpen && (
+            <button className="btn btn-ghost btn-sm" onClick={() => setTutorOpen(false)} title="Hide the AI tutor">
+              <X size={12} /> Hide tutor
+            </button>
+          )}
+          <button className="btn btn-ghost btn-sm" onClick={resetDataset} disabled={!activeDataset || running} title="Reload the dataset, restoring any table a query changed">
+            <RotateCcw size={12} /> Reset
           </button>
           {activeDataset ? (
             <span style={{
@@ -769,7 +814,10 @@ function SqlPlayground() {
         </div>
       </div>
       } />
-      } />
+      }
+      />
+      }
+      />
   )
 }
 
@@ -784,26 +832,42 @@ function stripSqlComments(sql: string): string {
   }
 }
 
-/** Editor on top; for SQL exercises the query output sits below it. */
-function ExerciseEditorArea({ children, showOutput, output, running }: {
-  children: React.ReactNode; showOutput: boolean; output: SqlResult | null; running: boolean
+/** Editor on top; for SQL exercises the query output sits below it, with a side-by-side view after a wrong answer. */
+function ExerciseEditorArea({ children, showOutput, output, running, comparison }: {
+  children: React.ReactNode; showOutput: boolean; output: SqlResult | null; running: boolean; comparison: Comparison | null
 }) {
+  const [tab, setTab] = useState<'output' | 'compare'>('output')
+  const canCompare = hasComparison(comparison)
+  // A wrong answer opens the comparison; running again returns to the plain output.
+  useEffect(() => { setTab(canCompare ? 'compare' : 'output') }, [canCompare, comparison])
   const editor = <div style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>{children}</div>
   if (!showOutput) return <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>{editor}</div>
+  const tabStyle = (active: boolean): React.CSSProperties => ({
+    padding: '5px 14px', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', cursor: 'pointer',
+    background: 'transparent', border: 'none', borderBottom: `2px solid ${active ? 'var(--accent)' : 'transparent'}`,
+    color: active ? 'var(--text-primary)' : 'var(--text-muted)',
+  })
   return (
     <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
       <SplitPane id="sql-exercise-editor-output" direction="vertical" defaultRatio={0.48} minFirst={110} minSecond={90}
         first={editor}
         second={
           <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', background: 'var(--bg-surface)' }}>
-            <div style={{ padding: '5px 14px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--border)' }}>
-              Output{output?.success ? ` · ${output.row_count} row${output.row_count === 1 ? '' : 's'}` : ''}
+            <div style={{ display: 'flex', alignItems: 'center', borderBottom: '1px solid var(--border)' }}>
+              <button style={tabStyle(tab === 'output')} onClick={() => setTab('output')}>
+                Output{output?.success ? ` · ${output.row_count} row${output.row_count === 1 ? '' : 's'}` : ''}
+              </button>
+              {canCompare && <button style={tabStyle(tab === 'compare')} onClick={() => setTab('compare')}>Compare with expected</button>}
             </div>
             <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
-              {!output && <div style={{ padding: 14, fontSize: 12, color: 'var(--text-muted)' }}>{running ? 'Running…' : 'Press Run to see what your query returns here.'}</div>}
-              {output && !output.success && <div style={{ padding: 14, fontSize: 12, color: 'var(--error)', fontFamily: 'var(--font-mono)', whiteSpace: 'pre-wrap' }}>{output.error}</div>}
-              {output?.success && output.notice && <div style={{ padding: '6px 14px', fontSize: 12, color: 'var(--warning)' }}>{output.notice}</div>}
-              {output?.success && output.rows && <ResultsGrid rows={output.rows} columns={output.columns ?? []} />}
+              {tab === 'compare' && canCompare ? <ComparePanel comparison={comparison} /> : (
+                <>
+                  {!output && <div style={{ padding: 14, fontSize: 12, color: 'var(--text-muted)' }}>{running ? 'Running…' : 'Press Run to see what your query returns here.'}</div>}
+                  {output && !output.success && <div style={{ padding: 14, fontSize: 12, color: 'var(--error)', fontFamily: 'var(--font-mono)', whiteSpace: 'pre-wrap' }}>{output.error}</div>}
+                  {output?.success && output.notice && <div style={{ padding: '6px 14px', fontSize: 12, color: 'var(--warning)' }}>{output.notice}</div>}
+                  {output?.success && output.rows && <ResultsGrid rows={output.rows} columns={output.columns ?? []} />}
+                </>
+              )}
             </div>
           </div>
         } />

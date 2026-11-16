@@ -5,6 +5,7 @@ import { Database, Plus, Play, Trash2, Download, Pencil, Table2, Key, Loader, X 
 import { useAuthStore, notify } from '../../store'
 import { SplitPane } from '../ui/SplitPane'
 import { reportApiError } from '../../lib/apiError'
+import { registerSqlCompletion, setSqlSchema } from '../../lib/sqlCompletion'
 import { buildCreateTable, snippets, quoteIdent, type ColumnDraft } from '../../lib/sqlBuilder'
 import type { SqlResult } from '../../types'
 
@@ -47,10 +48,13 @@ export default function MyDatabases() {
   }, [user])
 
   const refreshSchema = useCallback(async (d: Db | null) => {
-    if (!user || !d) { setTables([]); return }
+    if (!user || !d) { setTables([]); setSqlSchema({}); return }
     try {
       const r = await window.api.userdb.describe(user.id, d.id)
-      if (r.success) setTables(r.tables ?? [])
+      if (r.success) {
+        setTables(r.tables ?? [])
+        setSqlSchema(Object.fromEntries((r.tables ?? []).map((t) => [t.name, t.columns.map((c) => c.name)])))
+      }
       else notify.error('Could not open this database', r.error)
     } catch (err) { reportApiError('read this database', err) }
   }, [user])
@@ -231,7 +235,7 @@ export default function MyDatabases() {
             {snippets(table).map((s) => <button key={s.label} className="btn btn-ghost btn-sm" onClick={() => setQuery(s.sql)}>{s.label}</button>)}
           </div>
           <div style={{ flex: 1, minHeight: 0 }}>
-            <Editor height="100%" language="sql" value={query} onChange={(v) => setQuery(v ?? '')} theme="vs-dark"
+            <Editor height="100%" language="sql" beforeMount={registerSqlCompletion} value={query} onChange={(v) => setQuery(v ?? '')} theme="vs-dark"
               onMount={(ed, monaco) => ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => document.getElementById('mydb-run')?.click())}
               options={{ fontSize: 13, fontFamily: 'var(--font-mono)', minimap: { enabled: false }, scrollBeyondLastLine: false, padding: { top: 10 }, automaticLayout: true }} />
           </div>

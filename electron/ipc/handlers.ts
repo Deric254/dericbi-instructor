@@ -362,6 +362,10 @@ export function registerSqlHandlers() {
     return { success: true, savedTo: pick.filePath }
   })
 
+  safeHandle('sql:schema', async (_, { sandboxId, userId }) => {
+    return await SqlService.getSchema(userId, sandboxId)
+  })
+
   safeHandle('sql:close-sandbox', async (_, sandboxId: string) => {
     SqlService.closeSandbox(sandboxId)
     return { success: true }

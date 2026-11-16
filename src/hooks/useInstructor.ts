@@ -15,6 +15,8 @@ export interface UseInstructorReturn {
   messages: ChatMessage[]
   loading: boolean
   error: string | null
+  /** The tutor could not be reached by any provider: show a gentle note, the lesson carries on. */
+  unavailable: boolean
   conversationId: string | null
   sendMessage: (text: string, context?: InstructorContext) => Promise<void>
   getExerciseFeedback: (params: ExerciseFeedbackParams) => Promise<string | null>
@@ -37,6 +39,7 @@ export function useInstructor(initialContext?: InstructorContext): UseInstructor
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [unavailable, setUnavailable] = useState(false)
   const [hasApiKey, setHasApiKey] = useState(false)
   const conversationIdRef = useRef<string | null>(null)
 
@@ -44,6 +47,7 @@ export function useInstructor(initialContext?: InstructorContext): UseInstructor
     if (!user) return
     setLoading(true)
     setError(null)
+    setUnavailable(false)
 
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
@@ -76,6 +80,7 @@ export function useInstructor(initialContext?: InstructorContext): UseInstructor
         setMessages(prev => [...prev, assistantMsg])
       } else {
         setError(result.error ?? 'AI response failed.')
+        setUnavailable(!!result.unavailable)
         setMessages(prev => prev.filter(m => m.id !== userMsg.id))
       }
     } catch (err: any) {
@@ -104,6 +109,7 @@ export function useInstructor(initialContext?: InstructorContext): UseInstructor
         return result.message
       }
       setError(result.error ?? 'Could not get feedback.')
+      setUnavailable(!!result.unavailable)
       return null
     } catch (err: any) {
       setError(err?.message ?? 'Network error getting feedback.')
@@ -114,6 +120,7 @@ export function useInstructor(initialContext?: InstructorContext): UseInstructor
   const clearConversation = useCallback(() => {
     setMessages([])
     setError(null)
+    setUnavailable(false)
     conversationIdRef.current = null
   }, [])
 
@@ -121,6 +128,7 @@ export function useInstructor(initialContext?: InstructorContext): UseInstructor
     messages,
     loading,
     error,
+    unavailable,
     conversationId: conversationIdRef.current,
     sendMessage,
     getExerciseFeedback,

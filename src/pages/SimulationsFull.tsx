@@ -5,7 +5,7 @@ import {
 } from 'lucide-react'
 import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
-import { reportApiError } from '../lib/apiError'
+import { reportApiError, aiFailureNote } from '../lib/apiError'
 import { AsideSplit } from '../components/ui/SplitPane'
 
 const SIMULATIONS = [
@@ -205,7 +205,7 @@ function SimRunner({ sim, onExit }: { sim: typeof SIMULATIONS[0]; onExit: () => 
         context: { type: 'simulation', lesson: sim.role, exercise: current.title },
       })
       if (r.success) setFeedbacks(p => ({ ...p, [current.id]: r.message }))
-      else notify.error('Could not get feedback', 'Check your AI API key in Settings.')
+      else notify.error('Could not get feedback', aiFailureNote(r))
     } catch (err) {
       reportApiError('get feedback on this step', err)
     } finally { setSubmitting(false) }

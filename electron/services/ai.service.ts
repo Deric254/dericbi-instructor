@@ -177,6 +177,25 @@ export interface ChatResult {
   message?: string
   error?: string
   provider?: string
+  conversationId?: string
+  /** True when no provider could answer (as opposed to a missing key): the screen should carry on without the tutor. */
+  unavailable?: boolean
+}
+
+/** How long one chat may spend across all providers, and how long any single attempt may take. */
+export const aiLimits = { totalMs: 70_000, attemptMs: 30_000, minAttemptMs: 8_000 }
+
+/** Providers to try, in order: the chosen one first, then every other provider that has a saved key. */
+function providerChain(userId: string, active: string): string[] {
+  const others = Object.keys(PROVIDERS).filter((p) => p !== active && getApiKey(userId, p))
+  return [...(PROVIDERS[active] && getApiKey(userId, active) ? [active] : []), ...others]
+}
+
+const emptyReply = (provider: string) => PROVIDERS[provider].kind === 'gemini' ? 'No response from Gemini.' : 'No response.'
+
+function allFailedMessage(failures: { label: string; reason: string }[]): string {
+  const detail = failures.map((f) => failures.length > 1 ? `${f.label}: ${f.reason}` : f.reason).join(' | ')
+  return `The AI tutor could not answer just now, but everything else still works - lessons, exercises and the playground are all ready for you. ${detail} Try again in a minute, or check your keys in Settings → AI Configuration.`
 }
 
 export async function chat(params: {
@@ -187,17 +206,53 @@ export async function chat(params: {
   context: InstructorContext
 }): Promise<ChatResult> {
   const db = getDb()
-  const provider = getActiveProvider(params.userId)
-  const apiKey = getApiKey(params.userId, provider)
+  const active = getActiveProvider(params.userId)
+  if (!PROVIDERS[active]) return { success: false, error: `Unknown provider: ${active}` }
 
-  if (!apiKey) {
+  const chain = providerChain(params.userId, active)
+  if (!chain.length) {
     return {
       success: false,
-      error: `No API key configured for ${provider}. Add your key in Settings → AI Configuration.`,
+      error: `No API key configured for ${active}. Add your key in Settings → AI Configuration.`,
     }
   }
 
-  // Build conversation
+  const systemPrompt = buildSystemPrompt(params.userId, params.context)
+  const deadline = Date.now() + aiLimits.totalMs
+  const failures: { label: string; reason: string }[] = []
+  let response = ''
+  let provider = ''
+  let emptyFrom = ''
+  let onlyEmpty = true
+
+  // One provider failing (expired key, busy, offline, retired model) must never end the conversation:
+  // the next provider that has a key is tried before the student is told anything.
+  for (const [index, name] of chain.entries()) {
+    const remaining = deadline - Date.now()
+    if (index > 0 && remaining < aiLimits.minAttemptMs) break
+    const cfg = PROVIDERS[name]
+    const apiKey = getApiKey(params.userId, name) as string
+    const timeoutMs = Math.max(aiLimits.minAttemptMs, Math.min(aiLimits.attemptMs, remaining))
+    try {
+      const text = await callWithModelRecovery(name, apiKey, (model) =>
+        cfg.kind === 'gemini'
+          ? callGemini(apiKey, systemPrompt, params.history, params.message, model, timeoutMs)
+          : callOpenAI(apiKey, systemPrompt, params.history, params.message, cfg.baseUrl, model, timeoutMs), timeoutMs)
+      if (text.trim()) { response = text; provider = name; break }
+      failures.push({ label: cfg.label, reason: 'It sent back an empty answer.' })
+      emptyFrom = emptyFrom || name
+    } catch (err: unknown) {
+      onlyEmpty = false
+      const reason = (err as any)?.message ?? 'Something went wrong.'
+      failures.push({ label: cfg.label, reason: /[.!?]$/.test(reason) ? reason : `${reason}.` })
+    }
+  }
+
+  // Every provider that answered at all answered with nothing: show the plain "No response." line, not an error.
+  if (!provider && emptyFrom && onlyEmpty) { response = emptyReply(emptyFrom); provider = emptyFrom }
+  if (!provider) return { success: false, unavailable: true, error: allFailedMessage(failures) }
+
+  // Only a real exchange is saved, so a failed attempt leaves no half-conversation behind.
   const conversationId = params.conversationId ?? (() => {
     const id = uuidv4()
     db.prepare(`
@@ -206,40 +261,14 @@ export async function chat(params: {
     `).run(id, params.userId, params.context.type, null)
     return id
   })()
-
-  const systemPrompt = buildSystemPrompt(params.userId, params.context)
-
-  // Save user message
-  db.prepare(`
-    INSERT INTO ai_messages (id, conversation_id, role, content)
-    VALUES (?, ?, 'user', ?)
-  `).run(uuidv4(), conversationId, params.message)
-
-  // Call AI provider
-  let response: string
-  try {
-    const cfg = PROVIDERS[provider]
-    if (!cfg) return { success: false, error: `Unknown provider: ${provider}` }
-    response = await callWithModelRecovery(provider, apiKey, (model) =>
-      cfg.kind === 'gemini'
-        ? callGemini(apiKey, systemPrompt, params.history, params.message, model)
-        : callOpenAI(apiKey, systemPrompt, params.history, params.message, cfg.baseUrl, model))
-  } catch (err: unknown) {
-    const e = err as any
-    return { success: false, error: `AI error: ${e.message}` }
-  }
-
-  // Save assistant message
-  db.prepare(`
-    INSERT INTO ai_messages (id, conversation_id, role, content)
-    VALUES (?, ?, 'assistant', ?)
-  `).run(uuidv4(), conversationId, response)
-
-  // Update last_used
+  db.prepare(`INSERT INTO ai_messages (id, conversation_id, role, content) VALUES (?, ?, 'user', ?)`)
+    .run(uuidv4(), conversationId, params.message)
+  db.prepare(`INSERT INTO ai_messages (id, conversation_id, role, content) VALUES (?, ?, 'assistant', ?)`)
+    .run(uuidv4(), conversationId, response)
   db.prepare(`UPDATE api_keys SET last_used = datetime('now') WHERE user_id = ? AND provider = ?`)
     .run(params.userId, provider)
 
-  return { success: true, message: response, provider }
+  return { success: true, message: response, provider, conversationId }
 }
 
 // ─────────────────────────────────────────────
@@ -356,16 +385,16 @@ async function fetchWithTimeout(url: string, init: any, ms: number, label: strin
 }
 
 /** Ask the provider which chat models it offers right now. Best choice first. */
-async function discoverModels(provider: string, apiKey: string): Promise<string[]> {
+async function discoverModels(provider: string, apiKey: string, timeoutMs = 15_000): Promise<string[]> {
   const cfg = PROVIDERS[provider]
   if (!cfg) throw new ProviderError(`Unknown provider: ${provider}`)
 
   let res: Response
   if (cfg.kind === 'gemini') {
     // The key goes in a header, never in the URL (URLs end up in logs and error messages).
-    res = await fetchWithTimeout(`${cfg.baseUrl}/models?pageSize=1000`, { headers: { 'x-goog-api-key': apiKey } }, 15_000, cfg.label)
+    res = await fetchWithTimeout(`${cfg.baseUrl}/models?pageSize=1000`, { headers: { 'x-goog-api-key': apiKey } }, timeoutMs, cfg.label)
   } else {
-    res = await fetchWithTimeout(cfg.modelsUrl ?? `${cfg.baseUrl}/models`, { headers: { Authorization: `Bearer ${apiKey}` } }, 15_000, cfg.label)
+    res = await fetchWithTimeout(cfg.modelsUrl ?? `${cfg.baseUrl}/models`, { headers: { Authorization: `Bearer ${apiKey}` } }, timeoutMs, cfg.label)
   }
   if (res.status === 401 || res.status === 403) throw new ProviderError(authFailureMessage(cfg.label), res.status)
   if (!res.ok) {
@@ -416,12 +445,12 @@ export async function listModels(userId: string, provider: string): Promise<Mode
 }
 
 /** Run `call` with a working model, discovering or replacing the model when needed (see the header above). */
-async function callWithModelRecovery(provider: string, apiKey: string, call: (model: string) => Promise<string>): Promise<string> {
+async function callWithModelRecovery(provider: string, apiKey: string, call: (model: string) => Promise<string>, timeoutMs = 15_000): Promise<string> {
   const cfg = PROVIDERS[provider]
   let model = dbSetting(`${provider}_model`)
   if (!model) {
     try {
-      model = (await discoverModels(provider, apiKey))[0] ?? null
+      model = (await discoverModels(provider, apiKey, Math.min(15_000, timeoutMs)))[0] ?? null
       if (model) saveModel(provider, model)
     } catch (err: any) {
       // A rejected key will fail the chat call too, with the same clear message - let that happen below.
@@ -434,14 +463,14 @@ async function callWithModelRecovery(provider: string, apiKey: string, call: (mo
   } catch (err) {
     if (!(err instanceof ProviderError) || !err.isModelProblem) throw err
     let replacement: string | undefined
-    try { replacement = (await discoverModels(provider, apiKey)).find((m) => m !== first) } catch { /* keep the original error */ }
+    try { replacement = (await discoverModels(provider, apiKey, Math.min(15_000, timeoutMs))).find((m) => m !== first) } catch { /* keep the original error */ }
     if (!replacement) throw err
     saveModel(provider, replacement)
     return call(replacement)
   }
 }
 
-async function callGemini(apiKey: string, systemPrompt: string, history: ChatMessage[], userMessage: string, model: string): Promise<string> {
+async function callGemini(apiKey: string, systemPrompt: string, history: ChatMessage[], userMessage: string, model: string, timeoutMs: number): Promise<string> {
   const contents = [
     ...history.map(m => ({
       role: m.role === 'assistant' ? 'model' : 'user',
@@ -463,7 +492,7 @@ async function callGemini(apiKey: string, systemPrompt: string, history: ChatMes
         generationConfig: { maxOutputTokens: 1024, temperature: 0.7 },
       }),
     },
-    45_000,
+    timeoutMs,
     'Gemini',
   )
 
@@ -474,10 +503,10 @@ async function callGemini(apiKey: string, systemPrompt: string, history: ChatMes
   }
 
   const data = await res.json() as any
-  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? 'No response from Gemini.'
+  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
 }
 
-async function callOpenAI(apiKey: string, systemPrompt: string, history: ChatMessage[], userMessage: string, baseUrl: string, model: string): Promise<string> {
+async function callOpenAI(apiKey: string, systemPrompt: string, history: ChatMessage[], userMessage: string, baseUrl: string, model: string, timeoutMs: number): Promise<string> {
   const messages = [
     { role: 'system', content: systemPrompt },
     ...history.map(m => ({ role: m.role, content: m.content })),
@@ -491,7 +520,7 @@ async function callOpenAI(apiKey: string, systemPrompt: string, history: ChatMes
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({ model, messages, max_tokens: 1024, temperature: 0.7 }),
     },
-    45_000,
+    timeoutMs,
     'the AI provider',
   )
 
@@ -504,5 +533,5 @@ async function callOpenAI(apiKey: string, systemPrompt: string, history: ChatMes
   }
 
   const data = await res.json() as any
-  return data.choices?.[0]?.message?.content ?? 'No response.'
+  return data.choices?.[0]?.message?.content ?? ''
 }

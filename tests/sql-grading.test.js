@@ -99,6 +99,6 @@ test('a query that returns no table at all gets a clear message', async () => {
 
 test('a syntax error is reported in the student\'s terms, and does not break later attempts', async () => {
   const bad = await grade('ex_syn_u', 'SELEC * FROM patients', 'SELECT * FROM patients')
-  assert.equal(bad.correct, false); assert.match(bad.feedback, /Query error: .*syntax error/i)
+  assert.equal(bad.correct, false); assert.match(bad.feedback, /Query error: .*syntax error/is)
   assert.equal((await grade('ex_syn_u', 'SELECT * FROM patients', 'SELECT * FROM patients')).correct, true)
 })

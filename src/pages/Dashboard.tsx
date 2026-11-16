@@ -8,6 +8,7 @@ import {
 import { useAuthStore, useUIStore } from '../store'
 import type { DashboardStats, SkillRating, NavSection } from '../types'
 import AppLogo from '../components/ui/AppLogo'
+import LearningPlan from '../components/ui/LearningPlan'
 import { PageLoader, PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'
 
@@ -179,6 +180,8 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {stats?.plan && !isNewcomer && <LearningPlan plan={stats.plan} onOpen={setActiveSection} />}
 
       {/* Stats grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>

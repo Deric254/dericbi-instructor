@@ -3,6 +3,7 @@ import fs from 'fs'
 import { v4 as uuidv4 } from 'uuid'
 import { getDb, getDatasetsPath } from '../db/database'
 import { ensureDatasetFiles } from './setup.service'
+import { friendlySqlError, describeSchema } from './sql.friendly'
 import { runIsolated, IsolateTimeout, IsolateMemory, IsolateUnavailable, isolateLimits } from './sql.isolate'
 import Papa from 'papaparse'
 import * as XLSX from 'xlsx'
@@ -241,9 +242,28 @@ export async function executeSQL(params: {
     return { success: true, rows, columns, row_count: rows.length, exec_ms, affected_rows: affected, ...(notice ? { truncated: true, notice } : {}) }
   } catch (err: any) {
     const exec_ms = Date.now() - start
-    logHistory(false, 0, err.message, exec_ms)
-    return { success: false, error: err.message, exec_ms }
+    const message = await explainError(params.sandboxId, err?.message ?? String(err))
+    logHistory(false, 0, message, exec_ms)
+    return { success: false, error: message, exec_ms }
   }
+}
+
+/** Table and column names of a sandbox, for editor auto-complete. Never throws: no schema just means no suggestions. */
+export async function getSchema(userId: string, sandboxId: string): Promise<{ success: boolean; tables: Record<string, string[]> }> {
+  try {
+    if (typeof sandboxId !== 'string' || !sandboxId) return { success: false, tables: {} }
+    if (sandboxId.startsWith('udb_')) {
+      const opened = await (require('./userdb.service') as typeof import('./userdb.service')).openUserDatabase(userId, sandboxId)
+      if (!opened.success) return { success: false, tables: {} }
+    }
+    await ensureDefaultDatasetsLoaded(sandboxId)
+    return { success: true, ...describeSchema(await getSandbox(sandboxId)) }
+  } catch { return { success: false, tables: {} } }
+}
+
+/** A SQLite error in plain language, with suggestions from the tables that really exist in this sandbox. */
+async function explainError(sandboxId: string, raw: string): Promise<string> {
+  try { return friendlySqlError(raw, describeSchema(await getSandbox(sandboxId))) } catch { return raw }
 }
 
 // ─────────────────────────────────────────────
@@ -252,8 +272,15 @@ export async function executeSQL(params: {
 
 export interface ValidationResult {
   correct: boolean; score: number; feedback: string
+  /** For the side-by-side comparison: the first rows of each result, whether each row also appears on the other side, and totals. */
   actual_rows?: any[]; expected_rows?: any[]
+  actual_columns?: string[]; expected_columns?: string[]
+  actual_match?: boolean[]; expected_match?: boolean[]
+  actual_total?: number; expected_total?: number
 }
+
+/** How many rows of each side are sent to the screen for the side-by-side view. */
+export const COMPARE_ROWS = 50
 
 // ─────────────────────────────────────────────
 // AUTO-LOAD DEFAULT DATASETS FOR EXERCISES
@@ -348,9 +375,27 @@ export function requiresOrder(solutionSql: string): boolean {
   return /\border\s+by\b/i.test(noStrings)
 }
 
+/** Rows of both results (capped) with a flag per row: does it also appear on the other side? */
+function comparisonOf(user: { columns: string[]; rows: any[] }, expected: { columns: string[]; rows: any[] }, u: string[][], e: string[][], ordered: boolean) {
+  // Compare rows as sets of values so a different column order does not make every row look wrong.
+  const norm = (r: string[]) => rowKey([...r].sort())
+  const flags = (mine: string[][], theirs: string[][]): boolean[] => {
+    if (ordered) return mine.map((r, i) => theirs[i] !== undefined && rowKey(r) === rowKey(theirs[i]))
+    const pool = new Map<string, number>()
+    theirs.forEach((r) => pool.set(norm(r), (pool.get(norm(r)) ?? 0) + 1))
+    return mine.map((r) => { const k = norm(r); const n = pool.get(k) ?? 0; if (n > 0) pool.set(k, n - 1); return n > 0 })
+  }
+  return {
+    actual_rows: user.rows.slice(0, COMPARE_ROWS), expected_rows: expected.rows.slice(0, COMPARE_ROWS),
+    actual_columns: user.columns, expected_columns: expected.columns,
+    actual_match: flags(u, e).slice(0, COMPARE_ROWS), expected_match: flags(e, u).slice(0, COMPARE_ROWS),
+    actual_total: user.rows.length, expected_total: expected.rows.length,
+  }
+}
+
 export function compareAnswers(user: { columns: string[]; rows: any[] }, expected: { columns: string[]; rows: any[] }, ordered: boolean): ValidationResult {
   const u = matrix(user.rows); const e = matrix(expected.rows)
-  const base = { actual_rows: user.rows, expected_rows: expected.rows }
+  const base = comparisonOf(user, expected, u, e, ordered)
   const rowsEqual = (a: string[][], b: string[][], inOrder: boolean) => {
     if (a.length !== b.length) return false
     return inOrder ? a.every((r, i) => rowKey(r) === rowKey(b[i])) : sameMultiset(a.map(rowKey), b.map(rowKey))
@@ -422,7 +467,7 @@ export async function validateSQLAnswer(params: {
     if (params.evaluationMode === 'exact' || params.evaluationMode === 'result_match') {
       let user: { columns: string[]; rows: any[] }
       try { user = await runQuery(params.userQuery) }
-      catch (e: any) { return { correct: false, score: 0, feedback: `Query error: ${e.message}` } }
+      catch (e: any) { return { correct: false, score: 0, feedback: `Query error: ${await explainError(params.sandboxId, e.message)}` } }
 
       if (!user.columns.length) {
         return { correct: false, score: 0, feedback: 'Your query did not return a table of results. Start with SELECT, and run exactly the statement the task describes.' }

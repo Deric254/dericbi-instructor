@@ -56,6 +56,15 @@ export interface DashboardStats {
   skill_ratings: SkillRating[]
   rank: RankInfo
   recent_activity: RecentActivity[]
+  plan?: LearningPlan
+}
+
+export interface LearningPlan {
+  next: { lesson_id: string; title: string; module: string; status: 'in_progress' | 'available' | 'new' } | null
+  streak_days: number
+  active_today: boolean
+  modules: { module: string; complete: number; total: number }[]
+  review: { exercise_id: string; title: string; lesson_title: string; module: string }[]
 }
 
 export interface RecentActivity {

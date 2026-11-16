@@ -11,6 +11,8 @@ import { reportApiError } from '../../lib/apiError'
 interface Props {
   context: InstructorContext
   initialPrompt?: string        // auto-send on mount
+  /** Send a message on request (a new id sends again, even with the same text). */
+  request?: { id: number; text: string }
   compact?: boolean             // collapsed panel mode
   onFeedbackReady?: (msg: string) => void
 }
@@ -18,11 +20,12 @@ interface Props {
 export default function InstructorPanel({
   context,
   initialPrompt,
+  request,
   compact = false,
   onFeedbackReady,
 }: Props) {
   const { user } = useAuthStore()
-  const { messages, loading, error, sendMessage, clearConversation } = useInstructor(context)
+  const { messages, loading, error, unavailable, sendMessage, clearConversation } = useInstructor(context)
   const [input, setInput] = useState('')
   const [collapsed, setCollapsed] = useState(compact)
   const [apiKeyOk, setApiKeyOk] = useState<boolean | null>(null)
@@ -31,6 +34,7 @@ export default function InstructorPanel({
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const lastSentPrompt = useRef<string | null>(null)
+  const lastRequestId = useRef<number | null>(null)
 
   // Check API key
   useEffect(() => {
@@ -66,6 +70,12 @@ export default function InstructorPanel({
       }
     })
   }, [apiKeyOk, initialPrompt])
+
+  useEffect(() => {
+    if (!apiKeyOk || !request || request.id === lastRequestId.current) return
+    lastRequestId.current = request.id
+    sendMessage(request.text, context)
+  }, [apiKeyOk, request])
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -254,10 +264,10 @@ export default function InstructorPanel({
         {error && (
           <div style={{
             padding: '8px 12px',
-            background: 'var(--error-dim)',
-            border: '1px solid var(--error)',
+            background: unavailable ? 'var(--bg-elevated)' : 'var(--error-dim)',
+            border: `1px solid ${unavailable ? 'var(--border)' : 'var(--error)'}`,
             borderRadius: 'var(--radius)',
-            fontSize: 12, color: 'var(--error)',
+            fontSize: 12, color: unavailable ? 'var(--text-secondary)' : 'var(--error)',
             display: 'flex', gap: 8, alignItems: 'flex-start',
           }}>
             <AlertCircle size={13} style={{ flexShrink: 0, marginTop: 1 }} />

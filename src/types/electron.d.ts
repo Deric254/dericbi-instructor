@@ -64,6 +64,7 @@ declare global {
         loadDataset: (sandboxId: string, datasetId: string, type: 'bundled' | 'imported', userId: string) => Promise<any>
         history: (userId: string, limit?: number) => Promise<any[]>
         datasets: (userId: string) => Promise<any>
+        schema: (sandboxId: string, userId: string) => Promise<{ success: boolean; tables: Record<string, string[]> }>
         closeSandbox: (sandboxId: string) => Promise<any>
       }
       userdb: {

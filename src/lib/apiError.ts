@@ -23,3 +23,12 @@ export function reportApiError(context: string, err: unknown): undefined {
   notify.error(`Couldn't ${context}`, message)
   return undefined
 }
+
+/**
+ * A short, kind note for when an AI request did not succeed. If no provider could be reached the student is
+ * told their work is safe; any other problem (e.g. a missing key) is shown as the server worded it.
+ */
+export function aiFailureNote(result: { error?: string; unavailable?: boolean } | null | undefined): string {
+  if (result?.unavailable) return 'The AI tutor cannot be reached right now. Your work is safe - try again in a minute, or check your keys in Settings.'
+  return result?.error || 'The AI tutor is not set up yet. Add a key in Settings → AI Configuration.'
+}

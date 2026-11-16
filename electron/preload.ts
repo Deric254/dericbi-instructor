@@ -88,6 +88,7 @@ const api = {
       ipcRenderer.invoke('sql:load-dataset', { sandboxId, datasetId, type, userId }),
     history: (userId: string, limit?: number) => ipcRenderer.invoke('sql:history', { userId, limit }),
     datasets: (userId: string) => ipcRenderer.invoke('sql:datasets', userId),
+    schema: (sandboxId: string, userId: string) => ipcRenderer.invoke('sql:schema', { sandboxId, userId }),
     closeSandbox: (sandboxId: string) => ipcRenderer.invoke('sql:close-sandbox', sandboxId),
   },
 

@@ -295,12 +295,98 @@ export interface DashboardStats {
   skill_ratings: SkillRating[]
   rank: RankInfo
   recent_activity: RecentActivity[]
+  plan: LearningPlan
 }
 
 export interface RecentActivity {
   type: string
   description: string
   timestamp: string
+}
+
+// ─────────────────────────────────────────────
+// WHAT TO DO NEXT: continue point, streak, progress per academy, exercises worth another go
+// ─────────────────────────────────────────────
+
+export interface LearningPlan {
+  next: { lesson_id: string; title: string; module: string; status: 'in_progress' | 'available' | 'new' } | null
+  streak_days: number
+  active_today: boolean
+  modules: { module: string; complete: number; total: number }[]
+  review: { exercise_id: string; title: string; lesson_title: string; module: string }[]
+}
+
+const MODULE_ORDER = ['sql', 'excel', 'python', 'powerbi', 'statistics', 'business', 'simulation']
+const moduleRank = (m: string) => { const i = MODULE_ORDER.indexOf(m); return i === -1 ? MODULE_ORDER.length : i }
+
+const dayKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+/** Days in a row (ending today, or yesterday if today has no activity yet) on which the student did something. */
+export function streakFrom(timestampsUtc: string[], now: Date = new Date()): { streak: number; activeToday: boolean } {
+  const days = new Set<string>()
+  for (const ts of timestampsUtc) {
+    const d = new Date(`${String(ts).trim().replace(' ', 'T')}${/[zZ]|[+-]\d\d:?\d\d$/.test(ts) ? '' : 'Z'}`)
+    if (!Number.isNaN(d.getTime())) days.add(dayKey(d)) // the student's own calendar day, not UTC's
+  }
+  const activeToday = days.has(dayKey(now))
+  const cursor = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12)
+  if (!activeToday) cursor.setDate(cursor.getDate() - 1)
+  let streak = 0
+  while (days.has(dayKey(cursor))) { streak++; cursor.setDate(cursor.getDate() - 1) }
+  return { streak, activeToday }
+}
+
+export function getLearningPlan(userId: string, now: Date = new Date()): LearningPlan {
+  const db = getDb()
+
+  // 1. The lesson they were in the middle of; 2. otherwise the next one that is open to them.
+  let next: LearningPlan['next'] = null
+  const midway = db.prepare(`
+    SELECT l.id, l.title, l.module FROM lesson_progress lp JOIN lessons l ON l.id = lp.lesson_id
+    WHERE lp.user_id = ? AND lp.status = 'in_progress' ORDER BY lp.started_at DESC LIMIT 1
+  `).get(userId) as any
+  if (midway) next = { lesson_id: midway.id, title: midway.title, module: midway.module, status: 'in_progress' }
+  else {
+    const open = (db.prepare(`
+      SELECT l.id, l.title, l.module, l.sort_order, lp.status AS progress
+      FROM lessons l LEFT JOIN lesson_progress lp ON lp.lesson_id = l.id AND lp.user_id = ?
+      WHERE (lp.status = 'available' OR (lp.status IS NULL AND l.prerequisites = '[]'))
+    `).all(userId) as any[]).sort((a, b) => moduleRank(a.module) - moduleRank(b.module) || a.sort_order - b.sort_order)[0]
+    if (open) next = { lesson_id: open.id, title: open.title, module: open.module, status: open.progress ? 'available' : 'new' }
+  }
+
+  const stamps = (db.prepare(`
+    SELECT ts FROM (
+      SELECT substr(attempted_at, 1, 16) AS ts FROM exercise_attempts WHERE user_id = ?
+      UNION SELECT substr(executed_at, 1, 16) FROM sql_query_history WHERE user_id = ?
+      UNION SELECT substr(completed_at, 1, 16) FROM lesson_progress WHERE user_id = ? AND completed_at IS NOT NULL
+      UNION SELECT substr(started_at, 1, 16) FROM lesson_progress WHERE user_id = ? AND started_at IS NOT NULL
+    ) WHERE ts >= date('now', '-400 days') LIMIT 20000
+  `).all(userId, userId, userId, userId) as any[]).map((r) => r.ts as string)
+  const { streak, activeToday } = streakFrom(stamps, now)
+
+  const modules = (db.prepare(`
+    SELECT l.module, COUNT(*) AS total, SUM(CASE WHEN lp.status = 'complete' THEN 1 ELSE 0 END) AS complete
+    FROM lessons l LEFT JOIN lesson_progress lp ON lp.lesson_id = l.id AND lp.user_id = ?
+    GROUP BY l.module
+  `).all(userId) as any[]).map((r) => ({ module: r.module as string, complete: Number(r.complete ?? 0), total: Number(r.total) }))
+    .sort((a, b) => moduleRank(a.module) - moduleRank(b.module))
+
+  // Exercises whose latest try was wrong and never got right, left for at least a day (so it is a return visit, not a retry).
+  const review = db.prepare(`
+    SELECT e.id AS exercise_id, e.title, l.title AS lesson_title, l.module
+    FROM exercises e
+    JOIN lessons l ON l.id = e.lesson_id
+    JOIN exercise_attempts a ON a.exercise_id = e.id AND a.user_id = ?
+    WHERE e.evaluation_mode IN ('exact', 'result_match')
+      AND a.is_correct = 0
+      AND a.attempted_at = (SELECT MAX(x.attempted_at) FROM exercise_attempts x WHERE x.exercise_id = e.id AND x.user_id = ?)
+      AND a.attempted_at <= datetime('now', '-1 day')
+      AND NOT EXISTS (SELECT 1 FROM exercise_attempts c WHERE c.exercise_id = e.id AND c.user_id = ? AND c.is_correct = 1)
+    GROUP BY e.id ORDER BY a.attempted_at ASC LIMIT 3
+  `).all(userId, userId, userId) as LearningPlan['review']
+
+  return { next, streak_days: streak, active_today: activeToday, modules, review }
 }
 
 export function getDashboardStats(userId: string): DashboardStats {
@@ -356,5 +442,6 @@ export function getDashboardStats(userId: string): DashboardStats {
     skill_ratings: getSkillRatings(userId),
     rank: getRankInfo(userId),
     recent_activity: recentActivity,
+    plan: getLearningPlan(userId),
   }
 }

@@ -7,7 +7,7 @@ import {
 import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
 import { PageError } from '../components/ui/PageState'
-import { reportApiError } from '../lib/apiError'
+import { reportApiError, aiFailureNote } from '../lib/apiError'
 import { AsideSplit } from '../components/ui/SplitPane'
 
 type Screen = 'list' | 'editor'
@@ -247,7 +247,7 @@ function ProjectEditor({ project, onBack, onSave }: { project: any; onBack: () =
         setAiEval(r.message)
         await window.api.projects.update({ id: project.id, userId: user.id, ai_evaluation: r.message })
       } else {
-        notify.error('Could not get AI evaluation', 'Check your AI API key in Settings.')
+        notify.error('Could not get AI evaluation', aiFailureNote(r))
       }
     } catch (err) {
       reportApiError('get an AI evaluation', err)

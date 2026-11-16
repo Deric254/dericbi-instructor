@@ -9,7 +9,7 @@ import InstructorPanel from '../components/ui/InstructorPanel'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
 import { PageError } from '../components/ui/PageState'
-import { reportApiError } from '../lib/apiError'
+import { reportApiError, aiFailureNote } from '../lib/apiError'
 import { SplitPane, AsideSplit } from '../components/ui/SplitPane'
 import type { Lesson } from '../types'
 
@@ -169,7 +169,7 @@ function CaseStudyCard({ caseStudy }: { caseStudy: any }) {
         history: [], context: { type: 'exercise', exercise: caseStudy.title },
       })
       if (result.success) { setFeedback(result.message); setSubmitted(true) }
-      else setFeedback('Could not get feedback. Check AI API key in Settings.')
+      else setFeedback(aiFailureNote(result))
     } catch (err) {
       reportApiError('get AI feedback', err)
     } finally { setSubmitting(false) }
@@ -290,7 +290,7 @@ function WrittenExercise({ exercise, index }: { exercise: any; index: number }) 
     try {
       const r = await window.api.ai.exerciseFeedback({ userId: user.id, exercise_prompt: exercise.prompt, user_answer: answer, solution: exercise.solution || '', is_correct: null, skill: 'business_thinking', context: { type: 'exercise', exercise: exercise.title } })
       if (r.success) setFeedback(r.message)
-      else setFeedback('Could not get feedback. Check your AI API key in Settings.')
+      else setFeedback(aiFailureNote(r))
       await window.api.exercises.submit({ userId: user.id, exerciseId: exercise.id, answer, timeSpentS: 60 })
     } catch (err) {
       reportApiError('get feedback on this exercise', err)
