@@ -88,6 +88,7 @@ export async function listUserDatabases(userId: string): Promise<UserDatabase[]>
 export async function createUserDatabase(userId: string, rawName: unknown): Promise<{ success: boolean; database?: UserDatabase; error?: string }> {
   const v = validateName(rawName)
   if (!v.ok) return { success: false, error: v.error }
+  if (typeof userId !== 'string' || !getDb().prepare('SELECT 1 FROM users WHERE id = ?').get(userId)) return { success: false, error: 'Your session has expired. Please sign in again.' }
   const existing = getDb().prepare('SELECT name FROM user_databases WHERE user_id = ?').all(userId) as any[]
   if (existing.length >= MAX_DATABASES_PER_USER) return { success: false, error: `You can keep up to ${MAX_DATABASES_PER_USER} databases. Delete one you no longer need first.` }
   if (existing.some((e) => String(e.name).toLowerCase() === v.name.toLowerCase())) return { success: false, error: `You already have a database called "${v.name}".` }
@@ -95,9 +96,15 @@ export async function createUserDatabase(userId: string, rawName: unknown): Prom
   const SQL = await getSqlJs()
   const id = uuidv4()
   const file_name = `${id}.sqlite`
+  const target = path.join(dir(userId), file_name)
   const empty = new SQL.Database()
-  try { writeFileAtomic(path.join(dir(userId), file_name), empty.export()) } finally { empty.close() }
-  getDb().prepare('INSERT INTO user_databases (id, user_id, name, file_name) VALUES (?, ?, ?, ?)').run(id, userId, v.name, file_name)
+  try {
+    writeFileAtomic(target, empty.export())
+    getDb().prepare('INSERT INTO user_databases (id, user_id, name, file_name) VALUES (?, ?, ?, ?)').run(id, userId, v.name, file_name)
+  } catch (e: any) {
+    try { fs.rmSync(target, { force: true }) } catch { /* nothing to clean */ }
+    return { success: false, error: 'The database could not be created. Please sign in again and retry.' }
+  } finally { empty.close() }
   return { success: true, database: { id, name: v.name, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), size_bytes: 0, table_count: 0 } }
 }
 
@@ -132,12 +139,13 @@ export async function openUserDatabase(userId: string, sandboxId: string): Promi
   try {
     const SQL = await getSqlJs()
     const db = new SQL.Database(fs.readFileSync(file))
+    try { db.exec('SELECT count(*) FROM sqlite_master') } catch { db.close(); throw new Error('the file is damaged') }
     db.run('PRAGMA foreign_keys=ON;')
     registerSandbox(sandboxId, db)
     openIds.add(sandboxId)
     return { success: true }
   } catch (e: any) {
-    return { success: false, error: `"${r.name}" could not be opened (${e?.message ?? 'unreadable file'}).` }
+    return { success: false, error: `"${r.name}" could not be opened (${e?.message ?? 'unreadable file'}). You can delete it from My Databases and create a new one.` }
   }
 }
 

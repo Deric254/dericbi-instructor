@@ -3,6 +3,7 @@ import fs from 'fs'
 import { v4 as uuidv4 } from 'uuid'
 import { getDb, getDatasetsPath } from '../db/database'
 import { ensureDatasetFiles } from './setup.service'
+import { runIsolated, IsolateTimeout, IsolateMemory, IsolateUnavailable, isolateLimits } from './sql.isolate'
 import Papa from 'papaparse'
 import * as XLSX from 'xlsx'
 
@@ -116,10 +117,54 @@ export function execBounded(db: any, sql: string, opts: { maxRows?: number; maxM
 
 export const TRUNCATION_HELP = 'If you did not expect this many rows, check for a missing JOIN condition or a recursive query with no stop condition.'
 
+// Sandboxes where the student made TEMP tables. Those exist only on the live connection (copying the database
+// would lose them), so such sandboxes keep running in-process.
+const tempSandboxes = new Set<string>()
+
+/**
+ * Run SQL with all protections: row/time limits, and - when possible - on a copy inside a worker that can be
+ * stopped, so no query can freeze the app. Returns what exec() would, plus SQLite's changes() count.
+ */
+export async function runBounded(sandboxId: string, sql: string, opts: { maxRows?: number; maxMs?: number } = {}): Promise<{ sets: BoundedSet[]; changes: number; replaced: boolean }> {
+  const sandbox = await getSandbox(sandboxId)
+  const inProcess = () => {
+    const sets = execBounded(sandbox, sql, opts)
+    const changes = Number(sandbox.exec('SELECT changes()')[0]?.values[0]?.[0] ?? 0)
+    return { sets, changes, replaced: false }
+  }
+  if (/\btemp(orary)?\b/i.test(sql)) tempSandboxes.add(sandboxId)
+  if (tempSandboxes.has(sandboxId)) return inProcess()
+
+  try {
+    const bytes: Uint8Array = sandbox.export()
+    sandbox.run('PRAGMA foreign_keys=ON;') // export() resets connection settings
+    const r = await runIsolated(bytes, sql, { maxRows: opts.maxRows ?? MAX_RESULT_ROWS, maxMs: opts.maxMs ?? MAX_QUERY_MS }, execBounded.toString())
+    if (r.bytes) {
+      const SQL = await getSqlJs()
+      const fresh = new SQL.Database(r.bytes)
+      fresh.run('PRAGMA foreign_keys=ON;')
+      registerSandbox(sandboxId, fresh)
+    }
+    return { sets: r.sets, changes: r.changes, replaced: !!r.bytes }
+  } catch (e) {
+    if (e instanceof IsolateTimeout) {
+      throw new Error(`Your query was stopped after ${Math.round(e.ms / 1000)} seconds because it was taking far too long. Nothing was changed. ${TRUNCATION_HELP}`)
+    }
+    if (e instanceof IsolateMemory) {
+      throw new Error(`Your query was stopped because it needed too much memory. Nothing was changed. ${TRUNCATION_HELP}`)
+    }
+    if (e instanceof IsolateUnavailable) return inProcess() // could not start a worker: still protected by the row/time limits
+    throw e
+  }
+}
+
+
 export async function executeSQL(params: {
   sandboxId: string; query: string; userId: string
 }): Promise<SqlResult> {
   const start = Date.now()
+  if (typeof params?.query !== 'string') return { success: false, error: 'Nothing to run: please type a SQL query first.' }
+  if (typeof params.sandboxId !== 'string' || !params.sandboxId) return { success: false, error: 'No database is selected.' }
 
   // Query history is a convenience log. A failure to write it (e.g. a user row that
   // no longer exists) must never turn a query that ran fine into a reported failure.
@@ -153,12 +198,11 @@ export async function executeSQL(params: {
       const opened = await userDbs.openUserDatabase(params.userId, params.sandboxId)
       if (!opened.success) return { success: false, error: opened.error }
     }
-    const sandbox = await getSandbox(params.sandboxId)
-    const before = userDbs ? userDbs.changeSignature(sandbox) : ''
+    const before = userDbs ? userDbs.changeSignature(await getSandbox(params.sandboxId)) : ''
 
     // exec() runs every statement in the text and returns one result set per statement that
     // produced rows. Like a normal SQL console, show the LAST one (`SELECT 1; SELECT 2;` -> 2).
-    const sets = execBounded(sandbox, params.query)
+    const { sets, changes, replaced } = await runBounded(params.sandboxId, params.query)
     let rows: any[] = []
     let columns: string[] = []
     if (sets && sets.length > 0) {
@@ -176,11 +220,11 @@ export async function executeSQL(params: {
     const returnsRows = /^(SELECT|WITH|EXPLAIN|PRAGMA|VALUES)\b/i.test(statement)
     const affected = returnsRows || (sets && sets.length > 0)
       ? 0
-      : (sandbox.exec('SELECT changes()')[0]?.values[0]?.[0] ?? 0) as number
+      : changes
 
     // Anything that changed a user database (rows OR structure) is saved to its file straight away, so a
     // closed window or a crash never loses a student's work.
-    if (userDbs && userDbs.changeSignature(sandbox) !== before) {
+    if (userDbs && (replaced || userDbs.changeSignature(await getSandbox(params.sandboxId)) !== before)) {
       const saved = await userDbs.persistUserDatabase(params.userId, params.sandboxId)
       if (!saved.success) { logHistory(false, 0, saved.error ?? null, Date.now() - start); return { success: false, error: saved.error, exec_ms: Date.now() - start } }
     }
@@ -360,8 +404,8 @@ export async function validateSQLAnswer(params: {
 
     const sandbox = await getSandbox(params.sandboxId)
 
-    const runQuery = (q: string): { columns: string[]; rows: any[] } => {
-      const res = execBounded(sandbox, q, { maxRows: 100_000 })
+    const runQuery = async (q: string): Promise<{ columns: string[]; rows: any[] }> => {
+      const { sets: res } = await runBounded(params.sandboxId, q, { maxRows: 100_000 })
       if (res[0]?.truncated) throw new Error(`Your query returned far too many rows or ran too long. ${TRUNCATION_HELP}`)
       if (!res?.length) return { columns: [], rows: [] }
       const { columns, values } = res[0]
@@ -377,7 +421,7 @@ export async function validateSQLAnswer(params: {
 
     if (params.evaluationMode === 'exact' || params.evaluationMode === 'result_match') {
       let user: { columns: string[]; rows: any[] }
-      try { user = runQuery(params.userQuery) }
+      try { user = await runQuery(params.userQuery) }
       catch (e: any) { return { correct: false, score: 0, feedback: `Query error: ${e.message}` } }
 
       if (!user.columns.length) {
@@ -389,7 +433,7 @@ export async function validateSQLAnswer(params: {
         const rows: any[] = params.expectedOutput
         expected = { columns: rows[0] ? Object.keys(rows[0]) : user.columns, rows }
       } else {
-        expected = runQuery(params.solutionQuery)
+        expected = await runQuery(params.solutionQuery)
       }
       return compareAnswers(user, expected, requiresOrder(params.solutionQuery))
     }
