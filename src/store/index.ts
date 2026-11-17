@@ -44,7 +44,10 @@ interface UIStore {
   instructorOpen: boolean
   theme: 'dark' | 'light'
   isOwner: boolean
+  /** A lesson the next academy page should open as soon as it has loaded (never saved between launches). */
+  pendingLessonId: string | null
   setActiveSection: (section: NavSection) => void
+  setPendingLesson: (lessonId: string | null) => void
   toggleSidebar: () => void
   setSidebarCollapsed: (collapsed: boolean) => void
   toggleInstructor: () => void
@@ -61,7 +64,9 @@ export const useUIStore = create<UIStore>()(
       instructorOpen: false,
       theme: 'dark',
       isOwner: false,
+      pendingLessonId: null,
       setActiveSection: (activeSection) => set({ activeSection }),
+      setPendingLesson: (pendingLessonId) => set({ pendingLessonId }),
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
       setSidebarCollapsed: (sidebarCollapsed) => set({ sidebarCollapsed }),
       toggleInstructor: () => set((s) => ({ instructorOpen: !s.instructorOpen })),

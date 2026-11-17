@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { BarChart3, BookOpen, Lock, CheckCircle, ChevronRight, Clock, Info, Brain, ExternalLink } from 'lucide-react'
 import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
+import { usePendingLesson } from '../hooks/usePendingLesson'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
 import { PageError } from '../components/ui/PageState'
@@ -28,6 +29,10 @@ export default function PowerBIAcademy() {
   }
 
   useEffect(loadLessons, [user])
+  usePendingLesson(lessons, (id) => {
+    const lesson = lessons.find((l) => l.id === id)
+    if (lesson && user) { setActiveLesson(lesson); window.api.lessons.start(user.id, id) }
+  })
 
   const MODULE_TOPICS = [
     { title: 'Data Modeling & Relationships', desc: 'Star schema, dimension tables, fact tables, cardinality', level: 'beginner', est: 45 },

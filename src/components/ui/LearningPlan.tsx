@@ -2,12 +2,12 @@ import React from 'react'
 import { Play, Flame, RotateCcw } from 'lucide-react'
 import type { LearningPlan as Plan, NavSection } from '../../types'
 
-const LABEL: Record<string, string> = { sql: 'SQL', excel: 'Excel', python: 'Python', powerbi: 'Power BI', statistics: 'Statistics', business: 'Business', simulation: 'Simulations' }
-const COLOR: Record<string, string> = { sql: 'var(--sql-color)', excel: 'var(--excel-color)', python: 'var(--python-color)', powerbi: 'var(--powerbi-color)', statistics: 'var(--stats-color)', business: 'var(--business-color)' }
+const LABEL: Record<string, string> = { sql: 'SQL', excel: 'Excel', python: 'Python', powerbi: 'Power BI', statistics: 'Statistics', business: 'Business', dataeng: 'Data Engineering', simulation: 'Simulations' }
+const COLOR: Record<string, string> = { sql: 'var(--sql-color)', excel: 'var(--excel-color)', python: 'var(--python-color)', powerbi: 'var(--powerbi-color)', statistics: 'var(--stats-color)', business: 'var(--business-color)', dataeng: 'var(--de-color)' }
 const SECTION = (module: string): NavSection => (module === 'simulation' ? 'simulations' : module as NavSection)
 
 /** Where to go next: continue point, streak, progress in each academy, and exercises worth another go. */
-export default function LearningPlan({ plan, onOpen }: { plan: Plan; onOpen: (section: NavSection) => void }) {
+export default function LearningPlan({ plan, onOpen }: { plan: Plan; onOpen: (section: NavSection, lessonId?: string) => void }) {
   const { next, streak_days, active_today, modules, review } = plan
   const verb = next?.status === 'in_progress' ? 'Continue where you left off' : next?.status === 'available' ? 'Next lesson' : 'Start here'
   return (
@@ -26,7 +26,7 @@ export default function LearningPlan({ plan, onOpen }: { plan: Plan; onOpen: (se
               <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>{next.title}</div>
               <div style={{ fontSize: 12, color: COLOR[next.module] ?? 'var(--text-muted)' }}>{LABEL[next.module] ?? next.module}</div>
             </div>
-            <button className="btn btn-primary btn-sm" style={{ alignSelf: 'flex-start' }} onClick={() => onOpen(SECTION(next.module))}>
+            <button className="btn btn-primary btn-sm" style={{ alignSelf: 'flex-start' }} onClick={() => onOpen(SECTION(next.module), next.module === 'simulation' ? undefined : next.lesson_id)}>
               <Play size={12} /> {next.status === 'in_progress' ? 'Continue' : 'Open'}
             </button>
           </>

@@ -3,6 +3,7 @@ import fs from 'fs'
 import { v4 as uuidv4 } from 'uuid'
 import { getDb, getDatasetsPath } from '../db/database'
 import { ensureDatasetFiles } from './setup.service'
+import { DATAENG_DATASETS } from './dataeng.datasets'
 import { friendlySqlError, describeSchema } from './sql.friendly'
 import { runIsolated, IsolateTimeout, IsolateMemory, IsolateUnavailable, isolateLimits } from './sql.isolate'
 import Papa from 'papaparse'
@@ -324,8 +325,21 @@ async function bundledFilePath(fileName: string): Promise<string> {
   return full
 }
 
+/** Data Engineering exercises (ids "de-...") practise on the platform tables instead of the hospital ones. */
+async function ensureDataEngDatasetsLoaded(sandboxId: string): Promise<void> {
+  const sandbox = await getSandbox(sandboxId)
+  const have = new Set<string>((sandbox.exec(`SELECT name FROM sqlite_master WHERE type='table'`)[0]?.values ?? []).map((v: any[]) => String(v[0])))
+  for (const ds of DATAENG_DATASETS) {
+    if (have.has(ds.table)) continue
+    const file = await bundledFilePath(ds.file)
+    if (!fs.existsSync(file)) { console.warn(`[SQL] Data engineering dataset file missing: ${file}`); continue }
+    await loadFileIntoSandbox(sandboxId, file, ds.table)
+  }
+}
+
 async function ensureDefaultDatasetsLoaded(sandboxId: string): Promise<void> {
   if (!sandboxId.startsWith('ex_')) return // only auto-load for exercise sandboxes
+  if (sandboxId.startsWith('ex_de-')) return ensureDataEngDatasetsLoaded(sandboxId)
 
   const sandbox = await getSandbox(sandboxId)
 

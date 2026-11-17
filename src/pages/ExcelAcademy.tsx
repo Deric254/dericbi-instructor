@@ -5,6 +5,7 @@ import {
   RefreshCw, Info, Lightbulb, AlertCircle,
 } from 'lucide-react'
 import { useAuthStore, notify } from '../store'
+import { usePendingLesson } from '../hooks/usePendingLesson'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
 import { PageError } from '../components/ui/PageState'
@@ -38,6 +39,7 @@ export default function ExcelAcademy() {
   }, [user])
 
   useEffect(loadLessons, [loadLessons])
+  usePendingLesson(lessons, (id) => { setActiveLessonId(id); setView('spreadsheet') })
 
   if (loadError) return <PageError message="Couldn't load the Excel Academy lessons." onRetry={loadLessons} />
 

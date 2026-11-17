@@ -82,3 +82,15 @@ test('the dashboard carries the plan, and a learner with no data at all still ge
   const d = P.getDashboardStats('L3')
   assert.ok(d.plan && Array.isArray(d.plan.modules) && d.plan.streak_days === 0 && d.plan.review.length === 0)
 })
+
+test('"Continue" opens the exact lesson: the Dashboard names it and every academy opens it once its list has loaded', () => {
+  const { src } = require('./helpers/harness')
+  assert.match(src('src/pages/Dashboard.tsx'), /setPendingLesson\(lessonId \?\? null\)/)
+  assert.match(src('src/components/ui/LearningPlan.tsx'), /onOpen\(SECTION\(next\.module\), next\.module === 'simulation' \? undefined : next\.lesson_id\)/)
+  for (const page of ['SqlAcademy', 'ExcelAcademy', 'PythonAcademy', 'PowerBIAcademy', 'StatisticsAcademyFull', 'BusinessAcademyFull']) {
+    assert.match(src(`src/pages/${page}.tsx`), /usePendingLesson\(lessons,/, `${page} must open the lesson the Dashboard asked for`)
+  }
+  const hook = src('src/hooks/usePendingLesson.ts')
+  assert.match(hook, /user_status !== 'locked'/, 'a locked lesson is never opened')
+  assert.match(hook, /\(\) => \(\) => setPending\(null\)/, 'the request never outlives the page')
+})

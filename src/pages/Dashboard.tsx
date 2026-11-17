@@ -3,7 +3,7 @@ import {
   BookOpen, CheckCircle, Clock, TrendingUp,
   Award, ChevronRight, Database, FileSpreadsheet,
   Terminal, BarChart3, Briefcase, Users, FlaskConical,
-  Table2, FolderOpen, Trophy, Sparkles,
+  Table2, FolderOpen, Trophy, Sparkles, Workflow,
 } from 'lucide-react'
 import { useAuthStore, useUIStore } from '../store'
 import type { DashboardStats, SkillRating, NavSection } from '../types'
@@ -47,6 +47,7 @@ const JOURNEY: JourneyGroup[] = [
       { id: 'powerbi',    label: 'Power BI',   desc: 'Interactive dashboards that tell a story.',              icon: <BarChart3 size={16} />,      color: 'var(--powerbi-color)' },
       { id: 'statistics', label: 'Statistics', desc: 'The numbers behind the charts — tests & inference.',     icon: <TrendingUp size={16} />,     color: 'var(--stats-color)' },
       { id: 'business',   label: 'Business',   desc: 'Think like an analyst — frame and recommend.',          icon: <Briefcase size={16} />,      color: 'var(--business-color)' },
+      { id: 'dataeng',    label: 'Data Engineering', desc: 'Pipelines, data quality and AI-ready data at platform scale.', icon: <Workflow size={16} />, color: 'var(--de-color)' },
     ],
   },
   {
@@ -69,7 +70,7 @@ const JOURNEY: JourneyGroup[] = [
 
 export default function Dashboard() {
   const { user } = useAuthStore()
-  const { setActiveSection } = useUIStore()
+  const { setActiveSection, setPendingLesson } = useUIStore()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -181,7 +182,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {stats?.plan && !isNewcomer && <LearningPlan plan={stats.plan} onOpen={setActiveSection} />}
+      {stats?.plan && !isNewcomer && <LearningPlan plan={stats.plan} onOpen={(section, lessonId) => { setPendingLesson(lessonId ?? null); setActiveSection(section) }} />}
 
       {/* Stats grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 24 }}>

@@ -27,12 +27,13 @@ import type { NavSection } from '../../types'
 
 const PAGES: Record<NavSection, React.ReactNode> = {
   dashboard:    <Dashboard />,
-  sql:          <SqlAcademy />,
+  sql:          <SqlAcademy key="sql" />,
   python:       <PythonAcademy />,
   excel:        <ExcelAcademy />,
   powerbi:      <PowerBIAcademy />,
   statistics:   <StatisticsAcademy />,
   business:     <BusinessAcademy />,
+  dataeng:      <SqlAcademy key="dataeng" course="dataeng" />,
   simulations:  <Simulations />,
   playground:   <DataPlayground />,
   datasets:     <Datasets />,

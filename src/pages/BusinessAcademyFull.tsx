@@ -9,6 +9,7 @@ import InstructorPanel from '../components/ui/InstructorPanel'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
 import { PageError } from '../components/ui/PageState'
+import { usePendingLesson } from '../hooks/usePendingLesson'
 import { reportApiError, aiFailureNote } from '../lib/apiError'
 import { SplitPane, AsideSplit } from '../components/ui/SplitPane'
 import type { Lesson } from '../types'
@@ -73,6 +74,15 @@ export function BusinessAcademy() {
       .catch((err: any) => { reportApiError('load Business lessons', err); setLoadError(true) })
       .finally(() => setLoading(false))
   }
+
+  usePendingLesson(lessons, async (id) => {
+    if (!user) return
+    try {
+      const data = await window.api.lessons.get(user.id, id)
+      await window.api.lessons.start(user.id, id)
+      setActiveLesson(data)
+    } catch (err: any) { reportApiError('open that lesson', err) }
+  })
 
   if (loadError && !activeLesson) return <PageError message="Couldn't load the Business Academy lessons." onRetry={loadLessons} />
 

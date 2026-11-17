@@ -4,8 +4,10 @@ import '@/lib/monacoLocal'
 import { Database, Plus, Play, Trash2, Download, Pencil, Table2, Key, Loader, X } from 'lucide-react'
 import { useAuthStore, notify } from '../../store'
 import { SplitPane } from '../ui/SplitPane'
+import ResultsGrid from './ResultsGrid'
 import { reportApiError } from '../../lib/apiError'
-import { registerSqlCompletion, setSqlSchema } from '../../lib/sqlCompletion'
+import { setSqlSchema } from '../../lib/sqlCompletion'
+import { prepareSqlEditor, useEditorTheme } from '../../lib/editorTheme'
 import { buildCreateTable, snippets, quoteIdent, type ColumnDraft } from '../../lib/sqlBuilder'
 import type { SqlResult } from '../../types'
 
@@ -26,6 +28,7 @@ const LAST_KEY = 'dbi.mydb.last'
 const label: React.CSSProperties = { fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }
 
 export default function MyDatabases() {
+  const editorTheme = useEditorTheme()
   const { user } = useAuthStore()
   const [dbs, setDbs] = useState<Db[] | null>(null)
   const [active, setActive] = useState<Db | null>(null)
@@ -235,7 +238,7 @@ export default function MyDatabases() {
             {snippets(table).map((s) => <button key={s.label} className="btn btn-ghost btn-sm" onClick={() => setQuery(s.sql)}>{s.label}</button>)}
           </div>
           <div style={{ flex: 1, minHeight: 0 }}>
-            <Editor height="100%" language="sql" beforeMount={registerSqlCompletion} value={query} onChange={(v) => setQuery(v ?? '')} theme="vs-dark"
+            <Editor height="100%" language="sql" beforeMount={prepareSqlEditor} value={query} onChange={(v) => setQuery(v ?? '')} theme={editorTheme}
               onMount={(ed, monaco) => ed.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => document.getElementById('mydb-run')?.click())}
               options={{ fontSize: 13, fontFamily: 'var(--font-mono)', minimap: { enabled: false }, scrollBeyondLastLine: false, padding: { top: 10 }, automaticLayout: true }} />
           </div>
@@ -255,11 +258,7 @@ export default function MyDatabases() {
           {result?.success && (result.columns?.length ?? 0) > 0 && (
             (result.rows?.length ?? 0) === 0
               ? <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>The query ran and returned 0 rows.</div>
-              : <table className="data-table" style={{ minWidth: '100%' }}>
-                  <thead><tr>{result.columns!.map((c) => <th key={c}>{c}</th>)}</tr></thead>
-                  <tbody>{result.rows!.map((r, i) => <tr key={i}>{result.columns!.map((c) => (
-                    <td key={c}>{r[c] === null ? <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>NULL</span> : String(r[c])}</td>))}</tr>)}</tbody>
-                </table>
+              : <ResultsGrid rows={result.rows!} columns={result.columns!} />
           )}
         </div>
       } />

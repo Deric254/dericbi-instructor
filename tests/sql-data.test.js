@@ -28,6 +28,14 @@ const DATASETS = {
   'ds-hospital-billing': { table: 'billing', file: 'hospital_billing.csv' },
   'ds-sales': { table: 'sales', file: 'sales_transactions.csv' },
   'ds-hr': { table: 'employees', file: 'hr_employees.csv' },
+  // Data Engineering academy
+  'ds-de-customers': { table: 'customers', file: 'de_customers.csv' },
+  'ds-de-orders': { table: 'orders', file: 'de_orders.csv' },
+  'ds-de-raw-events': { table: 'raw_events', file: 'de_raw_events.csv' },
+  'ds-de-pipeline-runs': { table: 'pipeline_runs', file: 'de_pipeline_runs.csv' },
+  'ds-de-ml-features': { table: 'ml_features', file: 'de_ml_features.csv' },
+  'ds-de-messy-contacts': { table: 'messy_contacts', file: 'de_messy_contacts.csv' },
+  'ds-de-llm-requests': { table: 'llm_requests', file: 'de_llm_requests.csv' },
 }
 
 test.before(async () => {
@@ -40,7 +48,7 @@ test.before(async () => {
 
 // ───────────────────────── the data is there ─────────────────────────
 
-test('first-time setup writes the four practice files and registers each one', () => {
+test('first-time setup writes the practice files and registers each one', () => {
   const registered = db.getDb().prepare('SELECT * FROM bundled_datasets').all()
   assert.deepEqual(registered.map((d) => d.id).sort(), Object.keys(DATASETS).sort())
   for (const d of registered) {
