@@ -25,11 +25,9 @@ import type { Lesson, SqlResult } from '../types'
 
 type View = 'lessons' | 'lesson' | 'playground' | 'mydbs'
 
-<<<<<<< HEAD
 const DATAENG_TABLES = 'customers, orders, raw_events, pipeline_runs, ml_features, llm_requests, messy_contacts'
 
 =======
->>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
 /** The SQL screen also teaches Data Engineering: same editor, grader and tutor, different course, colour and title. */
 const COURSES = {
   sql: {
