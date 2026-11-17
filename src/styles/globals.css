@@ -9,12 +9,12 @@
   --bg-overlay:     #1d2438;
   --bg-hover:       #242b3d;
 
-  --border:         #252d42;
-  --border-strong:  #2e3850;
+  --border:         #37425f;
+  --border-strong:  #4a5879;
 
-  --text-primary:   #e8ecf4;
-  --text-secondary: #8b95b0;
-  --text-muted:     #4d5673;
+  --text-primary:   #eef1f8;
+  --text-secondary: #aab3cb;
+  --text-muted:     #8791ae;
   --text-inverse:   #0a0d14;
 
   /* Accent — dericBI signature teal-green (brand color from dericbi.vercel.app) */
@@ -35,6 +35,7 @@
   --business-color: #f472b6;    /* pink */
   --sim-color:      #3B82F6;    /* blue — distinct from accent green and Playground's indigo */
   --playground-color: #818cf8;  /* indigo */
+  --de-color:       #fb7185;    /* rose — Data Engineering */
 
   /* Status */
   --success:        #22c55e;
@@ -75,6 +76,10 @@
   --shadow-lg:   0 8px 32px rgba(0,0,0,0.6);
   --shadow-glow: 0 0 24px var(--accent-glow);
 
+  /* Output consoles (Python / Statistics) */
+  --terminal-bg:    #0d1117;
+  --terminal-text:  #a5d6a7;
+
   /* Decorative texture (dot-grid + glow) — theme-aware, purely visual */
   --texture-dot:    rgba(232, 236, 244, 0.09);
   --texture-glow-1: rgba(73, 160, 120, 0.24);
@@ -100,12 +105,12 @@
   --bg-overlay:     #e8eaf2;
   --bg-hover:       #dde1ec;
 
-  --border:         #e2e5ee;
-  --border-strong:  #cbd0e0;
+  --border:         #c9cfdf;
+  --border-strong:  #a9b1c7;
 
-  --text-primary:   #1a1f2e;
-  --text-secondary: #5b6478;
-  --text-muted:     #8a93a8;
+  --text-primary:   #141826;
+  --text-secondary: #424b60;
+  --text-muted:     #5d667c;
   --text-inverse:   #ffffff;
 
   --accent:         #2F7A57;
@@ -116,18 +121,19 @@
 
   --sql-color:      #0e7490;
   --excel-color:    #4d7c0f;
-  --python-color:   #a16207;
+  --python-color:   #92560a;
   --powerbi-color:  #c2410c;
   --stats-color:    #7c3aed;
   --business-color: #be185d;
   --sim-color:      #1d4ed8;
   --playground-color: #4338ca;
+  --de-color:       #be123c;
 
-  --success:        #16a34a;
+  --success:        #15803d;
   --success-dim:    rgba(22, 163, 74, 0.12);
-  --error:          #dc2626;
+  --error:          #c81e1e;
   --error-dim:      rgba(220, 38, 38, 0.10);
-  --warning:        #d97706;
+  --warning:        #b45309;
   --warning-dim:    rgba(217, 119, 6, 0.12);
   --info:           #2563eb;
   --info-dim:       rgba(37, 99, 235, 0.12);
@@ -141,6 +147,9 @@
   --shadow:      0 4px 12px rgba(15,23,42,0.10);
   --shadow-lg:   0 8px 32px rgba(15,23,42,0.16);
   --shadow-glow: 0 0 24px var(--accent-glow);
+
+  --terminal-bg:    #f6f8fa;
+  --terminal-text:  #166534;
 
   /* Decorative texture — softer on light backgrounds */
   --texture-dot:    rgba(26, 31, 46, 0.07);

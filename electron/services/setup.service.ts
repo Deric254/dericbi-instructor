@@ -4,8 +4,9 @@ import { app } from 'electron'
 // sql.js is used via getDb() — no direct import needed
 import { getDb, getDatasetsPath } from '../db/database'
 import { v4 as uuidv4 } from 'uuid'
+import { DATAENG_DATASETS, generateDataEngDatasets } from './dataeng.datasets'
 
-const SETUP_VERSION = 5 // increment to force re-seed on app update
+const SETUP_VERSION = 6 // increment to force re-seed on app update
 
 // Bump when the generated CSV *contents* change shape, so installs that already have older
 // CSVs on disk get them regenerated (generateDatasets() otherwise skips files that exist).
@@ -113,6 +114,7 @@ export async function ensureDatasetFiles(): Promise<void> {
 
 async function generateDatasets(): Promise<void> {
   const datasetsDir = getDatasetsPath()
+  generateDataEngDatasets(datasetsDir) // own version marker; a no-op once written
 
   // Only generate if files don't exist
   const files = [
@@ -271,6 +273,7 @@ function seedAllCurricula(): void {
     { file: 'excel/curriculum.json',      type: 'formula'     },
     { file: 'powerbi/curriculum.json',    type: 'freeform'    },
     { file: 'business/curriculum.json',   type: 'freeform'    },
+    { file: 'dataeng/curriculum.json',    type: 'sql_query'   },
   ]
 
   for (const c of curricula) {
@@ -291,17 +294,27 @@ function seedCurriculum(jsonPath: string, exerciseType: string): void {
   const db = getDb()
   const data = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'))
 
+  // UPDATE-in-place, never REPLACE: with foreign keys on, REPLACE deletes the old row first, and that cascades
+  // into every student's lesson progress and exercise attempts. A content update must never touch progress.
   const insertLesson = db.prepare(`
-    INSERT OR REPLACE INTO lessons
+    INSERT INTO lessons
     (id, module, title, description, level, prerequisites, estimated_min, sort_order, theory_md, quiz)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      module = excluded.module, title = excluded.title, description = excluded.description, level = excluded.level,
+      prerequisites = excluded.prerequisites, estimated_min = excluded.estimated_min, sort_order = excluded.sort_order,
+      theory_md = excluded.theory_md, quiz = excluded.quiz
   `)
 
   const insertExercise = db.prepare(`
-    INSERT OR REPLACE INTO exercises
+    INSERT INTO exercises
     (id, lesson_id, exercise_type, title, prompt, hint_1, hint_2, hint_3,
      solution, evaluation_mode, points, sort_order)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      lesson_id = excluded.lesson_id, exercise_type = excluded.exercise_type, title = excluded.title, prompt = excluded.prompt,
+      hint_1 = excluded.hint_1, hint_2 = excluded.hint_2, hint_3 = excluded.hint_3, solution = excluded.solution,
+      evaluation_mode = excluded.evaluation_mode, points = excluded.points, sort_order = excluded.sort_order
   `)
 
   const tx = db.transaction(() => {
@@ -349,6 +362,10 @@ function seedBundledDatasets(): void {
     { id: 'ds-sales',             name: 'Sales Transactions', description: 'Monthly sales by product, region, salesperson — 2 years', domain: 'sales', file: 'sales_transactions.csv', table: 'sales', rows: 1200, cols: ['transaction_id','sale_date','product','category','region','salesperson','quantity','unit_price','revenue'] },
     { id: 'ds-hr',                name: 'HR Employees',       description: 'Employee records: department, salary, tenure, attrition', domain: 'hr', file: 'hr_employees.csv', table: 'employees', rows: 800, cols: ['employee_id','name','department','role','salary','hire_date','years_tenure','attrition'] },
   ]
+
+  for (const d of DATAENG_DATASETS) {
+    datasets.push({ id: d.id, name: d.name, description: d.description, domain: 'dataeng', file: d.file, table: d.table, rows: d.rows, cols: d.cols })
+  }
 
   const tx = db.transaction(() => {
     for (const ds of datasets) {

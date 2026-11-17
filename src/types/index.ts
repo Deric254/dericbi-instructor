@@ -77,7 +77,7 @@ export interface RecentActivity {
 // LESSONS
 // ─────────────────────────────────────────────
 
-export type LessonModule = 'sql' | 'excel' | 'python' | 'powerbi' | 'statistics' | 'business' | 'simulation'
+export type LessonModule = 'sql' | 'excel' | 'python' | 'powerbi' | 'statistics' | 'business' | 'dataeng' | 'simulation'
 export type LessonLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert'
 export type LessonStatus = 'locked' | 'available' | 'in_progress' | 'complete'
 
@@ -210,6 +210,7 @@ export type NavSection =
   | 'powerbi'
   | 'statistics'
   | 'business'
+  | 'dataeng'
   | 'simulations'
   | 'playground'
   | 'datasets'

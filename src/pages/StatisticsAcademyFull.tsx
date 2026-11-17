@@ -7,6 +7,7 @@ import InstructorPanel from '../components/ui/InstructorPanel'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
 import { PageError } from '../components/ui/PageState'
+import { preparePythonEditor, useEditorTheme } from '../lib/editorTheme'
 import { reportApiError } from '../lib/apiError'
 import { SplitPane, AsideSplit } from '../components/ui/SplitPane'
 import type { Lesson } from '../types'
@@ -186,6 +187,7 @@ function StatLessonView({ lesson, exercises, onBack }: { lesson: any; exercises:
 }
 
 function StatExercise({ exercise }: { exercise: any }) {
+  const editorTheme = useEditorTheme()
   const { user } = useAuthStore()
   const { status, loadRuntime, runCode } = usePyodide()
   const [code, setCode] = useState('')
@@ -237,12 +239,12 @@ function StatExercise({ exercise }: { exercise: any }) {
       <SplitPane id="stats-exercise-output" direction="vertical" defaultRatio={0.55} minFirst={130} minSecond={110}
       first={
         <div style={{ flex: 1, minHeight: 0 }}>
-          <Editor height="100%" language="python" value={code} onChange={v => setCode(v ?? '')} theme="vs-dark" options={{ fontSize: 13, fontFamily: 'var(--font-mono)', minimap: { enabled: false }, scrollBeyondLastLine: false, padding: { top: 10 }, tabSize: 4, automaticLayout: true }} />
+          <Editor height="100%" language="python" value={code} onChange={v => setCode(v ?? '')} theme={editorTheme} beforeMount={preparePythonEditor} options={{ fontSize: 13, fontFamily: 'var(--font-mono)', minimap: { enabled: false }, scrollBeyondLastLine: false, padding: { top: 10 }, tabSize: 4, automaticLayout: true }} />
         </div>
       }
       second={
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ flex: 1, overflow: 'auto', padding: '10px 14px', background: '#0d1117', fontFamily: 'var(--font-mono)', fontSize: 12, lineHeight: 1.6, color: isError ? 'var(--error)' : '#a5d6a7', whiteSpace: 'pre-wrap' }}>
+        <div style={{ flex: 1, overflow: 'auto', padding: '10px 14px', background: 'var(--terminal-bg)', fontFamily: 'var(--font-mono)', fontSize: 12, lineHeight: 1.6, color: isError ? 'var(--error)' : 'var(--terminal-text)', whiteSpace: 'pre-wrap' }}>
           {output || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Output appears here…</span>}
         </div>
         <div style={{ padding: '7px 14px', borderTop: '1px solid var(--border)', background: 'var(--bg-surface)', display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>

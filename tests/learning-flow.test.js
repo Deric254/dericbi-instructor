@@ -79,8 +79,8 @@ test('Reset: closing the sandbox restores a practice table the student dropped',
 test('the screens are wired: completion registered on all three editors, Reset really resets, Explain uses a request id', () => {
   const sa = fs.readFileSync(path.join(__dirname, '..', 'src/pages/SqlAcademy.tsx'), 'utf8')
   const md = fs.readFileSync(path.join(__dirname, '..', 'src/components/sql/MyDatabases.tsx'), 'utf8')
-  assert.equal((sa.match(/beforeMount=\{registerSqlCompletion\}/g) || []).length, 2)
-  assert.match(md, /beforeMount=\{registerSqlCompletion\}/)
+  assert.equal((sa.match(/beforeMount=\{(prepareSqlEditor|lessonModule === 'sql' \? prepareSqlEditor : preparePythonEditor)\}/g) || []).length, 2)
+  assert.match(md, /beforeMount=\{prepareSqlEditor\}/)
   assert.match(sa, /const resetExercise = async[\s\S]*closeSandbox/)
   assert.match(sa, /request=\{tutorRequest\}/)
 })

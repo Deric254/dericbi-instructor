@@ -10,6 +10,7 @@ import { useAuthStore, notify } from '../store'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
 import { PageError } from '../components/ui/PageState'
+import { preparePythonEditor, useEditorTheme } from '../lib/editorTheme'
 import { reportApiError } from '../lib/apiError'
 import { SplitPane, LessonWorkspace } from '../components/ui/SplitPane'
 import type { Lesson } from '../types'
@@ -289,6 +290,7 @@ const STARTER_SNIPPETS = [
 ]
 
 function PythonPlayground({ contextLessonId }: { contextLessonId?: string }) {
+  const editorTheme = useEditorTheme()
   const { user } = useAuthStore()
   const { status, loadRuntime, runCode } = usePyodide()
   const [code, setCode] = useState(STARTER_SNIPPETS[0].code)
@@ -418,7 +420,8 @@ function PythonPlayground({ contextLessonId }: { contextLessonId?: string }) {
             language="python"
             value={code}
             onChange={v => setCode(v ?? '')}
-            theme="vs-dark"
+            theme={editorTheme}
+            beforeMount={preparePythonEditor}
             options={{
               fontSize: 13,
               fontFamily: 'var(--font-mono)',
@@ -438,7 +441,7 @@ function PythonPlayground({ contextLessonId }: { contextLessonId?: string }) {
         <div style={{
           flex: 1, minHeight: 0,
           display: 'flex', flexDirection: 'column',
-          background: '#0d1117',
+          background: 'var(--terminal-bg)',
         }}>
           <div style={{
             padding: '6px 12px', borderBottom: '1px solid var(--border)',
@@ -467,7 +470,7 @@ function PythonPlayground({ contextLessonId }: { contextLessonId?: string }) {
               <div key={i} style={{
                 color: line.type === 'error' ? 'var(--error)'
                   : line.type === 'info' ? 'var(--text-muted)'
-                  : '#a5d6a7',
+                  : 'var(--terminal-text)',
                 marginBottom: 2,
                 whiteSpace: 'pre-wrap',
                 wordBreak: 'break-all',

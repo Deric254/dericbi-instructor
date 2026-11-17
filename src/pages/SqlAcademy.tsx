@@ -5,14 +5,16 @@ import {
   Database, Play, ChevronRight, Lock, CheckCircle, Circle,
   Clock, BookOpen, Lightbulb, X, Loader, AlertCircle,
   ChevronDown, RotateCcw, HelpCircle, MessageSquare, Star,
-  Brain,
+  Brain, Workflow,
 } from 'lucide-react'
 import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
 import { SplitPane, AsideSplit } from '../components/ui/SplitPane'
 import MyDatabases from '../components/sql/MyDatabases'
-import { registerSqlCompletion, refreshSqlSchema } from '../lib/sqlCompletion'
+import { refreshSqlSchema } from '../lib/sqlCompletion'
+import { prepareSqlEditor, preparePythonEditor, useEditorTheme } from '../lib/editorTheme'
 import { explainPrompt } from '../lib/explainPrompt'
+import ResultsGrid from '../components/sql/ResultsGrid'
 import ComparePanel, { hasComparison, type Comparison } from '../components/sql/ComparePanel'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
@@ -22,7 +24,20 @@ import type { Lesson, SqlResult } from '../types'
 
 type View = 'lessons' | 'lesson' | 'playground' | 'mydbs'
 
-export default function SqlAcademy() {
+/** The SQL screen also teaches Data Engineering: same editor, grader and tutor, different course, colour and title. */
+const COURSES = {
+  sql: {
+    module: 'sql', title: 'SQL Academy', tint: 'rgba(34,211,238,0.15)', icon: <Database size={16} />,
+    subtitle: 'From SELECT to window functions — real execution on real data', myDatabases: true,
+  },
+  dataeng: {
+    module: 'dataeng', title: 'Data Engineering Academy', tint: 'rgba(251,113,133,0.15)', icon: <Workflow size={16} />,
+    subtitle: 'Pipelines, data quality and AI-ready data — for the people who run the platform', myDatabases: false,
+  },
+} as const
+
+export default function SqlAcademy({ course = 'sql' }: { course?: keyof typeof COURSES }) {
+  const cfg = COURSES[course]
   const [view, setView] = useState<View>('lessons')
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null)
@@ -34,11 +49,11 @@ export default function SqlAcademy() {
     if (!user) return
     setLoading(true)
     setLoadError(false)
-    window.api.lessons.list(user.id, 'sql')
+    window.api.lessons.list(user.id, cfg.module)
       .then((data: any) => setLessons(data))
-      .catch((err) => { reportApiError('load SQL lessons', err); setLoadError(true) })
+      .catch((err) => { reportApiError(`load ${cfg.title} lessons`, err); setLoadError(true) })
       .finally(() => setLoading(false))
-  }, [user])
+  }, [user, cfg])
 
   useEffect(loadLessons, [loadLessons])
 
@@ -48,7 +63,8 @@ export default function SqlAcademy() {
   }
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    // The page is built on --sql-color; Data Engineering re-points it to its own colour for everything below.
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', ...(course === 'dataeng' ? { ['--sql-color' as any]: 'var(--de-color)' } : {}) }}>
       {/* Page header */}
       <div style={{
         padding: '14px 24px',
@@ -61,16 +77,16 @@ export default function SqlAcademy() {
       }}>
         <div style={{
           width: 32, height: 32, borderRadius: 'var(--radius)',
-          background: 'rgba(34,211,238,0.15)',
+          background: cfg.tint,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           color: 'var(--sql-color)',
         }}>
-          <Database size={16} />
+          {cfg.icon}
         </div>
         <div>
-          <h2 style={{ color: 'var(--text-primary)' }}>SQL Academy</h2>
+          <h2 style={{ color: 'var(--text-primary)' }}>{cfg.title}</h2>
           <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-            From SELECT to window functions — real execution on real data
+            {cfg.subtitle}
           </p>
         </div>
 
@@ -81,9 +97,11 @@ export default function SqlAcademy() {
           <TabBtn active={view === 'playground'} onClick={() => setView('playground')}>
             <Play size={13} /> Playground
           </TabBtn>
-          <TabBtn active={view === 'mydbs'} onClick={() => setView('mydbs')}>
-            <Database size={13} /> My Databases
-          </TabBtn>
+          {cfg.myDatabases && (
+            <TabBtn active={view === 'mydbs'} onClick={() => setView('mydbs')}>
+              <Database size={13} /> My Databases
+            </TabBtn>
+          )}
         </div>
       </div>
 
@@ -99,12 +117,12 @@ export default function SqlAcademy() {
             onComplete={() => {
               setView('lessons')
               // Refresh lessons
-              if (user) window.api.lessons.list(user.id, 'sql').then(setLessons).catch((err: any) => reportApiError('refresh your lessons', err))
+              if (user) window.api.lessons.list(user.id, cfg.module).then(setLessons).catch((err: any) => reportApiError('refresh your lessons', err))
             }}
           />
         )}
         {view === 'playground' && <SqlPlayground />}
-        {view === 'mydbs' && <MyDatabases />}
+        {view === 'mydbs' && cfg.myDatabases && <MyDatabases />}
       </div>
     </div>
   )
@@ -344,6 +362,7 @@ function LessonView({ lessonId, onBack, onComplete }: {
 function ExerciseSolver({ exercise, lessonModule, onNext }: {
   exercise: any; lessonModule: string; onNext?: () => void
 }) {
+  const editorTheme = useEditorTheme()
   const { user } = useAuthStore()
   const [code, setCode] = useState(exercise?.solution ? '' : '')
   const [result, setResult] = useState<any>(null)
@@ -494,10 +513,10 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
           <Editor
             height="100%"
             language={lessonModule === 'sql' ? 'sql' : 'python'}
-            beforeMount={registerSqlCompletion}
+            beforeMount={lessonModule === 'sql' ? prepareSqlEditor : preparePythonEditor}
             value={code}
             onChange={v => setCode(v ?? '')}
-            theme="vs-dark"
+            theme={editorTheme}
             options={{
               fontSize: 13,
               fontFamily: 'var(--font-mono)',
@@ -589,6 +608,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
 // ─────────────────────────────────────────────
 
 function SqlPlayground() {
+  const editorTheme = useEditorTheme()
   const { user } = useAuthStore()
   const [query, setQuery] = useState('-- Write your SQL here\nSELECT * FROM patients LIMIT 10;')
   const [result, setResult] = useState<SqlResult | null>(null)
@@ -718,10 +738,10 @@ function SqlPlayground() {
           <Editor
             height="100%"
             language="sql"
-            beforeMount={registerSqlCompletion}
+            beforeMount={prepareSqlEditor}
             value={query}
             onChange={v => setQuery(v ?? '')}
-            theme="vs-dark"
+            theme={editorTheme}
             options={{
               fontSize: 13, fontFamily: 'var(--font-mono)',
               minimap: { enabled: false }, scrollBeyondLastLine: false,
@@ -871,32 +891,6 @@ function ExerciseEditorArea({ children, showOutput, output, running, comparison 
             </div>
           </div>
         } />
-    </div>
-  )
-}
-
-function ResultsGrid({ rows, columns }: { rows: any[]; columns: string[] }) {
-  if (rows.length === 0) {
-    return <div style={{ padding: 16, fontSize: 12, color: 'var(--text-muted)' }}>Query returned 0 rows.</div>
-  }
-  return (
-    <div style={{ overflow: 'auto', height: '100%' }}>
-      <table className="data-table" style={{ minWidth: '100%' }}>
-        <thead>
-          <tr>
-            {columns.map(col => <th key={col}>{col}</th>)}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={i}>
-              {columns.map(col => (
-                <td key={col}>{row[col] === null ? <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>NULL</span> : String(row[col])}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   )
 }

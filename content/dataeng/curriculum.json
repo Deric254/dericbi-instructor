@@ -1,0 +1,1065 @@
+{
+  "module": "dataeng",
+  "version": "1.0",
+  "lessons": [
+    {
+      "id": "de-foundations",
+      "title": "The Data Engineer's Role & the Modern Data Stack",
+      "description": "What a data platform is, why AI depends on it, and your first look at the Northwind Global data",
+      "level": "beginner",
+      "prerequisites": [],
+      "estimated_min": 30,
+      "sort_order": 1,
+      "theory_md": "## The Data Engineer's Role & the Modern Data Stack\n\n### Why this role decides who wins the AI race\nA model is only as good as the data it is fed. Every AI product, dashboard and board report sits on top of a **data platform**: the pipelines that collect data from many systems, clean it, store it, and serve it reliably. The person who builds and runs that platform is the **data engineer**. Analysts ask questions of data; data engineers make sure the data is *there, correct and on time*.\n\n### The journey of a piece of data\n```\nSource systems  ->  Ingestion  ->  Storage  ->  Transformation  ->  Serving\n(shop, app,         (batch or      (lake or      (clean, join,       (dashboards,\n partners, logs)     streaming)     warehouse)    model)              ML, AI, APIs)\n```\n- **Ingestion** brings raw data in. It can arrive twice, late, or malformed.\n- **Storage**: a *data lake* keeps raw files cheaply; a *warehouse* keeps structured tables for fast SQL. Many companies use both.\n- **Transformation** turns raw into trusted. **ETL** transforms before loading; **ELT** loads first and transforms inside the warehouse with SQL (the modern default).\n- **Serving** is where value appears: reports, features for models, APIs.\n\n### Your practice company\nIn this academy you work for **Northwind Global**, a multinational. Six tables are ready in every exercise:\n`customers`, `orders`, `raw_events`, `pipeline_runs`, `ml_features`, `llm_requests`.\n\nStart by *looking before you build*:\n```sql\nSELECT source_system, COUNT(*) AS event_count\nFROM raw_events\nGROUP BY source_system;\n```\nYou already know this pattern from the SQL Academy. Data engineering is mostly that same SQL, applied with discipline: counting, checking, comparing, and proving the data can be trusted.\n\n### Executive lens\nA CEO or CTO does not need to write every pipeline, but must be able to ask: *Where does this number come from? How fresh is it? What happens when it breaks?* If you can answer those three questions with queries, you are the person every team depends on.\n\n**Key rules:**\n- Never trust data you have not profiled.\n- A pipeline is a product: it has users, a quality bar and an on-call owner.\n- Raw data is kept; clean data is derived from it and can always be rebuilt.",
+      "quiz": [
+        {
+          "question": "What is the main job of a data engineer?",
+          "options": [
+            "Build charts for executives",
+            "Make sure trusted data is available, correct and on time for everyone who needs it",
+            "Train machine learning models",
+            "Write the company's website"
+          ],
+          "correct_index": 1,
+          "explanation": "Analysts and scientists consume data; the data engineer builds and runs the platform that delivers it reliably."
+        },
+        {
+          "question": "What is the difference between ETL and ELT?",
+          "options": [
+            "ETL loads first, ELT transforms first",
+            "ETL transforms before loading; ELT loads raw data first and transforms it inside the warehouse",
+            "They are the same thing",
+            "ELT is only for images"
+          ],
+          "correct_index": 1,
+          "explanation": "Modern warehouses are powerful enough to transform data with SQL after loading, which keeps the raw data and makes rebuilds easy."
+        },
+        {
+          "question": "Why does AI depend on data engineering?",
+          "options": [
+            "Models do not need data",
+            "Models learn from data, so wrong, late or duplicated data produces wrong models",
+            "Only because of storage cost",
+            "It does not"
+          ],
+          "correct_index": 1,
+          "explanation": "Bad data in means bad predictions out. Data quality and freshness are the foundation of every AI system."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-1-e1",
+          "title": "Know Your Sources",
+          "prompt": "Count the events per source_system in raw_events. Return source_system and event_count, sorted by event_count descending.",
+          "hint_1": "GROUP BY source_system and COUNT(*).",
+          "hint_2": "Name the count column event_count and finish with ORDER BY event_count DESC.",
+          "hint_3": "SELECT source_system, COUNT(*) AS event_count FROM raw_events GROUP BY source_system ORDER BY event_count DESC",
+          "solution": "SELECT source_system, COUNT(*) AS event_count FROM raw_events GROUP BY source_system ORDER BY event_count DESC",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "de-1-e2",
+          "title": "Landing Zone Volume",
+          "prompt": "How big is the raw_events landing table? Return one row with total_rows (number of rows) and total_payload_kb (sum of payload_kb).",
+          "hint_1": "Use COUNT(*) and SUM(payload_kb) in the same SELECT, no GROUP BY.",
+          "hint_2": "Give the two columns the names total_rows and total_payload_kb.",
+          "hint_3": "SELECT COUNT(*) AS total_rows, SUM(payload_kb) AS total_payload_kb FROM raw_events",
+          "solution": "SELECT COUNT(*) AS total_rows, SUM(payload_kb) AS total_payload_kb FROM raw_events",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "de-1-e3",
+          "title": "Customers by Tier",
+          "prompt": "How many customers are in each tier? Return tier and customers, sorted by customers descending (break ties by tier A to Z).",
+          "hint_1": "GROUP BY tier on the customers table.",
+          "hint_2": "ORDER BY customers DESC, tier.",
+          "hint_3": "SELECT tier, COUNT(*) AS customers FROM customers GROUP BY tier ORDER BY customers DESC, tier",
+          "solution": "SELECT tier, COUNT(*) AS customers FROM customers GROUP BY tier ORDER BY customers DESC, tier",
+          "evaluation_mode": "exact",
+          "points": 15
+        }
+      ]
+    },
+    {
+      "id": "de-profiling",
+      "title": "Profiling Data & Quality Checks",
+      "description": "Find nulls, ranges and surprises before anyone builds on the data",
+      "level": "beginner",
+      "prerequisites": [
+        "de-foundations"
+      ],
+      "estimated_min": 35,
+      "sort_order": 2,
+      "theory_md": "## Profiling Data & Quality Checks\n\n**Profiling** means measuring a table's health before you use it: how many rows, how many missing values, what the minimum and maximum are, which categories exist. It takes minutes and prevents the most expensive kind of mistake: a confident decision built on bad data.\n\n### The six checks to run on any new table\n1. **Volume**: `COUNT(*)`. A sudden drop or jump is the earliest warning of a broken pipeline.\n2. **Completeness**: how many values are `NULL`?\n3. **Uniqueness**: is a supposed key really unique?\n4. **Validity**: are values inside allowed ranges and sets?\n5. **Consistency**: do two tables agree with each other?\n6. **Freshness**: when did data last arrive?\n\n### Counting NULLs correctly\n`COUNT(column)` ignores NULLs, `COUNT(*)` does not. So the number of missing values is:\n```sql\nSELECT COUNT(*) - COUNT(country) AS missing_country FROM raw_events;\n-- or, equivalently\nSELECT COUNT(*) FROM raw_events WHERE country IS NULL;\n```\nRemember: `country = NULL` never works, always use `IS NULL`.\n\n### Null rate as a percentage\n```sql\nSELECT ROUND(100.0 * SUM(CASE WHEN country IS NULL THEN 1 ELSE 0 END) / COUNT(*), 2) AS null_pct\nFROM raw_events;\n```\nMultiplying by `100.0` (not `100`) forces decimal division. Plain integer division would round down and hide the problem.\n\n### Ranges and categories\n```sql\nSELECT MIN(amount), MAX(amount), AVG(amount) FROM orders;\nSELECT currency, COUNT(*) FROM orders GROUP BY currency;\n```\nA negative amount or an unknown currency code is a quality defect worth escalating.\n\n### Executive lens\nQuality is not \"perfect data\", it is *known* data. State the null rate, the duplicate rate and the freshness next to every important number, and decisions get safer.",
+      "quiz": [
+        {
+          "question": "What does COUNT(column) do with NULL values?",
+          "options": [
+            "Counts them",
+            "Ignores them",
+            "Raises an error",
+            "Replaces them with 0"
+          ],
+          "correct_index": 1,
+          "explanation": "COUNT(column) counts only non-NULL values; COUNT(*) counts every row."
+        },
+        {
+          "question": "Which test finds rows where country is missing?",
+          "options": [
+            "WHERE country = NULL",
+            "WHERE country IS NULL",
+            "WHERE country == ''",
+            "WHERE country = 0"
+          ],
+          "correct_index": 1,
+          "explanation": "NULL is 'unknown', so equality never matches it. Use IS NULL."
+        },
+        {
+          "question": "Why multiply by 100.0 instead of 100 when computing a percentage?",
+          "options": [
+            "It is faster",
+            "It forces decimal division so small percentages are not rounded to zero",
+            "SQL requires it",
+            "It removes NULLs"
+          ],
+          "correct_index": 1,
+          "explanation": "Integer division truncates (3/500 becomes 0). A decimal operand keeps the fraction."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-2-e1",
+          "title": "How Many Missing Countries?",
+          "prompt": "Count the events in raw_events where country is missing. Return one column named missing_country.",
+          "hint_1": "Missing means NULL. Use WHERE country IS NULL.",
+          "hint_2": "SELECT COUNT(*) AS missing_country FROM raw_events WHERE ...",
+          "hint_3": "SELECT COUNT(*) AS missing_country FROM raw_events WHERE country IS NULL",
+          "solution": "SELECT COUNT(*) AS missing_country FROM raw_events WHERE country IS NULL",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "de-2-e2",
+          "title": "Null Rate",
+          "prompt": "What percentage of raw_events rows have no country? Return one column named null_pct, rounded to 2 decimals.",
+          "hint_1": "Count the NULL rows with SUM(CASE WHEN country IS NULL THEN 1 ELSE 0 END) and divide by COUNT(*).",
+          "hint_2": "Multiply by 100.0 before dividing, and wrap everything in ROUND(..., 2).",
+          "hint_3": "SELECT ROUND(100.0 * SUM(CASE WHEN country IS NULL THEN 1 ELSE 0 END) / COUNT(*), 2) AS null_pct FROM raw_events",
+          "solution": "SELECT ROUND(100.0 * SUM(CASE WHEN country IS NULL THEN 1 ELSE 0 END) / COUNT(*), 2) AS null_pct FROM raw_events",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "de-2-e3",
+          "title": "Range Check on Amounts",
+          "prompt": "Profile orders.amount. Return min_amount, max_amount and avg_amount (average rounded to 2 decimals).",
+          "hint_1": "MIN(amount), MAX(amount) and AVG(amount) in one SELECT.",
+          "hint_2": "Alias them min_amount, max_amount, avg_amount and ROUND the average to 2 decimals.",
+          "hint_3": "SELECT MIN(amount) AS min_amount, MAX(amount) AS max_amount, ROUND(AVG(amount), 2) AS avg_amount FROM orders",
+          "solution": "SELECT MIN(amount) AS min_amount, MAX(amount) AS max_amount, ROUND(AVG(amount), 2) AS avg_amount FROM orders",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "de-2-e4",
+          "title": "Which Currencies Exist?",
+          "prompt": "List every currency in orders with its number of orders. Return currency and orders, sorted by orders descending (ties by currency A to Z).",
+          "hint_1": "GROUP BY currency.",
+          "hint_2": "ORDER BY orders DESC, currency.",
+          "hint_3": "SELECT currency, COUNT(*) AS orders FROM orders GROUP BY currency ORDER BY orders DESC, currency",
+          "solution": "SELECT currency, COUNT(*) AS orders FROM orders GROUP BY currency ORDER BY orders DESC, currency",
+          "evaluation_mode": "exact",
+          "points": 15
+        }
+      ]
+    },
+    {
+      "id": "de-dedup",
+      "title": "Deduplication & Idempotent Pipelines",
+      "description": "Real pipelines deliver the same event twice. Learn to keep exactly one, safely",
+      "level": "beginner",
+      "prerequisites": [
+        "de-profiling"
+      ],
+      "estimated_min": 40,
+      "sort_order": 3,
+      "theory_md": "## Deduplication & Idempotent Pipelines\n\n### Why duplicates happen\nNetworks retry. A producer sends an event, the acknowledgement is lost, so it sends it again. Most messaging systems promise **at-least-once delivery**: nothing is lost, but some things arrive twice. In `raw_events` you will find events with the same `event_id` delivered several times, each with a later `ingested_at`.\n\nIf you count these naively, revenue is double counted, models train on repeated rows, and nobody notices.\n\n### Detecting duplicates\n```sql\nSELECT COUNT(*) - COUNT(DISTINCT event_id) AS duplicate_rows FROM raw_events;\n\nSELECT event_id, COUNT(*) AS deliveries\nFROM raw_events\nGROUP BY event_id\nHAVING COUNT(*) > 1;\n```\n\n### Keeping exactly one row per key\nThe standard tool is `ROW_NUMBER()`:\n```sql\nWITH ranked AS (\n  SELECT *,\n         ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY ingested_at DESC) AS rn\n  FROM raw_events\n)\nSELECT * FROM ranked WHERE rn = 1;\n```\n- `PARTITION BY event_id` makes one group per event.\n- `ORDER BY ingested_at DESC` puts the newest delivery first.\n- `rn = 1` keeps only that one.\n\nChoosing the ordering is a business decision: *latest wins* suits corrections; *earliest wins* suits first-seen facts.\n\n### Idempotency: the property that saves your weekend\nA pipeline is **idempotent** if running it twice gives the same result as running it once. Deduplication on a stable key is what makes retries safe. Rule of thumb: *every load must be safe to re-run*.\n\n### Executive lens\nAsk any team: \"If this job runs twice tonight, what happens?\" If the answer is \"numbers double\", the platform is fragile. Idempotent pipelines let you recover from failures by simply re-running.",
+      "quiz": [
+        {
+          "question": "What does 'at-least-once delivery' imply?",
+          "options": [
+            "No message is ever duplicated",
+            "Messages are never lost but may be delivered more than once",
+            "Messages may be lost but never repeated",
+            "Delivery is random"
+          ],
+          "correct_index": 1,
+          "explanation": "At-least-once favours not losing data, so consumers must handle duplicates."
+        },
+        {
+          "question": "Which window function numbers rows within each event so you can keep the newest?",
+          "options": [
+            "RANK() without PARTITION",
+            "ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY ingested_at DESC)",
+            "SUM() OVER ()",
+            "LAG()"
+          ],
+          "correct_index": 1,
+          "explanation": "ROW_NUMBER restarts at 1 for each partition; with newest-first ordering, rn = 1 is the latest delivery."
+        },
+        {
+          "question": "What makes a pipeline idempotent?",
+          "options": [
+            "It runs faster",
+            "Running it twice gives the same result as running it once",
+            "It never fails",
+            "It uses streaming"
+          ],
+          "correct_index": 1,
+          "explanation": "Idempotency makes retries and re-runs safe, which is the basis of recoverable pipelines."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-3-e1",
+          "title": "Count the Duplicates",
+          "prompt": "How many surplus rows does raw_events contain, meaning rows beyond the first for each event_id? Return one column named duplicate_rows.",
+          "hint_1": "Total rows minus the number of distinct event_id values.",
+          "hint_2": "COUNT(*) - COUNT(DISTINCT event_id).",
+          "hint_3": "SELECT COUNT(*) - COUNT(DISTINCT event_id) AS duplicate_rows FROM raw_events",
+          "solution": "SELECT COUNT(*) - COUNT(DISTINCT event_id) AS duplicate_rows FROM raw_events",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "de-3-e2",
+          "title": "Which Events Were Re-delivered?",
+          "prompt": "List every event_id that appears more than once, with its number of deliveries. Return event_id and deliveries, sorted by event_id.",
+          "hint_1": "GROUP BY event_id and filter groups with HAVING.",
+          "hint_2": "HAVING COUNT(*) > 1, then ORDER BY event_id.",
+          "hint_3": "SELECT event_id, COUNT(*) AS deliveries FROM raw_events GROUP BY event_id HAVING COUNT(*) > 1 ORDER BY event_id",
+          "solution": "SELECT event_id, COUNT(*) AS deliveries FROM raw_events GROUP BY event_id HAVING COUNT(*) > 1 ORDER BY event_id",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "de-3-e3",
+          "title": "Clean Events by Type",
+          "prompt": "Keep only the newest delivery (latest ingested_at) of each event_id, then count the clean events per event_type. Return event_type and events, sorted by events descending (ties by event_type).",
+          "hint_1": "Use a CTE with ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY ingested_at DESC).",
+          "hint_2": "Filter rn = 1 in the main query, then GROUP BY event_type.",
+          "hint_3": "WITH ranked AS (SELECT event_type, ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY ingested_at DESC) AS rn FROM raw_events) SELECT event_type, COUNT(*) AS events FROM ranked WHERE rn = 1 GROUP BY event_type ORDER BY events DESC, event_type",
+          "solution": "WITH ranked AS (SELECT event_type, ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY ingested_at DESC) AS rn FROM raw_events) SELECT event_type, COUNT(*) AS events FROM ranked WHERE rn = 1 GROUP BY event_type ORDER BY events DESC, event_type",
+          "evaluation_mode": "exact",
+          "points": 40
+        },
+        {
+          "id": "de-3-e4",
+          "title": "Which Source Duplicates Most?",
+          "prompt": "Count the surplus duplicate rows per source_system. Return source_system and duplicate_rows, sorted by duplicate_rows descending (ties by source_system).",
+          "hint_1": "Per group: COUNT(*) - COUNT(DISTINCT event_id).",
+          "hint_2": "GROUP BY source_system, then ORDER BY duplicate_rows DESC, source_system.",
+          "hint_3": "SELECT source_system, COUNT(*) - COUNT(DISTINCT event_id) AS duplicate_rows FROM raw_events GROUP BY source_system ORDER BY duplicate_rows DESC, source_system",
+          "solution": "SELECT source_system, COUNT(*) - COUNT(DISTINCT event_id) AS duplicate_rows FROM raw_events GROUP BY source_system ORDER BY duplicate_rows DESC, source_system",
+          "evaluation_mode": "exact",
+          "points": 30
+        }
+      ]
+    },
+    {
+      "id": "de-integrity",
+      "title": "Referential Integrity & Orphan Detection",
+      "description": "Find records that point at things that do not exist, before they break a report",
+      "level": "intermediate",
+      "prerequisites": [
+        "de-dedup"
+      ],
+      "estimated_min": 40,
+      "sort_order": 4,
+      "theory_md": "## Referential Integrity & Orphan Detection\n\n### The problem\n`orders.customer_id` should always match a row in `customers`. When it does not, the order is an **orphan**. Orphans appear when systems sync at different speeds, when a customer is deleted, or when a bug writes a wrong id. The danger is silent: an `INNER JOIN` quietly drops orphan orders, so revenue in your report is *lower than the real revenue* and nobody sees an error.\n\n### Finding orphans: LEFT JOIN + IS NULL (the anti-join)\n```sql\nSELECT o.order_id, o.customer_id\nFROM orders o\nLEFT JOIN customers c ON c.customer_id = o.customer_id\nWHERE c.customer_id IS NULL;\n```\n`LEFT JOIN` keeps every order. Where no customer matched, the customer columns are `NULL`, so filtering on that finds exactly the orphans.\n\n### Measuring the damage\nDo not just say \"there are orphans\". Say how many and how much money:\n```sql\nSELECT COUNT(*) AS orphan_orders, ROUND(SUM(o.amount), 2) AS orphan_amount\nFROM orders o\nLEFT JOIN customers c ON c.customer_id = o.customer_id\nWHERE c.customer_id IS NULL;\n```\n\n### The reverse direction\nCustomers with *no* orders are also informative (inactive, or a broken sync). Same pattern, swapped tables.\n\n### What to do about orphans\n- **Quarantine** them in a separate table for review instead of deleting.\n- **Alert** the owning team with the count and value.\n- **Fix at the source**, add a constraint or a contract, so it cannot recur.\n\n### Executive lens\nOrphans are a trust problem. If finance asks \"why does the dashboard disagree with the ledger?\", orphan analysis is often the answer.",
+      "quiz": [
+        {
+          "question": "What is an orphan record?",
+          "options": [
+            "A record with no primary key",
+            "A child record whose foreign key points at a parent that does not exist",
+            "A deleted record",
+            "A duplicate record"
+          ],
+          "correct_index": 1,
+          "explanation": "Orphans reference a parent (here, a customer) that is missing from the parent table."
+        },
+        {
+          "question": "Which pattern finds orders without a matching customer?",
+          "options": [
+            "INNER JOIN ... WHERE customer_id IS NULL",
+            "LEFT JOIN customers ... WHERE customers.customer_id IS NULL",
+            "SELECT DISTINCT customer_id",
+            "GROUP BY customer_id"
+          ],
+          "correct_index": 1,
+          "explanation": "LEFT JOIN keeps unmatched orders and shows NULL for the customer side; filtering on that NULL isolates them."
+        },
+        {
+          "question": "Why can orphans make a revenue report too low without any error?",
+          "options": [
+            "SQL hides errors",
+            "An INNER JOIN silently drops rows with no match",
+            "Orphans have negative amounts",
+            "NULLs are summed as zero"
+          ],
+          "correct_index": 1,
+          "explanation": "INNER JOIN only returns matches, so orphan orders vanish from the result without warning."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-4-e1",
+          "title": "Find the Orphan Orders",
+          "prompt": "List the orders whose customer does not exist in customers. Return order_id and customer_id, sorted by order_id.",
+          "hint_1": "LEFT JOIN customers c ON c.customer_id = o.customer_id.",
+          "hint_2": "Keep rows WHERE c.customer_id IS NULL and ORDER BY o.order_id.",
+          "hint_3": "SELECT o.order_id, o.customer_id FROM orders o LEFT JOIN customers c ON c.customer_id = o.customer_id WHERE c.customer_id IS NULL ORDER BY o.order_id",
+          "solution": "SELECT o.order_id, o.customer_id FROM orders o LEFT JOIN customers c ON c.customer_id = o.customer_id WHERE c.customer_id IS NULL ORDER BY o.order_id",
+          "evaluation_mode": "exact",
+          "points": 30
+        },
+        {
+          "id": "de-4-e2",
+          "title": "Size of the Problem",
+          "prompt": "Measure the orphan orders: return orphan_orders (how many) and orphan_amount (their total amount, rounded to 2 decimals).",
+          "hint_1": "Reuse the anti-join (LEFT JOIN ... WHERE c.customer_id IS NULL) and aggregate.",
+          "hint_2": "SELECT COUNT(*) AS orphan_orders, ROUND(SUM(o.amount), 2) AS orphan_amount ...",
+          "hint_3": "SELECT COUNT(*) AS orphan_orders, ROUND(SUM(o.amount), 2) AS orphan_amount FROM orders o LEFT JOIN customers c ON c.customer_id = o.customer_id WHERE c.customer_id IS NULL",
+          "solution": "SELECT COUNT(*) AS orphan_orders, ROUND(SUM(o.amount), 2) AS orphan_amount FROM orders o LEFT JOIN customers c ON c.customer_id = o.customer_id WHERE c.customer_id IS NULL",
+          "evaluation_mode": "exact",
+          "points": 30
+        },
+        {
+          "id": "de-4-e3",
+          "title": "Customers With No Paid Orders",
+          "prompt": "List customers who have never had a paid order. Return customer_id and name, sorted by customer_id.",
+          "hint_1": "Put the status condition in the JOIN (ON ... AND o.status = 'paid'), not in WHERE.",
+          "hint_2": "LEFT JOIN orders o ON o.customer_id = c.customer_id AND o.status = 'paid' WHERE o.order_id IS NULL.",
+          "hint_3": "SELECT c.customer_id, c.name FROM customers c LEFT JOIN orders o ON o.customer_id = c.customer_id AND o.status = 'paid' WHERE o.order_id IS NULL ORDER BY c.customer_id",
+          "solution": "SELECT c.customer_id, c.name FROM customers c LEFT JOIN orders o ON o.customer_id = c.customer_id AND o.status = 'paid' WHERE o.order_id IS NULL ORDER BY c.customer_id",
+          "evaluation_mode": "exact",
+          "points": 35
+        }
+      ]
+    },
+    {
+      "id": "de-incremental",
+      "title": "Incremental Loads, Watermarks & Late Data",
+      "description": "Load only what is new, and survive data that arrives late",
+      "level": "intermediate",
+      "prerequisites": [
+        "de-integrity"
+      ],
+      "estimated_min": 40,
+      "sort_order": 5,
+      "theory_md": "## Incremental Loads, Watermarks & Late Data\n\n### Full reload vs incremental\nA **full load** copies everything every time: simple, but it gets slower and more expensive as data grows. An **incremental load** copies only what changed since the last run. At multinational scale, incremental is not optional.\n\n### The watermark pattern\nA **watermark** remembers how far you have processed, usually the largest timestamp already loaded:\n```sql\n-- where did the last run stop?\nSELECT MAX(ingested_at) AS watermark FROM raw_events;\n\n-- next run: only rows newer than that\nSELECT * FROM raw_events WHERE ingested_at > '2025-01-29 12:00:00';\n```\nAlways use a strict `>` on a column that the *pipeline* controls (`ingested_at`), not one the *source* controls (`event_ts`), because sources can send old events at any time.\n\n### Event time vs ingestion time\n- **event_ts**: when it happened.\n- **ingested_at**: when your platform received it.\n\nThe gap between them is **lateness**. A phone that was offline sends yesterday's events today. If you build daily reports on `event_ts` and never revisit them, late data is silently lost.\n```sql\nSELECT COUNT(*) AS late_events\nFROM raw_events\nWHERE strftime('%s', ingested_at) - strftime('%s', event_ts) > 3600;\n```\n(`strftime('%s', ...)` converts a timestamp to seconds, so subtraction gives seconds of delay.)\n\n### Handling late data\n- Reprocess a **sliding window** (for example the last 3 days) every run.\n- Combine with deduplication so reprocessing never double counts.\n- Measure lateness and set an agreed cut-off.\n\n### Volume per load\n```sql\nSELECT DATE(ingested_at) AS ingest_date, COUNT(*) AS rows_loaded\nFROM raw_events GROUP BY DATE(ingested_at) ORDER BY ingest_date;\n```\nA sudden drop here is how you notice a stalled source.\n\n### Executive lens\nFreshness is a promise. \"Dashboards are never more than 15 minutes behind\" is a service level you can measure with these exact queries.",
+      "quiz": [
+        {
+          "question": "What is a watermark in an incremental pipeline?",
+          "options": [
+            "A security stamp",
+            "A remembered position (such as the latest timestamp) marking what has already been loaded",
+            "A duplicate key",
+            "A chart type"
+          ],
+          "correct_index": 1,
+          "explanation": "The pipeline stores how far it has processed and next time loads only rows beyond it."
+        },
+        {
+          "question": "Why filter incrementally on ingested_at rather than event_ts?",
+          "options": [
+            "It is a shorter name",
+            "Sources can deliver old events late; ingested_at is controlled by your pipeline and always moves forward",
+            "event_ts is always NULL",
+            "No difference"
+          ],
+          "correct_index": 1,
+          "explanation": "A late event has an old event_ts but a new ingested_at, so only ingested_at reliably catches it."
+        },
+        {
+          "question": "What is 'late-arriving data'?",
+          "options": [
+            "Data stored in the wrong table",
+            "Events that reach the platform long after they actually happened",
+            "Data older than one year",
+            "Failed jobs"
+          ],
+          "correct_index": 1,
+          "explanation": "Lateness is the gap between when an event happened and when the platform received it."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-5-e1",
+          "title": "Read the Watermark",
+          "prompt": "Find the high-water mark of raw_events: the largest ingested_at. Return one column named watermark.",
+          "hint_1": "MAX() on the ingestion timestamp.",
+          "hint_2": "SELECT MAX(ingested_at) AS watermark FROM raw_events.",
+          "hint_3": "SELECT MAX(ingested_at) AS watermark FROM raw_events",
+          "solution": "SELECT MAX(ingested_at) AS watermark FROM raw_events",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "de-5-e2",
+          "title": "What Is New?",
+          "prompt": "The last successful run stopped at '2025-01-29 12:00:00'. How many rows in raw_events were ingested after that moment? Return one column named new_rows.",
+          "hint_1": "Compare ingested_at with the timestamp text using a strict >.",
+          "hint_2": "SELECT COUNT(*) AS new_rows FROM raw_events WHERE ingested_at > '2025-01-29 12:00:00'.",
+          "hint_3": "SELECT COUNT(*) AS new_rows FROM raw_events WHERE ingested_at > '2025-01-29 12:00:00'",
+          "solution": "SELECT COUNT(*) AS new_rows FROM raw_events WHERE ingested_at > '2025-01-29 12:00:00'",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "de-5-e3",
+          "title": "Measure the Lateness",
+          "prompt": "Count the events that were ingested more than one hour (3600 seconds) after they happened. Return one column named late_events.",
+          "hint_1": "Convert both timestamps to seconds with strftime('%s', column) and subtract.",
+          "hint_2": "WHERE strftime('%s', ingested_at) - strftime('%s', event_ts) > 3600.",
+          "hint_3": "SELECT COUNT(*) AS late_events FROM raw_events WHERE strftime('%s', ingested_at) - strftime('%s', event_ts) > 3600",
+          "solution": "SELECT COUNT(*) AS late_events FROM raw_events WHERE strftime('%s', ingested_at) - strftime('%s', event_ts) > 3600",
+          "evaluation_mode": "exact",
+          "points": 35
+        },
+        {
+          "id": "de-5-e4",
+          "title": "Daily Load Volume",
+          "prompt": "How many rows were loaded per ingestion date? Return ingest_date (the date part of ingested_at) and rows_loaded, sorted by ingest_date.",
+          "hint_1": "DATE(ingested_at) gives the date part.",
+          "hint_2": "GROUP BY DATE(ingested_at) and ORDER BY ingest_date.",
+          "hint_3": "SELECT DATE(ingested_at) AS ingest_date, COUNT(*) AS rows_loaded FROM raw_events GROUP BY DATE(ingested_at) ORDER BY ingest_date",
+          "solution": "SELECT DATE(ingested_at) AS ingest_date, COUNT(*) AS rows_loaded FROM raw_events GROUP BY DATE(ingested_at) ORDER BY ingest_date",
+          "evaluation_mode": "exact",
+          "points": 25
+        }
+      ]
+    },
+    {
+      "id": "de-modeling",
+      "title": "Dimensional Modeling: Facts, Dimensions & Grain",
+      "description": "Shape data so the business can ask any question fast: star schemas and the grain rule",
+      "level": "intermediate",
+      "prerequisites": [
+        "de-incremental"
+      ],
+      "estimated_min": 40,
+      "sort_order": 6,
+      "theory_md": "## Dimensional Modeling: Facts, Dimensions & Grain\n\n### Facts and dimensions\nA **fact table** records events you want to measure: each order, each click, each model call. A **dimension table** describes the things those events are about: customers, products, dates. Fact tables are narrow and huge; dimensions are wide and small.\n\nIn Northwind Global:\n- `orders` is a **fact** table (amount is the measure).\n- `customers` is a **dimension** (country and tier are the descriptions).\n\nJoining a fact to its dimensions in a simple shape is called a **star schema**: the fact in the middle, dimensions around it.\n\n### The grain: decide it first\nThe **grain** is what one row means. \"One row per order\" is a grain. Every measure and every join must respect it. Mixing grains is the most common cause of numbers that are mysteriously too big.\n\nTest the grain with a query:\n```sql\nSELECT COUNT(*) - COUNT(DISTINCT order_id) AS grain_violations FROM orders;\n```\nZero means one row per order, as promised.\n\n### Asking business questions\n```sql\nSELECT c.country, ROUND(SUM(o.amount), 2) AS revenue\nFROM orders o\nJOIN customers c ON c.customer_id = o.customer_id\nWHERE o.status = 'paid'\nGROUP BY c.country\nORDER BY revenue DESC;\n```\nThe fact supplies the number, the dimension supplies the slice. Add `c.tier`, or a month from `order_date`, and you have a new report without changing the model.\n\n### Why this matters\nA good model lets analysts, dashboards and AI assistants all answer questions from the *same* definitions. Without it, every team invents its own \"revenue\" and the meeting becomes an argument about whose number is right.\n\n### Executive lens\nOne definition of each metric, owned and documented, is worth more than a hundred dashboards. Modeling is how you create it.",
+      "quiz": [
+        {
+          "question": "Which is a fact table in this company?",
+          "options": [
+            "customers",
+            "orders",
+            "A list of country names",
+            "None"
+          ],
+          "correct_index": 1,
+          "explanation": "Orders record measurable events (amount); customers describe who placed them."
+        },
+        {
+          "question": "What is the grain of a table?",
+          "options": [
+            "The file size",
+            "What one row represents",
+            "Its primary index",
+            "The number of columns"
+          ],
+          "correct_index": 1,
+          "explanation": "Declaring the grain (for example one row per order) prevents double counting and wrong joins."
+        },
+        {
+          "question": "Why do numbers become 'mysteriously too big' after a join?",
+          "options": [
+            "SQL adds rows by itself",
+            "Joining at a different grain repeats the rows, so measures are counted multiple times",
+            "NULLs are doubled",
+            "Dates are wrong"
+          ],
+          "correct_index": 1,
+          "explanation": "If the joined table has several rows per key, each fact row is duplicated and sums inflate."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-6-e1",
+          "title": "Revenue by Country",
+          "prompt": "Calculate the total amount of paid orders per customer country. Return country and revenue (rounded to 2 decimals), sorted by revenue descending.",
+          "hint_1": "JOIN orders o to customers c on customer_id, filter status = 'paid'.",
+          "hint_2": "GROUP BY c.country, SUM(o.amount) rounded, ORDER BY revenue DESC.",
+          "hint_3": "SELECT c.country, ROUND(SUM(o.amount), 2) AS revenue FROM orders o JOIN customers c ON c.customer_id = o.customer_id WHERE o.status = 'paid' GROUP BY c.country ORDER BY revenue DESC",
+          "solution": "SELECT c.country, ROUND(SUM(o.amount), 2) AS revenue FROM orders o JOIN customers c ON c.customer_id = o.customer_id WHERE o.status = 'paid' GROUP BY c.country ORDER BY revenue DESC",
+          "evaluation_mode": "exact",
+          "points": 30
+        },
+        {
+          "id": "de-6-e2",
+          "title": "Average Order Value by Tier",
+          "prompt": "What is the average order amount per customer tier (all statuses)? Return tier and avg_order_value (rounded to 2 decimals), sorted by avg_order_value descending.",
+          "hint_1": "JOIN orders to customers and GROUP BY c.tier.",
+          "hint_2": "ROUND(AVG(o.amount), 2) AS avg_order_value, then ORDER BY avg_order_value DESC.",
+          "hint_3": "SELECT c.tier, ROUND(AVG(o.amount), 2) AS avg_order_value FROM orders o JOIN customers c ON c.customer_id = o.customer_id GROUP BY c.tier ORDER BY avg_order_value DESC",
+          "solution": "SELECT c.tier, ROUND(AVG(o.amount), 2) AS avg_order_value FROM orders o JOIN customers c ON c.customer_id = o.customer_id GROUP BY c.tier ORDER BY avg_order_value DESC",
+          "evaluation_mode": "exact",
+          "points": 30
+        },
+        {
+          "id": "de-6-e3",
+          "title": "Grain Check",
+          "prompt": "Prove the grain of orders is one row per order. Return one column named grain_violations: total rows minus distinct order_id values.",
+          "hint_1": "Compare COUNT(*) with COUNT(DISTINCT order_id).",
+          "hint_2": "SELECT COUNT(*) - COUNT(DISTINCT order_id) AS grain_violations FROM orders.",
+          "hint_3": "SELECT COUNT(*) - COUNT(DISTINCT order_id) AS grain_violations FROM orders",
+          "solution": "SELECT COUNT(*) - COUNT(DISTINCT order_id) AS grain_violations FROM orders",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "de-6-e4",
+          "title": "Monthly Orders by Tier",
+          "prompt": "Count orders per month and customer tier. Return month (the first 7 characters of order_date, like 2025-08), tier and orders, sorted by month then tier.",
+          "hint_1": "SUBSTR(o.order_date, 1, 7) gives the month text.",
+          "hint_2": "GROUP BY month, c.tier and ORDER BY month, c.tier (JOIN customers first).",
+          "hint_3": "SELECT SUBSTR(o.order_date, 1, 7) AS month, c.tier, COUNT(*) AS orders FROM orders o JOIN customers c ON c.customer_id = o.customer_id GROUP BY month, c.tier ORDER BY month, c.tier",
+          "solution": "SELECT SUBSTR(o.order_date, 1, 7) AS month, c.tier, COUNT(*) AS orders FROM orders o JOIN customers c ON c.customer_id = o.customer_id GROUP BY month, c.tier ORDER BY month, c.tier",
+          "evaluation_mode": "exact",
+          "points": 35
+        }
+      ]
+    },
+    {
+      "id": "de-trends",
+      "title": "Window Functions for Pipelines & Trends",
+      "description": "Running totals, day-over-day change and moving averages: the toolkit for spotting trends and anomalies",
+      "level": "intermediate",
+      "prerequisites": [
+        "de-modeling"
+      ],
+      "estimated_min": 40,
+      "sort_order": 7,
+      "theory_md": "## Window Functions for Pipelines & Trends\n\nA **window function** calculates across a set of related rows *without collapsing them*, so every row keeps its identity and gains a new column. For platform work, three patterns cover most needs.\n\n### 1. Running total\n```sql\nSELECT day, events,\n       SUM(events) OVER (ORDER BY day) AS running_total\nFROM (SELECT DATE(event_ts) AS day, COUNT(*) AS events FROM raw_events GROUP BY DATE(event_ts))\nORDER BY day;\n```\nUseful for cumulative volume, storage growth and spend tracking.\n\n### 2. Change versus the previous row with LAG\n```sql\nSELECT run_date, rows_loaded,\n       rows_loaded - LAG(rows_loaded) OVER (ORDER BY run_date) AS change_vs_prev\nFROM pipeline_runs\nWHERE pipeline = 'orders_ingest'\nORDER BY run_date;\n```\n`LAG(x)` reads the value from the row before. The first row has no previous value, so its result is `NULL` (correct and expected).\n\n### 3. Moving average to smooth noise\n```sql\nSELECT run_date, duration_s,\n       ROUND(AVG(duration_s) OVER (ORDER BY run_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW), 1) AS avg_7d\nFROM pipeline_runs WHERE pipeline = 'events_stream' ORDER BY run_date;\n```\n`ROWS BETWEEN 6 PRECEDING AND CURRENT ROW` means \"this row and the six before it\", a 7-run window. A single slow run is noise; a rising 7-day average is a trend.\n\n### Why engineers love them\n- A pipeline slowly getting slower never \"fails\", so only a trend reveals it.\n- A sudden drop in `rows_loaded` against the previous day flags a stalled source.\n\n### Executive lens\nLeadership cares about direction, not single points. \"Run time has grown 40% in a month\" is a call for investment, found with one window function.",
+      "quiz": [
+        {
+          "question": "How does a window function differ from GROUP BY?",
+          "options": [
+            "It is slower",
+            "It keeps every row and adds a calculated column instead of collapsing rows",
+            "It only works on text",
+            "It removes duplicates"
+          ],
+          "correct_index": 1,
+          "explanation": "GROUP BY returns one row per group; a window function returns all rows with extra context."
+        },
+        {
+          "question": "What does LAG(rows_loaded) return for the very first row?",
+          "options": [
+            "0",
+            "The same row's value",
+            "NULL, because there is no previous row",
+            "An error"
+          ],
+          "correct_index": 2,
+          "explanation": "There is nothing before the first row, so LAG gives NULL unless a default is supplied."
+        },
+        {
+          "question": "What does ROWS BETWEEN 6 PRECEDING AND CURRENT ROW describe?",
+          "options": [
+            "A 7-row moving window ending at the current row",
+            "Six random rows",
+            "All rows in the table",
+            "Only the next six rows"
+          ],
+          "correct_index": 0,
+          "explanation": "It covers the current row and the six rows before it, which makes a 7-row moving window."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-7-e1",
+          "title": "Cumulative Event Volume",
+          "prompt": "Count raw_events per calendar day (the date part of event_ts) and add a running total. Return day, events and running_total, sorted by day.",
+          "hint_1": "First aggregate per day in a subquery or CTE, then apply SUM(events) OVER (ORDER BY day).",
+          "hint_2": "Name the daily count events and the window column running_total.",
+          "hint_3": "SELECT day, events, SUM(events) OVER (ORDER BY day) AS running_total FROM (SELECT DATE(event_ts) AS day, COUNT(*) AS events FROM raw_events GROUP BY DATE(event_ts)) ORDER BY day",
+          "solution": "SELECT day, events, SUM(events) OVER (ORDER BY day) AS running_total FROM (SELECT DATE(event_ts) AS day, COUNT(*) AS events FROM raw_events GROUP BY DATE(event_ts)) ORDER BY day",
+          "evaluation_mode": "exact",
+          "points": 40
+        },
+        {
+          "id": "de-7-e2",
+          "title": "Day-over-Day Change",
+          "prompt": "For the orders_ingest pipeline, show each run's rows_loaded and the change versus the previous run. Return run_date, rows_loaded and change_vs_prev, sorted by run_date.",
+          "hint_1": "LAG(rows_loaded) OVER (ORDER BY run_date) gives the previous value.",
+          "hint_2": "Subtract it from rows_loaded and filter WHERE pipeline = 'orders_ingest'.",
+          "hint_3": "SELECT run_date, rows_loaded, rows_loaded - LAG(rows_loaded) OVER (ORDER BY run_date) AS change_vs_prev FROM pipeline_runs WHERE pipeline = 'orders_ingest' ORDER BY run_date",
+          "solution": "SELECT run_date, rows_loaded, rows_loaded - LAG(rows_loaded) OVER (ORDER BY run_date) AS change_vs_prev FROM pipeline_runs WHERE pipeline = 'orders_ingest' ORDER BY run_date",
+          "evaluation_mode": "exact",
+          "points": 40
+        },
+        {
+          "id": "de-7-e3",
+          "title": "Smooth the Duration",
+          "prompt": "For the events_stream pipeline return run_date, duration_s and avg_7d: the average duration over the current and previous 6 runs, rounded to 1 decimal. Sort by run_date.",
+          "hint_1": "AVG(duration_s) OVER (ORDER BY run_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW).",
+          "hint_2": "Wrap it in ROUND(..., 1) and filter WHERE pipeline = 'events_stream'.",
+          "hint_3": "SELECT run_date, duration_s, ROUND(AVG(duration_s) OVER (ORDER BY run_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW), 1) AS avg_7d FROM pipeline_runs WHERE pipeline = 'events_stream' ORDER BY run_date",
+          "solution": "SELECT run_date, duration_s, ROUND(AVG(duration_s) OVER (ORDER BY run_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW), 1) AS avg_7d FROM pipeline_runs WHERE pipeline = 'events_stream' ORDER BY run_date",
+          "evaluation_mode": "exact",
+          "points": 45
+        }
+      ]
+    },
+    {
+      "id": "de-observability",
+      "title": "Pipeline Reliability, SLAs & Observability",
+      "description": "Measure failure rates, SLA breaches and silent failures so the platform earns trust",
+      "level": "intermediate",
+      "prerequisites": [
+        "de-trends"
+      ],
+      "estimated_min": 40,
+      "sort_order": 8,
+      "theory_md": "## Pipeline Reliability, SLAs & Observability\n\n### Pipelines fail. The question is who finds out first\nIf a stakeholder discovers a broken dashboard before you do, trust drops. **Data observability** is the practice of measuring the health of your data and pipelines continuously so *you* find problems first.\n\n### Service level vocabulary\n- **SLA** (agreement): the promise made to users, such as \"daily orders data ready by 06:00\".\n- **SLO** (objective): the internal target, usually stricter, such as \"99% of runs finish under 15 minutes\".\n- **SLI** (indicator): the measurement you track, such as run duration or failure rate.\n\nIn `pipeline_runs`, `sla_s` is each pipeline's allowed run time in seconds.\n\n### Core health queries\nFailure rate per pipeline:\n```sql\nSELECT pipeline,\n       ROUND(100.0 * SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) / COUNT(*), 1) AS failure_pct\nFROM pipeline_runs GROUP BY pipeline;\n```\nSLA breaches (run succeeded, but too slowly):\n```sql\nSELECT pipeline, COUNT(*) AS sla_breaches\nFROM pipeline_runs WHERE status = 'success' AND duration_s > sla_s GROUP BY pipeline;\n```\nRoot causes of failure:\n```sql\nSELECT error_type, COUNT(*) FROM pipeline_runs WHERE status = 'failed' GROUP BY error_type;\n```\n\n### Silent failures\nThe worst failure shows no error: a job \"succeeds\" but loads far less data than usual. Volume checks catch it:\n```sql\nSELECT run_id, pipeline, run_date, rows_loaded\nFROM pipeline_runs WHERE status = 'success' AND rows_loaded < 10000;\n```\n\n### The five pillars to monitor\n**Freshness, volume, schema, distribution, lineage.** If you watch these, most incidents are caught within minutes.\n\n### Executive lens\nReliability is a budget. Know the failure rate, the top root cause and the SLA breaches, and you can decide where one engineer-week buys the most trust.",
+      "quiz": [
+        {
+          "question": "What is the difference between an SLA and an SLO?",
+          "options": [
+            "No difference",
+            "SLA is the promise to users; SLO is the internal target, usually stricter",
+            "SLO is for security only",
+            "SLA is a dashboard"
+          ],
+          "correct_index": 1,
+          "explanation": "Teams aim for a tighter internal SLO so the external SLA promise is rarely broken."
+        },
+        {
+          "question": "What is a 'silent failure'?",
+          "options": [
+            "A job that crashes loudly",
+            "A job that reports success but loads far less (or wrong) data than expected",
+            "A muted alert",
+            "A paused pipeline"
+          ],
+          "correct_index": 1,
+          "explanation": "No error is raised, so only volume, freshness and distribution checks reveal it."
+        },
+        {
+          "question": "Which check finds a slow-but-successful run?",
+          "options": [
+            "status = 'failed'",
+            "status = 'success' AND duration_s > sla_s",
+            "rows_loaded = 0",
+            "error_type IS NULL"
+          ],
+          "correct_index": 1,
+          "explanation": "Comparing the actual duration with the allowed SLA time identifies breaches among completed runs."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-8-e1",
+          "title": "Failure Rate per Pipeline",
+          "prompt": "Calculate the percentage of failed runs per pipeline. Return pipeline and failure_pct (rounded to 1 decimal), sorted by failure_pct descending (ties by pipeline).",
+          "hint_1": "SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) divided by COUNT(*), times 100.0.",
+          "hint_2": "ROUND(..., 1), GROUP BY pipeline, ORDER BY failure_pct DESC, pipeline.",
+          "hint_3": "SELECT pipeline, ROUND(100.0 * SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) / COUNT(*), 1) AS failure_pct FROM pipeline_runs GROUP BY pipeline ORDER BY failure_pct DESC, pipeline",
+          "solution": "SELECT pipeline, ROUND(100.0 * SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) / COUNT(*), 1) AS failure_pct FROM pipeline_runs GROUP BY pipeline ORDER BY failure_pct DESC, pipeline",
+          "evaluation_mode": "exact",
+          "points": 35
+        },
+        {
+          "id": "de-8-e2",
+          "title": "SLA Breaches",
+          "prompt": "Count successful runs that took longer than their SLA (duration_s greater than sla_s), per pipeline. Return pipeline and sla_breaches, sorted by sla_breaches descending (ties by pipeline). Pipelines with no breaches may be omitted.",
+          "hint_1": "Filter status = 'success' AND duration_s > sla_s, then GROUP BY pipeline.",
+          "hint_2": "ORDER BY sla_breaches DESC, pipeline.",
+          "hint_3": "SELECT pipeline, COUNT(*) AS sla_breaches FROM pipeline_runs WHERE status = 'success' AND duration_s > sla_s GROUP BY pipeline ORDER BY sla_breaches DESC, pipeline",
+          "solution": "SELECT pipeline, COUNT(*) AS sla_breaches FROM pipeline_runs WHERE status = 'success' AND duration_s > sla_s GROUP BY pipeline ORDER BY sla_breaches DESC, pipeline",
+          "evaluation_mode": "exact",
+          "points": 35
+        },
+        {
+          "id": "de-8-e3",
+          "title": "Root Causes",
+          "prompt": "Which errors cause the failures? Return error_type and failures for failed runs, sorted by failures descending (ties by error_type).",
+          "hint_1": "Filter status = 'failed' and GROUP BY error_type.",
+          "hint_2": "ORDER BY failures DESC, error_type.",
+          "hint_3": "SELECT error_type, COUNT(*) AS failures FROM pipeline_runs WHERE status = 'failed' GROUP BY error_type ORDER BY failures DESC, error_type",
+          "solution": "SELECT error_type, COUNT(*) AS failures FROM pipeline_runs WHERE status = 'failed' GROUP BY error_type ORDER BY failures DESC, error_type",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "de-8-e4",
+          "title": "Hunt the Silent Failures",
+          "prompt": "List successful runs that loaded fewer than 10000 rows, a possible volume anomaly. Return run_id, pipeline, run_date and rows_loaded, sorted by run_id.",
+          "hint_1": "Filter status = 'success' AND rows_loaded < 10000.",
+          "hint_2": "SELECT run_id, pipeline, run_date, rows_loaded ... ORDER BY run_id.",
+          "hint_3": "SELECT run_id, pipeline, run_date, rows_loaded FROM pipeline_runs WHERE status = 'success' AND rows_loaded < 10000 ORDER BY run_id",
+          "solution": "SELECT run_id, pipeline, run_date, rows_loaded FROM pipeline_runs WHERE status = 'success' AND rows_loaded < 10000 ORDER BY run_id",
+          "evaluation_mode": "exact",
+          "points": 30
+        }
+      ]
+    },
+    {
+      "id": "de-ai-features",
+      "title": "Feature Engineering & Training Data for AI",
+      "description": "Prepare trustworthy training data: class balance, missing values, leakage and bias",
+      "level": "advanced",
+      "prerequisites": [
+        "de-observability"
+      ],
+      "estimated_min": 45,
+      "sort_order": 9,
+      "theory_md": "## Feature Engineering & Training Data for AI\n\n### The data engineer's hidden power\nResearchers get the headlines, but a model's ceiling is set by its **training data**: what is in it, what is missing, how it was labelled. The data engineer builds the **feature pipelines** that turn raw business data into model-ready columns, and keeps them identical in training and in production.\n\n### A feature table\n`ml_features` has one row per customer and a label, `churned` (1 = the customer left):\n`orders_30d`, `avg_order_value`, `days_since_last_order`, `support_tickets`, `churned`.\n\n### Check 1: label balance\n```sql\nSELECT churned, COUNT(*) AS customers,\n       ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM ml_features), 1) AS pct\nFROM ml_features GROUP BY churned;\n```\nIf only a small share churn, a lazy model that always predicts \"no churn\" looks accurate while being useless. This is **class imbalance**.\n\n### Check 2: missing values\n```sql\nSELECT ROUND(AVG(avg_order_value), 2) AS mean_aov,\n       SUM(CASE WHEN avg_order_value IS NULL THEN 1 ELSE 0 END) AS nulls\nFROM ml_features;\n```\n`AVG` ignores NULLs. Choose a strategy on purpose (drop, fill with mean or median, or add a \"was missing\" flag) and document it. Never let a pipeline guess silently.\n\n### Check 3: does the feature carry signal?\nBucket a feature and compare the label rate in each bucket:\n```sql\nSELECT CASE WHEN days_since_last_order <= 30 THEN '0-30'\n            WHEN days_since_last_order <= 75 THEN '31-75' ELSE '76+' END AS inactivity_bucket,\n       COUNT(*) AS customers, ROUND(100.0 * AVG(churned), 1) AS churn_pct\nFROM ml_features GROUP BY inactivity_bucket;\n```\n`AVG(churned)` of a 0/1 column is the churn rate, a neat trick.\n\n### Dangers to design out\n- **Leakage**: a feature that contains the answer or information from the future (for example \"cancellation_date\" used to predict cancellation). The model looks brilliant in testing and fails in production.\n- **Training/serving skew**: features computed differently offline and online.\n- **Bias**: groups under-represented in the data get worse predictions. Always slice quality by segment (tier, country).\n\n### Executive lens\nEvery AI initiative is really a data initiative. Whoever controls trustworthy, governed, well-documented data controls how fast the company can ship AI.",
+      "quiz": [
+        {
+          "question": "Why can a model that always predicts 'no churn' look accurate?",
+          "options": [
+            "It cannot",
+            "If few customers churn, always guessing the majority class scores high accuracy but catches nothing",
+            "Churn is random",
+            "Accuracy ignores labels"
+          ],
+          "correct_index": 1,
+          "explanation": "Class imbalance makes plain accuracy misleading; you must look at the label balance and use better metrics."
+        },
+        {
+          "question": "What is data leakage?",
+          "options": [
+            "Data stolen by hackers",
+            "Training features that contain the answer or future information unavailable at prediction time",
+            "Deleted rows",
+            "Slow pipelines"
+          ],
+          "correct_index": 1,
+          "explanation": "Leakage inflates test results and collapses in production because the leaked information does not exist at prediction time."
+        },
+        {
+          "question": "What does AVG(churned) return for a column of 0s and 1s?",
+          "options": [
+            "The count of ones",
+            "The share of rows that are 1, meaning the churn rate",
+            "The maximum",
+            "NULL"
+          ],
+          "correct_index": 1,
+          "explanation": "The average of 0/1 values is the proportion of ones."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-9-e1",
+          "title": "Label Balance",
+          "prompt": "How balanced is the churn label? Return churned, customers and pct (the share of all rows, rounded to 1 decimal), sorted by churned.",
+          "hint_1": "GROUP BY churned and COUNT(*).",
+          "hint_2": "pct = ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM ml_features), 1).",
+          "hint_3": "SELECT churned, COUNT(*) AS customers, ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM ml_features), 1) AS pct FROM ml_features GROUP BY churned ORDER BY churned",
+          "solution": "SELECT churned, COUNT(*) AS customers, ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM ml_features), 1) AS pct FROM ml_features GROUP BY churned ORDER BY churned",
+          "evaluation_mode": "exact",
+          "points": 35
+        },
+        {
+          "id": "de-9-e2",
+          "title": "Missing Feature Values",
+          "prompt": "Audit avg_order_value. Return mean_aov (average of the non-missing values, rounded to 2 decimals) and nulls (how many rows are missing it).",
+          "hint_1": "AVG ignores NULLs already.",
+          "hint_2": "Count the missing ones with SUM(CASE WHEN avg_order_value IS NULL THEN 1 ELSE 0 END).",
+          "hint_3": "SELECT ROUND(AVG(avg_order_value), 2) AS mean_aov, SUM(CASE WHEN avg_order_value IS NULL THEN 1 ELSE 0 END) AS nulls FROM ml_features",
+          "solution": "SELECT ROUND(AVG(avg_order_value), 2) AS mean_aov, SUM(CASE WHEN avg_order_value IS NULL THEN 1 ELSE 0 END) AS nulls FROM ml_features",
+          "evaluation_mode": "exact",
+          "points": 30
+        },
+        {
+          "id": "de-9-e3",
+          "title": "Does Inactivity Predict Churn?",
+          "prompt": "Bucket customers by days_since_last_order: '0-30' (up to 30), '31-75' (31 to 75) and '76+' (more). Return inactivity_bucket, customers and churn_pct (percentage who churned, rounded to 1 decimal), ordered from least to most inactive.",
+          "hint_1": "Use a CASE expression for the bucket and GROUP BY it.",
+          "hint_2": "ORDER BY MIN(days_since_last_order) puts the buckets in the right order; churn_pct = ROUND(100.0 * AVG(churned), 1).",
+          "hint_3": "SELECT CASE WHEN days_since_last_order <= 30 THEN '0-30' WHEN days_since_last_order <= 75 THEN '31-75' ELSE '76+' END AS inactivity_bucket, COUNT(*) AS customers, ROUND(100.0 * AVG(churned), 1) AS churn_pct FROM ml_features GROUP BY inactivity_bucket ORDER BY MIN(days_since_last_order)",
+          "solution": "SELECT CASE WHEN days_since_last_order <= 30 THEN '0-30' WHEN days_since_last_order <= 75 THEN '31-75' ELSE '76+' END AS inactivity_bucket, COUNT(*) AS customers, ROUND(100.0 * AVG(churned), 1) AS churn_pct FROM ml_features GROUP BY inactivity_bucket ORDER BY MIN(days_since_last_order)",
+          "evaluation_mode": "exact",
+          "points": 50
+        },
+        {
+          "id": "de-9-e4",
+          "title": "Bias Check by Tier",
+          "prompt": "Does churn differ by customer tier? Join ml_features to customers and return tier, customers and churn_pct (rounded to 1 decimal), sorted by churn_pct descending (ties by tier).",
+          "hint_1": "JOIN customers c ON c.customer_id = f.customer_id.",
+          "hint_2": "GROUP BY c.tier, ROUND(100.0 * AVG(f.churned), 1) AS churn_pct, ORDER BY churn_pct DESC, c.tier.",
+          "hint_3": "SELECT c.tier, COUNT(*) AS customers, ROUND(100.0 * AVG(f.churned), 1) AS churn_pct FROM ml_features f JOIN customers c ON c.customer_id = f.customer_id GROUP BY c.tier ORDER BY churn_pct DESC, c.tier",
+          "solution": "SELECT c.tier, COUNT(*) AS customers, ROUND(100.0 * AVG(f.churned), 1) AS churn_pct FROM ml_features f JOIN customers c ON c.customer_id = f.customer_id GROUP BY c.tier ORDER BY churn_pct DESC, c.tier",
+          "evaluation_mode": "exact",
+          "points": 40
+        }
+      ]
+    },
+    {
+      "id": "de-llm-ops",
+      "title": "LLM Ops: Cost, Latency & Safety Analytics",
+      "description": "Run AI like a business: track spend per model and team, latency and flagged outputs",
+      "level": "advanced",
+      "prerequisites": [
+        "de-ai-features"
+      ],
+      "estimated_min": 40,
+      "sort_order": 10,
+      "theory_md": "## LLM Ops: Cost, Latency & Safety Analytics\n\n### AI has a bill\nOnce a company uses language models in many products, the *usage log* becomes one of its most important datasets. Every call records which model, which team, how many tokens in and out, how long it took, what it cost and whether it was flagged by a safety filter. That is `llm_requests`.\n\n**Tokens** are the pieces of text a model reads and writes; providers charge per token, and output tokens usually cost more than input tokens. Bigger models cost much more and are slower.\n\n### Three questions every CTO asks\n**1. Where is the money going?**\n```sql\nSELECT model, COUNT(*) AS requests, ROUND(SUM(cost_usd), 2) AS total_cost\nFROM llm_requests GROUP BY model ORDER BY total_cost DESC;\n```\nOften a minority of calls on the largest model creates most of the cost. That is where routing simple tasks to smaller models saves the most.\n\n**2. Which team is driving it?**\n```sql\nSELECT team, ROUND(SUM(cost_usd), 2) AS total_cost\nFROM llm_requests GROUP BY team ORDER BY total_cost DESC, team;\n```\nCost attribution per team enables **chargeback** and accountability.\n\n**3. Is it safe?**\n```sql\nSELECT model, ROUND(100.0 * SUM(flagged) / COUNT(*), 2) AS flagged_pct\nFROM llm_requests GROUP BY model;\n```\n`flagged` is 0 or 1, so its sum is the number of flagged calls.\n\n### Unit economics\nTotal cost alone misleads. Compare the **cost per 1,000 requests** for each model:\n```sql\nSELECT model, ROUND(1000.0 * SUM(cost_usd) / COUNT(*), 3) AS cost_per_1k FROM llm_requests GROUP BY model;\n```\nThis is the number you use to decide which model to route which workload to.\n\n### Executive lens\nControl of AI spend, quality and safety is a competitive advantage. A company that measures cost per task can ship ten times more AI features for the same budget.",
+      "quiz": [
+        {
+          "question": "What is a token?",
+          "options": [
+            "A password",
+            "A chunk of text that models read and write and that providers bill by",
+            "A database row",
+            "A server"
+          ],
+          "correct_index": 1,
+          "explanation": "Usage and price are measured in tokens, usually priced separately for input and output."
+        },
+        {
+          "question": "Why compute cost per 1,000 requests instead of only total cost?",
+          "options": [
+            "It is shorter",
+            "Totals hide efficiency: a model with many cheap calls and a model with few expensive calls cannot be compared by totals alone",
+            "SQL cannot sum",
+            "To hide spending"
+          ],
+          "correct_index": 1,
+          "explanation": "Unit economics let you compare models and decide how to route workloads."
+        },
+        {
+          "question": "The flagged column is 0 or 1. What does SUM(flagged) give?",
+          "options": [
+            "The average",
+            "The number of flagged requests",
+            "The total cost",
+            "NULL"
+          ],
+          "correct_index": 1,
+          "explanation": "Summing a 0/1 flag counts the ones."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-10-e1",
+          "title": "Where Does the Money Go?",
+          "prompt": "Return the number of requests and total cost per model. Columns: model, requests, total_cost (rounded to 2 decimals), sorted by total_cost descending.",
+          "hint_1": "GROUP BY model with COUNT(*) and SUM(cost_usd).",
+          "hint_2": "ROUND(SUM(cost_usd), 2) AS total_cost, ORDER BY total_cost DESC.",
+          "hint_3": "SELECT model, COUNT(*) AS requests, ROUND(SUM(cost_usd), 2) AS total_cost FROM llm_requests GROUP BY model ORDER BY total_cost DESC",
+          "solution": "SELECT model, COUNT(*) AS requests, ROUND(SUM(cost_usd), 2) AS total_cost FROM llm_requests GROUP BY model ORDER BY total_cost DESC",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "de-10-e2",
+          "title": "Chargeback by Team",
+          "prompt": "Total cost per team for chargeback. Return team and total_cost (rounded to 2 decimals), sorted by total_cost descending (ties by team).",
+          "hint_1": "GROUP BY team.",
+          "hint_2": "ORDER BY total_cost DESC, team.",
+          "hint_3": "SELECT team, ROUND(SUM(cost_usd), 2) AS total_cost FROM llm_requests GROUP BY team ORDER BY total_cost DESC, team",
+          "solution": "SELECT team, ROUND(SUM(cost_usd), 2) AS total_cost FROM llm_requests GROUP BY team ORDER BY total_cost DESC, team",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "de-10-e3",
+          "title": "Safety Flags by Model",
+          "prompt": "What percentage of requests were flagged, per model? Return model and flagged_pct (rounded to 2 decimals), sorted by flagged_pct descending (ties by model).",
+          "hint_1": "flagged is 0/1, so SUM(flagged) is the number of flagged calls.",
+          "hint_2": "ROUND(100.0 * SUM(flagged) / COUNT(*), 2) AS flagged_pct.",
+          "hint_3": "SELECT model, ROUND(100.0 * SUM(flagged) / COUNT(*), 2) AS flagged_pct FROM llm_requests GROUP BY model ORDER BY flagged_pct DESC, model",
+          "solution": "SELECT model, ROUND(100.0 * SUM(flagged) / COUNT(*), 2) AS flagged_pct FROM llm_requests GROUP BY model ORDER BY flagged_pct DESC, model",
+          "evaluation_mode": "exact",
+          "points": 35
+        },
+        {
+          "id": "de-10-e4",
+          "title": "Unit Economics",
+          "prompt": "Compute the cost per 1,000 requests for each model. Return model and cost_per_1k (rounded to 3 decimals), sorted by cost_per_1k descending.",
+          "hint_1": "Total cost divided by request count, times 1000.0.",
+          "hint_2": "ROUND(1000.0 * SUM(cost_usd) / COUNT(*), 3) AS cost_per_1k.",
+          "hint_3": "SELECT model, ROUND(1000.0 * SUM(cost_usd) / COUNT(*), 3) AS cost_per_1k FROM llm_requests GROUP BY model ORDER BY cost_per_1k DESC",
+          "solution": "SELECT model, ROUND(1000.0 * SUM(cost_usd) / COUNT(*), 3) AS cost_per_1k FROM llm_requests GROUP BY model ORDER BY cost_per_1k DESC",
+          "evaluation_mode": "exact",
+          "points": 40
+        }
+      ]
+    },
+    {
+      "id": "de-governance",
+      "title": "Architecture, Governance & Cost: the CTO View",
+      "description": "Data contracts, compute cost, concentration risk and the decisions that scale a platform",
+      "level": "advanced",
+      "prerequisites": [
+        "de-llm-ops"
+      ],
+      "estimated_min": 45,
+      "sort_order": 11,
+      "theory_md": "## Architecture, Governance & Cost: the CTO View\n\nAt this level the question changes from \"does the query work?\" to \"does the *system* work, safely, at a sensible cost, for ten years?\"\n\n### Data contracts\nA **data contract** is an agreement between a producer and its consumers about what data will look like: columns, types, allowed values, freshness. Enforce it automatically. A contract check is just a query that counts violations:\n```sql\nSELECT COUNT(*) AS contract_breaches\nFROM raw_events\nWHERE country IS NULL OR payload_kb > 300;\n```\nA rising number means a producer changed something. You catch it before the dashboards break, and you know whom to call.\n\n### Compute and cost\nCloud platforms bill for compute time and storage. Know your most expensive workloads:\n```sql\nSELECT pipeline, ROUND(SUM(duration_s) / 3600.0, 2) AS compute_hours\nFROM pipeline_runs GROUP BY pipeline ORDER BY compute_hours DESC;\n```\nOptimise the top one first. The same logic applies to storage tiers and to the LLM spend you measured earlier.\n\n### Concentration risk\nIf one country, one customer or one vendor is most of the business, a single event can hurt badly. Window functions give shares in one query:\n```sql\nSELECT c.country,\n       ROUND(100.0 * SUM(o.amount) / SUM(SUM(o.amount)) OVER (), 1) AS revenue_share_pct\nFROM orders o JOIN customers c ON c.customer_id = o.customer_id\nWHERE o.status = 'paid' GROUP BY c.country;\n```\n`SUM(SUM(...)) OVER ()` is the grand total of the grouped sums, so the shares add up to 100.\n\n### Governance checklist\n- **Ownership**: every dataset has a named owner.\n- **Access control**: least privilege; personal data masked or tokenised.\n- **Retention**: keep data only as long as there is a reason and a legal basis.\n- **Lineage**: you can trace any number back to its sources.\n- **Auditability**: who changed what and when.\n\n### Build vs buy\nBuy commodity (storage, orchestration, ingestion connectors); build what differentiates you (domain models, proprietary features). Revisit the decision every year, and always count the engineers' time as a cost.\n\n### Executive lens\nA CTO is judged on reliability, cost and speed of delivery together. Contracts, cost visibility and concentration awareness are how you hold all three.",
+      "quiz": [
+        {
+          "question": "What is a data contract?",
+          "options": [
+            "A legal document for staff",
+            "An enforced agreement between data producers and consumers about structure, values and freshness",
+            "A backup file",
+            "A SQL view"
+          ],
+          "correct_index": 1,
+          "explanation": "Contracts make expectations explicit and testable so breaking changes are caught early."
+        },
+        {
+          "question": "What does SUM(SUM(amount)) OVER () compute in a grouped query?",
+          "options": [
+            "Nothing",
+            "The grand total across all groups, so each group's share can be calculated",
+            "The maximum",
+            "The count"
+          ],
+          "correct_index": 1,
+          "explanation": "The inner SUM is per group; the window SUM adds those group totals together."
+        },
+        {
+          "question": "Which rule best describes the build-vs-buy decision?",
+          "options": [
+            "Always build",
+            "Always buy",
+            "Buy commodity capabilities, build what differentiates the business",
+            "Decide randomly"
+          ],
+          "correct_index": 2,
+          "explanation": "Spend scarce engineering time where it creates unique advantage, not where good products already exist."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-11-e1",
+          "title": "Contract Breaches",
+          "prompt": "The raw_events contract says: country must be present and payload_kb must not exceed 300. Count the rows that break either rule. Return one column named contract_breaches.",
+          "hint_1": "Two conditions joined with OR.",
+          "hint_2": "WHERE country IS NULL OR payload_kb > 300.",
+          "hint_3": "SELECT COUNT(*) AS contract_breaches FROM raw_events WHERE country IS NULL OR payload_kb > 300",
+          "solution": "SELECT COUNT(*) AS contract_breaches FROM raw_events WHERE country IS NULL OR payload_kb > 300",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "de-11-e2",
+          "title": "Compute Bill",
+          "prompt": "Which pipelines use the most compute? Return pipeline and compute_hours (total duration_s divided by 3600.0, rounded to 2 decimals), sorted by compute_hours descending (ties by pipeline).",
+          "hint_1": "SUM(duration_s) / 3600.0 per pipeline.",
+          "hint_2": "ROUND(..., 2) AS compute_hours, ORDER BY compute_hours DESC, pipeline.",
+          "hint_3": "SELECT pipeline, ROUND(SUM(duration_s) / 3600.0, 2) AS compute_hours FROM pipeline_runs GROUP BY pipeline ORDER BY compute_hours DESC, pipeline",
+          "solution": "SELECT pipeline, ROUND(SUM(duration_s) / 3600.0, 2) AS compute_hours FROM pipeline_runs GROUP BY pipeline ORDER BY compute_hours DESC, pipeline",
+          "evaluation_mode": "exact",
+          "points": 30
+        },
+        {
+          "id": "de-11-e3",
+          "title": "Concentration Risk",
+          "prompt": "What share of paid revenue (orders joined to customers) comes from each country? Return country and revenue_share_pct (rounded to 1 decimal), sorted by revenue_share_pct descending (ties by country).",
+          "hint_1": "JOIN, filter status = 'paid', GROUP BY c.country.",
+          "hint_2": "Share = 100.0 * SUM(o.amount) / SUM(SUM(o.amount)) OVER ().",
+          "hint_3": "SELECT c.country, ROUND(100.0 * SUM(o.amount) / SUM(SUM(o.amount)) OVER (), 1) AS revenue_share_pct FROM orders o JOIN customers c ON c.customer_id = o.customer_id WHERE o.status = 'paid' GROUP BY c.country ORDER BY revenue_share_pct DESC, c.country",
+          "solution": "SELECT c.country, ROUND(100.0 * SUM(o.amount) / SUM(SUM(o.amount)) OVER (), 1) AS revenue_share_pct FROM orders o JOIN customers c ON c.customer_id = o.customer_id WHERE o.status = 'paid' GROUP BY c.country ORDER BY revenue_share_pct DESC, c.country",
+          "evaluation_mode": "exact",
+          "points": 50
+        }
+      ]
+    },
+    {
+      "id": "de-capstone",
+      "title": "Capstone: The Executive Data Platform Scorecard",
+      "description": "Bring everything together: build the numbers a CEO reads on Monday morning",
+      "level": "advanced",
+      "prerequisites": [
+        "de-governance"
+      ],
+      "estimated_min": 50,
+      "sort_order": 12,
+      "theory_md": "## Capstone: The Executive Data Platform Scorecard\n\nYou now have the full toolkit: profiling, deduplication, integrity checks, incremental loading, modeling, trend analysis, observability, AI data quality and governance. The capstone asks you to combine them the way a platform lead does when the CEO says: *\"Can I trust our numbers?\"*\n\n### The scorecard idea\nExecutives do not want fifty tables. They want a handful of **trust metrics** next to the headline numbers, so they know how much weight to put on each. A good scorecard answers:\n1. **Is the pipeline reliable?** success rate, average duration, volume.\n2. **Is the data clean?** duplicates removed, orphans found.\n3. **Is the headline number right?** revenue computed on clean, joined data.\n\n### Building blocks you will combine\n```sql\n-- dedupe first (Lesson 3), then aggregate\nWITH clean AS (\n  SELECT *, ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY ingested_at DESC) AS rn\n  FROM raw_events\n)\nSELECT event_type, COUNT(*) FROM clean WHERE rn = 1 AND country IS NOT NULL GROUP BY event_type;\n```\n```sql\n-- several independent measures in one row using scalar subqueries\nSELECT\n  (SELECT COUNT(*) FROM pipeline_runs WHERE status = 'failed') AS failed_runs,\n  (SELECT COUNT(*) - COUNT(DISTINCT event_id) FROM raw_events) AS duplicate_events;\n```\nScalar subqueries each return one value, so they can sit side by side in a single result row: a classic way to build a KPI strip.\n\n### Working method\n1. Write the smallest query that returns the right shape.\n2. Check one number by hand (a small filter, a `LIMIT`).\n3. Combine, then re-check that the totals still make sense.\n\n### Executive lens\nThis is the job: turn a messy, multi-source, AI-hungry data estate into a few numbers the whole company trusts, and be able to explain every one of them. People who can do that are very hard to replace.",
+      "quiz": [
+        {
+          "question": "Why put trust metrics next to headline numbers?",
+          "options": [
+            "To make reports longer",
+            "So readers know how much weight each number deserves",
+            "SQL requires it",
+            "Because of storage cost"
+          ],
+          "correct_index": 1,
+          "explanation": "A figure with its quality context supports better decisions than a bare figure."
+        },
+        {
+          "question": "Why deduplicate before aggregating events?",
+          "options": [
+            "It is optional",
+            "Otherwise repeated deliveries are counted several times and inflate every total",
+            "It sorts the data",
+            "It removes NULL countries"
+          ],
+          "correct_index": 1,
+          "explanation": "Duplicates distort counts, so cleaning has to happen before the aggregation."
+        },
+        {
+          "question": "What does a scalar subquery in the SELECT list return?",
+          "options": [
+            "A whole table",
+            "A single value, so several can appear side by side as columns of one row",
+            "A list of rows",
+            "An error"
+          ],
+          "correct_index": 1,
+          "explanation": "Each scalar subquery yields exactly one value, perfect for a KPI strip."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-12-e1",
+          "title": "Pipeline Scorecard",
+          "prompt": "For each pipeline return runs (number of runs), success_rate_pct (percent of runs with status 'success', rounded to 1 decimal), avg_duration_s (average duration_s of successful runs, rounded to 1 decimal) and total_rows (sum of rows_loaded). Sort by success_rate_pct ascending, then pipeline.",
+          "hint_1": "SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) for the success rate.",
+          "hint_2": "AVG(CASE WHEN status = 'success' THEN duration_s END) averages only successful runs (CASE without ELSE gives NULL, which AVG ignores).",
+          "hint_3": "SELECT pipeline, COUNT(*) AS runs, ROUND(100.0 * SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) / COUNT(*), 1) AS success_rate_pct, ROUND(AVG(CASE WHEN status = 'success' THEN duration_s END), 1) AS avg_duration_s, SUM(rows_loaded) AS total_rows FROM pipeline_runs GROUP BY pipeline ORDER BY success_rate_pct, pipeline",
+          "solution": "SELECT pipeline, COUNT(*) AS runs, ROUND(100.0 * SUM(CASE WHEN status = 'success' THEN 1 ELSE 0 END) / COUNT(*), 1) AS success_rate_pct, ROUND(AVG(CASE WHEN status = 'success' THEN duration_s END), 1) AS avg_duration_s, SUM(rows_loaded) AS total_rows FROM pipeline_runs GROUP BY pipeline ORDER BY success_rate_pct, pipeline",
+          "evaluation_mode": "exact",
+          "points": 60
+        },
+        {
+          "id": "de-12-e2",
+          "title": "Trusted Events",
+          "prompt": "Count the trustworthy events by type: keep only the newest delivery of each event_id AND only events that have a country. Return event_type and trusted_events, sorted by trusted_events descending (ties by event_type).",
+          "hint_1": "Deduplicate with ROW_NUMBER() in a CTE first.",
+          "hint_2": "In the outer query use WHERE rn = 1 AND country IS NOT NULL, then GROUP BY event_type.",
+          "hint_3": "WITH clean AS (SELECT event_type, country, ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY ingested_at DESC) AS rn FROM raw_events) SELECT event_type, COUNT(*) AS trusted_events FROM clean WHERE rn = 1 AND country IS NOT NULL GROUP BY event_type ORDER BY trusted_events DESC, event_type",
+          "solution": "WITH clean AS (SELECT event_type, country, ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY ingested_at DESC) AS rn FROM raw_events) SELECT event_type, COUNT(*) AS trusted_events FROM clean WHERE rn = 1 AND country IS NOT NULL GROUP BY event_type ORDER BY trusted_events DESC, event_type",
+          "evaluation_mode": "exact",
+          "points": 60
+        },
+        {
+          "id": "de-12-e3",
+          "title": "The Monday Morning KPI Strip",
+          "prompt": "Return ONE row with four columns: paid_revenue (total amount of paid orders that have a matching customer, rounded to 2 decimals), orphan_orders (orders whose customer does not exist), duplicate_events (surplus duplicate rows in raw_events) and failed_runs (pipeline runs with status 'failed').",
+          "hint_1": "Use four scalar subqueries in one SELECT, one per column.",
+          "hint_2": "Revenue: JOIN orders to customers WHERE status = 'paid'. Orphans: LEFT JOIN ... WHERE c.customer_id IS NULL.",
+          "hint_3": "SELECT (SELECT ROUND(SUM(o.amount), 2) FROM orders o JOIN customers c ON c.customer_id = o.customer_id WHERE o.status = 'paid') AS paid_revenue, (SELECT COUNT(*) FROM orders o LEFT JOIN customers c ON c.customer_id = o.customer_id WHERE c.customer_id IS NULL) AS orphan_orders, (SELECT COUNT(*) - COUNT(DISTINCT event_id) FROM raw_events) AS duplicate_events, (SELECT COUNT(*) FROM pipeline_runs WHERE status = 'failed') AS failed_runs",
+          "solution": "SELECT (SELECT ROUND(SUM(o.amount), 2) FROM orders o JOIN customers c ON c.customer_id = o.customer_id WHERE o.status = 'paid') AS paid_revenue, (SELECT COUNT(*) FROM orders o LEFT JOIN customers c ON c.customer_id = o.customer_id WHERE c.customer_id IS NULL) AS orphan_orders, (SELECT COUNT(*) - COUNT(DISTINCT event_id) FROM raw_events) AS duplicate_events, (SELECT COUNT(*) FROM pipeline_runs WHERE status = 'failed') AS failed_runs",
+          "evaluation_mode": "exact",
+          "points": 80
+        }
+      ]
+    }
+  ]
+}
