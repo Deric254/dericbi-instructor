@@ -6,11 +6,7 @@ import fs from 'fs'
 // Everything is generated from a fixed seed so the traps are ALWAYS there and every student sees identical data
 // (the bundled hospital data uses Math.random, which is fine for it, but a lesson on duplicates needs real duplicates).
 
-<<<<<<< HEAD
 export const DATAENG_VERSION = 2
-=======
-export const DATAENG_VERSION = 1
->>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
 export const DATAENG_VERSION_FILE = '.dataeng-version'
 
 export interface DataEngDataset {
@@ -28,11 +24,8 @@ export const DATAENG_DATASETS: DataEngDataset[] = [
     cols: ['run_id', 'pipeline', 'run_date', 'duration_s', 'sla_s', 'rows_loaded', 'status', 'error_type'] },
   { id: 'ds-de-ml-features', name: 'DE ML Features', description: 'A customer feature table for a churn model, with the nulls and class imbalance real training data has', file: 'de_ml_features.csv', table: 'ml_features', rows: 300,
     cols: ['customer_id', 'snapshot_date', 'orders_30d', 'avg_order_value', 'days_since_last_order', 'support_tickets', 'churned'] },
-<<<<<<< HEAD
   { id: 'ds-de-messy-contacts', name: 'DE Messy Contacts', description: 'A CRM export typed by humans: mixed case, stray spaces, placeholder text, two date formats, text in number columns', file: 'de_messy_contacts.csv', table: 'messy_contacts', rows: 240,
     cols: ['contact_id', 'full_name', 'email', 'country', 'signup_date', 'spend'] },
-=======
->>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
   { id: 'ds-de-llm-requests', name: 'DE LLM Requests', description: 'AI gateway log: every model call with tokens, latency, cost and a safety flag', file: 'de_llm_requests.csv', table: 'llm_requests', rows: 2000,
     cols: ['request_id', 'request_date', 'model', 'team', 'tokens_in', 'tokens_out', 'latency_ms', 'cost_usd', 'flagged'] },
 ]
@@ -139,7 +132,6 @@ function build() {
     llm.push([id, day(int(300, 359)), m.n, pick(teams), tin, tout, Math.round(m.lat * (0.6 + r() * 1.2)), cost, r() < 0.03 ? 1 : 0].join(','))
   }
 
-<<<<<<< HEAD
   // messy_contacts: a hand-typed CRM export. Every defect below is one a lesson exercise has to repair.
   const spell: Record<string, string[]> = {
     Kenya: ['Kenya', 'kenya', 'KENYA', ' Kenya ', 'Kenya '], Uganda: ['Uganda', 'uganda', ' Uganda'], Nigeria: ['Nigeria', 'NIGERIA', 'nigeria '], Ghana: ['Ghana', 'ghana'],
@@ -160,9 +152,6 @@ function build() {
   }
 
   return { customers, orders, rawEvents, runs, feats, llm, messy }
-=======
-  return { customers, orders, rawEvents, runs, feats, llm }
->>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
 }
 
 /** Writes the Data Engineering practice CSVs (idempotent, own version marker, never touches the other datasets). */
@@ -175,10 +164,7 @@ export function generateDataEngDatasets(dir: string): void {
   const files: [string, string[]][] = [
     ['de_customers.csv', t.customers], ['de_orders.csv', t.orders], ['de_raw_events.csv', t.rawEvents],
     ['de_pipeline_runs.csv', t.runs], ['de_ml_features.csv', t.feats], ['de_llm_requests.csv', t.llm],
-<<<<<<< HEAD
     ['de_messy_contacts.csv', t.messy],
-=======
->>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
   ]
   for (const [f, lines] of files) fs.writeFileSync(path.join(dir, f), lines.join('\n'))
   fs.writeFileSync(marker, String(DATAENG_VERSION))

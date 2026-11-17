@@ -18,15 +18,9 @@ test.before(async () => {
 const exercises = () => lessons.flatMap((l) => l.exercises)
 const grade = (id, user, solution) => sql.validateSQLAnswer({ sandboxId: `ex_${id}_u`, userQuery: user, solutionQuery: solution, evaluationMode: 'exact' })
 
-<<<<<<< HEAD
 test('the course is seeded as its own module with 13 lessons and does not add a skill or change the others', () => {
   const g = db.getDb()
   assert.equal(g.prepare("SELECT COUNT(*) c FROM lessons WHERE module = 'dataeng'").get().c, 13)
-=======
-test('the course is seeded as its own module with 12 lessons and does not add a skill or change the others', () => {
-  const g = db.getDb()
-  assert.equal(g.prepare("SELECT COUNT(*) c FROM lessons WHERE module = 'dataeng'").get().c, 12)
->>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
   assert.equal(g.prepare("SELECT COUNT(*) c FROM lessons WHERE module = 'sql'").get().c, 10)
   assert.equal(g.prepare("SELECT DISTINCT exercise_type t FROM exercises WHERE lesson_id LIKE 'de-%'").all().map((r) => r.t).join(), 'sql_query')
   assert.equal(g.prepare("SELECT COUNT(*) c FROM skill_ratings WHERE skill = 'dataeng'").get().c, 0)
@@ -53,11 +47,7 @@ test('wrong answers are rejected on every exercise: an unrelated query, and a qu
     assert.equal(r.correct, false, `${e.id}: "SELECT 1" was accepted`)
     assert.ok(r.feedback && r.feedback.length > 10)
   }
-<<<<<<< HEAD
   const dup = lessons.find((l) => l.id === 'de-dedup').exercises.find((x) => x.id === 'de-3-e3')
-=======
-  const dup = lessons.find((l) => l.id === 'de-dedup').exercises[2]
->>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
   const naive = await grade(dup.id, "SELECT event_type, COUNT(*) AS events FROM raw_events GROUP BY event_type ORDER BY events DESC, event_type", dup.solution)
   assert.equal(naive.correct, false, 'forgetting to deduplicate must be marked wrong')
 })
@@ -71,11 +61,7 @@ test('Data Engineering sandboxes are separate from the hospital ones: the SQL co
 
 test('the practice tables are listed for the playground and the AI tutor', () => {
   const rows = db.getDb().prepare("SELECT table_name FROM bundled_datasets WHERE domain = 'dataeng' ORDER BY table_name").all().map((r) => r.table_name)
-<<<<<<< HEAD
   assert.deepEqual(rows, ['customers', 'llm_requests', 'messy_contacts', 'ml_features', 'orders', 'pipeline_runs', 'raw_events'])
-=======
-  assert.deepEqual(rows, ['customers', 'llm_requests', 'ml_features', 'orders', 'pipeline_runs', 'raw_events'])
->>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
 })
 
 // ───────────────────────── the student's path, through the same calls the screen makes ─────────────────────────
@@ -90,11 +76,7 @@ test('a student upgrading from the previous version: Data Engineering opens at l
 
   const list = (m) => app.invoke('lessons:list', { userId: 'old', module: m })
   const de = await list('dataeng')
-<<<<<<< HEAD
   assert.equal(de.length, 13)
-=======
-  assert.equal(de.length, 12)
->>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
   assert.equal(de[0].id, 'de-foundations')
   assert.notEqual(de[0].user_status, 'locked', 'lesson 1 must be open')
   assert.ok(de.slice(1).every((l) => l.user_status === 'locked' || !l.user_status), 'the rest wait for their prerequisites')
@@ -112,18 +94,13 @@ test('a student upgrading from the previous version: Data Engineering opens at l
 test('submitting a Data Engineering exercise through the real channel: right answer scores, wrong answer explains', async () => {
   const app = h, g = db.getDb()
   makeLearner(app, db, 's')
-<<<<<<< HEAD
   const e = exercises().find((x) => x.id === 'de-3-e3') // clean events by type
-=======
-  const e = lessons[2].exercises[2] // de-3-e3: clean events by type
->>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
   const ok = await app.invoke('exercises:submit', { userId: 's', exerciseId: e.id, answer: e.solution })
   assert.equal(ok.validation.correct, true, ok.validation.feedback)
   const bad = await app.invoke('exercises:submit', { userId: 's', exerciseId: e.id, answer: 'SELECT event_type, COUNT(*) AS events FROM raw_events GROUP BY event_type' })
   assert.equal(bad.validation.correct, false)
   assert.match(bad.validation.feedback, /rows|values|differ|expected/i)
 })
-<<<<<<< HEAD
 
 test('cleaning lesson: the messy data really is messy, and the repair exercises reject the naive answer', async () => {
   const clean = lessons.find((l) => l.id === 'de-cleaning')
@@ -139,5 +116,3 @@ test('cleaning lesson: the messy data really is messy, and the repair exercises 
     assert.equal((await grade(id, q, e.solution)).correct, false, `${id}: the naive, uncleaned query must be marked wrong`)
   }
 })
-=======
->>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f

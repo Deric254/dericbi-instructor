@@ -34,10 +34,7 @@ const DATASETS = {
   'ds-de-raw-events': { table: 'raw_events', file: 'de_raw_events.csv' },
   'ds-de-pipeline-runs': { table: 'pipeline_runs', file: 'de_pipeline_runs.csv' },
   'ds-de-ml-features': { table: 'ml_features', file: 'de_ml_features.csv' },
-<<<<<<< HEAD
   'ds-de-messy-contacts': { table: 'messy_contacts', file: 'de_messy_contacts.csv' },
-=======
->>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
   'ds-de-llm-requests': { table: 'llm_requests', file: 'de_llm_requests.csv' },
 }
 

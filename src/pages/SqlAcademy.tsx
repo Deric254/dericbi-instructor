@@ -27,7 +27,6 @@ type View = 'lessons' | 'lesson' | 'playground' | 'mydbs'
 
 const DATAENG_TABLES = 'customers, orders, raw_events, pipeline_runs, ml_features, llm_requests, messy_contacts'
 
-=======
 /** The SQL screen also teaches Data Engineering: same editor, grader and tutor, different course, colour and title. */
 const COURSES = {
   sql: {

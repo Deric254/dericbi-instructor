@@ -45,11 +45,7 @@ test('RACE: opening an exercise before first-time setup finishes must not break 
 test('setup is safe to run again: nothing is duplicated and nothing is lost', async () => {
   const count = (sql) => db.getDb().prepare(sql).get().c
   const before = { lessons: count('SELECT COUNT(*) c FROM lessons'), ex: count('SELECT COUNT(*) c FROM exercises'), ds: count('SELECT COUNT(*) c FROM bundled_datasets'), ach: count('SELECT COUNT(*) c FROM achievements') }
-<<<<<<< HEAD
   assert.ok(before.lessons >= 60 && before.ex >= 100 && before.ds === 11 && before.ach >= 20, JSON.stringify(before))
-=======
-  assert.ok(before.lessons >= 60 && before.ex >= 100 && before.ds === 10 && before.ach >= 20, JSON.stringify(before))
->>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
   const csvBefore = patientsCsv().join('\n')
 
   await setup.runFirstTimeSetup(() => {})
