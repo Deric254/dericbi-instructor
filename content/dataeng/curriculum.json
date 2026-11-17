@@ -176,6 +176,7 @@
       ]
     },
     {
+<<<<<<< HEAD
       "id": "de-cleaning",
       "title": "Cleaning Messy Data: Standardise, Convert, Repair",
       "description": "Fix what humans typed: stray spaces, mixed case, placeholder text and two date formats, with SQL",
@@ -280,15 +281,24 @@
       ]
     },
     {
+=======
+>>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
       "id": "de-dedup",
       "title": "Deduplication & Idempotent Pipelines",
       "description": "Real pipelines deliver the same event twice. Learn to keep exactly one, safely",
       "level": "beginner",
       "prerequisites": [
+<<<<<<< HEAD
         "de-cleaning"
       ],
       "estimated_min": 40,
       "sort_order": 4,
+=======
+        "de-profiling"
+      ],
+      "estimated_min": 40,
+      "sort_order": 3,
+>>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
       "theory_md": "## Deduplication & Idempotent Pipelines\n\n### Why duplicates happen\nNetworks retry. A producer sends an event, the acknowledgement is lost, so it sends it again. Most messaging systems promise **at-least-once delivery**: nothing is lost, but some things arrive twice. In `raw_events` you will find events with the same `event_id` delivered several times, each with a later `ingested_at`.\n\nIf you count these naively, revenue is double counted, models train on repeated rows, and nobody notices.\n\n### Detecting duplicates\n```sql\nSELECT COUNT(*) - COUNT(DISTINCT event_id) AS duplicate_rows FROM raw_events;\n\nSELECT event_id, COUNT(*) AS deliveries\nFROM raw_events\nGROUP BY event_id\nHAVING COUNT(*) > 1;\n```\n\n### Keeping exactly one row per key\nThe standard tool is `ROW_NUMBER()`:\n```sql\nWITH ranked AS (\n  SELECT *,\n         ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY ingested_at DESC) AS rn\n  FROM raw_events\n)\nSELECT * FROM ranked WHERE rn = 1;\n```\n- `PARTITION BY event_id` makes one group per event.\n- `ORDER BY ingested_at DESC` puts the newest delivery first.\n- `rn = 1` keeps only that one.\n\nChoosing the ordering is a business decision: *latest wins* suits corrections; *earliest wins* suits first-seen facts.\n\n### Idempotency: the property that saves your weekend\nA pipeline is **idempotent** if running it twice gives the same result as running it once. Deduplication on a stable key is what makes retries safe. Rule of thumb: *every load must be safe to re-run*.\n\n### Executive lens\nAsk any team: \"If this job runs twice tonight, what happens?\" If the answer is \"numbers double\", the platform is fragile. Idempotent pipelines let you recover from failures by simply re-running.",
       "quiz": [
         {
@@ -381,7 +391,11 @@
         "de-dedup"
       ],
       "estimated_min": 40,
+<<<<<<< HEAD
       "sort_order": 5,
+=======
+      "sort_order": 4,
+>>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
       "theory_md": "## Referential Integrity & Orphan Detection\n\n### The problem\n`orders.customer_id` should always match a row in `customers`. When it does not, the order is an **orphan**. Orphans appear when systems sync at different speeds, when a customer is deleted, or when a bug writes a wrong id. The danger is silent: an `INNER JOIN` quietly drops orphan orders, so revenue in your report is *lower than the real revenue* and nobody sees an error.\n\n### Finding orphans: LEFT JOIN + IS NULL (the anti-join)\n```sql\nSELECT o.order_id, o.customer_id\nFROM orders o\nLEFT JOIN customers c ON c.customer_id = o.customer_id\nWHERE c.customer_id IS NULL;\n```\n`LEFT JOIN` keeps every order. Where no customer matched, the customer columns are `NULL`, so filtering on that finds exactly the orphans.\n\n### Measuring the damage\nDo not just say \"there are orphans\". Say how many and how much money:\n```sql\nSELECT COUNT(*) AS orphan_orders, ROUND(SUM(o.amount), 2) AS orphan_amount\nFROM orders o\nLEFT JOIN customers c ON c.customer_id = o.customer_id\nWHERE c.customer_id IS NULL;\n```\n\n### The reverse direction\nCustomers with *no* orders are also informative (inactive, or a broken sync). Same pattern, swapped tables.\n\n### What to do about orphans\n- **Quarantine** them in a separate table for review instead of deleting.\n- **Alert** the owning team with the count and value.\n- **Fix at the source**, add a constraint or a contract, so it cannot recur.\n\n### Executive lens\nOrphans are a trust problem. If finance asks \"why does the dashboard disagree with the ledger?\", orphan analysis is often the answer.",
       "quiz": [
         {
@@ -463,7 +477,11 @@
         "de-integrity"
       ],
       "estimated_min": 40,
+<<<<<<< HEAD
       "sort_order": 6,
+=======
+      "sort_order": 5,
+>>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
       "theory_md": "## Incremental Loads, Watermarks & Late Data\n\n### Full reload vs incremental\nA **full load** copies everything every time: simple, but it gets slower and more expensive as data grows. An **incremental load** copies only what changed since the last run. At multinational scale, incremental is not optional.\n\n### The watermark pattern\nA **watermark** remembers how far you have processed, usually the largest timestamp already loaded:\n```sql\n-- where did the last run stop?\nSELECT MAX(ingested_at) AS watermark FROM raw_events;\n\n-- next run: only rows newer than that\nSELECT * FROM raw_events WHERE ingested_at > '2025-01-29 12:00:00';\n```\nAlways use a strict `>` on a column that the *pipeline* controls (`ingested_at`), not one the *source* controls (`event_ts`), because sources can send old events at any time.\n\n### Event time vs ingestion time\n- **event_ts**: when it happened.\n- **ingested_at**: when your platform received it.\n\nThe gap between them is **lateness**. A phone that was offline sends yesterday's events today. If you build daily reports on `event_ts` and never revisit them, late data is silently lost.\n```sql\nSELECT COUNT(*) AS late_events\nFROM raw_events\nWHERE strftime('%s', ingested_at) - strftime('%s', event_ts) > 3600;\n```\n(`strftime('%s', ...)` converts a timestamp to seconds, so subtraction gives seconds of delay.)\n\n### Handling late data\n- Reprocess a **sliding window** (for example the last 3 days) every run.\n- Combine with deduplication so reprocessing never double counts.\n- Measure lateness and set an agreed cut-off.\n\n### Volume per load\n```sql\nSELECT DATE(ingested_at) AS ingest_date, COUNT(*) AS rows_loaded\nFROM raw_events GROUP BY DATE(ingested_at) ORDER BY ingest_date;\n```\nA sudden drop here is how you notice a stalled source.\n\n### Executive lens\nFreshness is a promise. \"Dashboards are never more than 15 minutes behind\" is a service level you can measure with these exact queries.",
       "quiz": [
         {
@@ -556,7 +574,11 @@
         "de-incremental"
       ],
       "estimated_min": 40,
+<<<<<<< HEAD
       "sort_order": 7,
+=======
+      "sort_order": 6,
+>>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
       "theory_md": "## Dimensional Modeling: Facts, Dimensions & Grain\n\n### Facts and dimensions\nA **fact table** records events you want to measure: each order, each click, each model call. A **dimension table** describes the things those events are about: customers, products, dates. Fact tables are narrow and huge; dimensions are wide and small.\n\nIn Northwind Global:\n- `orders` is a **fact** table (amount is the measure).\n- `customers` is a **dimension** (country and tier are the descriptions).\n\nJoining a fact to its dimensions in a simple shape is called a **star schema**: the fact in the middle, dimensions around it.\n\n### The grain: decide it first\nThe **grain** is what one row means. \"One row per order\" is a grain. Every measure and every join must respect it. Mixing grains is the most common cause of numbers that are mysteriously too big.\n\nTest the grain with a query:\n```sql\nSELECT COUNT(*) - COUNT(DISTINCT order_id) AS grain_violations FROM orders;\n```\nZero means one row per order, as promised.\n\n### Asking business questions\n```sql\nSELECT c.country, ROUND(SUM(o.amount), 2) AS revenue\nFROM orders o\nJOIN customers c ON c.customer_id = o.customer_id\nWHERE o.status = 'paid'\nGROUP BY c.country\nORDER BY revenue DESC;\n```\nThe fact supplies the number, the dimension supplies the slice. Add `c.tier`, or a month from `order_date`, and you have a new report without changing the model.\n\n### Why this matters\nA good model lets analysts, dashboards and AI assistants all answer questions from the *same* definitions. Without it, every team invents its own \"revenue\" and the meeting becomes an argument about whose number is right.\n\n### Executive lens\nOne definition of each metric, owned and documented, is worth more than a hundred dashboards. Modeling is how you create it.",
       "quiz": [
         {
@@ -649,7 +671,11 @@
         "de-modeling"
       ],
       "estimated_min": 40,
+<<<<<<< HEAD
       "sort_order": 8,
+=======
+      "sort_order": 7,
+>>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
       "theory_md": "## Window Functions for Pipelines & Trends\n\nA **window function** calculates across a set of related rows *without collapsing them*, so every row keeps its identity and gains a new column. For platform work, three patterns cover most needs.\n\n### 1. Running total\n```sql\nSELECT day, events,\n       SUM(events) OVER (ORDER BY day) AS running_total\nFROM (SELECT DATE(event_ts) AS day, COUNT(*) AS events FROM raw_events GROUP BY DATE(event_ts))\nORDER BY day;\n```\nUseful for cumulative volume, storage growth and spend tracking.\n\n### 2. Change versus the previous row with LAG\n```sql\nSELECT run_date, rows_loaded,\n       rows_loaded - LAG(rows_loaded) OVER (ORDER BY run_date) AS change_vs_prev\nFROM pipeline_runs\nWHERE pipeline = 'orders_ingest'\nORDER BY run_date;\n```\n`LAG(x)` reads the value from the row before. The first row has no previous value, so its result is `NULL` (correct and expected).\n\n### 3. Moving average to smooth noise\n```sql\nSELECT run_date, duration_s,\n       ROUND(AVG(duration_s) OVER (ORDER BY run_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW), 1) AS avg_7d\nFROM pipeline_runs WHERE pipeline = 'events_stream' ORDER BY run_date;\n```\n`ROWS BETWEEN 6 PRECEDING AND CURRENT ROW` means \"this row and the six before it\", a 7-run window. A single slow run is noise; a rising 7-day average is a trend.\n\n### Why engineers love them\n- A pipeline slowly getting slower never \"fails\", so only a trend reveals it.\n- A sudden drop in `rows_loaded` against the previous day flags a stalled source.\n\n### Executive lens\nLeadership cares about direction, not single points. \"Run time has grown 40% in a month\" is a call for investment, found with one window function.",
       "quiz": [
         {
@@ -731,7 +757,11 @@
         "de-trends"
       ],
       "estimated_min": 40,
+<<<<<<< HEAD
       "sort_order": 9,
+=======
+      "sort_order": 8,
+>>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
       "theory_md": "## Pipeline Reliability, SLAs & Observability\n\n### Pipelines fail. The question is who finds out first\nIf a stakeholder discovers a broken dashboard before you do, trust drops. **Data observability** is the practice of measuring the health of your data and pipelines continuously so *you* find problems first.\n\n### Service level vocabulary\n- **SLA** (agreement): the promise made to users, such as \"daily orders data ready by 06:00\".\n- **SLO** (objective): the internal target, usually stricter, such as \"99% of runs finish under 15 minutes\".\n- **SLI** (indicator): the measurement you track, such as run duration or failure rate.\n\nIn `pipeline_runs`, `sla_s` is each pipeline's allowed run time in seconds.\n\n### Core health queries\nFailure rate per pipeline:\n```sql\nSELECT pipeline,\n       ROUND(100.0 * SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) / COUNT(*), 1) AS failure_pct\nFROM pipeline_runs GROUP BY pipeline;\n```\nSLA breaches (run succeeded, but too slowly):\n```sql\nSELECT pipeline, COUNT(*) AS sla_breaches\nFROM pipeline_runs WHERE status = 'success' AND duration_s > sla_s GROUP BY pipeline;\n```\nRoot causes of failure:\n```sql\nSELECT error_type, COUNT(*) FROM pipeline_runs WHERE status = 'failed' GROUP BY error_type;\n```\n\n### Silent failures\nThe worst failure shows no error: a job \"succeeds\" but loads far less data than usual. Volume checks catch it:\n```sql\nSELECT run_id, pipeline, run_date, rows_loaded\nFROM pipeline_runs WHERE status = 'success' AND rows_loaded < 10000;\n```\n\n### The five pillars to monitor\n**Freshness, volume, schema, distribution, lineage.** If you watch these, most incidents are caught within minutes.\n\n### Executive lens\nReliability is a budget. Know the failure rate, the top root cause and the SLA breaches, and you can decide where one engineer-week buys the most trust.",
       "quiz": [
         {
@@ -824,7 +854,11 @@
         "de-observability"
       ],
       "estimated_min": 45,
+<<<<<<< HEAD
       "sort_order": 10,
+=======
+      "sort_order": 9,
+>>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
       "theory_md": "## Feature Engineering & Training Data for AI\n\n### The data engineer's hidden power\nResearchers get the headlines, but a model's ceiling is set by its **training data**: what is in it, what is missing, how it was labelled. The data engineer builds the **feature pipelines** that turn raw business data into model-ready columns, and keeps them identical in training and in production.\n\n### A feature table\n`ml_features` has one row per customer and a label, `churned` (1 = the customer left):\n`orders_30d`, `avg_order_value`, `days_since_last_order`, `support_tickets`, `churned`.\n\n### Check 1: label balance\n```sql\nSELECT churned, COUNT(*) AS customers,\n       ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM ml_features), 1) AS pct\nFROM ml_features GROUP BY churned;\n```\nIf only a small share churn, a lazy model that always predicts \"no churn\" looks accurate while being useless. This is **class imbalance**.\n\n### Check 2: missing values\n```sql\nSELECT ROUND(AVG(avg_order_value), 2) AS mean_aov,\n       SUM(CASE WHEN avg_order_value IS NULL THEN 1 ELSE 0 END) AS nulls\nFROM ml_features;\n```\n`AVG` ignores NULLs. Choose a strategy on purpose (drop, fill with mean or median, or add a \"was missing\" flag) and document it. Never let a pipeline guess silently.\n\n### Check 3: does the feature carry signal?\nBucket a feature and compare the label rate in each bucket:\n```sql\nSELECT CASE WHEN days_since_last_order <= 30 THEN '0-30'\n            WHEN days_since_last_order <= 75 THEN '31-75' ELSE '76+' END AS inactivity_bucket,\n       COUNT(*) AS customers, ROUND(100.0 * AVG(churned), 1) AS churn_pct\nFROM ml_features GROUP BY inactivity_bucket;\n```\n`AVG(churned)` of a 0/1 column is the churn rate, a neat trick.\n\n### Dangers to design out\n- **Leakage**: a feature that contains the answer or information from the future (for example \"cancellation_date\" used to predict cancellation). The model looks brilliant in testing and fails in production.\n- **Training/serving skew**: features computed differently offline and online.\n- **Bias**: groups under-represented in the data get worse predictions. Always slice quality by segment (tier, country).\n\n### Executive lens\nEvery AI initiative is really a data initiative. Whoever controls trustworthy, governed, well-documented data controls how fast the company can ship AI.",
       "quiz": [
         {
@@ -917,7 +951,11 @@
         "de-ai-features"
       ],
       "estimated_min": 40,
+<<<<<<< HEAD
       "sort_order": 11,
+=======
+      "sort_order": 10,
+>>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
       "theory_md": "## LLM Ops: Cost, Latency & Safety Analytics\n\n### AI has a bill\nOnce a company uses language models in many products, the *usage log* becomes one of its most important datasets. Every call records which model, which team, how many tokens in and out, how long it took, what it cost and whether it was flagged by a safety filter. That is `llm_requests`.\n\n**Tokens** are the pieces of text a model reads and writes; providers charge per token, and output tokens usually cost more than input tokens. Bigger models cost much more and are slower.\n\n### Three questions every CTO asks\n**1. Where is the money going?**\n```sql\nSELECT model, COUNT(*) AS requests, ROUND(SUM(cost_usd), 2) AS total_cost\nFROM llm_requests GROUP BY model ORDER BY total_cost DESC;\n```\nOften a minority of calls on the largest model creates most of the cost. That is where routing simple tasks to smaller models saves the most.\n\n**2. Which team is driving it?**\n```sql\nSELECT team, ROUND(SUM(cost_usd), 2) AS total_cost\nFROM llm_requests GROUP BY team ORDER BY total_cost DESC, team;\n```\nCost attribution per team enables **chargeback** and accountability.\n\n**3. Is it safe?**\n```sql\nSELECT model, ROUND(100.0 * SUM(flagged) / COUNT(*), 2) AS flagged_pct\nFROM llm_requests GROUP BY model;\n```\n`flagged` is 0 or 1, so its sum is the number of flagged calls.\n\n### Unit economics\nTotal cost alone misleads. Compare the **cost per 1,000 requests** for each model:\n```sql\nSELECT model, ROUND(1000.0 * SUM(cost_usd) / COUNT(*), 3) AS cost_per_1k FROM llm_requests GROUP BY model;\n```\nThis is the number you use to decide which model to route which workload to.\n\n### Executive lens\nControl of AI spend, quality and safety is a competitive advantage. A company that measures cost per task can ship ten times more AI features for the same budget.",
       "quiz": [
         {
@@ -1010,7 +1048,11 @@
         "de-llm-ops"
       ],
       "estimated_min": 45,
+<<<<<<< HEAD
       "sort_order": 12,
+=======
+      "sort_order": 11,
+>>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
       "theory_md": "## Architecture, Governance & Cost: the CTO View\n\nAt this level the question changes from \"does the query work?\" to \"does the *system* work, safely, at a sensible cost, for ten years?\"\n\n### Data contracts\nA **data contract** is an agreement between a producer and its consumers about what data will look like: columns, types, allowed values, freshness. Enforce it automatically. A contract check is just a query that counts violations:\n```sql\nSELECT COUNT(*) AS contract_breaches\nFROM raw_events\nWHERE country IS NULL OR payload_kb > 300;\n```\nA rising number means a producer changed something. You catch it before the dashboards break, and you know whom to call.\n\n### Compute and cost\nCloud platforms bill for compute time and storage. Know your most expensive workloads:\n```sql\nSELECT pipeline, ROUND(SUM(duration_s) / 3600.0, 2) AS compute_hours\nFROM pipeline_runs GROUP BY pipeline ORDER BY compute_hours DESC;\n```\nOptimise the top one first. The same logic applies to storage tiers and to the LLM spend you measured earlier.\n\n### Concentration risk\nIf one country, one customer or one vendor is most of the business, a single event can hurt badly. Window functions give shares in one query:\n```sql\nSELECT c.country,\n       ROUND(100.0 * SUM(o.amount) / SUM(SUM(o.amount)) OVER (), 1) AS revenue_share_pct\nFROM orders o JOIN customers c ON c.customer_id = o.customer_id\nWHERE o.status = 'paid' GROUP BY c.country;\n```\n`SUM(SUM(...)) OVER ()` is the grand total of the grouped sums, so the shares add up to 100.\n\n### Governance checklist\n- **Ownership**: every dataset has a named owner.\n- **Access control**: least privilege; personal data masked or tokenised.\n- **Retention**: keep data only as long as there is a reason and a legal basis.\n- **Lineage**: you can trace any number back to its sources.\n- **Auditability**: who changed what and when.\n\n### Build vs buy\nBuy commodity (storage, orchestration, ingestion connectors); build what differentiates you (domain models, proprietary features). Revisit the decision every year, and always count the engineers' time as a cost.\n\n### Executive lens\nA CTO is judged on reliability, cost and speed of delivery together. Contracts, cost visibility and concentration awareness are how you hold all three.",
       "quiz": [
         {
@@ -1092,7 +1134,11 @@
         "de-governance"
       ],
       "estimated_min": 50,
+<<<<<<< HEAD
       "sort_order": 13,
+=======
+      "sort_order": 12,
+>>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
       "theory_md": "## Capstone: The Executive Data Platform Scorecard\n\nYou now have the full toolkit: profiling, deduplication, integrity checks, incremental loading, modeling, trend analysis, observability, AI data quality and governance. The capstone asks you to combine them the way a platform lead does when the CEO says: *\"Can I trust our numbers?\"*\n\n### The scorecard idea\nExecutives do not want fifty tables. They want a handful of **trust metrics** next to the headline numbers, so they know how much weight to put on each. A good scorecard answers:\n1. **Is the pipeline reliable?** success rate, average duration, volume.\n2. **Is the data clean?** duplicates removed, orphans found.\n3. **Is the headline number right?** revenue computed on clean, joined data.\n\n### Building blocks you will combine\n```sql\n-- dedupe first (Lesson 3), then aggregate\nWITH clean AS (\n  SELECT *, ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY ingested_at DESC) AS rn\n  FROM raw_events\n)\nSELECT event_type, COUNT(*) FROM clean WHERE rn = 1 AND country IS NOT NULL GROUP BY event_type;\n```\n```sql\n-- several independent measures in one row using scalar subqueries\nSELECT\n  (SELECT COUNT(*) FROM pipeline_runs WHERE status = 'failed') AS failed_runs,\n  (SELECT COUNT(*) - COUNT(DISTINCT event_id) FROM raw_events) AS duplicate_events;\n```\nScalar subqueries each return one value, so they can sit side by side in a single result row: a classic way to build a KPI strip.\n\n### Working method\n1. Write the smallest query that returns the right shape.\n2. Check one number by hand (a small filter, a `LIMIT`).\n3. Combine, then re-check that the totals still make sense.\n\n### Executive lens\nThis is the job: turn a messy, multi-source, AI-hungry data estate into a few numbers the whole company trusts, and be able to explain every one of them. People who can do that are very hard to replace.",
       "quiz": [
         {

@@ -8,7 +8,10 @@ import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
 import { PageError } from '../components/ui/PageState'
 import { preparePythonEditor, useEditorTheme } from '../lib/editorTheme'
+<<<<<<< HEAD
 import { usePendingLesson } from '../hooks/usePendingLesson'
+=======
+>>>>>>> 751a2baa32746d5c49186b4147523c95a563f56f
 import { reportApiError } from '../lib/apiError'
 import { SplitPane, AsideSplit } from '../components/ui/SplitPane'
 import type { Lesson } from '../types'
