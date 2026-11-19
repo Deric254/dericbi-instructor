@@ -16,7 +16,7 @@ import type { NavSection } from '../../types'
  * there's always exactly one way to reach it, on every single page.
  */
 export const SECTIONS_WITH_OWN_INSTRUCTOR = new Set<NavSection>([
-  'sql', 'powerbi', 'statistics', 'business', 'dataeng', 'simulations', 'projects', 'settings',
+  'sql', 'powerbi', 'statistics', 'business', 'dataeng', 'bizsolver', 'simulations', 'projects', 'settings',
 ])
 
 // A little contextual flavor per section, so "general" advice still feels

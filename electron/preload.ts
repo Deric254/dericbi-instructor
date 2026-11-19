@@ -60,6 +60,7 @@ const api = {
   progress: {
     dashboard: (userId: string) => ipcRenderer.invoke('progress:dashboard', userId),
     skills: (userId: string) => ipcRenderer.invoke('progress:skills', userId),
+    skillMap: (userId: string) => ipcRenderer.invoke('progress:skill-map', userId),
     rank: (userId: string) => ipcRenderer.invoke('progress:rank', userId),
     memory: (userId: string, options?: any) => ipcRenderer.invoke('progress:memory', { userId, options }),
     achievements: (userId: string) => ipcRenderer.invoke('progress:achievements', userId),

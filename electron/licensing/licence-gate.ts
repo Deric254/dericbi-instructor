@@ -30,7 +30,7 @@ export const renewUrl = (installCode: string): string => `${RENEW_PAGE}?app=${RE
  */
 export const READ_CHANNELS: ReadonlySet<string> = new Set([
   'auth:login', 'auth:validate-session', 'auth:logout', 'auth:get-security-question', 'auth:reset-password',
-  'progress:dashboard', 'progress:skills', 'progress:rank', 'progress:memory', 'progress:achievements',
+  'progress:dashboard', 'progress:skills', 'progress:skill-map', 'progress:rank', 'progress:memory', 'progress:achievements',
   'lessons:list', 'lessons:get', 'lessons:start',
   'exercises:get', 'exercises:hint',
   'sql:history', 'sql:datasets', 'sql:close-sandbox', 'sql:schema',

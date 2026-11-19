@@ -5,9 +5,9 @@ import {
   Database, Play, ChevronRight, Lock, CheckCircle, Circle,
   Clock, BookOpen, Lightbulb, X, Loader, AlertCircle,
   ChevronDown, RotateCcw, HelpCircle, MessageSquare, Star,
-  Brain, Workflow,
+  Brain, Workflow, Target,
 } from 'lucide-react'
-import { useAuthStore, notify } from '../store'
+import { useAuthStore, useUIStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
 import { SplitPane, AsideSplit } from '../components/ui/SplitPane'
 import MyDatabases from '../components/sql/MyDatabases'
@@ -18,25 +18,31 @@ import ResultsGrid from '../components/sql/ResultsGrid'
 import ComparePanel, { hasComparison, type Comparison } from '../components/sql/ComparePanel'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
+import SkillMap from '../components/ui/SkillMap'
 import { PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'
 import { usePendingLesson } from '../hooks/usePendingLesson'
 import { usePyodide } from '../hooks/usePyodide'
-import type { Lesson, SqlResult } from '../types'
+import type { Lesson, NavSection, SqlResult } from '../types'
 
-type View = 'lessons' | 'lesson' | 'playground' | 'mydbs'
+type View = 'lessons' | 'lesson' | 'playground' | 'mydbs' | 'skills'
 
 const DATAENG_TABLES = 'customers, orders, raw_events, pipeline_runs, ml_features, llm_requests, messy_contacts'
+const SHOP_TABLES = 'shop_sales, shop_sale_items, shop_products, shop_customers, shop_suppliers, shop_purchases, shop_batches, shop_payments, shop_refunds, shop_expenses, shop_supplier_invoices, shop_bank, shop_actions'
 
 /** The SQL screen also teaches Data Engineering: same editor, grader and tutor, different course, colour and title. */
 const COURSES = {
   sql: {
     module: 'sql', title: 'SQL Academy', tint: 'rgba(34,211,238,0.15)', icon: <Database size={16} />,
-    subtitle: 'From SELECT to window functions — real execution on real data', myDatabases: true,
+    subtitle: 'From SELECT to window functions — real execution on real data', myDatabases: true, skillMap: false, color: null,
   },
   dataeng: {
     module: 'dataeng', title: 'Data Engineering Academy', tint: 'rgba(251,113,133,0.15)', icon: <Workflow size={16} />,
-    subtitle: 'Pipelines, data quality and AI-ready data — for the people who run the platform', myDatabases: false,
+    subtitle: 'Pipelines, data quality and AI-ready data — for the people who run the platform', myDatabases: false, skillMap: false, color: 'var(--de-color)',
+  },
+  bizsolver: {
+    module: 'bizsolver', title: 'Business Problem Solver', tint: 'rgba(20,184,166,0.15)', icon: <Target size={16} />,
+    subtitle: 'Find the money, explain the problem, recommend and measure — on a real trading business', myDatabases: false, skillMap: true, color: 'var(--bp-color)',
   },
 } as const
 
@@ -48,6 +54,7 @@ export default function SqlAcademy({ course = 'sql' }: { course?: keyof typeof C
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
   const { user } = useAuthStore()
+  const { setActiveSection, setPendingLesson } = useUIStore()
 
   const loadLessons = useCallback(() => {
     if (!user) return
@@ -68,8 +75,8 @@ export default function SqlAcademy({ course = 'sql' }: { course?: keyof typeof C
   usePendingLesson(lessons, openLesson)
 
   return (
-    // The page is built on --sql-color; Data Engineering re-points it to its own colour for everything below.
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', ...(course === 'dataeng' ? { ['--sql-color' as any]: 'var(--de-color)' } : {}) }}>
+    // The page is built on --sql-color; Data Engineering and the Business Problem Solver re-point it to their own colour for everything below.
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', ...(cfg.color ? { ['--sql-color' as any]: cfg.color } : {}) }}>
       {/* Page header */}
       <div style={{
         padding: '14px 24px',
@@ -99,6 +106,11 @@ export default function SqlAcademy({ course = 'sql' }: { course?: keyof typeof C
           <TabBtn active={view === 'lessons'} onClick={() => setView('lessons')}>
             <BookOpen size={13} /> Lessons
           </TabBtn>
+          {cfg.skillMap && (
+            <TabBtn active={view === 'skills'} onClick={() => setView('skills')}>
+              <Target size={13} /> Skill map
+            </TabBtn>
+          )}
           <TabBtn active={view === 'playground'} onClick={() => setView('playground')}>
             <Play size={13} /> Playground
           </TabBtn>
@@ -125,6 +137,12 @@ export default function SqlAcademy({ course = 'sql' }: { course?: keyof typeof C
               if (user) window.api.lessons.list(user.id, cfg.module).then(setLessons).catch((err: any) => reportApiError('refresh your lessons', err))
             }}
           />
+        )}
+        {view === 'skills' && cfg.skillMap && (
+          <SkillMap onOpen={(module, lessonId) => {
+            if (module === cfg.module) openLesson(lessonId)
+            else { setPendingLesson(lessonId); setActiveSection(module as NavSection) }
+          }} />
         )}
         {view === 'playground' && <SqlPlayground />}
         {view === 'mydbs' && cfg.myDatabases && <MyDatabases />}
@@ -510,10 +528,10 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
             <div style={{
               marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 5,
               fontSize: 11, color: 'var(--sql-color)', fontWeight: 500,
-              padding: '3px 9px', borderRadius: 'var(--radius-full)',
+              padding: '3px 9px', borderRadius: String(exercise.id).startsWith('bp-') && !isPython ? 'var(--radius)' : 'var(--radius-full)', // thirteen table names wrap onto several lines
               background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.3)',
             }}>
-              <Database size={11} /> {isPython ? 'Python practical: Run tests your code with hidden checks' : <>Tables ready: {String(exercise.id).startsWith('de-') ? DATAENG_TABLES : 'patients, billing'}</>}
+              <Database size={11} /> {isPython ? 'Python practical: Run tests your code with hidden checks' : <>Tables ready: {String(exercise.id).startsWith('de-') ? DATAENG_TABLES : String(exercise.id).startsWith('bp-') ? SHOP_TABLES : 'patients, billing'}</>}
             </div>
           )}
           {hint && (

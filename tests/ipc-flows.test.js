@@ -22,7 +22,7 @@ test.before(async () => {
 
 test('SQL Playground: list datasets -> auto-load Patients -> run the default query -> see it in history', async () => {
   const { bundled, imported } = await app.invoke('sql:datasets', UID)
-  assert.equal(bundled.length, 11) // 4 core practice tables + 7 for the Data Engineering academy
+  assert.equal(bundled.length, 24) // 4 core practice tables + 7 for Data Engineering + 13 for the Business Problem Solver
   assert.deepEqual(imported, [])
 
   // SqlAcademy.tsx prefers the Patients dataset on first open.
@@ -156,5 +156,5 @@ test('an unactivated copy refuses EVERY data channel, including SQL, AI and the 
   } finally {
     app.setLicensed(true)
   }
-  assert.equal((await app.invoke('sql:datasets', UID)).bundled.length, 11, 'and works again once licensed')
+  assert.equal((await app.invoke('sql:datasets', UID)).bundled.length, 24, 'and works again once licensed')
 })

@@ -151,7 +151,7 @@ test('starter snippets reference the chosen table and run against it', async () 
 test('the SQL screen offers My Databases and still has its playground defaults the tests rely on', () => {
   const page = src('src/pages/SqlAcademy.tsx')
   assert.match(page, /view === 'mydbs' && cfg\.myDatabases && <MyDatabases/)
-  assert.match(page, /sql: \{[\s\S]*?myDatabases: true,?\s*\},\s*dataeng/, 'the SQL course keeps My Databases (Data Engineering hides it)')
+  assert.match(page, /sql: \{[\s\S]*?myDatabases: true,[^}]*\},\s*dataeng/, 'the SQL course keeps My Databases (Data Engineering hides it)')
   assert.match(page, /useState\('(-- Write your SQL here[^']*)'\)/)
 })
 

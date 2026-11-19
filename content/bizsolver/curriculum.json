@@ -1,0 +1,1344 @@
+{
+  "module": "bizsolver",
+  "version": "1.0",
+  "lessons": [
+    {
+      "id": "bp-audit",
+      "title": "Audit a Business's Data: What Do We Actually Have?",
+      "description": "Before any insight: measure what the data covers, what is missing and what looks wrong, using Mwangi Trading Co.",
+      "level": "intermediate",
+      "prerequisites": [],
+      "estimated_min": 40,
+      "sort_order": 1,
+      "theory_md": "## Audit a Business's Data: What Do We Actually Have?\n\n### The business problem\nAn owner says: *\"My shop is losing money somewhere. Find it.\"* You cannot find money in data you have not checked. The first job of any business analyst or data engineer is an **audit**: what is in the data, which period it covers, what is missing, and what looks wrong. A confident answer built on a broken table is the most expensive kind of mistake.\n\n### Your practice company\nYou work for **Mwangi Trading Co.**, a trading business with grocery, hardware, pharmacy, agrovet and stationery shops across three branches. Thirteen tables are ready in every exercise. Names start with `shop_`:\n\n| Area | Tables |\n|---|---|\n| Sales | `shop_sales` (one row per receipt), `shop_sale_items` (the lines), `shop_customers`, `shop_payments`, `shop_refunds` |\n| Stock and buying | `shop_products`, `shop_suppliers`, `shop_purchases`, `shop_batches` (counted on 31 Dec 2025) |\n| Money out | `shop_expenses` |\n| Other sources | `shop_supplier_invoices` (the suppliers' own statements), `shop_bank` (bank deposit lines) |\n| Decisions | `shop_actions` (what the owner decided and what was measured) |\n\n### The audit questions\n1. **Volume**: how many rows are in each table? A table that is far smaller than expected means a broken import.\n2. **Coverage**: which period does the data cover? Is any month missing?\n3. **Completeness**: which values are `NULL`, and is the `NULL` a problem or a fact? A missing expiry date on a hammer is normal; hardware does not expire. A missing expiry on medicine is a risk.\n4. **Duplicates**: the same record entered twice inflates costs or revenue.\n5. **Consistency**: do two tables agree? Receipt totals should equal the sum of their lines.\n\n```sql\nSELECT MIN(sale_date) AS first_sale, MAX(sale_date) AS last_sale\nFROM shop_sales;\n```\n\n### What you can and cannot claim\nAn audit tells you what the data **contains**. It does not tell you the business is healthy. Write down what each table does *not* cover. For example, `shop_batches` is a single stock count on 31 December, so it cannot tell you how stock moved during the year.",
+      "quiz": [
+        {
+          "question": "Why audit the data before looking for insights?",
+          "options": [
+            "It is a legal rule",
+            "A decision built on broken or missing data is confidently wrong",
+            "It makes queries faster",
+            "Owners prefer long reports"
+          ],
+          "correct_index": 1,
+          "explanation": "An audit finds coverage gaps, duplicates and inconsistencies before they turn into wrong advice."
+        },
+        {
+          "question": "A hammer batch has no expiry date. What should you conclude?",
+          "options": [
+            "The data is corrupt",
+            "It is probably normal: hardware does not expire",
+            "The batch is expired",
+            "The supplier lied"
+          ],
+          "correct_index": 1,
+          "explanation": "A NULL can be a fact. Check whether the category normally has the field before calling it an error."
+        },
+        {
+          "question": "Receipts in the sales table do not add up to their lines. This is a...",
+          "options": [
+            "Consistency problem",
+            "Speed problem",
+            "Formatting preference",
+            "Backup problem"
+          ],
+          "correct_index": 0,
+          "explanation": "Two tables that should agree but do not signal a data problem to explain before any analysis."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "bp-1-e1",
+          "title": "How Big Is the Data?",
+          "prompt": "Return one row with four numbers: the number of rows in shop_sales (column sales), shop_sale_items (column sale_items), shop_customers (column customers) and shop_products (column products).",
+          "hint_1": "Use four scalar subqueries side by side: SELECT (SELECT COUNT(*) FROM ...) AS sales, ...",
+          "hint_2": "SELECT (SELECT COUNT(*) FROM shop_sales) AS sales, (SELECT COUNT(*) FROM shop_sale_items) AS sale_items, ...",
+          "hint_3": "SELECT (SELECT COUNT(*) FROM shop_sales) AS sales, (SELECT COUNT(*) FROM shop_sale_items) AS sale_items, (SELECT COUNT(*) FROM shop_customers) AS customers, (SELECT COUNT(*) FROM shop_products) AS products",
+          "solution": "SELECT (SELECT COUNT(*) FROM shop_sales) AS sales, (SELECT COUNT(*) FROM shop_sale_items) AS sale_items, (SELECT COUNT(*) FROM shop_customers) AS customers, (SELECT COUNT(*) FROM shop_products) AS products",
+          "evaluation_mode": "exact",
+          "points": 10
+        },
+        {
+          "id": "bp-1-e2",
+          "title": "What Period Does It Cover?",
+          "prompt": "Return one row with the first sale date (first_sale), the last sale date (last_sale) and the number of different days on which a sale happened (trading_days) from shop_sales.",
+          "hint_1": "MIN and MAX give the first and last dates. COUNT(DISTINCT sale_date) counts the days.",
+          "hint_2": "SELECT MIN(sale_date) AS first_sale, MAX(sale_date) AS last_sale, COUNT(DISTINCT ...) AS trading_days FROM shop_sales",
+          "hint_3": "SELECT MIN(sale_date) AS first_sale, MAX(sale_date) AS last_sale, COUNT(DISTINCT sale_date) AS trading_days FROM shop_sales",
+          "solution": "SELECT MIN(sale_date) AS first_sale, MAX(sale_date) AS last_sale, COUNT(DISTINCT sale_date) AS trading_days FROM shop_sales",
+          "evaluation_mode": "exact",
+          "points": 10
+        },
+        {
+          "id": "bp-1-e3",
+          "title": "Is the Missing Expiry a Problem?",
+          "prompt": "For every product category return category and batches_without_expiry: how many rows of shop_batches have no expiry date (NULL). Include only categories that have at least one. Sort by batches_without_expiry descending, then category.",
+          "hint_1": "Join shop_batches to shop_products on product_id to get the category.",
+          "hint_2": "WHERE expiry_date IS NULL, then GROUP BY category.",
+          "hint_3": "SELECT p.category, COUNT(*) AS batches_without_expiry FROM shop_batches b JOIN shop_products p ON p.product_id = b.product_id WHERE b.expiry_date IS NULL GROUP BY p.category ORDER BY batches_without_expiry DESC, p.category",
+          "solution": "SELECT p.category, COUNT(*) AS batches_without_expiry FROM shop_batches b JOIN shop_products p ON p.product_id = b.product_id WHERE b.expiry_date IS NULL GROUP BY p.category ORDER BY batches_without_expiry DESC, p.category",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "bp-1-e4",
+          "title": "The Expense Entered Twice",
+          "prompt": "Find expense rows that look like double entries: the same expense_date, category and amount appearing more than once in shop_expenses. Return expense_date, category, amount and copies (how many times it appears). Sort by expense_date.",
+          "hint_1": "Group by the three columns that should make a row unique, then keep groups with more than one row.",
+          "hint_2": "GROUP BY expense_date, category, amount HAVING COUNT(*) > 1",
+          "hint_3": "SELECT expense_date, category, amount, COUNT(*) AS copies FROM shop_expenses GROUP BY expense_date, category, amount HAVING COUNT(*) > 1 ORDER BY expense_date",
+          "solution": "SELECT expense_date, category, amount, COUNT(*) AS copies FROM shop_expenses GROUP BY expense_date, category, amount HAVING COUNT(*) > 1 ORDER BY expense_date",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "bp-py-1",
+          "title": "Profile a Table in Python",
+          "prompt": "A list `rows` of dicts is already loaded (each dict is one record). Write a function `profile(rows)` that returns a dict mapping every column name to a dict with two keys: `missing` (how many records have None or an empty string '' in that column) and `distinct` (how many different non-missing values it holds). Return {} for an empty list.",
+          "hint_1": "Collect the column names from the first record, then loop over every record for each column.",
+          "hint_2": "Use a set for the distinct values and skip None and '' when counting them.",
+          "hint_3": "def profile(rows):\n    out = {}\n    if not rows:\n        return out\n    for col in rows[0]:\n        values = [r.get(col) for r in rows]\n        present = [v for v in values if v is not None and v != \"\"]\n        out[col] = {\"missing\": len(values) - len(present), \"distinct\": len(set(present))}\n    return out",
+          "solution": "def profile(rows):\n    out = {}\n    if not rows:\n        return out\n    for col in rows[0]:\n        values = [r.get(col) for r in rows]\n        present = [v for v in values if v is not None and v != \"\"]\n        out[col] = {\"missing\": len(values) - len(present), \"distinct\": len(set(present))}\n    return out",
+          "evaluation_mode": "python_output",
+          "points": 60,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "rows = [\n    {\"batch\": 1, \"product\": \"Hammer\", \"expiry\": None, \"qty\": 10},\n    {\"batch\": 2, \"product\": \"Cough syrup\", \"expiry\": \"2026-02-01\", \"qty\": 18},\n    {\"batch\": 3, \"product\": \"Cough syrup\", \"expiry\": \"\", \"qty\": 18},\n    {\"batch\": 4, \"product\": \"Spade\", \"expiry\": None, \"qty\": 4},\n]",
+            "check": "p = profile(rows)\nfor col in [\"batch\", \"product\", \"expiry\", \"qty\"]:\n    print(col, p[col][\"missing\"], p[col][\"distinct\"])\nprint(profile([]))",
+            "starter": "# rows is already defined. Write profile(rows) below.",
+            "output": "batch 0 4\nproduct 0 3\nexpiry 3 1\nqty 0 3\n{}",
+            "must_have": [
+              "def "
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bp-model",
+      "title": "Model the Business: Sales, Stock, Suppliers and Money",
+      "description": "Understand grain, keys and relationships so every number you report can be traced back to its source.",
+      "level": "intermediate",
+      "prerequisites": [
+        "bp-audit"
+      ],
+      "estimated_min": 40,
+      "sort_order": 2,
+      "theory_md": "## Model the Business: Sales, Stock, Suppliers and Money\n\n### The business problem\nA business is more than a list of sales. It buys stock from suppliers, holds it on shelves, sells it to customers, gets paid (sometimes late), refunds some of it and pays rent and salaries. If you force all of that into one big table, nothing can be traced and numbers get double-counted. A good **model** keeps each kind of fact in its own place and connects them with keys.\n\n### The building blocks\n| Kind | What it is | In this business |\n|---|---|---|\n| **Entities** | Things that exist and change slowly | customers, products, suppliers |\n| **Transactions** | Money or goods moving at a moment | sales and their lines, purchases, payments, refunds, expenses |\n| **Measurements** | A reading at a point in time | stock counted per batch on 31 Dec |\n| **Documents and external records** | Evidence from outside | supplier statements, bank lines |\n| **Decisions** | What the owner chose and what happened | the decision log |\n\n### Grain: the most important question\n**Grain** is what one row means. In `shop_sales` one row is one receipt. In `shop_sale_items` one row is one product line on a receipt. If you join the two and then add up `shop_sales.total`, every receipt's total is counted once per line. That is double-counting. Always ask: *what does one row mean, and what happens to it after this join?*\n\n```sql\n-- Revenue from the lines, one row per line: correct\nSELECT SUM(qty * unit_price) AS revenue FROM shop_sale_items;\n```\n\n### Keep the evidence\nNotice that `shop_sale_items` stores the **cost on the day of sale** (`unit_cost`) as well as the price. Product costs change. If you only stored today's cost, last July's profit would be wrong. A good model preserves values *as they were*.\n\n### What you can and cannot claim\nA model lets you calculate profit **only if the cost is recorded**. Revenue minus cost on each line is *gross profit*. It is not *net profit*: rent, salaries and other expenses sit in `shop_expenses` and must be subtracted separately.",
+      "quiz": [
+        {
+          "question": "In shop_sales one row is one receipt. You join it to shop_sale_items and SUM(shop_sales.total). What goes wrong?",
+          "options": [
+            "Nothing",
+            "Each receipt total is counted once per line",
+            "The query becomes faster",
+            "NULLs appear"
+          ],
+          "correct_index": 1,
+          "explanation": "Joining to a finer grain repeats the coarser row. Sum amounts at the grain where they live."
+        },
+        {
+          "question": "Why store unit_cost on each sale line?",
+          "options": [
+            "To make the table bigger",
+            "Product costs change, and profit must use the cost at the time",
+            "SQL requires it",
+            "Customers asked"
+          ],
+          "correct_index": 1,
+          "explanation": "Keeping values as they were is what makes past profit calculable."
+        },
+        {
+          "question": "Revenue minus the cost of goods sold is...",
+          "options": [
+            "Net profit",
+            "Gross profit",
+            "Cash",
+            "Turnover"
+          ],
+          "correct_index": 1,
+          "explanation": "Net profit also subtracts rent, salaries and other expenses."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "bp-2-e1",
+          "title": "One Receipt, Many Lines",
+          "prompt": "Find the five receipts with the highest revenue by adding up their lines. Return sale_id, lines (number of lines) and revenue (sum of qty times unit_price) from shop_sale_items. Sort by revenue descending, then sale_id. Return five rows.",
+          "hint_1": "GROUP BY sale_id on shop_sale_items. COUNT(*) gives the lines.",
+          "hint_2": "ORDER BY revenue DESC, sale_id LIMIT 5",
+          "hint_3": "SELECT sale_id, COUNT(*) AS lines, SUM(qty * unit_price) AS revenue FROM shop_sale_items GROUP BY sale_id ORDER BY revenue DESC, sale_id LIMIT 5",
+          "solution": "SELECT sale_id, COUNT(*) AS lines, SUM(qty * unit_price) AS revenue FROM shop_sale_items GROUP BY sale_id ORDER BY revenue DESC, sale_id LIMIT 5",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "bp-2-e2",
+          "title": "Revenue by Category",
+          "prompt": "Return each product category with its revenue (sum of qty times unit_price over all sale lines), rounded to 0 decimals. Columns: category, revenue. Sort by revenue descending.",
+          "hint_1": "Join shop_sale_items to shop_products on product_id to reach the category.",
+          "hint_2": "ROUND(SUM(i.qty * i.unit_price), 0) AS revenue ... GROUP BY p.category",
+          "hint_3": "SELECT p.category, ROUND(SUM(i.qty * i.unit_price), 0) AS revenue FROM shop_sale_items i JOIN shop_products p ON p.product_id = i.product_id GROUP BY p.category ORDER BY revenue DESC",
+          "solution": "SELECT p.category, ROUND(SUM(i.qty * i.unit_price), 0) AS revenue FROM shop_sale_items i JOIN shop_products p ON p.product_id = i.product_id GROUP BY p.category ORDER BY revenue DESC",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "bp-2-e3",
+          "title": "Gross Profit Using the Cost on the Day",
+          "prompt": "For each category return category, gross_profit (sum of qty times (unit_price minus unit_cost) from the sale lines, rounded to 0 decimals) and margin_pct (gross profit as a percentage of revenue, rounded to 1 decimal). Sort by gross_profit descending.",
+          "hint_1": "Revenue is SUM(qty * unit_price). Gross profit is SUM(qty * (unit_price - unit_cost)).",
+          "hint_2": "margin_pct = ROUND(100.0 * gross profit / revenue, 1)",
+          "hint_3": "SELECT p.category, ROUND(SUM(i.qty * (i.unit_price - i.unit_cost)), 0) AS gross_profit, ROUND(100.0 * SUM(i.qty * (i.unit_price - i.unit_cost)) / SUM(i.qty * i.unit_price), 1) AS margin_pct FROM shop_sale_items i JOIN shop_products p ON p.product_id = i.product_id GROUP BY p.category ORDER BY gross_profit DESC",
+          "solution": "SELECT p.category, ROUND(SUM(i.qty * (i.unit_price - i.unit_cost)), 0) AS gross_profit, ROUND(100.0 * SUM(i.qty * (i.unit_price - i.unit_cost)) / SUM(i.qty * i.unit_price), 1) AS margin_pct FROM shop_sale_items i JOIN shop_products p ON p.product_id = i.product_id GROUP BY p.category ORDER BY gross_profit DESC",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "bp-2-e4",
+          "title": "Who Are the Customers?",
+          "prompt": "For each customer segment return segment, customers (how many customers in shop_customers), receipts (how many sales in shop_sales) and revenue (sum of shop_sales.total rounded to 0 decimals). Include segments with no sales. Sort by revenue descending.",
+          "hint_1": "Start from shop_customers and LEFT JOIN shop_sales. COUNT(DISTINCT c.customer_id) avoids repeating customers.",
+          "hint_2": "COUNT(s.sale_id) counts receipts; SUM(s.total) is the revenue.",
+          "hint_3": "SELECT c.segment, COUNT(DISTINCT c.customer_id) AS customers, COUNT(s.sale_id) AS receipts, ROUND(SUM(s.total), 0) AS revenue FROM shop_customers c LEFT JOIN shop_sales s ON s.customer_id = c.customer_id GROUP BY c.segment ORDER BY revenue DESC",
+          "solution": "SELECT c.segment, COUNT(DISTINCT c.customer_id) AS customers, COUNT(s.sale_id) AS receipts, ROUND(SUM(s.total), 0) AS revenue FROM shop_customers c LEFT JOIN shop_sales s ON s.customer_id = c.customer_id GROUP BY c.segment ORDER BY revenue DESC",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "bp-2-e5",
+          "title": "How Much Money Sits on the Shelves?",
+          "prompt": "Using the stock count in shop_batches, return each category with stock_value: qty_on_hand times unit_cost summed, rounded to 0 decimals. Columns: category, stock_value. Sort by stock_value descending.",
+          "hint_1": "Join shop_batches to shop_products for the category. Stock value is quantity times cost, not price.",
+          "hint_2": "ROUND(SUM(b.qty_on_hand * b.unit_cost), 0)",
+          "hint_3": "SELECT p.category, ROUND(SUM(b.qty_on_hand * b.unit_cost), 0) AS stock_value FROM shop_batches b JOIN shop_products p ON p.product_id = b.product_id GROUP BY p.category ORDER BY stock_value DESC",
+          "solution": "SELECT p.category, ROUND(SUM(b.qty_on_hand * b.unit_cost), 0) AS stock_value FROM shop_batches b JOIN shop_products p ON p.product_id = b.product_id GROUP BY p.category ORDER BY stock_value DESC",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "bp-py-2",
+          "title": "Keep the Evidence: a Canonical Record",
+          "prompt": "Every source system names things differently. Write `to_canonical(raw, source)` that turns one raw record into a canonical sale dict with exactly these keys: `source` (the source name), `source_id` (the raw `id` value, unchanged), `date` (the raw `date`), `amount` (the raw `amount` as a float), `currency` ('KES' when the raw record has no currency) and `original` (a copy of the whole raw record, untouched). Never change the raw record you were given.",
+          "hint_1": "Build a new dict. original should hold a copy of raw, not raw itself: dict(raw).",
+          "hint_2": "raw.get('currency') or 'KES' supplies the default currency.",
+          "hint_3": "def to_canonical(raw, source):\n    return {\n        \"source\": source,\n        \"source_id\": raw[\"id\"],\n        \"date\": raw[\"date\"],\n        \"amount\": float(raw[\"amount\"]),\n        \"currency\": raw.get(\"currency\") or \"KES\",\n        \"original\": dict(raw),\n    }",
+          "solution": "def to_canonical(raw, source):\n    return {\n        \"source\": source,\n        \"source_id\": raw[\"id\"],\n        \"date\": raw[\"date\"],\n        \"amount\": float(raw[\"amount\"]),\n        \"currency\": raw.get(\"currency\") or \"KES\",\n        \"original\": dict(raw),\n    }",
+          "evaluation_mode": "python_output",
+          "points": 60,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "",
+            "check": "a = {\"id\": \"R-17\", \"date\": \"2025-03-04\", \"amount\": \"1250.50\"}\nb = {\"id\": 902, \"date\": \"2025-03-05\", \"amount\": 300, \"currency\": \"USD\", \"note\": \"walk-in\"}\nca = to_canonical(a, \"pos\")\ncb = to_canonical(b, \"sheet\")\nprint(sorted(ca.keys()))\nprint(ca[\"source\"], ca[\"source_id\"], ca[\"date\"], ca[\"amount\"], ca[\"currency\"])\nprint(cb[\"source\"], cb[\"source_id\"], cb[\"amount\"], cb[\"currency\"])\nprint(cb[\"original\"] == b, cb[\"original\"] is b)\nprint(a == {\"id\": \"R-17\", \"date\": \"2025-03-04\", \"amount\": \"1250.50\"})",
+            "starter": "# Write to_canonical(raw, source) below.",
+            "output": "['amount', 'currency', 'date', 'original', 'source', 'source_id']\npos R-17 2025-03-04 1250.5 KES\nsheet 902 300.0 USD\nTrue False\nTrue",
+            "must_have": [
+              "def "
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bp-connect",
+      "title": "Connect a Source: Map Columns and Flag the Doubtful Ones",
+      "description": "Bring a new source in safely: propose column mappings, never guess silently, check control totals.",
+      "level": "intermediate",
+      "prerequisites": [
+        "bp-model"
+      ],
+      "estimated_min": 40,
+      "sort_order": 3,
+      "theory_md": "## Connect a Source: Map Columns and Flag the Doubtful Ones\n\n### The business problem\nThe owner hands you a spreadsheet, a bank statement or an export from another system and says *\"add this to the picture.\"* Every source calls things differently: `Amt`, `Value`, `Total`, `Cost`, `Price`. If you guess that `Amt` means revenue and you are wrong, every report built on it is wrong, and nobody will know why.\n\n### The safe way to connect a source\n1. **Discover**: read the headers and a few sample rows.\n2. **Propose** a mapping from each source column to a business meaning (date, amount, quantity, supplier, product...).\n3. **Score the confidence** of each proposal.\n4. **Flag the doubtful ones** for the owner to confirm. Never silently assume that a column means revenue, cost or quantity.\n5. **Validate** against a control total: the number of rows and the sum of amounts should match what the source says.\n6. **Import**, then keep monitoring it.\n\n### The same word, different meanings\nIn this business five tables have a column called `amount`. They are **not** the same thing:\n\n| Table | What `amount` means |\n|---|---|\n| `shop_payments` | money received from a customer |\n| `shop_refunds` | money given back to a customer |\n| `shop_expenses` | money spent on running costs |\n| `shop_supplier_invoices` | what a supplier says we owe them |\n| `shop_bank` | what the bank says was deposited |\n\nAdding them together is meaningless. A column name is a **clue**, not a proof.\n\n### Control totals\nA control total is a number you can check on both sides of an import: row count, sum of an amount column, latest date. If the source says 120 rows totalling 4,000,000 and you loaded 118 rows totalling 3,950,000, stop and find the difference before using the data.\n\n```sql\nSELECT COUNT(*) AS rows_loaded, SUM(amount) AS total FROM shop_expenses;\n```\n\n### What you can and cannot claim\nA proposed mapping is a **proposal**, and a confirmed one is only as good as the owner's confirmation. Matching control totals show that the **number of rows and the sum of one column** agree. They do not prove every value in every row is right. Say *\"the import matches the source on rows and total\"*, not *\"the data is correct\"*.",
+      "quiz": [
+        {
+          "question": "A column called Amt appears in a new spreadsheet. What is the safest first step?",
+          "options": [
+            "Treat it as revenue",
+            "Propose a meaning with a confidence score and ask the owner if unsure",
+            "Delete the column",
+            "Add it to profit"
+          ],
+          "correct_index": 1,
+          "explanation": "A name is a clue. Doubtful mappings go to the owner for confirmation."
+        },
+        {
+          "question": "What does a control total protect you from?",
+          "options": [
+            "Slow queries",
+            "Silent loss or duplication of rows during an import",
+            "Spelling mistakes",
+            "Wrong chart colours"
+          ],
+          "correct_index": 1,
+          "explanation": "Comparing row counts and sums on both sides shows whether the import was complete."
+        },
+        {
+          "question": "Is it valid to add shop_refunds.amount to shop_payments.amount?",
+          "options": [
+            "Yes, both are money",
+            "No, they mean different things",
+            "Only on Mondays",
+            "Only for retail"
+          ],
+          "correct_index": 1,
+          "explanation": "Same column name, different business meaning. Never add them without knowing what each represents."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "bp-3-e1",
+          "title": "Open Orders From Suppliers",
+          "prompt": "Some purchase lines have not been delivered yet (received_date is NULL). For each supplier with open lines return supplier (the supplier's name), open_lines (how many) and open_value (sum of qty times unit_cost, rounded to 0 decimals). Sort by open_value descending, then supplier.",
+          "hint_1": "Join shop_purchases to shop_suppliers. Filter WHERE received_date IS NULL.",
+          "hint_2": "GROUP BY the supplier name; ROUND(SUM(p.qty * p.unit_cost), 0)",
+          "hint_3": "SELECT s.name AS supplier, COUNT(*) AS open_lines, ROUND(SUM(p.qty * p.unit_cost), 0) AS open_value FROM shop_purchases p JOIN shop_suppliers s ON s.supplier_id = p.supplier_id WHERE p.received_date IS NULL GROUP BY s.name ORDER BY open_value DESC, s.name",
+          "solution": "SELECT s.name AS supplier, COUNT(*) AS open_lines, ROUND(SUM(p.qty * p.unit_cost), 0) AS open_value FROM shop_purchases p JOIN shop_suppliers s ON s.supplier_id = p.supplier_id WHERE p.received_date IS NULL GROUP BY s.name ORDER BY open_value DESC, s.name",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "bp-3-e2",
+          "title": "Check the Control Total",
+          "prompt": "After loading sales you must check the import. Return one row with sales_total (sum of shop_sales.total, rounded to 2 decimals), items_total (sum of qty times unit_price over shop_sale_items, rounded to 2 decimals) and difference (sales_total minus items_total, rounded to 2 decimals). A difference of zero means the two tables agree.",
+          "hint_1": "Two scalar subqueries give the two totals.",
+          "hint_2": "Compute difference from the same two subqueries, rounded to 2 decimals.",
+          "hint_3": "SELECT ROUND((SELECT SUM(total) FROM shop_sales), 2) AS sales_total, ROUND((SELECT SUM(qty * unit_price) FROM shop_sale_items), 2) AS items_total, ROUND((SELECT SUM(total) FROM shop_sales) - (SELECT SUM(qty * unit_price) FROM shop_sale_items), 2) AS difference",
+          "solution": "SELECT ROUND((SELECT SUM(total) FROM shop_sales), 2) AS sales_total, ROUND((SELECT SUM(qty * unit_price) FROM shop_sale_items), 2) AS items_total, ROUND((SELECT SUM(total) FROM shop_sales) - (SELECT SUM(qty * unit_price) FROM shop_sale_items), 2) AS difference",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "bp-3-e3",
+          "title": "Same Name, Different Meaning",
+          "prompt": "Show why the amount columns must not be added together. Return one row per source with source, row_count and total_amount (rounded to 0 decimals) for these five: 'payments' (shop_payments), 'refunds' (shop_refunds), 'expenses' (shop_expenses), 'supplier statements' (shop_supplier_invoices) and 'bank' (shop_bank). Sort by source.",
+          "hint_1": "Use UNION ALL of five SELECTs, each with a literal source name.",
+          "hint_2": "SELECT 'payments' AS source, COUNT(*) AS row_count, ROUND(SUM(amount), 0) AS total_amount FROM shop_payments UNION ALL ...",
+          "hint_3": "SELECT * FROM (SELECT 'payments' AS source, COUNT(*) AS row_count, ROUND(SUM(amount), 0) AS total_amount FROM shop_payments UNION ALL SELECT 'refunds', COUNT(*), ROUND(SUM(amount), 0) FROM shop_refunds UNION ALL SELECT 'expenses', COUNT(*), ROUND(SUM(amount), 0) FROM shop_expenses UNION ALL SELECT 'supplier statements', COUNT(*), ROUND(SUM(amount), 0) FROM shop_supplier_invoices UNION ALL SELECT 'bank', COUNT(*), ROUND(SUM(amount), 0) FROM shop_bank) ORDER BY source",
+          "solution": "SELECT * FROM (SELECT 'payments' AS source, COUNT(*) AS row_count, ROUND(SUM(amount), 0) AS total_amount FROM shop_payments UNION ALL SELECT 'refunds', COUNT(*), ROUND(SUM(amount), 0) FROM shop_refunds UNION ALL SELECT 'expenses', COUNT(*), ROUND(SUM(amount), 0) FROM shop_expenses UNION ALL SELECT 'supplier statements', COUNT(*), ROUND(SUM(amount), 0) FROM shop_supplier_invoices UNION ALL SELECT 'bank', COUNT(*), ROUND(SUM(amount), 0) FROM shop_bank) ORDER BY source",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "bp-py-3",
+          "title": "Propose a Mapping and Flag the Doubtful Ones",
+          "prompt": "A new spreadsheet arrives with unknown headers. Write `propose_mapping(headers)` that returns a list with one dict per header, in the same order, each with keys `header`, `field` and `status`. Use this rule table (compare in lower case, ignoring spaces and underscores): 'date' or 'invoicedate' -> field 'date'; 'qty' or 'quantity' -> 'quantity'; 'supplier' or 'suppliername' -> 'supplier'. These are certain: status 'confirmed'. The headers 'amt', 'amount', 'value' and 'total' could mean revenue, cost or a balance: field None and status 'needs_review'. Anything else: field None and status 'unknown'. Never guess an amount silently.",
+          "hint_1": "Normalise each header first: lower case with spaces and underscores removed.",
+          "hint_2": "Use sets for the certain names, the doubtful names and a dict from certain name to field.",
+          "hint_3": "def propose_mapping(headers):\n    certain = {\"date\": \"date\", \"invoicedate\": \"date\", \"qty\": \"quantity\", \"quantity\": \"quantity\",\n               \"supplier\": \"supplier\", \"suppliername\": \"supplier\"}\n    doubtful = {\"amt\", \"amount\", \"value\", \"total\"}\n    out = []\n    for h in headers:\n        key = h.lower().replace(\" \", \"\").replace(\"_\", \"\")\n        if key in certain:\n            out.append({\"header\": h, \"field\": certain[key], \"status\": \"confirmed\"})\n        elif key in doubtful:\n            out.append({\"header\": h, \"field\": None, \"status\": \"needs_review\"})\n        else:\n            out.append({\"header\": h, \"field\": None, \"status\": \"unknown\"})\n    return out",
+          "solution": "def propose_mapping(headers):\n    certain = {\"date\": \"date\", \"invoicedate\": \"date\", \"qty\": \"quantity\", \"quantity\": \"quantity\",\n               \"supplier\": \"supplier\", \"suppliername\": \"supplier\"}\n    doubtful = {\"amt\", \"amount\", \"value\", \"total\"}\n    out = []\n    for h in headers:\n        key = h.lower().replace(\" \", \"\").replace(\"_\", \"\")\n        if key in certain:\n            out.append({\"header\": h, \"field\": certain[key], \"status\": \"confirmed\"})\n        elif key in doubtful:\n            out.append({\"header\": h, \"field\": None, \"status\": \"needs_review\"})\n        else:\n            out.append({\"header\": h, \"field\": None, \"status\": \"unknown\"})\n    return out",
+          "evaluation_mode": "python_output",
+          "points": 70,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "",
+            "check": "for r in propose_mapping([\"Invoice Date\", \"Supplier_Name\", \"Qty\", \"Amt\", \"Total\", \"Notes\"]):\n    print(r[\"header\"], r[\"field\"], r[\"status\"])\nprint(propose_mapping([]))\nprint([r[\"status\"] for r in propose_mapping([\"VALUE\", \"date\"])])",
+            "starter": "# Write propose_mapping(headers) below.",
+            "output": "Invoice Date date confirmed\nSupplier_Name supplier confirmed\nQty quantity confirmed\nAmt None needs_review\nTotal None needs_review\nNotes None unknown\n[]\n['needs_review', 'confirmed']",
+            "must_have": [
+              "def "
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bp-unify",
+      "title": "Unify and Reconcile: One Supplier, One Truth",
+      "description": "Match the same supplier across sources, remove double-counting and find where two sources disagree.",
+      "level": "intermediate",
+      "prerequisites": [
+        "bp-connect"
+      ],
+      "estimated_min": 45,
+      "sort_order": 4,
+      "theory_md": "## Unify and Reconcile: One Supplier, One Truth\n\n### The business problem\nThe supplier \"Savannah Foods Ltd\" appears in the purchase ledger as supplier 1. In the supplier's own monthly statement spreadsheet it is typed `SAVANNAH FOODS LIMITED`, `Savannah Foods Ltd.` and `Savannah Foods Ltd`. Are they the same supplier? Obviously, to a person. To a database, they are four different strings. If you total spending by name, one supplier looks like four small ones, and the real concentration risk disappears.\n\n### Entity resolution: deciding two records are the same thing\nWork in this order and stop at the first level that gives a **single** answer:\n1. **Exact match** after cleaning: lower case, no punctuation, drop noise words like *Ltd* and *Limited*.\n2. **Containment**: `Lakeside Pharma` is contained in `Lakeside Pharma Supplies`.\n3. **Close spelling**: `Rift Valley Hardwre` is one letter away from `Rift Valley Hardware`.\n4. **Otherwise do not guess**: send it to the owner.\n\nBeware of the trap in this data: `Lakeside Millers` and `Lakeside Pharma Supplies` share the word *Lakeside*. A statement from just \"Lakeside\" matches **both**. A confident system would pick one at random. A trustworthy system says *ambiguous* and asks.\n\n### Duplicates and double-counting\nWhen a spreadsheet is imported twice, or two sources describe the same event, totals inflate. `shop_supplier_invoices` holds some invoice numbers twice. `shop_bank` has a deposit posted twice. Remove duplicates by a **business key** (here the invoice number), never by guessing.\n\n### Reconciliation: compare two sources that should agree\nReconcile the supplier's statement against your own purchase ledger, month by month, and the bank's deposits against the payments you recorded, day by day. Every difference is one of three things: a **timing** difference, a **duplicate**, or a **real discrepancy**. Do not silently discard conflicting records. Show them.\n\n```sql\nSELECT invoice_no, COUNT(*) AS copies\nFROM shop_supplier_invoices\nGROUP BY invoice_no\nHAVING COUNT(*) > 1;\n```\n\n### What you can and cannot claim\nA match with a confidence score is a **proposal**. A difference between two sources proves the sources disagree. It does not prove which one is right. That needs a human with the documents.",
+      "quiz": [
+        {
+          "question": "A statement says just 'Lakeside'. Two suppliers start with that word. What should the system do?",
+          "options": [
+            "Pick the first one",
+            "Mark it ambiguous and ask the owner",
+            "Pick the larger supplier",
+            "Delete the row"
+          ],
+          "correct_index": 1,
+          "explanation": "When more than one candidate fits, guessing creates silent errors. Flag it."
+        },
+        {
+          "question": "Two sources disagree on a total. What does that prove?",
+          "options": [
+            "The first is right",
+            "The second is right",
+            "That they disagree and need investigating",
+            "That the data is deleted"
+          ],
+          "correct_index": 2,
+          "explanation": "A difference is a finding. Deciding which source is right requires evidence."
+        },
+        {
+          "question": "How should you remove duplicate invoice rows?",
+          "options": [
+            "By a business key such as the invoice number",
+            "By deleting random rows",
+            "By rounding amounts",
+            "By sorting"
+          ],
+          "correct_index": 0,
+          "explanation": "Duplicates are defined by what makes a record unique in the business, not by chance."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "bp-4-e1",
+          "title": "How Many Suppliers Do the Statements Really Have?",
+          "prompt": "Return one row with distinct_spellings (how many different supplier_name values appear in shop_supplier_invoices) and real_suppliers (how many rows are in shop_suppliers).",
+          "hint_1": "COUNT(DISTINCT supplier_name) on the statements, COUNT(*) on shop_suppliers.",
+          "hint_2": "Use two scalar subqueries in one SELECT.",
+          "hint_3": "SELECT (SELECT COUNT(DISTINCT supplier_name) FROM shop_supplier_invoices) AS distinct_spellings, (SELECT COUNT(*) FROM shop_suppliers) AS real_suppliers",
+          "solution": "SELECT (SELECT COUNT(DISTINCT supplier_name) FROM shop_supplier_invoices) AS distinct_spellings, (SELECT COUNT(*) FROM shop_suppliers) AS real_suppliers",
+          "evaluation_mode": "exact",
+          "points": 10
+        },
+        {
+          "id": "bp-4-e2",
+          "title": "Statement Rows Entered Twice",
+          "prompt": "Return the invoice numbers that appear more than once in shop_supplier_invoices. Columns: invoice_no, copies. Sort by invoice_no.",
+          "hint_1": "Group by invoice_no and keep groups with more than one row.",
+          "hint_2": "HAVING COUNT(*) > 1",
+          "hint_3": "SELECT invoice_no, COUNT(*) AS copies FROM shop_supplier_invoices GROUP BY invoice_no HAVING COUNT(*) > 1 ORDER BY invoice_no",
+          "solution": "SELECT invoice_no, COUNT(*) AS copies FROM shop_supplier_invoices GROUP BY invoice_no HAVING COUNT(*) > 1 ORDER BY invoice_no",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "bp-4-e3",
+          "title": "Why Matching by Name Fails",
+          "prompt": "Try the naive match: join shop_supplier_invoices to shop_suppliers on name equality (supplier_name = name). Return statement_rows (how many statement rows there are) and exact_matches (how many of them found a supplier).",
+          "hint_1": "LEFT JOIN so unmatched rows are kept, then count the rows whose supplier_id is not NULL.",
+          "hint_2": "SUM(CASE WHEN s.supplier_id IS NOT NULL THEN 1 ELSE 0 END)",
+          "hint_3": "SELECT COUNT(*) AS statement_rows, SUM(CASE WHEN s.supplier_id IS NOT NULL THEN 1 ELSE 0 END) AS exact_matches FROM shop_supplier_invoices i LEFT JOIN shop_suppliers s ON s.name = i.supplier_name",
+          "solution": "SELECT COUNT(*) AS statement_rows, SUM(CASE WHEN s.supplier_id IS NOT NULL THEN 1 ELSE 0 END) AS exact_matches FROM shop_supplier_invoices i LEFT JOIN shop_suppliers s ON s.name = i.supplier_name",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "bp-4-e4",
+          "title": "Where Do the Statements Disagree With Our Ledger?",
+          "prompt": "The invoice number holds the supplier: INV-3-09 is supplier 3, September. Compare each (de-duplicated) statement amount with our own ledger for that supplier and month, where the ledger is the sum of qty times unit_cost in shop_purchases by purchase month. Return invoice_no, statement_amount, ledger_amount and difference (statement minus ledger) for every statement that differs by more than 0.5. Sort by difference descending.",
+          "hint_1": "Take one row per invoice with SELECT DISTINCT, pull the supplier with CAST(substr(invoice_no, 5, 1) AS INTEGER) and the month with substr(invoice_date, 1, 7).",
+          "hint_2": "Build a ledger CTE: GROUP BY supplier_id, substr(purchase_date, 1, 7); join the two and filter on ABS(difference) > 0.5.",
+          "hint_3": "WITH stmt AS (SELECT DISTINCT invoice_no, CAST(substr(invoice_no, 5, 1) AS INTEGER) AS supplier_id, substr(invoice_date, 1, 7) AS month, amount FROM shop_supplier_invoices), ledger AS (SELECT supplier_id, substr(purchase_date, 1, 7) AS month, SUM(qty * unit_cost) AS ledger_amount FROM shop_purchases GROUP BY supplier_id, substr(purchase_date, 1, 7)) SELECT s.invoice_no, s.amount AS statement_amount, l.ledger_amount, ROUND(s.amount - l.ledger_amount, 2) AS difference FROM stmt s JOIN ledger l ON l.supplier_id = s.supplier_id AND l.month = s.month WHERE ABS(s.amount - l.ledger_amount) > 0.5 ORDER BY difference DESC",
+          "solution": "WITH stmt AS (SELECT DISTINCT invoice_no, CAST(substr(invoice_no, 5, 1) AS INTEGER) AS supplier_id, substr(invoice_date, 1, 7) AS month, amount FROM shop_supplier_invoices), ledger AS (SELECT supplier_id, substr(purchase_date, 1, 7) AS month, SUM(qty * unit_cost) AS ledger_amount FROM shop_purchases GROUP BY supplier_id, substr(purchase_date, 1, 7)) SELECT s.invoice_no, s.amount AS statement_amount, l.ledger_amount, ROUND(s.amount - l.ledger_amount, 2) AS difference FROM stmt s JOIN ledger l ON l.supplier_id = s.supplier_id AND l.month = s.month WHERE ABS(s.amount - l.ledger_amount) > 0.5 ORDER BY difference DESC",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "bp-4-e5",
+          "title": "Does the Bank Agree With Our Payments?",
+          "prompt": "Compare the money we recorded as received each day (shop_payments, by payment_date) with what the bank shows deposited that day (shop_bank, by line_date). Return day, payments_total, bank_total and difference (bank minus payments), each rounded to 2 decimals, for the days that differ by more than 0.5. Sort by day.",
+          "hint_1": "Total each source per day in its own CTE, then join the two on the day.",
+          "hint_2": "ROUND(SUM(amount), 2) in each CTE; WHERE ABS(b.bank_total - p.payments_total) > 0.5",
+          "hint_3": "WITH p AS (SELECT payment_date AS day, ROUND(SUM(amount), 2) AS payments_total FROM shop_payments GROUP BY payment_date), b AS (SELECT line_date AS day, ROUND(SUM(amount), 2) AS bank_total FROM shop_bank GROUP BY line_date) SELECT p.day, p.payments_total, b.bank_total, ROUND(b.bank_total - p.payments_total, 2) AS difference FROM p JOIN b ON b.day = p.day WHERE ABS(b.bank_total - p.payments_total) > 0.5 ORDER BY p.day",
+          "solution": "WITH p AS (SELECT payment_date AS day, ROUND(SUM(amount), 2) AS payments_total FROM shop_payments GROUP BY payment_date), b AS (SELECT line_date AS day, ROUND(SUM(amount), 2) AS bank_total FROM shop_bank GROUP BY line_date) SELECT p.day, p.payments_total, b.bank_total, ROUND(b.bank_total - p.payments_total, 2) AS difference FROM p JOIN b ON b.day = p.day WHERE ABS(b.bank_total - p.payments_total) > 0.5 ORDER BY p.day",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "bp-py-4",
+          "title": "Match a Supplier Without Guessing",
+          "prompt": "A dict `known` (supplier id -> official name) is loaded. Write `match_supplier(raw, known)` that returns a supplier id, or None when there is no single safe answer. Steps: (1) normalise a name: lower case, delete the characters . , and -, split into words and drop the words 'ltd' and 'limited'. (2) If the normalised raw name equals exactly one normalised known name, return its id. (3) Otherwise, find known names that contain ALL the raw words; exactly one -> return its id; more than one -> None. (4) Otherwise use difflib.get_close_matches on the joined normalised names (n=2, cutoff 0.9): exactly one -> its id, else None. An empty name returns None.",
+          "hint_1": "Write a small helper that returns the list of normalised words; join with a space when you need a string.",
+          "hint_2": "Keep a dict from the joined normalised known name to its id. Check each step in the order given and return as soon as you have a single answer.",
+          "hint_3": "import difflib\n\ndef _words(name):\n    cleaned = name.lower().replace(\".\", \"\").replace(\",\", \"\").replace(\"-\", \"\")\n    return [w for w in cleaned.split() if w not in (\"ltd\", \"limited\")]\n\ndef match_supplier(raw, known):\n    words = _words(raw)\n    if not words:\n        return None\n    joined = {\" \".join(_words(n)): sid for sid, n in known.items()}\n    key = \" \".join(words)\n    if key in joined:\n        return joined[key]\n    contains = [sid for sid, n in known.items() if set(words) <= set(_words(n))]\n    if len(contains) == 1:\n        return contains[0]\n    if len(contains) > 1:\n        return None\n    close = difflib.get_close_matches(key, list(joined), n=2, cutoff=0.9)\n    return joined[close[0]] if len(close) == 1 else None",
+          "solution": "import difflib\n\ndef _words(name):\n    cleaned = name.lower().replace(\".\", \"\").replace(\",\", \"\").replace(\"-\", \"\")\n    return [w for w in cleaned.split() if w not in (\"ltd\", \"limited\")]\n\ndef match_supplier(raw, known):\n    words = _words(raw)\n    if not words:\n        return None\n    joined = {\" \".join(_words(n)): sid for sid, n in known.items()}\n    key = \" \".join(words)\n    if key in joined:\n        return joined[key]\n    contains = [sid for sid, n in known.items() if set(words) <= set(_words(n))]\n    if len(contains) == 1:\n        return contains[0]\n    if len(contains) > 1:\n        return None\n    close = difflib.get_close_matches(key, list(joined), n=2, cutoff=0.9)\n    return joined[close[0]] if len(close) == 1 else None",
+          "evaluation_mode": "python_output",
+          "points": 80,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "known = {1: \"Savannah Foods Ltd\", 2: \"Lakeside Millers\", 3: \"Rift Valley Hardware\", 5: \"Lakeside Pharma Supplies\", 6: \"Highland Agrovet\"}",
+            "check": "for raw in [\"SAVANNAH FOODS LIMITED\", \"Savannah Foods Ltd.\", \"Highland Agro-vet\", \"Lakeside Pharma\", \"Lakeside\", \"Rift Valley Hardwre\", \"Unknown Traders\", \"\", \"LAKESIDE MILLERS\"]:\n    print(repr(raw), match_supplier(raw, known))",
+            "starter": "# known is already defined. Write match_supplier(raw, known) below.",
+            "output": "'SAVANNAH FOODS LIMITED' 1\n'Savannah Foods Ltd.' 1\n'Highland Agro-vet' 6\n'Lakeside Pharma' 5\n'Lakeside' None\n'Rift Valley Hardwre' 3\n'Unknown Traders' None\n'' None\n'LAKESIDE MILLERS' 2",
+            "must_have": [
+              "def "
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bp-stock",
+      "title": "Find the Money in Stock: Dead Stock, Expiry and Reorder",
+      "description": "Measure capital tied up on the shelves, stock nobody buys, batches about to expire and what to reorder.",
+      "level": "intermediate",
+      "prerequisites": [
+        "bp-unify"
+      ],
+      "estimated_min": 45,
+      "sort_order": 5,
+      "theory_md": "## Find the Money in Stock: Dead Stock, Expiry and Reorder\n\n### The business problem\nStock is cash that has been turned into boxes. Cash in the bank can pay a salary; cash in a box on a shelf cannot. Owners often feel stock is \"an asset\" and miss three leaks:\n\n1. **Dead stock**: items nobody buys. The cash is stuck, and the shop keeps paying to store, insure and worry about it.\n2. **Expiry exposure**: medicine and food that will become worthless on a known date.\n3. **Wrong reorder**: running out of fast sellers while slow sellers pile up.\n\n### The calculations, defined\n| Metric | Calculation | Needs |\n|---|---|---|\n| **Stock value** | quantity on hand x unit cost (never price) | a stock count and costs |\n| **Dead stock** | on hand > 0 and no sale in the last 90 days | stock count, sales dates |\n| **Expiry exposure** | quantity x cost for batches expired or expiring within 90 days | batch expiry dates |\n| **Days of cover** | quantity on hand / average daily sales over the last 90 days | stock count, recent sales |\n| **Reorder need** | total on hand below the product's reorder level | stock count, reorder level |\n\nAll calculations in this lesson use **31 December 2025** as \"today\", and the last 90 days start on 2 October 2025.\n\n```sql\nSELECT p.name, SUM(b.qty_on_hand * b.unit_cost) AS stock_value\nFROM shop_batches b JOIN shop_products p ON p.product_id = b.product_id\nGROUP BY p.product_id;\n```\n\n### What you can and cannot claim\nStock value at **cost** is what you paid, not what you would get. Discounting dead stock may recover only part of it. Say *\"KSh X is tied up in items with no sales in 90 days\"*, not *\"we will lose KSh X\"*. And remember `shop_batches` is a single count, so reorder advice is only as fresh as the count.",
+      "quiz": [
+        {
+          "question": "Stock value should be calculated using...",
+          "options": [
+            "Selling price",
+            "Cost",
+            "Average of both",
+            "Supplier price list"
+          ],
+          "correct_index": 1,
+          "explanation": "Stock value is the cash you paid. Valuing at price overstates it."
+        },
+        {
+          "question": "A product has stock but no sales for 90 days. It is...",
+          "options": [
+            "Fast moving",
+            "Dead stock",
+            "A bestseller",
+            "Out of stock"
+          ],
+          "correct_index": 1,
+          "explanation": "No movement for a long period ties up cash. It deserves a decision."
+        },
+        {
+          "question": "Days of cover = quantity on hand divided by...",
+          "options": [
+            "Selling price",
+            "Average daily sales",
+            "Reorder level",
+            "Unit cost"
+          ],
+          "correct_index": 1,
+          "explanation": "It tells you how many days the current stock will last at the recent selling rate."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "bp-5-e1",
+          "title": "Where Is the Cash Sitting?",
+          "prompt": "List the five products with the most cash tied up in stock. Return product (the product name), units_on_hand (sum of qty_on_hand) and stock_value (qty_on_hand times unit_cost summed, rounded to 0 decimals) from shop_batches. Sort by stock_value descending, then product. Five rows.",
+          "hint_1": "Join shop_batches to shop_products and group by the product.",
+          "hint_2": "ORDER BY stock_value DESC, product LIMIT 5",
+          "hint_3": "SELECT p.name AS product, SUM(b.qty_on_hand) AS units_on_hand, ROUND(SUM(b.qty_on_hand * b.unit_cost), 0) AS stock_value FROM shop_batches b JOIN shop_products p ON p.product_id = b.product_id GROUP BY p.product_id, p.name ORDER BY stock_value DESC, product LIMIT 5",
+          "solution": "SELECT p.name AS product, SUM(b.qty_on_hand) AS units_on_hand, ROUND(SUM(b.qty_on_hand * b.unit_cost), 0) AS stock_value FROM shop_batches b JOIN shop_products p ON p.product_id = b.product_id GROUP BY p.product_id, p.name ORDER BY stock_value DESC, product LIMIT 5",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "bp-5-e2",
+          "title": "Find the Dead Stock",
+          "prompt": "Find products that still have stock but have not sold since 1 October 2025 (no sale line on a sale dated 2025-10-02 or later). Return product, units_on_hand, stock_value (rounded to 0 decimals) and last_sale (the date of its most recent sale). Sort by stock_value descending.",
+          "hint_1": "Compute each product's last sale date with a subquery over shop_sale_items joined to shop_sales.",
+          "hint_2": "Group the batches by product, then keep rows with last_sale < '2025-10-02' (or NULL).",
+          "hint_3": "WITH last AS (SELECT i.product_id, MAX(s.sale_date) AS last_sale FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id GROUP BY i.product_id) SELECT p.name AS product, SUM(b.qty_on_hand) AS units_on_hand, ROUND(SUM(b.qty_on_hand * b.unit_cost), 0) AS stock_value, l.last_sale FROM shop_batches b JOIN shop_products p ON p.product_id = b.product_id LEFT JOIN last l ON l.product_id = p.product_id WHERE l.last_sale IS NULL OR l.last_sale < '2025-10-02' GROUP BY p.product_id, p.name, l.last_sale HAVING SUM(b.qty_on_hand) > 0 ORDER BY stock_value DESC",
+          "solution": "WITH last AS (SELECT i.product_id, MAX(s.sale_date) AS last_sale FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id GROUP BY i.product_id) SELECT p.name AS product, SUM(b.qty_on_hand) AS units_on_hand, ROUND(SUM(b.qty_on_hand * b.unit_cost), 0) AS stock_value, l.last_sale FROM shop_batches b JOIN shop_products p ON p.product_id = b.product_id LEFT JOIN last l ON l.product_id = p.product_id WHERE l.last_sale IS NULL OR l.last_sale < '2025-10-02' GROUP BY p.product_id, p.name, l.last_sale HAVING SUM(b.qty_on_hand) > 0 ORDER BY stock_value DESC",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "bp-5-e3",
+          "title": "What Is About to Expire?",
+          "prompt": "Find batches that have expired or expire by 31 March 2026 and still have stock (qty_on_hand above 0). Return product, expiry_date, qty_on_hand, value_at_risk (qty_on_hand times unit_cost, rounded to 0 decimals) and status: 'expired' when the expiry date is before 2025-12-31, otherwise 'expiring within 90 days'. Sort by expiry_date, then product.",
+          "hint_1": "Filter expiry_date <= '2026-03-31'. NULL expiry dates are excluded automatically.",
+          "hint_2": "CASE WHEN b.expiry_date < '2025-12-31' THEN 'expired' ELSE 'expiring within 90 days' END",
+          "hint_3": "SELECT p.name AS product, b.expiry_date, b.qty_on_hand, ROUND(b.qty_on_hand * b.unit_cost, 0) AS value_at_risk, CASE WHEN b.expiry_date < '2025-12-31' THEN 'expired' ELSE 'expiring within 90 days' END AS status FROM shop_batches b JOIN shop_products p ON p.product_id = b.product_id WHERE b.expiry_date <= '2026-03-31' AND b.qty_on_hand > 0 ORDER BY b.expiry_date, p.name",
+          "solution": "SELECT p.name AS product, b.expiry_date, b.qty_on_hand, ROUND(b.qty_on_hand * b.unit_cost, 0) AS value_at_risk, CASE WHEN b.expiry_date < '2025-12-31' THEN 'expired' ELSE 'expiring within 90 days' END AS status FROM shop_batches b JOIN shop_products p ON p.product_id = b.product_id WHERE b.expiry_date <= '2026-03-31' AND b.qty_on_hand > 0 ORDER BY b.expiry_date, p.name",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "bp-5-e4",
+          "title": "How Many Days Will the Stock Last?",
+          "prompt": "For products sold since 2 October 2025 (the last 90 days), return product, on_hand (total qty_on_hand), avg_daily_sales (units sold in those 90 days divided by 90, rounded to 2 decimals) and days_cover (on_hand divided by the unrounded daily rate, rounded to 0 decimals). Keep only products with fewer than 14 days of cover. Sort by days_cover, then product.",
+          "hint_1": "Sum qty from sale lines on sales dated '2025-10-02' or later; sum qty_on_hand separately in its own CTE so one does not multiply the other.",
+          "hint_2": "days_cover = ROUND(on_hand / (units / 90.0), 0); filter in an outer query.",
+          "hint_3": "WITH sold AS (SELECT i.product_id, SUM(i.qty) AS units FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id WHERE s.sale_date >= '2025-10-02' GROUP BY i.product_id), stock AS (SELECT product_id, SUM(qty_on_hand) AS on_hand FROM shop_batches GROUP BY product_id), calc AS (SELECT p.name AS product, st.on_hand, ROUND(so.units / 90.0, 2) AS avg_daily_sales, ROUND(st.on_hand / (so.units / 90.0), 0) AS days_cover FROM sold so JOIN stock st ON st.product_id = so.product_id JOIN shop_products p ON p.product_id = so.product_id) SELECT * FROM calc WHERE days_cover < 14 ORDER BY days_cover, product",
+          "solution": "WITH sold AS (SELECT i.product_id, SUM(i.qty) AS units FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id WHERE s.sale_date >= '2025-10-02' GROUP BY i.product_id), stock AS (SELECT product_id, SUM(qty_on_hand) AS on_hand FROM shop_batches GROUP BY product_id), calc AS (SELECT p.name AS product, st.on_hand, ROUND(so.units / 90.0, 2) AS avg_daily_sales, ROUND(st.on_hand / (so.units / 90.0), 0) AS days_cover FROM sold so JOIN stock st ON st.product_id = so.product_id JOIN shop_products p ON p.product_id = so.product_id) SELECT * FROM calc WHERE days_cover < 14 ORDER BY days_cover, product",
+          "evaluation_mode": "exact",
+          "points": 30
+        },
+        {
+          "id": "bp-5-e5",
+          "title": "What Must Be Reordered?",
+          "prompt": "Return the products whose total stock on hand (sum of qty_on_hand over their batches) is below their reorder_level. Columns: product, on_hand, reorder_level, shortfall (reorder_level minus on_hand). Sort by shortfall descending, then product.",
+          "hint_1": "Total the batches per product first, then compare with shop_products.reorder_level.",
+          "hint_2": "HAVING SUM(b.qty_on_hand) < p.reorder_level",
+          "hint_3": "SELECT p.name AS product, SUM(b.qty_on_hand) AS on_hand, p.reorder_level, p.reorder_level - SUM(b.qty_on_hand) AS shortfall FROM shop_products p JOIN shop_batches b ON b.product_id = p.product_id GROUP BY p.product_id, p.name, p.reorder_level HAVING SUM(b.qty_on_hand) < p.reorder_level ORDER BY shortfall DESC, product",
+          "solution": "SELECT p.name AS product, SUM(b.qty_on_hand) AS on_hand, p.reorder_level, p.reorder_level - SUM(b.qty_on_hand) AS shortfall FROM shop_products p JOIN shop_batches b ON b.product_id = p.product_id GROUP BY p.product_id, p.name, p.reorder_level HAVING SUM(b.qty_on_hand) < p.reorder_level ORDER BY shortfall DESC, product",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "bp-py-5",
+          "title": "Build the Reorder List",
+          "prompt": "A list `stock` is loaded: each dict has product, on_hand, daily_sales and lead_days (days the supplier takes to deliver). Write `reorder_list(stock, cover_days)` that returns a list of (product, quantity) tuples for products that need ordering, sorted by product. A product needs ordering when on_hand is below daily_sales times (lead_days + cover_days). The quantity to order is the shortfall, rounded UP to a whole unit. Products that do not sell (daily_sales of 0) are never reordered.",
+          "hint_1": "Target stock = daily_sales * (lead_days + cover_days). The shortfall is target minus on_hand.",
+          "hint_2": "math.ceil rounds up. Skip a product when daily_sales is 0 or when on_hand already meets the target.",
+          "hint_3": "import math\n\ndef reorder_list(stock, cover_days):\n    out = []\n    for s in stock:\n        if s[\"daily_sales\"] <= 0:\n            continue\n        target = s[\"daily_sales\"] * (s[\"lead_days\"] + cover_days)\n        if s[\"on_hand\"] < target:\n            out.append((s[\"product\"], math.ceil(target - s[\"on_hand\"])))\n    return sorted(out)",
+          "solution": "import math\n\ndef reorder_list(stock, cover_days):\n    out = []\n    for s in stock:\n        if s[\"daily_sales\"] <= 0:\n            continue\n        target = s[\"daily_sales\"] * (s[\"lead_days\"] + cover_days)\n        if s[\"on_hand\"] < target:\n            out.append((s[\"product\"], math.ceil(target - s[\"on_hand\"])))\n    return sorted(out)",
+          "evaluation_mode": "python_output",
+          "points": 80,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "stock = [\n    {\"product\": \"Maize flour 2kg\", \"on_hand\": 20, \"daily_sales\": 4.0, \"lead_days\": 3},\n    {\"product\": \"Cement 50kg\", \"on_hand\": 60, \"daily_sales\": 2.5, \"lead_days\": 6},\n    {\"product\": \"Wire mesh\", \"on_hand\": 80, \"daily_sales\": 0, \"lead_days\": 5},\n    {\"product\": \"Cough syrup 100ml\", \"on_hand\": 9, \"daily_sales\": 0.7, \"lead_days\": 5},\n    {\"product\": \"Dairy meal 70kg\", \"on_hand\": 5, \"daily_sales\": 1.3, \"lead_days\": 8},\n]",
+            "check": "print(reorder_list(stock, 7))\nprint(reorder_list(stock, 0))\nprint(reorder_list([], 7))",
+            "starter": "# stock is already defined. Write reorder_list(stock, cover_days) below.",
+            "output": "[('Dairy meal 70kg', 15), ('Maize flour 2kg', 20)]\n[('Dairy meal 70kg', 6)]\n[]",
+            "must_have": [
+              "def "
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bp-margins",
+      "title": "Find the Money in Margins, Customers and Suppliers",
+      "description": "Which products really earn, how margin is slipping, who the business depends on and which supplier is getting expensive or unreliable.",
+      "level": "intermediate",
+      "prerequisites": [
+        "bp-stock"
+      ],
+      "estimated_min": 45,
+      "sort_order": 6,
+      "theory_md": "## Find the Money in Margins, Customers and Suppliers\n\n### The business problem\nRevenue is vanity; margin is sanity. A shop can sell more every month and earn less, because costs rise, prices stay and a few big customers negotiate discounts. Three questions find most of the leaks:\n\n1. **Which products make the money?** Gross profit by product, not just revenue.\n2. **Is margin slipping, and why?** Margin by month, then cost by product and supplier.\n3. **How exposed are we?** Dependence on a few customers or suppliers is a risk, and so is a supplier who delivers late.\n\n### The calculations, defined\n| Metric | Calculation | Limits |\n|---|---|---|\n| **Gross profit** | sum of qty x (unit_price - unit_cost) over sale lines | excludes rent, salaries and other expenses |\n| **Margin %** | gross profit / revenue x 100 | the cost must be the cost *on the day* |\n| **Cost change %** | (later average cost - earlier average cost) / earlier x 100, **per product** | compare the same product only. Averaging different products is meaningless |\n| **Customer concentration** | a customer's revenue / total revenue x 100 | one year of data shows dependence, not intention |\n| **Supplier lateness** | received_date minus expected_date, on delivered orders | undelivered orders are not counted. They need their own view |\n\n### A trap to avoid\nWhen comparing cost over time, average **per product** and then compare. If you average all products together, a mix change (selling more of an expensive item) looks like a price rise. A per-product comparison removes that illusion.\n\n```sql\nSELECT substr(s.sale_date, 1, 7) AS month,\n       ROUND(100.0 * SUM(i.qty * (i.unit_price - i.unit_cost)) / SUM(i.qty * i.unit_price), 1) AS margin_pct\nFROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id\nGROUP BY month;\n```\n\n### What you can and cannot claim\nFalling margin tells you *that* profit per sale is shrinking. Linking it to a supplier's price rises is a **hypothesis supported by evidence**, not a proven cause, until you rule out other explanations such as discounting or a change in product mix.",
+      "quiz": [
+        {
+          "question": "Why compare cost per product rather than the average of all products?",
+          "options": [
+            "It is quicker",
+            "A change in what you sell can look like a price change",
+            "SQL requires it",
+            "Averages are illegal"
+          ],
+          "correct_index": 1,
+          "explanation": "Mix changes distort blended averages. Same product, different period, isolates the price change."
+        },
+        {
+          "question": "One customer is 18 percent of revenue. This is...",
+          "options": [
+            "A risk worth monitoring",
+            "Always fine",
+            "A data error",
+            "Irrelevant"
+          ],
+          "correct_index": 0,
+          "explanation": "Concentration means that losing one customer would hurt badly."
+        },
+        {
+          "question": "Which statement is the most defensible?",
+          "options": [
+            "The supplier caused the margin fall",
+            "Margin fell as this supplier's costs rose; other causes still need ruling out",
+            "Margins never change",
+            "Profit equals revenue"
+          ],
+          "correct_index": 1,
+          "explanation": "Evidence supports a hypothesis. A cause needs the alternatives ruled out."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "bp-6-e1",
+          "title": "Which Products Earn the Money?",
+          "prompt": "Return the five products with the highest gross profit. Columns: product, revenue (sum of qty times unit_price, rounded to 0), gross_profit (sum of qty times (unit_price minus unit_cost), rounded to 0) and margin_pct (gross profit divided by revenue times 100, rounded to 1). Sort by gross_profit descending, then product.",
+          "hint_1": "Group the sale lines by product (join shop_products for the name).",
+          "hint_2": "ORDER BY gross_profit DESC, product LIMIT 5",
+          "hint_3": "SELECT p.name AS product, ROUND(SUM(i.qty * i.unit_price), 0) AS revenue, ROUND(SUM(i.qty * (i.unit_price - i.unit_cost)), 0) AS gross_profit, ROUND(100.0 * SUM(i.qty * (i.unit_price - i.unit_cost)) / SUM(i.qty * i.unit_price), 1) AS margin_pct FROM shop_sale_items i JOIN shop_products p ON p.product_id = i.product_id GROUP BY p.product_id, p.name ORDER BY gross_profit DESC, product LIMIT 5",
+          "solution": "SELECT p.name AS product, ROUND(SUM(i.qty * i.unit_price), 0) AS revenue, ROUND(SUM(i.qty * (i.unit_price - i.unit_cost)), 0) AS gross_profit, ROUND(100.0 * SUM(i.qty * (i.unit_price - i.unit_cost)) / SUM(i.qty * i.unit_price), 1) AS margin_pct FROM shop_sale_items i JOIN shop_products p ON p.product_id = i.product_id GROUP BY p.product_id, p.name ORDER BY gross_profit DESC, product LIMIT 5",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "bp-6-e2",
+          "title": "Is the Margin Slipping?",
+          "prompt": "Return the gross margin for every month of 2025. Columns: month (YYYY-MM), revenue (rounded to 0) and margin_pct (rounded to 1). Sort by month.",
+          "hint_1": "Take the month from sale_date with substr(sale_date, 1, 7); join the lines to their sales.",
+          "hint_2": "GROUP BY month; margin = 100.0 * gross profit / revenue.",
+          "hint_3": "SELECT substr(s.sale_date, 1, 7) AS month, ROUND(SUM(i.qty * i.unit_price), 0) AS revenue, ROUND(100.0 * SUM(i.qty * (i.unit_price - i.unit_cost)) / SUM(i.qty * i.unit_price), 1) AS margin_pct FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id GROUP BY month ORDER BY month",
+          "solution": "SELECT substr(s.sale_date, 1, 7) AS month, ROUND(SUM(i.qty * i.unit_price), 0) AS revenue, ROUND(100.0 * SUM(i.qty * (i.unit_price - i.unit_cost)) / SUM(i.qty * i.unit_price), 1) AS margin_pct FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id GROUP BY month ORDER BY month",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "bp-6-e3",
+          "title": "Which Supplier Prices Are Creeping Up?",
+          "prompt": "For each product compare what we paid in the first half of 2025 (purchases dated before 2025-07-01) with the second half (2025-07-01 onwards). Return product, supplier (the supplier's name), h1_cost and h2_cost (average unit_cost in each half, rounded to 0) and change_pct (the rise from the unrounded h1 average to the unrounded h2 average, as a percentage rounded to 1). Keep products whose change_pct is above 4. Sort by change_pct descending, then product.",
+          "hint_1": "Use AVG(CASE WHEN purchase_date < '2025-07-01' THEN unit_cost END) for the first half and the opposite condition for the second.",
+          "hint_2": "Compute the averages in a CTE, then filter change_pct in an outer query.",
+          "hint_3": "WITH c AS (SELECT p.name AS product, s.name AS supplier, AVG(CASE WHEN pu.purchase_date < '2025-07-01' THEN pu.unit_cost END) AS h1, AVG(CASE WHEN pu.purchase_date >= '2025-07-01' THEN pu.unit_cost END) AS h2 FROM shop_purchases pu JOIN shop_products p ON p.product_id = pu.product_id JOIN shop_suppliers s ON s.supplier_id = pu.supplier_id GROUP BY p.product_id, p.name, s.name) SELECT product, supplier, ROUND(h1, 0) AS h1_cost, ROUND(h2, 0) AS h2_cost, ROUND(100.0 * (h2 - h1) / h1, 1) AS change_pct FROM c WHERE 100.0 * (h2 - h1) / h1 > 4 ORDER BY change_pct DESC, product",
+          "solution": "WITH c AS (SELECT p.name AS product, s.name AS supplier, AVG(CASE WHEN pu.purchase_date < '2025-07-01' THEN pu.unit_cost END) AS h1, AVG(CASE WHEN pu.purchase_date >= '2025-07-01' THEN pu.unit_cost END) AS h2 FROM shop_purchases pu JOIN shop_products p ON p.product_id = pu.product_id JOIN shop_suppliers s ON s.supplier_id = pu.supplier_id GROUP BY p.product_id, p.name, s.name) SELECT product, supplier, ROUND(h1, 0) AS h1_cost, ROUND(h2, 0) AS h2_cost, ROUND(100.0 * (h2 - h1) / h1, 1) AS change_pct FROM c WHERE 100.0 * (h2 - h1) / h1 > 4 ORDER BY change_pct DESC, product",
+          "evaluation_mode": "exact",
+          "points": 30
+        },
+        {
+          "id": "bp-6-e4",
+          "title": "How Dependent Are We on a Few Customers?",
+          "prompt": "Return the three biggest customers by revenue. Columns: customer (name), revenue (sum of shop_sales.total, rounded to 0) and share_pct (their share of the total revenue of all customers, rounded to 1). Sort by revenue descending.",
+          "hint_1": "Group shop_sales by customer, joined to shop_customers for the name.",
+          "hint_2": "share_pct = ROUND(100.0 * SUM(s.total) / (SELECT SUM(total) FROM shop_sales), 1)",
+          "hint_3": "SELECT c.name AS customer, ROUND(SUM(s.total), 0) AS revenue, ROUND(100.0 * SUM(s.total) / (SELECT SUM(total) FROM shop_sales), 1) AS share_pct FROM shop_sales s JOIN shop_customers c ON c.customer_id = s.customer_id GROUP BY c.customer_id, c.name ORDER BY revenue DESC LIMIT 3",
+          "solution": "SELECT c.name AS customer, ROUND(SUM(s.total), 0) AS revenue, ROUND(100.0 * SUM(s.total) / (SELECT SUM(total) FROM shop_sales), 1) AS share_pct FROM shop_sales s JOIN shop_customers c ON c.customer_id = s.customer_id GROUP BY c.customer_id, c.name ORDER BY revenue DESC LIMIT 3",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "bp-6-e5",
+          "title": "Which Supplier Delivers Late?",
+          "prompt": "For delivered purchase lines (received_date is not NULL) return, per supplier, supplier (name), delivered_orders (count), avg_days_late (average of received_date minus expected_date in days, rounded to 1) and pct_late (the percentage of lines delivered after the expected date, rounded to 0). Sort by avg_days_late descending, then supplier.",
+          "hint_1": "Use julianday(received_date) - julianday(expected_date) to get days.",
+          "hint_2": "pct_late = ROUND(100.0 * SUM(CASE WHEN p.received_date > p.expected_date THEN 1 ELSE 0 END) / COUNT(*), 0)",
+          "hint_3": "SELECT s.name AS supplier, COUNT(*) AS delivered_orders, ROUND(AVG(julianday(p.received_date) - julianday(p.expected_date)), 1) AS avg_days_late, ROUND(100.0 * SUM(CASE WHEN p.received_date > p.expected_date THEN 1 ELSE 0 END) / COUNT(*), 0) AS pct_late FROM shop_purchases p JOIN shop_suppliers s ON s.supplier_id = p.supplier_id WHERE p.received_date IS NOT NULL GROUP BY s.supplier_id, s.name ORDER BY avg_days_late DESC, supplier",
+          "solution": "SELECT s.name AS supplier, COUNT(*) AS delivered_orders, ROUND(AVG(julianday(p.received_date) - julianday(p.expected_date)), 1) AS avg_days_late, ROUND(100.0 * SUM(CASE WHEN p.received_date > p.expected_date THEN 1 ELSE 0 END) / COUNT(*), 0) AS pct_late FROM shop_purchases p JOIN shop_suppliers s ON s.supplier_id = p.supplier_id WHERE p.received_date IS NOT NULL GROUP BY s.supplier_id, s.name ORDER BY avg_days_late DESC, supplier",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "bp-py-6",
+          "title": "Measure Customer Concentration",
+          "prompt": "A dict `revenue` (customer name -> revenue) is loaded. Write `concentration(revenue, n)` that returns a dict with `top` (the names of the n biggest customers, biggest first, ties broken by name), `share_pct` (their combined share of total revenue as a percentage rounded to 1) and `risk`: 'high' when the share is above 50, 'medium' when it is above 30 up to 50, otherwise 'low'. When total revenue is 0 return share_pct 0.0 and risk 'low'.",
+          "hint_1": "Sort by (-revenue, name). Slice the first n names.",
+          "hint_2": "Guard the division: when the total is 0 there is nothing to divide.",
+          "hint_3": "def concentration(revenue, n):\n    ranked = sorted(revenue.items(), key=lambda kv: (-kv[1], kv[0]))[:n]\n    total = sum(revenue.values())\n    share = round(100.0 * sum(v for _, v in ranked) / total, 1) if total else 0.0\n    risk = \"high\" if share > 50 else \"medium\" if share > 30 else \"low\"\n    return {\"top\": [k for k, _ in ranked], \"share_pct\": share, \"risk\": risk}",
+          "solution": "def concentration(revenue, n):\n    ranked = sorted(revenue.items(), key=lambda kv: (-kv[1], kv[0]))[:n]\n    total = sum(revenue.values())\n    share = round(100.0 * sum(v for _, v in ranked) / total, 1) if total else 0.0\n    risk = \"high\" if share > 50 else \"medium\" if share > 30 else \"low\"\n    return {\"top\": [k for k, _ in ranked], \"share_pct\": share, \"risk\": risk}",
+          "evaluation_mode": "python_output",
+          "points": 70,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "revenue = {\"Kamau Distributors\": 5700000, \"Rift Agri Co-op\": 2300000, \"Mercy School\": 2200000, \"Naomi O.\": 1260000, \"Brian K.\": 1100000, \"Walk-ins\": 3200000}",
+            "check": "print(concentration(revenue, 1))\nprint(concentration(revenue, 3))\nprint(concentration(revenue, 6))\nprint(concentration({\"A\": 10, \"B\": 10, \"C\": 80}, 2))\nprint(concentration({}, 3))",
+            "starter": "# revenue is already defined. Write concentration(revenue, n) below.",
+            "output": "{'top': ['Kamau Distributors'], 'share_pct': 36.2, 'risk': 'medium'}\n{'top': ['Kamau Distributors', 'Walk-ins', 'Rift Agri Co-op'], 'share_pct': 71.1, 'risk': 'high'}\n{'top': ['Kamau Distributors', 'Walk-ins', 'Rift Agri Co-op', 'Mercy School', 'Naomi O.', 'Brian K.'], 'share_pct': 100.0, 'risk': 'high'}\n{'top': ['C', 'A'], 'share_pct': 90.0, 'risk': 'high'}\n{'top': [], 'share_pct': 0.0, 'risk': 'low'}",
+            "must_have": [
+              "def "
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bp-cash",
+      "title": "Find the Money in Cash: Receivables, Refunds and Expenses",
+      "description": "Who owes the business money and for how long, what refunds reveal, which expenses are creeping and what is really left.",
+      "level": "intermediate",
+      "prerequisites": [
+        "bp-margins"
+      ],
+      "estimated_min": 45,
+      "sort_order": 7,
+      "theory_md": "## Find the Money in Cash: Receivables, Refunds and Expenses\n\n### The business problem\nA business can show a profit and still run out of cash. The usual reasons: customers who buy on credit and pay late, refunds that reveal a product or stock problem, and running costs that quietly grow. Profit is an opinion; **cash is a fact**.\n\n### The calculations, defined\n| Metric | Calculation | Needs |\n|---|---|---|\n| **Receivable** | credit sale total minus payments received against it | sales, payments |\n| **Ageing** | days between the sale date and today, grouped into 0-30, 31-60, 61-90, over 90 | sale dates |\n| **Refund pattern** | refunds by reason and period | refunds with reasons |\n| **Expense change** | average monthly spend before versus after a date, per category | dated expenses |\n| **Profit after expenses** | gross profit minus all expenses for the month | sale costs and expenses |\n\n### Fan-out: the receivable trap\nA credit sale can have **several** payments. If you join sales to payments and then add up the sale totals, a sale with three payments is counted three times. Total the payments per sale first (in a CTE), then join once.\n\n```sql\nWITH paid AS (SELECT sale_id, SUM(amount) AS paid FROM shop_payments GROUP BY sale_id)\nSELECT s.sale_id, s.total - COALESCE(p.paid, 0) AS balance\nFROM shop_sales s LEFT JOIN paid p ON p.sale_id = s.sale_id\nWHERE s.payment_status = 'credit';\n```\n\n### Be careful with data quality\nAn expense category average can be wrong because of **a double entry**. In this data the March rent was entered twice, so the rent \"before October\" average is inflated and rent looks like it fell. Clean first, then compare.\n\n### What you can and cannot claim\nAn old receivable is **not** automatically a bad debt. Say *\"KSh X is more than 90 days overdue\"* and recommend a follow-up. Do not write it off without the owner's decision.",
+      "quiz": [
+        {
+          "question": "A credit sale has three part-payments. Joining sales to payments and summing sale totals will...",
+          "options": [
+            "Be correct",
+            "Count that sale three times",
+            "Skip the sale",
+            "Round the total"
+          ],
+          "correct_index": 1,
+          "explanation": "Total the payments per sale first, then join once, to avoid fan-out."
+        },
+        {
+          "question": "A customer's invoice is 120 days old and unpaid. The accurate wording is...",
+          "options": [
+            "It is a bad debt",
+            "It is over 90 days overdue and needs follow-up",
+            "It is paid",
+            "It is revenue lost"
+          ],
+          "correct_index": 1,
+          "explanation": "Ageing describes the facts. Writing off is the owner's decision."
+        },
+        {
+          "question": "Rent appears to have dropped. What should you check first?",
+          "options": [
+            "Whether a month was entered twice",
+            "The weather",
+            "Salaries",
+            "The font"
+          ],
+          "correct_index": 0,
+          "explanation": "A double entry in the comparison period can create a fake change."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "bp-7-e1",
+          "title": "Who Owes Us Money?",
+          "prompt": "For credit sales (payment_status = 'credit') return the five customers who owe the most. Columns: customer (name), billed (sum of sale totals, rounded to 0), paid (sum of payments received against those sales, rounded to 0) and owed (billed minus paid, rounded to 0). Sort by owed descending, then customer. Remember: total the payments per sale before joining.",
+          "hint_1": "Build a paid CTE: SELECT sale_id, SUM(amount) FROM shop_payments GROUP BY sale_id, then LEFT JOIN it to the sales.",
+          "hint_2": "COALESCE(p.paid, 0) handles sales with no payment yet.",
+          "hint_3": "WITH paid AS (SELECT sale_id, SUM(amount) AS paid FROM shop_payments GROUP BY sale_id) SELECT c.name AS customer, ROUND(SUM(s.total), 0) AS billed, ROUND(SUM(COALESCE(p.paid, 0)), 0) AS paid, ROUND(SUM(s.total - COALESCE(p.paid, 0)), 0) AS owed FROM shop_sales s JOIN shop_customers c ON c.customer_id = s.customer_id LEFT JOIN paid p ON p.sale_id = s.sale_id WHERE s.payment_status = 'credit' GROUP BY c.customer_id, c.name ORDER BY owed DESC, customer LIMIT 5",
+          "solution": "WITH paid AS (SELECT sale_id, SUM(amount) AS paid FROM shop_payments GROUP BY sale_id) SELECT c.name AS customer, ROUND(SUM(s.total), 0) AS billed, ROUND(SUM(COALESCE(p.paid, 0)), 0) AS paid, ROUND(SUM(s.total - COALESCE(p.paid, 0)), 0) AS owed FROM shop_sales s JOIN shop_customers c ON c.customer_id = s.customer_id LEFT JOIN paid p ON p.sale_id = s.sale_id WHERE s.payment_status = 'credit' GROUP BY c.customer_id, c.name ORDER BY owed DESC, customer LIMIT 5",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "bp-7-e2",
+          "title": "How Old Is the Debt?",
+          "prompt": "Age the unpaid balances of credit sales as at 2025-12-31. For every credit sale with a balance above 0.5 (sale total minus payments) put it in a bucket by days since the sale: '0-30', '31-60', '61-90' or 'over 90'. Return bucket, receipts (how many sales) and outstanding (sum of balances, rounded to 0). Sort from the youngest bucket to the oldest.",
+          "hint_1": "days = julianday('2025-12-31') - julianday(sale_date). Use CASE to choose the bucket.",
+          "hint_2": "ORDER BY MIN(days) puts the buckets in age order.",
+          "hint_3": "WITH paid AS (SELECT sale_id, SUM(amount) AS paid FROM shop_payments GROUP BY sale_id), aged AS (SELECT s.total - COALESCE(p.paid, 0) AS balance, julianday('2025-12-31') - julianday(s.sale_date) AS days FROM shop_sales s LEFT JOIN paid p ON p.sale_id = s.sale_id WHERE s.payment_status = 'credit' AND s.total - COALESCE(p.paid, 0) > 0.5) SELECT CASE WHEN days <= 30 THEN '0-30' WHEN days <= 60 THEN '31-60' WHEN days <= 90 THEN '61-90' ELSE 'over 90' END AS bucket, COUNT(*) AS receipts, ROUND(SUM(balance), 0) AS outstanding FROM aged GROUP BY bucket ORDER BY MIN(days)",
+          "solution": "WITH paid AS (SELECT sale_id, SUM(amount) AS paid FROM shop_payments GROUP BY sale_id), aged AS (SELECT s.total - COALESCE(p.paid, 0) AS balance, julianday('2025-12-31') - julianday(s.sale_date) AS days FROM shop_sales s LEFT JOIN paid p ON p.sale_id = s.sale_id WHERE s.payment_status = 'credit' AND s.total - COALESCE(p.paid, 0) > 0.5) SELECT CASE WHEN days <= 30 THEN '0-30' WHEN days <= 60 THEN '31-60' WHEN days <= 90 THEN '61-90' ELSE 'over 90' END AS bucket, COUNT(*) AS receipts, ROUND(SUM(balance), 0) AS outstanding FROM aged GROUP BY bucket ORDER BY MIN(days)",
+          "evaluation_mode": "exact",
+          "points": 30
+        },
+        {
+          "id": "bp-7-e3",
+          "title": "What Are Refunds Telling Us?",
+          "prompt": "For each refund reason return reason, q3_refunds (how many refunds dated 2025-07-01 to 2025-09-30), q4_refunds (2025-10-01 to 2025-12-31) and q4_amount (sum of Q4 refund amounts, rounded to 0). Sort by q4_refunds descending, then reason.",
+          "hint_1": "Use SUM(CASE WHEN refund_date BETWEEN ... THEN 1 ELSE 0 END) for each quarter.",
+          "hint_2": "GROUP BY reason.",
+          "hint_3": "SELECT reason, SUM(CASE WHEN refund_date BETWEEN '2025-07-01' AND '2025-09-30' THEN 1 ELSE 0 END) AS q3_refunds, SUM(CASE WHEN refund_date BETWEEN '2025-10-01' AND '2025-12-31' THEN 1 ELSE 0 END) AS q4_refunds, ROUND(SUM(CASE WHEN refund_date BETWEEN '2025-10-01' AND '2025-12-31' THEN amount ELSE 0 END), 0) AS q4_amount FROM shop_refunds GROUP BY reason ORDER BY q4_refunds DESC, reason",
+          "solution": "SELECT reason, SUM(CASE WHEN refund_date BETWEEN '2025-07-01' AND '2025-09-30' THEN 1 ELSE 0 END) AS q3_refunds, SUM(CASE WHEN refund_date BETWEEN '2025-10-01' AND '2025-12-31' THEN 1 ELSE 0 END) AS q4_refunds, ROUND(SUM(CASE WHEN refund_date BETWEEN '2025-10-01' AND '2025-12-31' THEN amount ELSE 0 END), 0) AS q4_amount FROM shop_refunds GROUP BY reason ORDER BY q4_refunds DESC, reason",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "bp-7-e4",
+          "title": "Which Expense Is Climbing?",
+          "prompt": "Compare the average monthly spend per expense category before October (January to September, 9 months, expense_date before 2025-10-01) with October to December (3 months). Return category, before_avg and after_avg (each rounded to 0) and change_pct (rise from the unrounded before-average to the after-average, rounded to 1). Keep categories that have spend in both periods and whose change_pct is above 20. Sort by change_pct descending.",
+          "hint_1": "SUM(CASE WHEN expense_date < '2025-10-01' THEN amount END) / 9.0 gives the before average; divide the other by 3.0.",
+          "hint_2": "Do the filter in an outer query on change_pct; categories with no spend after October give NULL and drop out.",
+          "hint_3": "WITH c AS (SELECT category, SUM(CASE WHEN expense_date < '2025-10-01' THEN amount END) / 9.0 AS before_avg, SUM(CASE WHEN expense_date >= '2025-10-01' THEN amount END) / 3.0 AS after_avg FROM shop_expenses GROUP BY category) SELECT category, ROUND(before_avg, 0) AS before_avg, ROUND(after_avg, 0) AS after_avg, ROUND(100.0 * (after_avg - before_avg) / before_avg, 1) AS change_pct FROM c WHERE before_avg IS NOT NULL AND after_avg IS NOT NULL AND 100.0 * (after_avg - before_avg) / before_avg > 20 ORDER BY change_pct DESC",
+          "solution": "WITH c AS (SELECT category, SUM(CASE WHEN expense_date < '2025-10-01' THEN amount END) / 9.0 AS before_avg, SUM(CASE WHEN expense_date >= '2025-10-01' THEN amount END) / 3.0 AS after_avg FROM shop_expenses GROUP BY category) SELECT category, ROUND(before_avg, 0) AS before_avg, ROUND(after_avg, 0) AS after_avg, ROUND(100.0 * (after_avg - before_avg) / before_avg, 1) AS change_pct FROM c WHERE before_avg IS NOT NULL AND after_avg IS NOT NULL AND 100.0 * (after_avg - before_avg) / before_avg > 20 ORDER BY change_pct DESC",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "bp-7-e5",
+          "title": "What Is Really Left Each Month?",
+          "prompt": "For every month return month (YYYY-MM), gross_profit (sum of qty times (unit_price minus unit_cost) from the sale lines, rounded to 0), expenses (sum of shop_expenses for that month) and profit_after_expenses (gross profit minus expenses, rounded to 0). Sort by month.",
+          "hint_1": "Make two CTEs, one for gross profit by month and one for expenses by month, then join them on month.",
+          "hint_2": "Use substr(date, 1, 7) for the month in both.",
+          "hint_3": "WITH g AS (SELECT substr(s.sale_date, 1, 7) AS month, SUM(i.qty * (i.unit_price - i.unit_cost)) AS gross_profit FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id GROUP BY month), e AS (SELECT substr(expense_date, 1, 7) AS month, SUM(amount) AS expenses FROM shop_expenses GROUP BY month) SELECT g.month, ROUND(g.gross_profit, 0) AS gross_profit, e.expenses, ROUND(g.gross_profit - e.expenses, 0) AS profit_after_expenses FROM g JOIN e ON e.month = g.month ORDER BY g.month",
+          "solution": "WITH g AS (SELECT substr(s.sale_date, 1, 7) AS month, SUM(i.qty * (i.unit_price - i.unit_cost)) AS gross_profit FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id GROUP BY month), e AS (SELECT substr(expense_date, 1, 7) AS month, SUM(amount) AS expenses FROM shop_expenses GROUP BY month) SELECT g.month, ROUND(g.gross_profit, 0) AS gross_profit, e.expenses, ROUND(g.gross_profit - e.expenses, 0) AS profit_after_expenses FROM g JOIN e ON e.month = g.month ORDER BY g.month",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "bp-py-7",
+          "title": "Age the Receivables",
+          "prompt": "A list `owed` of (invoice, sale_date, balance) tuples is loaded; dates are 'YYYY-MM-DD'. Write `age_receivables(owed, as_of)` that returns a dict with the four keys '0-30', '31-60', '61-90' and 'over 90', each the total balance whose age (days between sale_date and as_of) falls in that bucket. A balance of 0 or less is ignored. A sale dated after as_of is ignored. Every key is always present, even when its total is 0.",
+          "hint_1": "datetime.date.fromisoformat turns a string into a date; subtracting two dates gives .days.",
+          "hint_2": "Start from a dict with the four keys set to 0, then add each balance to its bucket.",
+          "hint_3": "import datetime\n\ndef age_receivables(owed, as_of):\n    today = datetime.date.fromisoformat(as_of)\n    out = {\"0-30\": 0, \"31-60\": 0, \"61-90\": 0, \"over 90\": 0}\n    for _, sale_date, balance in owed:\n        if balance <= 0:\n            continue\n        days = (today - datetime.date.fromisoformat(sale_date)).days\n        if days < 0:\n            continue\n        key = \"0-30\" if days <= 30 else \"31-60\" if days <= 60 else \"61-90\" if days <= 90 else \"over 90\"\n        out[key] += balance\n    return out",
+          "solution": "import datetime\n\ndef age_receivables(owed, as_of):\n    today = datetime.date.fromisoformat(as_of)\n    out = {\"0-30\": 0, \"31-60\": 0, \"61-90\": 0, \"over 90\": 0}\n    for _, sale_date, balance in owed:\n        if balance <= 0:\n            continue\n        days = (today - datetime.date.fromisoformat(sale_date)).days\n        if days < 0:\n            continue\n        key = \"0-30\" if days <= 30 else \"31-60\" if days <= 60 else \"61-90\" if days <= 90 else \"over 90\"\n        out[key] += balance\n    return out",
+          "evaluation_mode": "python_output",
+          "points": 80,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "owed = [(\"A1\", \"2025-12-20\", 1000), (\"A2\", \"2025-11-30\", 500), (\"A3\", \"2025-10-31\", 250), (\"A4\", \"2025-10-01\", 400),\n        (\"A5\", \"2025-06-01\", 9000), (\"A6\", \"2025-12-31\", 70), (\"A7\", \"2026-01-05\", 999), (\"A8\", \"2025-09-01\", 0), (\"A9\", \"2025-12-01\", -50)]",
+            "check": "print(age_receivables(owed, \"2025-12-31\"))\nprint(age_receivables([], \"2025-12-31\"))\nprint(age_receivables(owed[:1], \"2026-03-01\"))",
+            "starter": "# owed is already defined. Write age_receivables(owed, as_of) below.",
+            "output": "{'0-30': 1070, '31-60': 500, '61-90': 250, 'over 90': 9400}\n{'0-30': 0, '31-60': 0, '61-90': 0, 'over 90': 0}\n{'0-30': 0, '31-60': 0, '61-90': 1000, 'over 90': 0}",
+            "must_have": [
+              "def "
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bp-investigate",
+      "title": "Investigate a Question: Why Did Profit Fall?",
+      "description": "Sales went up but profit fell. Break the question into causes, test each with evidence and rule things out before you recommend anything.",
+      "level": "advanced",
+      "prerequisites": [
+        "bp-cash"
+      ],
+      "estimated_min": 50,
+      "sort_order": 8,
+      "theory_md": "## Investigate a Question: Why Did Profit Fall?\n\n### The business problem\nThe owner says: *\"We sold more in the last quarter, yet there is less money. Why?\"* A dashboard number does not answer that. A professional **investigates**: split the question into the possible causes, measure each one, and report which causes the evidence supports and which it rules out.\n\n### The method (use it on any \"why\" question)\n1. **Define the change**: which metric, which two periods? (Here: Q3 versus Q4 2025.)\n2. **List the possible drivers**: fewer sales, lower prices, higher cost, a lost customer, a product problem, more refunds, higher expenses.\n3. **Measure each driver** with a validated query, using the *same periods* for every comparison.\n4. **Compare**: which drivers moved enough to explain the change? Which did not move at all?\n5. **Weigh the evidence and the uncertainty**: how much is explained, what is left?\n6. **Recommend** actions only for the drivers the evidence supports.\n\n### Revenue versus margin\nProfit can fall while revenue flat or even rises, because the cost of each sale went up. Always look at revenue and gross margin side by side, quarter by quarter.\n\n```sql\nSELECT 'Q' || ((CAST(substr(sale_date, 6, 2) AS INTEGER) + 2) / 3) AS quarter\nFROM shop_sales;\n```\n\n### Ruling causes out is a result\nIf rent and salaries are the same in both quarters, they did **not** drive the drop. Saying so is as valuable as finding the cause, and it stops the owner chasing the wrong problem.\n\n### Quantify the impact\nA finding is stronger in money. *\"Supplier price rises cost us KSh X more in Q4 than the same sales would have cost at the original prices.\"* In this data every product has a list cost (`shop_products.unit_cost`) and every sale line has the actual cost on the day. Their difference, times the quantity, is the extra cost.\n\n### What you can and cannot claim\nEvidence can **support** an explanation. It rarely proves one. Say *\"The evidence points to X and Y; Z is ruled out; N percent remains unexplained.\"* Never say *\"X caused it\"* unless you have excluded the alternatives.",
+      "quiz": [
+        {
+          "question": "Why compare the same two periods for every driver?",
+          "options": [
+            "It is quicker",
+            "Different periods make drivers incomparable",
+            "SQL needs it",
+            "Charts need it"
+          ],
+          "correct_index": 1,
+          "explanation": "Mixing periods across drivers produces comparisons that cannot be added up or ranked."
+        },
+        {
+          "question": "Rent and salaries are identical in both quarters. What is the finding?",
+          "options": [
+            "They drove the drop",
+            "They are ruled out as drivers",
+            "They should be hidden",
+            "Nothing"
+          ],
+          "correct_index": 1,
+          "explanation": "Ruling a cause out is a result: it redirects the effort."
+        },
+        {
+          "question": "Which wording is the most honest?",
+          "options": [
+            "The price rises caused the fall",
+            "The evidence points to price rises, which explain about half; the rest is unexplained",
+            "Profit fell randomly",
+            "Nothing is known"
+          ],
+          "correct_index": 1,
+          "explanation": "State what is supported, how much it explains, and what remains."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "bp-8-e1",
+          "title": "Where Did the Revenue Fall?",
+          "prompt": "Compare quarter 3 (2025-07-01 to 2025-09-30) with quarter 4 (2025-10-01 to 2025-12-31) revenue by category, using the sale lines. Return category, q3 and q4 (each rounded to 0) and change (q4 minus q3, rounded to 0). Sort by change ascending (biggest fall first), then category.",
+          "hint_1": "Use SUM(CASE WHEN s.sale_date BETWEEN ... THEN i.qty * i.unit_price END) for each quarter, joining lines to sales and products.",
+          "hint_2": "Compute q3 and q4 in a CTE; the outer query subtracts them.",
+          "hint_3": "WITH c AS (SELECT p.category, SUM(CASE WHEN s.sale_date BETWEEN '2025-07-01' AND '2025-09-30' THEN i.qty * i.unit_price END) AS q3, SUM(CASE WHEN s.sale_date BETWEEN '2025-10-01' AND '2025-12-31' THEN i.qty * i.unit_price END) AS q4 FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id JOIN shop_products p ON p.product_id = i.product_id GROUP BY p.category) SELECT category, ROUND(q3, 0) AS q3, ROUND(q4, 0) AS q4, ROUND(q4 - q3, 0) AS change FROM c ORDER BY change ASC, category",
+          "solution": "WITH c AS (SELECT p.category, SUM(CASE WHEN s.sale_date BETWEEN '2025-07-01' AND '2025-09-30' THEN i.qty * i.unit_price END) AS q3, SUM(CASE WHEN s.sale_date BETWEEN '2025-10-01' AND '2025-12-31' THEN i.qty * i.unit_price END) AS q4 FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id JOIN shop_products p ON p.product_id = i.product_id GROUP BY p.category) SELECT category, ROUND(q3, 0) AS q3, ROUND(q4, 0) AS q4, ROUND(q4 - q3, 0) AS change FROM c ORDER BY change ASC, category",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "bp-8-e2",
+          "title": "Which Customers Explain the Drop?",
+          "prompt": "Using shop_sales.total, find the three customers whose revenue fell the most from Q3 (2025-07-01 to 2025-09-30) to Q4 (2025-10-01 to 2025-12-31). Return customer (name), q3 and q4 (each rounded to 0; a quarter with no sales counts as 0) and change (q4 minus q3, rounded to 0). Sort by change ascending, then customer. Three rows.",
+          "hint_1": "Use SUM(CASE WHEN ... THEN total ELSE 0 END) so quarters with no sales give 0, not NULL.",
+          "hint_2": "ORDER BY change, customer LIMIT 3",
+          "hint_3": "SELECT c.name AS customer, ROUND(SUM(CASE WHEN s.sale_date BETWEEN '2025-07-01' AND '2025-09-30' THEN s.total ELSE 0 END), 0) AS q3, ROUND(SUM(CASE WHEN s.sale_date BETWEEN '2025-10-01' AND '2025-12-31' THEN s.total ELSE 0 END), 0) AS q4, ROUND(SUM(CASE WHEN s.sale_date BETWEEN '2025-10-01' AND '2025-12-31' THEN s.total ELSE 0 END) - SUM(CASE WHEN s.sale_date BETWEEN '2025-07-01' AND '2025-09-30' THEN s.total ELSE 0 END), 0) AS change FROM shop_sales s JOIN shop_customers c ON c.customer_id = s.customer_id GROUP BY c.customer_id, c.name ORDER BY change ASC, customer LIMIT 3",
+          "solution": "SELECT c.name AS customer, ROUND(SUM(CASE WHEN s.sale_date BETWEEN '2025-07-01' AND '2025-09-30' THEN s.total ELSE 0 END), 0) AS q3, ROUND(SUM(CASE WHEN s.sale_date BETWEEN '2025-10-01' AND '2025-12-31' THEN s.total ELSE 0 END), 0) AS q4, ROUND(SUM(CASE WHEN s.sale_date BETWEEN '2025-10-01' AND '2025-12-31' THEN s.total ELSE 0 END) - SUM(CASE WHEN s.sale_date BETWEEN '2025-07-01' AND '2025-09-30' THEN s.total ELSE 0 END), 0) AS change FROM shop_sales s JOIN shop_customers c ON c.customer_id = s.customer_id GROUP BY c.customer_id, c.name ORDER BY change ASC, customer LIMIT 3",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "bp-8-e3",
+          "title": "Revenue and Margin, Quarter by Quarter",
+          "prompt": "For each quarter of 2025 return quarter ('Q1' to 'Q4'), revenue (sum of qty times unit_price, rounded to 0), gross_profit (rounded to 0) and margin_pct (rounded to 1). The quarter number is (month + 2) / 3 using integer division on the month number. Sort by quarter.",
+          "hint_1": "'Q' || ((CAST(substr(sale_date, 6, 2) AS INTEGER) + 2) / 3) builds the quarter label.",
+          "hint_2": "Group by that label.",
+          "hint_3": "SELECT 'Q' || ((CAST(substr(s.sale_date, 6, 2) AS INTEGER) + 2) / 3) AS quarter, ROUND(SUM(i.qty * i.unit_price), 0) AS revenue, ROUND(SUM(i.qty * (i.unit_price - i.unit_cost)), 0) AS gross_profit, ROUND(100.0 * SUM(i.qty * (i.unit_price - i.unit_cost)) / SUM(i.qty * i.unit_price), 1) AS margin_pct FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id GROUP BY quarter ORDER BY quarter",
+          "solution": "SELECT 'Q' || ((CAST(substr(s.sale_date, 6, 2) AS INTEGER) + 2) / 3) AS quarter, ROUND(SUM(i.qty * i.unit_price), 0) AS revenue, ROUND(SUM(i.qty * (i.unit_price - i.unit_cost)), 0) AS gross_profit, ROUND(100.0 * SUM(i.qty * (i.unit_price - i.unit_cost)) / SUM(i.qty * i.unit_price), 1) AS margin_pct FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id GROUP BY quarter ORDER BY quarter",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "bp-8-e4",
+          "title": "Test the Refund Theory",
+          "prompt": "Test whether refunds explain the fall. For each quarter return quarter ('Q1' to 'Q4'), refunds (sum of refund amount by refund_date quarter, rounded to 0), revenue (sum of shop_sales.total by sale quarter, rounded to 0) and refund_pct (refunds as a percentage of revenue, rounded to 2). Sort by quarter.",
+          "hint_1": "Build one CTE of refunds by quarter and one of revenue by quarter with the same quarter label, then join them.",
+          "hint_2": "refund_pct = ROUND(100.0 * refunds / revenue, 2)",
+          "hint_3": "WITH r AS (SELECT 'Q' || ((CAST(substr(refund_date, 6, 2) AS INTEGER) + 2) / 3) AS quarter, SUM(amount) AS refunds FROM shop_refunds GROUP BY quarter), v AS (SELECT 'Q' || ((CAST(substr(sale_date, 6, 2) AS INTEGER) + 2) / 3) AS quarter, SUM(total) AS revenue FROM shop_sales GROUP BY quarter) SELECT v.quarter, ROUND(r.refunds, 0) AS refunds, ROUND(v.revenue, 0) AS revenue, ROUND(100.0 * r.refunds / v.revenue, 2) AS refund_pct FROM v JOIN r ON r.quarter = v.quarter ORDER BY v.quarter",
+          "solution": "WITH r AS (SELECT 'Q' || ((CAST(substr(refund_date, 6, 2) AS INTEGER) + 2) / 3) AS quarter, SUM(amount) AS refunds FROM shop_refunds GROUP BY quarter), v AS (SELECT 'Q' || ((CAST(substr(sale_date, 6, 2) AS INTEGER) + 2) / 3) AS quarter, SUM(total) AS revenue FROM shop_sales GROUP BY quarter) SELECT v.quarter, ROUND(r.refunds, 0) AS refunds, ROUND(v.revenue, 0) AS revenue, ROUND(100.0 * r.refunds / v.revenue, 2) AS refund_pct FROM v JOIN r ON r.quarter = v.quarter ORDER BY v.quarter",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "bp-8-e5",
+          "title": "What Did Supplier Price Rises Cost Us?",
+          "prompt": "For sale lines dated 2025-10-01 or later, work out the extra cost compared with the original list cost: sum of qty times (sale-line unit_cost minus shop_products.unit_cost), by supplier of the product. Return supplier (name) and extra_cost (rounded to 0) for suppliers where it is above 0. Sort by extra_cost descending.",
+          "hint_1": "Join shop_sale_items to shop_sales (for the date), shop_products (list cost and supplier_id) and shop_suppliers (name).",
+          "hint_2": "HAVING SUM(...) > 0 keeps only suppliers with extra cost.",
+          "hint_3": "SELECT su.name AS supplier, ROUND(SUM(i.qty * (i.unit_cost - p.unit_cost)), 0) AS extra_cost FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id JOIN shop_products p ON p.product_id = i.product_id JOIN shop_suppliers su ON su.supplier_id = p.supplier_id WHERE s.sale_date >= '2025-10-01' GROUP BY su.supplier_id, su.name HAVING SUM(i.qty * (i.unit_cost - p.unit_cost)) > 0 ORDER BY extra_cost DESC",
+          "solution": "SELECT su.name AS supplier, ROUND(SUM(i.qty * (i.unit_cost - p.unit_cost)), 0) AS extra_cost FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id JOIN shop_products p ON p.product_id = i.product_id JOIN shop_suppliers su ON su.supplier_id = p.supplier_id WHERE s.sale_date >= '2025-10-01' GROUP BY su.supplier_id, su.name HAVING SUM(i.qty * (i.unit_cost - p.unit_cost)) > 0 ORDER BY extra_cost DESC",
+          "evaluation_mode": "exact",
+          "points": 30
+        },
+        {
+          "id": "bp-8-e6",
+          "title": "Rule Out the Fixed Costs",
+          "prompt": "Check which running costs moved. For each quarter of 2025 return quarter ('Q1' to 'Q4'), rent, salaries and utilities (the sum of shop_expenses for each of those three categories in that quarter). Sort by quarter.",
+          "hint_1": "Group shop_expenses by the quarter label and use SUM(CASE WHEN category = 'Rent' THEN amount ELSE 0 END) for each category.",
+          "hint_2": "The quarter label is 'Q' || ((CAST(substr(expense_date, 6, 2) AS INTEGER) + 2) / 3).",
+          "hint_3": "SELECT 'Q' || ((CAST(substr(expense_date, 6, 2) AS INTEGER) + 2) / 3) AS quarter, SUM(CASE WHEN category = 'Rent' THEN amount ELSE 0 END) AS rent, SUM(CASE WHEN category = 'Salaries' THEN amount ELSE 0 END) AS salaries, SUM(CASE WHEN category = 'Utilities' THEN amount ELSE 0 END) AS utilities FROM shop_expenses GROUP BY quarter ORDER BY quarter",
+          "solution": "SELECT 'Q' || ((CAST(substr(expense_date, 6, 2) AS INTEGER) + 2) / 3) AS quarter, SUM(CASE WHEN category = 'Rent' THEN amount ELSE 0 END) AS rent, SUM(CASE WHEN category = 'Salaries' THEN amount ELSE 0 END) AS salaries, SUM(CASE WHEN category = 'Utilities' THEN amount ELSE 0 END) AS utilities FROM shop_expenses GROUP BY quarter ORDER BY quarter",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "bp-py-8",
+          "title": "Explain a Change Driver by Driver",
+          "prompt": "Two dicts `before` and `after` map a driver (for example a customer or category) to its value in each period. Write `explain_change(before, after)` that returns a list of (driver, change, share_pct) tuples, one per driver that appears in either dict (a missing driver counts as 0), where change is after minus before and share_pct is that change as a percentage of the TOTAL change across all drivers, rounded to 1 (use 0.0 for every share when the total change is 0). Sort by the size of the change, largest absolute change first, ties by driver name.",
+          "hint_1": "Take the union of the keys with set(before) | set(after) and use .get(key, 0).",
+          "hint_2": "Sort with key=lambda t: (-abs(t[1]), t[0]).",
+          "hint_3": "def explain_change(before, after):\n    changes = {k: after.get(k, 0) - before.get(k, 0) for k in set(before) | set(after)}\n    total = sum(changes.values())\n    rows = [(k, v, round(100.0 * v / total, 1) if total else 0.0) for k, v in changes.items()]\n    return sorted(rows, key=lambda t: (-abs(t[1]), t[0]))",
+          "solution": "def explain_change(before, after):\n    changes = {k: after.get(k, 0) - before.get(k, 0) for k in set(before) | set(after)}\n    total = sum(changes.values())\n    rows = [(k, v, round(100.0 * v / total, 1) if total else 0.0) for k, v in changes.items()]\n    return sorted(rows, key=lambda t: (-abs(t[1]), t[0]))",
+          "evaluation_mode": "python_output",
+          "points": 90,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "before = {\"Hardware\": 1800000, \"Agrovet\": 4200000, \"Pharmacy\": 900000, \"Groceries\": 1500000}\nafter = {\"Hardware\": 1200000, \"Agrovet\": 4100000, \"Pharmacy\": 950000, \"Stationery\": 300000}",
+            "check": "for row in explain_change(before, after):\n    print(row)\nprint(explain_change({\"A\": 5}, {\"A\": 5}))\nprint(explain_change({}, {}))",
+            "starter": "# before and after are already defined. Write explain_change(before, after) below.",
+            "output": "('Groceries', -1500000, 81.1)\n('Hardware', -600000, 32.4)\n('Stationery', 300000, -16.2)\n('Agrovet', -100000, 5.4)\n('Pharmacy', 50000, -2.7)\n[('A', 0, 0.0)]\n[]",
+            "must_have": [
+              "def "
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bp-monitor",
+      "title": "Remember and Monitor: Alerts, Decisions and Measured Outcomes",
+      "description": "Raise an alert only when it matters, keep a memory of what was found and decided, and measure the result without over-claiming.",
+      "level": "advanced",
+      "prerequisites": [
+        "bp-investigate"
+      ],
+      "estimated_min": 45,
+      "sort_order": 9,
+      "theory_md": "## Remember and Monitor: Alerts, Decisions and Measured Outcomes\n\n### The business problem\nAn owner who checks reports manually finds problems late. An owner who gets 50 alerts a day ignores all of them. Good monitoring raises **few, important, explainable** alerts, and good business memory remembers what was found, what was decided and what happened next, so the same problem is not rediscovered every quarter.\n\n### Designing an alert that is worth reading\n| Question | Example |\n|---|---|\n| **What is measured?** | monthly utilities spend |\n| **Compared with what?** | the average of the previous 6 months |\n| **How big a change?** | more than 1.5 times that average (a **threshold**) |\n| **Enough history?** | at least 3 previous months, otherwise stay silent |\n| **Is the data fresh?** | if the latest data is old, say *stale* instead of raising a false calm |\n\nThresholds are choices. Too low and the owner drowns in noise. Too high and real problems slip through. Start with a rule, look at what it flags and tune it.\n\n```sql\nSELECT category, month, amount,\n       AVG(amount) OVER (PARTITION BY category ORDER BY month\n                         ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING) AS prior_avg\nFROM monthly_spend;\n```\n\n### Business memory: the decision log\n`shop_actions` records, for each finding: what was decided, the saving **expected** and, later, the saving **measured**. This is what lets an owner ask *\"What happened to the stock problem we found in September?\"* and get a real answer: the original finding, the decision, and the evidence since.\n\n### Estimated is not achieved\nThe expected saving is a forecast. The measured saving is what was observed afterwards. Keep them in **separate columns** and never mix them.\n\n### What you can and cannot claim\nIf a cost fell after an action, you can say *\"the cost fell by KSh X after the action\"*. You cannot say *\"the action caused it\"* unless you have ruled out other reasons: a seasonal change, a price change, a one-off bill. The honest report says *observed*, not *proven*.",
+      "quiz": [
+        {
+          "question": "Why require at least 3 previous months before raising an alert?",
+          "options": [
+            "To save storage",
+            "An average of one or two points is unreliable and creates false alarms",
+            "SQL needs it",
+            "It looks nicer"
+          ],
+          "correct_index": 1,
+          "explanation": "Alerts on thin history are noisy. Silence is better than a misleading alert."
+        },
+        {
+          "question": "An expected saving of 90,000 and a measured saving of 35,000 should be...",
+          "options": [
+            "Added together",
+            "Stored in separate columns and compared",
+            "Averaged",
+            "Deleted"
+          ],
+          "correct_index": 1,
+          "explanation": "Forecast and observation are different facts. Compare them, never merge them."
+        },
+        {
+          "question": "A cost fell after you acted. The safest statement is...",
+          "options": [
+            "The action caused the fall",
+            "The cost fell by this amount after the action; other causes are not yet ruled out",
+            "The cost will fall again",
+            "Nothing can be said"
+          ],
+          "correct_index": 1,
+          "explanation": "Report what was observed. Causation needs more evidence."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "bp-9-e1",
+          "title": "Raise the Right Alert",
+          "prompt": "Flag expense spikes. Total spend per month for the categories Rent, Salaries, Utilities, Marketing and Transport. For each category, compare a month with the average of the up-to-6 previous months (use a window frame of ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING). Alert only when there are at least 3 previous months and the month is more than 1.5 times that average. Return category, month (YYYY-MM), amount, prior_avg (rounded to 0) and ratio (amount divided by the unrounded average, rounded to 2). Sort by month, then category.",
+          "hint_1": "First make a CTE of monthly totals per category; then a second CTE with AVG(...) OVER and COUNT(*) OVER using the same frame.",
+          "hint_2": "Filter prior_n >= 3 AND amount > 1.5 * prior_avg in the outer query.",
+          "hint_3": "WITH m AS (SELECT category, substr(expense_date, 1, 7) AS month, SUM(amount) AS amount FROM shop_expenses WHERE category IN ('Rent', 'Salaries', 'Utilities', 'Marketing', 'Transport') GROUP BY category, substr(expense_date, 1, 7)), w AS (SELECT category, month, amount, AVG(amount) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING) AS prior_avg, COUNT(*) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING) AS prior_n FROM m) SELECT category, month, amount, ROUND(prior_avg, 0) AS prior_avg, ROUND(amount / prior_avg, 2) AS ratio FROM w WHERE prior_n >= 3 AND amount > 1.5 * prior_avg ORDER BY month, category",
+          "solution": "WITH m AS (SELECT category, substr(expense_date, 1, 7) AS month, SUM(amount) AS amount FROM shop_expenses WHERE category IN ('Rent', 'Salaries', 'Utilities', 'Marketing', 'Transport') GROUP BY category, substr(expense_date, 1, 7)), w AS (SELECT category, month, amount, AVG(amount) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING) AS prior_avg, COUNT(*) OVER (PARTITION BY category ORDER BY month ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING) AS prior_n FROM m) SELECT category, month, amount, ROUND(prior_avg, 0) AS prior_avg, ROUND(amount / prior_avg, 2) AS ratio FROM w WHERE prior_n >= 3 AND amount > 1.5 * prior_avg ORDER BY month, category",
+          "evaluation_mode": "exact",
+          "points": 35
+        },
+        {
+          "id": "bp-9-e2",
+          "title": "Is Any Source Stale?",
+          "prompt": "Check the freshness of five sources as at 2025-12-31. Return source, last_date and days_behind (days between last_date and 2025-12-31) for: 'sales' (shop_sales.sale_date), 'payments' (shop_payments.payment_date), 'purchases' (shop_purchases.purchase_date), 'expenses' (shop_expenses.expense_date) and 'bank' (shop_bank.line_date). Sort by days_behind descending, then source.",
+          "hint_1": "UNION ALL five SELECTs of MAX(date) with a literal source name.",
+          "hint_2": "days_behind = CAST(julianday('2025-12-31') - julianday(last_date) AS INTEGER)",
+          "hint_3": "SELECT source, last_date, CAST(julianday('2025-12-31') - julianday(last_date) AS INTEGER) AS days_behind FROM (SELECT 'sales' AS source, MAX(sale_date) AS last_date FROM shop_sales UNION ALL SELECT 'payments', MAX(payment_date) FROM shop_payments UNION ALL SELECT 'purchases', MAX(purchase_date) FROM shop_purchases UNION ALL SELECT 'expenses', MAX(expense_date) FROM shop_expenses UNION ALL SELECT 'bank', MAX(line_date) FROM shop_bank) ORDER BY days_behind DESC, source",
+          "solution": "SELECT source, last_date, CAST(julianday('2025-12-31') - julianday(last_date) AS INTEGER) AS days_behind FROM (SELECT 'sales' AS source, MAX(sale_date) AS last_date FROM shop_sales UNION ALL SELECT 'payments', MAX(payment_date) FROM shop_payments UNION ALL SELECT 'purchases', MAX(purchase_date) FROM shop_purchases UNION ALL SELECT 'expenses', MAX(expense_date) FROM shop_expenses UNION ALL SELECT 'bank', MAX(line_date) FROM shop_bank) ORDER BY days_behind DESC, source",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "bp-9-e3",
+          "title": "Did the Action Work?",
+          "prompt": "From the decision log (shop_actions) take the actions that have been measured (measured_saving is not NULL). Return action_id, expected_saving, measured_saving and achieved_pct (measured divided by expected times 100, rounded to 0). Sort by action_id.",
+          "hint_1": "Filter WHERE measured_saving IS NOT NULL.",
+          "hint_2": "achieved_pct = ROUND(100.0 * measured_saving / expected_saving, 0)",
+          "hint_3": "SELECT action_id, expected_saving, measured_saving, ROUND(100.0 * measured_saving / expected_saving, 0) AS achieved_pct FROM shop_actions WHERE measured_saving IS NOT NULL ORDER BY action_id",
+          "solution": "SELECT action_id, expected_saving, measured_saving, ROUND(100.0 * measured_saving / expected_saving, 0) AS achieved_pct FROM shop_actions WHERE measured_saving IS NOT NULL ORDER BY action_id",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "bp-9-e4",
+          "title": "What Is Still Unresolved?",
+          "prompt": "List the actions with no measured result yet (measured_saving is NULL). Return action_id, finding, status and days_open (days from decided_on to 2025-12-31). Sort by days_open descending, then action_id.",
+          "hint_1": "WHERE measured_saving IS NULL; days with julianday('2025-12-31') - julianday(decided_on).",
+          "hint_2": "Cast the days to an integer.",
+          "hint_3": "SELECT action_id, finding, status, CAST(julianday('2025-12-31') - julianday(decided_on) AS INTEGER) AS days_open FROM shop_actions WHERE measured_saving IS NULL ORDER BY days_open DESC, action_id",
+          "solution": "SELECT action_id, finding, status, CAST(julianday('2025-12-31') - julianday(decided_on) AS INTEGER) AS days_open FROM shop_actions WHERE measured_saving IS NULL ORDER BY days_open DESC, action_id",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "bp-py-9",
+          "title": "Write an Alert Rule That Stays Quiet Until It Matters",
+          "prompt": "Write `should_alert(history, latest, factor, min_points)`. `history` is a list of earlier values, `latest` the new value. Return True only when there are at least `min_points` earlier values AND the average of the earlier values is above 0 AND `latest` is greater than `factor` times that average. Otherwise return False. Never raise an error on an empty history.",
+          "hint_1": "Check the length of history first and return False early.",
+          "hint_2": "average = sum(history) / len(history); compare latest > factor * average.",
+          "hint_3": "def should_alert(history, latest, factor, min_points):\n    if len(history) < min_points or not history:\n        return False\n    average = sum(history) / len(history)\n    return average > 0 and latest > factor * average",
+          "solution": "def should_alert(history, latest, factor, min_points):\n    if len(history) < min_points or not history:\n        return False\n    average = sum(history) / len(history)\n    return average > 0 and latest > factor * average",
+          "evaluation_mode": "python_output",
+          "points": 70,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "",
+            "check": "quiet = [28000, 29000, 27500, 28500]\nprint(should_alert(quiet, 61500, 1.5, 3))\nprint(should_alert(quiet, 40000, 1.5, 3))\nprint(should_alert(quiet, 42000, 1.5, 3))\nprint(should_alert([28000, 29000], 90000, 1.5, 3))\nprint(should_alert([], 100, 1.5, 3))\nprint(should_alert([0, 0, 0], 50, 1.5, 3))",
+            "starter": "# Write should_alert(history, latest, factor, min_points) below.",
+            "output": "True\nFalse\nFalse\nFalse\nFalse\nFalse",
+            "must_have": [
+              "def "
+            ]
+          }
+        },
+        {
+          "id": "bp-py-10",
+          "title": "Report an Outcome Without Over-Claiming",
+          "prompt": "Write `measure_outcome(before, after, expected_saving)` for a COST that the owner tried to reduce. `before` and `after` are the monthly cost before and after an action. Return a dict with exactly these keys: `observed_saving` (before minus after), `achieved_pct` (observed_saving as a percentage of expected_saving, rounded to 0, or None when expected_saving is 0 or less), `verdict` ('target met' when observed_saving is at least expected_saving, 'partly met' when it is above 0 but below, otherwise 'no saving') and `proven_cause` which is ALWAYS False: a number that moved after an action is an observation, not proof the action caused it.",
+          "hint_1": "observed = before - after. Pick the verdict with if/elif.",
+          "hint_2": "Guard the percentage: it only exists when expected_saving > 0.",
+          "hint_3": "def measure_outcome(before, after, expected_saving):\n    observed = before - after\n    pct = round(100.0 * observed / expected_saving) if expected_saving > 0 else None\n    if observed >= expected_saving and observed > 0:\n        verdict = \"target met\"\n    elif observed > 0:\n        verdict = \"partly met\"\n    else:\n        verdict = \"no saving\"\n    return {\"observed_saving\": observed, \"achieved_pct\": pct, \"verdict\": verdict, \"proven_cause\": False}",
+          "solution": "def measure_outcome(before, after, expected_saving):\n    observed = before - after\n    pct = round(100.0 * observed / expected_saving) if expected_saving > 0 else None\n    if observed >= expected_saving and observed > 0:\n        verdict = \"target met\"\n    elif observed > 0:\n        verdict = \"partly met\"\n    else:\n        verdict = \"no saving\"\n    return {\"observed_saving\": observed, \"achieved_pct\": pct, \"verdict\": verdict, \"proven_cause\": False}",
+          "evaluation_mode": "python_output",
+          "points": 80,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "",
+            "check": "for args in [(68500, 38500, 30000), (68500, 55000, 30000), (68500, 70000, 30000), (50000, 40000, 0), (50000, 50000, 10000)]:\n    r = measure_outcome(*args)\n    print(sorted(r.keys()))\n    print(r[\"observed_saving\"], r[\"achieved_pct\"], r[\"verdict\"], r[\"proven_cause\"])",
+            "starter": "# Write measure_outcome(before, after, expected_saving) below.",
+            "output": "['achieved_pct', 'observed_saving', 'proven_cause', 'verdict']\n30000 100 target met False\n['achieved_pct', 'observed_saving', 'proven_cause', 'verdict']\n13500 45 partly met False\n['achieved_pct', 'observed_saving', 'proven_cause', 'verdict']\n-1500 -5 no saving False\n['achieved_pct', 'observed_saving', 'proven_cause', 'verdict']\n10000 None target met False\n['achieved_pct', 'observed_saving', 'proven_cause', 'verdict']\n0 0 no saving False",
+            "must_have": [
+              "def "
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bp-scale",
+      "title": "Scale and Secure: Incremental Loads, Isolation and Safe Backups",
+      "description": "Make the pipeline load only what is new, run twice without harm, keep each business's data separate and prove a backup is complete.",
+      "level": "advanced",
+      "prerequisites": [
+        "bp-monitor"
+      ],
+      "estimated_min": 45,
+      "sort_order": 10,
+      "theory_md": "## Scale and Secure: Incremental Loads, Isolation and Safe Backups\n\n### The business problem\nA system that works for one shop must work for a thousand shops, each with its own data, loading new records every day. Three things go wrong at scale: loading everything again every night (slow and costly), running a job twice and doubling the numbers, and one business seeing another's data. Each has a standard defence.\n\n### Incremental loads and watermarks\nDo not reload the whole history. Remember the **watermark**, the latest record you have seen, and next time ask only for records after it. If a job fails halfway, it restarts from the last safe watermark.\n\n### Idempotent loads\nA load is **idempotent** if running it twice gives the same result as running it once. Insert-or-update by a business key (an *upsert*) does that. A blind insert does not: run it twice and every record is doubled.\n\n### Tenant isolation\nIn a multi-tenant system every row belongs to a business (the **tenant**). Every query must be scoped to one tenant, and a missing tenant must produce an **error**, never \"all tenants\". In this practice data, a *branch* plays the role of a tenant: a Town branch manager must see only Town.\n\n```sql\nSELECT COUNT(*) AS receipts, SUM(total) AS revenue\nFROM shop_sales\nWHERE branch = 'Town';\n```\n\n### Backups you can trust\nA backup you have never checked is a hope. Record **control totals** (row count and the sum of ids) for each table before the backup and compare after a restore. If they differ, the backup is not complete.\n\n### Security habits\nCredentials never go into code or into the data being analysed. Data in transit uses HTTPS. Access is read-only where writing is not needed, and every access is logged.\n\n### What you can and cannot claim\nControl totals prove that the number of rows and their ids match. They do not prove every value inside the rows is identical. For that you also compare a sum of an important column.",
+      "quiz": [
+        {
+          "question": "What is a watermark?",
+          "options": [
+            "A security stamp",
+            "The latest record already loaded, used to fetch only newer ones",
+            "A chart style",
+            "A type of backup"
+          ],
+          "correct_index": 1,
+          "explanation": "It lets each run process only new data and restart safely after a failure."
+        },
+        {
+          "question": "An idempotent load run twice...",
+          "options": [
+            "Doubles the data",
+            "Gives the same result as running it once",
+            "Deletes the data",
+            "Fails"
+          ],
+          "correct_index": 1,
+          "explanation": "Upserting by a business key makes re-runs harmless."
+        },
+        {
+          "question": "A query is run with no tenant given. What should happen?",
+          "options": [
+            "Return all tenants",
+            "Raise an error",
+            "Return the first tenant",
+            "Return nothing silently"
+          ],
+          "correct_index": 1,
+          "explanation": "A missing scope must fail loudly. Returning everything leaks other businesses' data."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "bp-10-e1",
+          "title": "Load Only What Is New",
+          "prompt": "The last load stopped at the watermark 2025-12-29 (it already has everything up to and including that date). Return the sales after the watermark: sale_id, sale_date and total, sorted by sale_id.",
+          "hint_1": "Filter on sale_date > '2025-12-29'.",
+          "hint_2": "ORDER BY sale_id",
+          "hint_3": "SELECT sale_id, sale_date, total FROM shop_sales WHERE sale_date > '2025-12-29' ORDER BY sale_id",
+          "solution": "SELECT sale_id, sale_date, total FROM shop_sales WHERE sale_date > '2025-12-29' ORDER BY sale_id",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "bp-10-e2",
+          "title": "Make a Re-Run Safe",
+          "prompt": "The bank lines were loaded twice for some days. Return one row with lines_loaded (rows in shop_bank), unique_lines (different combinations of line_date and amount) and duplicates (lines_loaded minus unique_lines).",
+          "hint_1": "SELECT COUNT(*) FROM (SELECT DISTINCT line_date, amount FROM shop_bank) counts the unique lines.",
+          "hint_2": "Use three scalar subqueries; the last one subtracts the first two.",
+          "hint_3": "SELECT (SELECT COUNT(*) FROM shop_bank) AS lines_loaded, (SELECT COUNT(*) FROM (SELECT DISTINCT line_date, amount FROM shop_bank)) AS unique_lines, (SELECT COUNT(*) FROM shop_bank) - (SELECT COUNT(*) FROM (SELECT DISTINCT line_date, amount FROM shop_bank)) AS duplicates",
+          "solution": "SELECT (SELECT COUNT(*) FROM shop_bank) AS lines_loaded, (SELECT COUNT(*) FROM (SELECT DISTINCT line_date, amount FROM shop_bank)) AS unique_lines, (SELECT COUNT(*) FROM shop_bank) - (SELECT COUNT(*) FROM (SELECT DISTINCT line_date, amount FROM shop_bank)) AS duplicates",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "bp-10-e3",
+          "title": "Show a Branch Only Its Own Data",
+          "prompt": "Act as the manager of the Town branch. Return one row with receipts (number of sales), revenue (sum of total, rounded to 0) and customers (how many different customers bought) for branch 'Town' only.",
+          "hint_1": "WHERE branch = 'Town'. COUNT(DISTINCT customer_id) counts the customers.",
+          "hint_2": "ROUND(SUM(total), 0) AS revenue",
+          "hint_3": "SELECT COUNT(*) AS receipts, ROUND(SUM(total), 0) AS revenue, COUNT(DISTINCT customer_id) AS customers FROM shop_sales WHERE branch = 'Town'",
+          "solution": "SELECT COUNT(*) AS receipts, ROUND(SUM(total), 0) AS revenue, COUNT(DISTINCT customer_id) AS customers FROM shop_sales WHERE branch = 'Town'",
+          "evaluation_mode": "exact",
+          "points": 20
+        },
+        {
+          "id": "bp-10-e4",
+          "title": "Prove the Copy Is Complete",
+          "prompt": "Build control totals for a backup check. Return one row per table with table_name, row_count and id_sum (the sum of its id column) for: 'sales' (shop_sales.sale_id), 'sale_items' (shop_sale_items.item_id), 'payments' (shop_payments.payment_id), 'refunds' (shop_refunds.refund_id) and 'purchases' (shop_purchases.purchase_id). Sort by table_name.",
+          "hint_1": "UNION ALL five SELECTs of COUNT(*) and SUM(id column).",
+          "hint_2": "Wrap them in SELECT * FROM (...) ORDER BY table_name.",
+          "hint_3": "SELECT * FROM (SELECT 'sales' AS table_name, COUNT(*) AS row_count, SUM(sale_id) AS id_sum FROM shop_sales UNION ALL SELECT 'sale_items', COUNT(*), SUM(item_id) FROM shop_sale_items UNION ALL SELECT 'payments', COUNT(*), SUM(payment_id) FROM shop_payments UNION ALL SELECT 'refunds', COUNT(*), SUM(refund_id) FROM shop_refunds UNION ALL SELECT 'purchases', COUNT(*), SUM(purchase_id) FROM shop_purchases) ORDER BY table_name",
+          "solution": "SELECT * FROM (SELECT 'sales' AS table_name, COUNT(*) AS row_count, SUM(sale_id) AS id_sum FROM shop_sales UNION ALL SELECT 'sale_items', COUNT(*), SUM(item_id) FROM shop_sale_items UNION ALL SELECT 'payments', COUNT(*), SUM(payment_id) FROM shop_payments UNION ALL SELECT 'refunds', COUNT(*), SUM(refund_id) FROM shop_refunds UNION ALL SELECT 'purchases', COUNT(*), SUM(purchase_id) FROM shop_purchases) ORDER BY table_name",
+          "evaluation_mode": "exact",
+          "points": 25
+        },
+        {
+          "id": "bp-py-11",
+          "title": "An Upsert You Can Run Twice",
+          "prompt": "Lists `existing` and `incoming` of dict records are loaded; each has an `id`. Write `upsert(existing, incoming)` that returns a dict with `rows` (the merged list sorted by id), `inserted` (ids that were new), `updated` (ids that existed and whose record changed) and `unchanged` (ids that existed and are identical). If `incoming` contains the same id more than once, the LAST one wins and counts once. Do not change the lists you were given. Running the same incoming data again on the result must give inserted 0 and updated 0.",
+          "hint_1": "Build a dict from id to record for existing, then walk incoming (a dict naturally keeps the last duplicate).",
+          "hint_2": "Compare the old record with the new one using == to tell updated from unchanged. Copy records with dict(r).",
+          "hint_3": "def upsert(existing, incoming):\n    merged = {r[\"id\"]: dict(r) for r in existing}\n    latest = {}\n    for r in incoming:\n        latest[r[\"id\"]] = dict(r)\n    inserted = updated = unchanged = 0\n    for rid, rec in latest.items():\n        if rid not in merged:\n            inserted += 1\n        elif merged[rid] == rec:\n            unchanged += 1\n        else:\n            updated += 1\n        merged[rid] = rec\n    return {\"rows\": [merged[k] for k in sorted(merged)], \"inserted\": inserted, \"updated\": updated, \"unchanged\": unchanged}",
+          "solution": "def upsert(existing, incoming):\n    merged = {r[\"id\"]: dict(r) for r in existing}\n    latest = {}\n    for r in incoming:\n        latest[r[\"id\"]] = dict(r)\n    inserted = updated = unchanged = 0\n    for rid, rec in latest.items():\n        if rid not in merged:\n            inserted += 1\n        elif merged[rid] == rec:\n            unchanged += 1\n        else:\n            updated += 1\n        merged[rid] = rec\n    return {\"rows\": [merged[k] for k in sorted(merged)], \"inserted\": inserted, \"updated\": updated, \"unchanged\": unchanged}",
+          "evaluation_mode": "python_output",
+          "points": 90,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "existing = [{\"id\": 1, \"total\": 100}, {\"id\": 2, \"total\": 250}, {\"id\": 4, \"total\": 40}]\nincoming = [{\"id\": 2, \"total\": 250}, {\"id\": 3, \"total\": 75}, {\"id\": 4, \"total\": 45}, {\"id\": 3, \"total\": 80}]",
+            "check": "r = upsert(existing, incoming)\nprint(r[\"inserted\"], r[\"updated\"], r[\"unchanged\"])\nprint(r[\"rows\"])\nagain = upsert(r[\"rows\"], incoming)\nprint(again[\"inserted\"], again[\"updated\"], again[\"unchanged\"], again[\"rows\"] == r[\"rows\"])\nprint(existing)\nprint(upsert([], []))",
+            "starter": "# existing and incoming are already defined. Write upsert(existing, incoming) below.",
+            "output": "1 1 1\n[{'id': 1, 'total': 100}, {'id': 2, 'total': 250}, {'id': 3, 'total': 80}, {'id': 4, 'total': 45}]\n0 0 3 True\n[{'id': 1, 'total': 100}, {'id': 2, 'total': 250}, {'id': 4, 'total': 40}]\n{'rows': [], 'inserted': 0, 'updated': 0, 'unchanged': 0}",
+            "must_have": [
+              "def "
+            ]
+          }
+        },
+        {
+          "id": "bp-py-12",
+          "title": "Never Return Another Business's Data",
+          "prompt": "A list `records` is loaded; each record has a `tenant` and a `value`. Write `rows_for(records, tenant)` that returns only the records of that tenant, in the original order. If `tenant` is None or an empty string, raise ValueError with the message 'tenant required' instead of returning anything. An unknown tenant returns an empty list.",
+          "hint_1": "Check the tenant first and raise before looking at any record.",
+          "hint_2": "A list comprehension with r['tenant'] == tenant does the filtering.",
+          "hint_3": "def rows_for(records, tenant):\n    if not tenant:\n        raise ValueError(\"tenant required\")\n    return [r for r in records if r[\"tenant\"] == tenant]",
+          "solution": "def rows_for(records, tenant):\n    if not tenant:\n        raise ValueError(\"tenant required\")\n    return [r for r in records if r[\"tenant\"] == tenant]",
+          "evaluation_mode": "python_output",
+          "points": 70,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "records = [\n    {\"tenant\": \"shop-a\", \"value\": 10}, {\"tenant\": \"shop-b\", \"value\": 99},\n    {\"tenant\": \"shop-a\", \"value\": 20}, {\"tenant\": \"shop-c\", \"value\": 5},\n]",
+            "check": "print(rows_for(records, \"shop-a\"))\nprint(rows_for(records, \"shop-z\"))\nfor bad in (None, \"\"):\n    try:\n        rows_for(records, bad)\n        print(\"no error\")\n    except ValueError as e:\n        print(\"ValueError\", e)",
+            "starter": "# records is already defined. Write rows_for(records, tenant) below.",
+            "output": "[{'tenant': 'shop-a', 'value': 10}, {'tenant': 'shop-a', 'value': 20}]\n[]\nValueError tenant required\nValueError tenant required",
+            "must_have": [
+              "def "
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bp-capstone",
+      "title": "Capstone: The Owner's Briefing",
+      "description": "Pull everything together: find the biggest money leaks in Mwangi Trading Co., put a value on each and write findings an owner can act on and check.",
+      "level": "advanced",
+      "prerequisites": [
+        "bp-scale"
+      ],
+      "estimated_min": 60,
+      "sort_order": 11,
+      "theory_md": "## Capstone: The Owner's Briefing\n\n### The brief\nThe owner of Mwangi Trading Co. says: *\"Understand my business. Find the money. Tell me what to do and how we will know it worked.\"* You now have every skill needed.\n\n### What a good finding contains\nEvery significant finding should answer nine questions:\n\n| Part | Question |\n|---|---|\n| **What happened** | the fact, in one sentence |\n| **Why it matters** | the consequence for the business |\n| **Evidence** | the numbers and where they came from |\n| **Financial impact** | an estimate in money, labelled as an estimate |\n| **Urgency** | today, this week or this month |\n| **Recommended action** | something the owner can actually do |\n| **Expected result** | what should improve |\n| **Confidence** | low, medium or high, and why |\n| **Monitoring** | what to watch, and for how long |\n\n### Estimated versus measured\nPut the **estimated** impact in one field and the **measured** impact in another, and leave the measured one empty until it has been measured. Never copy an estimate into the measured field.\n\n### The five leaks in this business\nCombine what you learned: **dead stock** (lesson 5), **expired or expiring stock** (5), **supplier price rises** (6 and 8), **old unpaid credit** (7) and **utilities above normal** (7 and 9). Each has a value, and together they tell the owner where to start.\n\n```sql\nSELECT 'example leak' AS leak, 1000 AS amount\nUNION ALL SELECT 'another', 500\nORDER BY amount DESC;\n```\n\n### Before you present\nRe-check each number, state your limits (one stock count, one year of data, no proof of cause) and recommend actions the owner can decide on. Consequential actions, such as stopping credit to a customer, are the owner's decision, not the system's.",
+      "quiz": [
+        {
+          "question": "Why keep estimated and measured impact in separate fields?",
+          "options": [
+            "To save space",
+            "An estimate is a forecast; copying it into measured results claims success that was never observed",
+            "Fields must be paired",
+            "No reason"
+          ],
+          "correct_index": 1,
+          "explanation": "Keeping them apart is how you stay honest about what actually happened."
+        },
+        {
+          "question": "Which action should the system take without asking the owner?",
+          "options": [
+            "Stop credit to a customer",
+            "Calculate and report the overdue balance",
+            "Cancel a supplier",
+            "Write off a debt"
+          ],
+          "correct_index": 1,
+          "explanation": "Reporting is safe. Consequential business actions need the owner's authorisation."
+        },
+        {
+          "question": "A finding has no monitoring plan. What is missing?",
+          "options": [
+            "A way to know whether the action worked",
+            "A colour",
+            "A title",
+            "A footnote"
+          ],
+          "correct_index": 0,
+          "explanation": "Without monitoring you cannot measure the outcome, so you cannot learn from it."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "bp-11-e1",
+          "title": "The Five Biggest Leaks, in Money",
+          "prompt": "Return the five leaks with their value as leak and amount (rounded to 0), sorted by amount descending, then leak. The five are: 'dead stock' (stock value at cost of products with stock on hand and no sale on or after 2025-10-02); 'expired or expiring stock' (qty_on_hand times unit_cost of batches with expiry_date up to 2026-03-31); 'supplier price rises' (the Q4 extra cost from lesson 8: qty times sale-line unit_cost minus list unit_cost for sale lines dated 2025-10-01 or later); 'unpaid credit over 90 days' (balances of credit sales older than 90 days as at 2025-12-31, balance above 0.5); and 'utilities above normal' (utilities spend from 2025-10-01 minus 3 times the average monthly utilities spend before that).",
+          "hint_1": "Build each leak as its own SELECT with a literal name, then UNION ALL them. Reuse the earlier lesson queries as subqueries.",
+          "hint_2": "Dead stock: batches of products whose last sale (or no sale) is before 2025-10-02. Unpaid credit: total payments per sale first, then sale total minus payments for credit sales more than 90 days old.",
+          "hint_3": "SELECT leak, ROUND(amount, 0) AS amount FROM (SELECT 'dead stock' AS leak, (SELECT SUM(b.qty_on_hand * b.unit_cost) FROM shop_batches b WHERE b.product_id NOT IN (SELECT i.product_id FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id WHERE s.sale_date >= '2025-10-02')) AS amount UNION ALL SELECT 'expired or expiring stock', (SELECT SUM(qty_on_hand * unit_cost) FROM shop_batches WHERE expiry_date <= '2026-03-31') UNION ALL SELECT 'supplier price rises', (SELECT SUM(i.qty * (i.unit_cost - p.unit_cost)) FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id JOIN shop_products p ON p.product_id = i.product_id WHERE s.sale_date >= '2025-10-01') UNION ALL SELECT 'unpaid credit over 90 days', (SELECT SUM(s.total - COALESCE((SELECT SUM(amount) FROM shop_payments p WHERE p.sale_id = s.sale_id), 0)) FROM shop_sales s WHERE s.payment_status = 'credit' AND julianday('2025-12-31') - julianday(s.sale_date) > 90 AND s.total - COALESCE((SELECT SUM(amount) FROM shop_payments p WHERE p.sale_id = s.sale_id), 0) > 0.5) UNION ALL SELECT 'utilities above normal', (SELECT SUM(amount) FROM shop_expenses WHERE category = 'Utilities' AND expense_date >= '2025-10-01') - 3 * (SELECT AVG(amount) FROM shop_expenses WHERE category = 'Utilities' AND expense_date < '2025-10-01')) ORDER BY amount DESC, leak",
+          "solution": "SELECT leak, ROUND(amount, 0) AS amount FROM (SELECT 'dead stock' AS leak, (SELECT SUM(b.qty_on_hand * b.unit_cost) FROM shop_batches b WHERE b.product_id NOT IN (SELECT i.product_id FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id WHERE s.sale_date >= '2025-10-02')) AS amount UNION ALL SELECT 'expired or expiring stock', (SELECT SUM(qty_on_hand * unit_cost) FROM shop_batches WHERE expiry_date <= '2026-03-31') UNION ALL SELECT 'supplier price rises', (SELECT SUM(i.qty * (i.unit_cost - p.unit_cost)) FROM shop_sale_items i JOIN shop_sales s ON s.sale_id = i.sale_id JOIN shop_products p ON p.product_id = i.product_id WHERE s.sale_date >= '2025-10-01') UNION ALL SELECT 'unpaid credit over 90 days', (SELECT SUM(s.total - COALESCE((SELECT SUM(amount) FROM shop_payments p WHERE p.sale_id = s.sale_id), 0)) FROM shop_sales s WHERE s.payment_status = 'credit' AND julianday('2025-12-31') - julianday(s.sale_date) > 90 AND s.total - COALESCE((SELECT SUM(amount) FROM shop_payments p WHERE p.sale_id = s.sale_id), 0) > 0.5) UNION ALL SELECT 'utilities above normal', (SELECT SUM(amount) FROM shop_expenses WHERE category = 'Utilities' AND expense_date >= '2025-10-01') - 3 * (SELECT AVG(amount) FROM shop_expenses WHERE category = 'Utilities' AND expense_date < '2025-10-01')) ORDER BY amount DESC, leak",
+          "evaluation_mode": "exact",
+          "points": 50
+        },
+        {
+          "id": "bp-11-e2",
+          "title": "The Owner's Scorecard",
+          "prompt": "Return one row for the whole year: revenue (sum of shop_sales.total), gross_profit (sum of qty times (unit_price minus unit_cost) over sale lines), expenses (sum of shop_expenses), profit_after_expenses (gross profit minus expenses), receivables (credit sale totals minus all payments received against credit sales) and stock_value (qty_on_hand times unit_cost over shop_batches). Round every value to 0 decimals.",
+          "hint_1": "Use six scalar subqueries. Receivables: the credit sales total minus the payments whose sale is a credit sale.",
+          "hint_2": "profit_after_expenses = gross profit subquery minus expenses subquery, rounded.",
+          "hint_3": "SELECT ROUND((SELECT SUM(total) FROM shop_sales), 0) AS revenue, ROUND((SELECT SUM(qty * (unit_price - unit_cost)) FROM shop_sale_items), 0) AS gross_profit, ROUND((SELECT SUM(amount) FROM shop_expenses), 0) AS expenses, ROUND((SELECT SUM(qty * (unit_price - unit_cost)) FROM shop_sale_items) - (SELECT SUM(amount) FROM shop_expenses), 0) AS profit_after_expenses, ROUND((SELECT SUM(total) FROM shop_sales WHERE payment_status = 'credit') - (SELECT SUM(p.amount) FROM shop_payments p JOIN shop_sales s ON s.sale_id = p.sale_id WHERE s.payment_status = 'credit'), 0) AS receivables, ROUND((SELECT SUM(qty_on_hand * unit_cost) FROM shop_batches), 0) AS stock_value",
+          "solution": "SELECT ROUND((SELECT SUM(total) FROM shop_sales), 0) AS revenue, ROUND((SELECT SUM(qty * (unit_price - unit_cost)) FROM shop_sale_items), 0) AS gross_profit, ROUND((SELECT SUM(amount) FROM shop_expenses), 0) AS expenses, ROUND((SELECT SUM(qty * (unit_price - unit_cost)) FROM shop_sale_items) - (SELECT SUM(amount) FROM shop_expenses), 0) AS profit_after_expenses, ROUND((SELECT SUM(total) FROM shop_sales WHERE payment_status = 'credit') - (SELECT SUM(p.amount) FROM shop_payments p JOIN shop_sales s ON s.sale_id = p.sale_id WHERE s.payment_status = 'credit'), 0) AS receivables, ROUND((SELECT SUM(qty_on_hand * unit_cost) FROM shop_batches), 0) AS stock_value",
+          "evaluation_mode": "exact",
+          "points": 40
+        },
+        {
+          "id": "bp-py-13",
+          "title": "Write a Finding an Owner Can Act On and Check",
+          "prompt": "Write `build_finding(**fields)` that takes these keyword fields: what, why, evidence, action, expected_result, monitoring (non-empty text), urgency ('today', 'this week' or 'this month'), confidence ('low', 'medium' or 'high') and impact_estimated (a number above 0). It may also take impact_measured (default None). Return a dict with all those keys plus `status`: 'open' while impact_measured is None, otherwise 'measured'. Raise ValueError with the message 'missing: <field>' for the first required text field (in the order listed) that is absent or blank, 'bad urgency' or 'bad confidence' for an invalid choice, and 'bad impact' when impact_estimated is missing or not above 0. Never copy impact_estimated into impact_measured.",
+          "hint_1": "Keep the required text fields in a list, in the order given, and loop over it to find the first one that is missing or blank.",
+          "hint_2": "fields.get(name) gives None when absent; .strip() checks blank text.",
+          "hint_3": "TEXT = [\"what\", \"why\", \"evidence\", \"action\", \"expected_result\", \"monitoring\"]\n\ndef build_finding(**fields):\n    for name in TEXT:\n        value = fields.get(name)\n        if not isinstance(value, str) or not value.strip():\n            raise ValueError(\"missing: \" + name)\n    if fields.get(\"urgency\") not in (\"today\", \"this week\", \"this month\"):\n        raise ValueError(\"bad urgency\")\n    if fields.get(\"confidence\") not in (\"low\", \"medium\", \"high\"):\n        raise ValueError(\"bad confidence\")\n    estimated = fields.get(\"impact_estimated\")\n    if not isinstance(estimated, (int, float)) or estimated <= 0:\n        raise ValueError(\"bad impact\")\n    measured = fields.get(\"impact_measured\")\n    out = {k: fields[k] for k in TEXT}\n    out.update(urgency=fields[\"urgency\"], confidence=fields[\"confidence\"], impact_estimated=estimated,\n               impact_measured=measured, status=\"open\" if measured is None else \"measured\")\n    return out",
+          "solution": "TEXT = [\"what\", \"why\", \"evidence\", \"action\", \"expected_result\", \"monitoring\"]\n\ndef build_finding(**fields):\n    for name in TEXT:\n        value = fields.get(name)\n        if not isinstance(value, str) or not value.strip():\n            raise ValueError(\"missing: \" + name)\n    if fields.get(\"urgency\") not in (\"today\", \"this week\", \"this month\"):\n        raise ValueError(\"bad urgency\")\n    if fields.get(\"confidence\") not in (\"low\", \"medium\", \"high\"):\n        raise ValueError(\"bad confidence\")\n    estimated = fields.get(\"impact_estimated\")\n    if not isinstance(estimated, (int, float)) or estimated <= 0:\n        raise ValueError(\"bad impact\")\n    measured = fields.get(\"impact_measured\")\n    out = {k: fields[k] for k in TEXT}\n    out.update(urgency=fields[\"urgency\"], confidence=fields[\"confidence\"], impact_estimated=estimated,\n               impact_measured=measured, status=\"open\" if measured is None else \"measured\")\n    return out",
+          "evaluation_mode": "python_output",
+          "points": 100,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "",
+            "check": "ok = dict(what=\"Utilities doubled from October\", why=\"It cuts profit every month\", evidence=\"Oct-Dec average 68,500 versus 28,100\",\n          action=\"Inspect meters and switch off night lighting\", expected_result=\"Utilities back near 30,000\", monitoring=\"Check monthly for 3 months\",\n          urgency=\"this week\", confidence=\"medium\", impact_estimated=120000)\nf = build_finding(**ok)\nprint(f[\"status\"], f[\"impact_estimated\"], f[\"impact_measured\"])\ng = build_finding(**ok, impact_measured=35000)\nprint(g[\"status\"], g[\"impact_estimated\"], g[\"impact_measured\"])\nprint(sorted(f.keys()))\ntests = [dict(ok, why=\"  \"), {k: v for k, v in ok.items() if k != \"what\"}, dict(ok, urgency=\"whenever\"), dict(ok, confidence=\"sure\"),\n         dict(ok, impact_estimated=0), {k: v for k, v in ok.items() if k != \"impact_estimated\"}]\nfor t in tests:\n    try:\n        build_finding(**t)\n        print(\"no error\")\n    except ValueError as e:\n        print(\"ValueError\", e)",
+            "starter": "# Write build_finding(**fields) below.",
+            "output": "open 120000 None\nmeasured 120000 35000\n['action', 'confidence', 'evidence', 'expected_result', 'impact_estimated', 'impact_measured', 'monitoring', 'status', 'urgency', 'what', 'why']\nValueError missing: why\nValueError missing: what\nValueError bad urgency\nValueError bad confidence\nValueError bad impact\nValueError bad impact",
+            "must_have": [
+              "def "
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

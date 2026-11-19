@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { getDb, getDatasetsPath } from '../db/database'
 import { ensureDatasetFiles } from './setup.service'
 import { DATAENG_DATASETS } from './dataeng.datasets'
+import { SHOP_DATASETS } from './shop.datasets'
 import { friendlySqlError, describeSchema } from './sql.friendly'
 import { runIsolated, IsolateTimeout, IsolateMemory, IsolateUnavailable, isolateLimits } from './sql.isolate'
 import Papa from 'papaparse'
@@ -337,9 +338,22 @@ async function ensureDataEngDatasetsLoaded(sandboxId: string): Promise<void> {
   }
 }
 
+/** Business Problem Solver exercises (ids "bp-...") practise on the trading-business tables (shop_...). */
+async function ensureShopDatasetsLoaded(sandboxId: string): Promise<void> {
+  const sandbox = await getSandbox(sandboxId)
+  const have = new Set<string>((sandbox.exec(`SELECT name FROM sqlite_master WHERE type='table'`)[0]?.values ?? []).map((v: any[]) => String(v[0])))
+  for (const ds of SHOP_DATASETS) {
+    if (have.has(ds.table)) continue
+    const file = await bundledFilePath(ds.file)
+    if (!fs.existsSync(file)) { console.warn(`[SQL] Business Problem Solver dataset file missing: ${file}`); continue }
+    await loadFileIntoSandbox(sandboxId, file, ds.table)
+  }
+}
+
 async function ensureDefaultDatasetsLoaded(sandboxId: string): Promise<void> {
   if (!sandboxId.startsWith('ex_')) return // only auto-load for exercise sandboxes
   if (sandboxId.startsWith('ex_de-')) return ensureDataEngDatasetsLoaded(sandboxId)
+  if (sandboxId.startsWith('ex_bp-')) return ensureShopDatasetsLoaded(sandboxId)
 
   const sandbox = await getSandbox(sandboxId)
 

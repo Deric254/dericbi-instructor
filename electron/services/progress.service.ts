@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 import { getDb } from '../db/database'
+import { SKILLS, SKILLS_CAPSTONE } from './skills'
 
 // ─────────────────────────────────────────────
 // SKILL RATINGS
@@ -325,7 +326,7 @@ export interface LearningPlan {
   review: { exercise_id: string; title: string; lesson_title: string; module: string }[]
 }
 
-const MODULE_ORDER = ['sql', 'excel', 'python', 'powerbi', 'statistics', 'business', 'dataeng', 'simulation']
+const MODULE_ORDER = ['sql', 'excel', 'python', 'powerbi', 'statistics', 'business', 'dataeng', 'bizsolver', 'simulation']
 const moduleRank = (m: string) => { const i = MODULE_ORDER.indexOf(m); return i === -1 ? MODULE_ORDER.length : i }
 
 const dayKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -403,6 +404,31 @@ export function getLearningPlan(userId: string, now: Date = new Date()): Learnin
   `).all(userId, userId, userId) as LearningPlan['review']
 
   return { next, streak_days: streak, active_today: activeToday, modules, review }
+}
+
+export interface SkillMapLesson { id: string; title: string; module: string; status: string }
+export interface SkillMapEntry {
+  id: number; title: string; problem: string
+  lessons: SkillMapLesson[]; complete: number; total: number
+}
+export interface SkillMap { skills: SkillMapEntry[]; capstone: SkillMapLesson | null }
+
+/** The eight business skills with the student's progress on every lesson that builds each one. */
+export function getSkillMap(userId: string): SkillMap {
+  const db = getDb()
+  const rows = db.prepare(`
+    SELECT l.id, l.title, l.module, l.prerequisites, lp.status AS progress
+    FROM lessons l LEFT JOIN lesson_progress lp ON lp.lesson_id = l.id AND lp.user_id = ?
+  `).all(userId) as any[]
+  const byId = new Map<string, SkillMapLesson>(rows.map((r) => [r.id, {
+    id: r.id, title: r.title, module: r.module,
+    status: r.progress ?? (r.prerequisites === '[]' || r.prerequisites === '' ? 'available' : 'locked'),
+  }]))
+  const skills = SKILLS.map((s) => {
+    const lessons = s.lessons.map((id) => byId.get(id)).filter((l): l is SkillMapLesson => !!l)
+    return { id: s.id, title: s.title, problem: s.problem, lessons, complete: lessons.filter((l) => l.status === 'complete').length, total: lessons.length }
+  })
+  return { skills, capstone: byId.get(SKILLS_CAPSTONE) ?? null }
 }
 
 export function getDashboardStats(userId: string): DashboardStats {

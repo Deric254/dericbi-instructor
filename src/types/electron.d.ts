@@ -45,6 +45,7 @@ declare global {
       progress: {
         dashboard: (userId: string) => Promise<any>
         skills: (userId: string) => Promise<any>
+        skillMap: (userId: string) => Promise<any>
         rank: (userId: string) => Promise<any>
         memory: (userId: string, options?: any) => Promise<any>
         achievements: (userId: string) => Promise<any>

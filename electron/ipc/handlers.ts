@@ -76,6 +76,10 @@ export function registerProgressHandlers() {
     return ProgressService.getSkillRatings(userId)
   })
 
+  safeHandle('progress:skill-map', async (_, userId: string) => {
+    return ProgressService.getSkillMap(userId)
+  })
+
   safeHandle('progress:rank', async (_, userId: string) => {
     return ProgressService.getRankInfo(userId)
   })

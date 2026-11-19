@@ -5,8 +5,9 @@ import { app } from 'electron'
 import { getDb, getDatasetsPath } from '../db/database'
 import { v4 as uuidv4 } from 'uuid'
 import { DATAENG_DATASETS, generateDataEngDatasets } from './dataeng.datasets'
+import { SHOP_DATASETS, generateShopDatasets } from './shop.datasets'
 
-const SETUP_VERSION = 8 // increment to force re-seed on app update
+const SETUP_VERSION = 9 // increment to force re-seed on app update
 
 // Bump when the generated CSV *contents* change shape, so installs that already have older
 // CSVs on disk get them regenerated (generateDatasets() otherwise skips files that exist).
@@ -115,6 +116,7 @@ export async function ensureDatasetFiles(): Promise<void> {
 async function generateDatasets(): Promise<void> {
   const datasetsDir = getDatasetsPath()
   generateDataEngDatasets(datasetsDir) // own version marker; a no-op once written
+  generateShopDatasets(datasetsDir) // the Business Problem Solver's trading business; same rule
 
   // Only generate if files don't exist
   const files = [
@@ -274,6 +276,7 @@ function seedAllCurricula(): void {
     { file: 'powerbi/curriculum.json',    type: 'freeform'    },
     { file: 'business/curriculum.json',   type: 'freeform'    },
     { file: 'dataeng/curriculum.json',    type: 'sql_query'   },
+    { file: 'bizsolver/curriculum.json',  type: 'sql_query'   },
   ]
 
   for (const c of curricula) {
@@ -368,6 +371,9 @@ function seedBundledDatasets(): void {
   for (const d of DATAENG_DATASETS) {
     datasets.push({ id: d.id, name: d.name, description: d.description, domain: 'dataeng', file: d.file, table: d.table, rows: d.rows, cols: d.cols })
   }
+  for (const d of SHOP_DATASETS) {
+    datasets.push({ id: d.id, name: d.name, description: d.description, domain: 'bizsolver', file: d.file, table: d.table, rows: d.rows, cols: d.cols })
+  }
 
   const tx = db.transaction(() => {
     for (const ds of datasets) {
@@ -414,6 +420,10 @@ function seedAchievements(): void {
     ['ach_de_py_10',        'Python Pipeliner',      'Passed 10 Python practicals with hidden tests',    'terminal',    '{"type":"exercise_complete","skill":"dataeng","exercise_type":"python_code","count":10,"distinct":true}', 200, 'rare'],
     ['ach_de_50',           'Platform Engineer',     'Solved 50 different Data Engineering exercises',   'layers',      '{"type":"exercise_complete","skill":"dataeng","count":50,"distinct":true}',   400, 'epic'],
     ['ach_de_capstone',     'Data Engineer',         'Completed the Data Engineering capstone',          'trophy',      '{"type":"lesson_complete","lesson_id":"de-capstone"}',                         800, 'legendary'],
+    ['ach_bp_first',        'First Finding',         'Solved your first Business Problem Solver exercise', 'target',    '{"type":"exercise_complete","skill":"bizsolver","count":1,"distinct":true}',  20,  'common'],
+    ['ach_bp_25',           'Money Finder',          'Solved 25 different Business Problem Solver exercises', 'search',  '{"type":"exercise_complete","skill":"bizsolver","count":25,"distinct":true}', 200, 'rare'],
+    ['ach_bp_py_8',         'Practical Analyst',     'Passed 8 Python practicals with hidden tests in the Business Problem Solver', 'terminal', '{"type":"exercise_complete","skill":"bizsolver","exercise_type":"python_code","count":8,"distinct":true}', 250, 'rare'],
+    ['ach_bp_capstone',     'Business Problem Solver', 'Completed the Owner\'s Briefing capstone',      'trophy',      '{"type":"lesson_complete","lesson_id":"bp-capstone"}',                         800, 'legendary'],
     ['ach_consultant_rank', 'Analytics Consultant',  'Achieved Analytics Consultant rank',               'briefcase',   '{"type":"rank","rank":"analytics_consultant"}',             1000, 'legendary'],
   ]
 

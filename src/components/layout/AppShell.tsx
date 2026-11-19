@@ -34,6 +34,7 @@ const PAGES: Record<NavSection, React.ReactNode> = {
   statistics:   <StatisticsAcademy />,
   business:     <BusinessAcademy />,
   dataeng:      <SqlAcademy key="dataeng" course="dataeng" />,
+  bizsolver:    <SqlAcademy key="bizsolver" course="bizsolver" />,
   simulations:  <Simulations />,
   playground:   <DataPlayground />,
   datasets:     <Datasets />,

@@ -3,7 +3,7 @@ import {
   BookOpen, CheckCircle, Clock, TrendingUp,
   Award, ChevronRight, Database, FileSpreadsheet,
   Terminal, BarChart3, Briefcase, Users, FlaskConical,
-  Table2, FolderOpen, Trophy, Sparkles, Workflow,
+  Table2, FolderOpen, Trophy, Sparkles, Workflow, Target,
 } from 'lucide-react'
 import { useAuthStore, useUIStore } from '../store'
 import type { DashboardStats, SkillRating, NavSection } from '../types'
@@ -48,6 +48,7 @@ const JOURNEY: JourneyGroup[] = [
       { id: 'statistics', label: 'Statistics', desc: 'The numbers behind the charts — tests & inference.',     icon: <TrendingUp size={16} />,     color: 'var(--stats-color)' },
       { id: 'business',   label: 'Business',   desc: 'Think like an analyst — frame and recommend.',          icon: <Briefcase size={16} />,      color: 'var(--business-color)' },
       { id: 'dataeng',    label: 'Data Engineering', desc: 'Pipelines, data quality and AI-ready data at platform scale.', icon: <Workflow size={16} />, color: 'var(--de-color)' },
+      { id: 'bizsolver',  label: 'Business Problem Solver', desc: 'Find the money, explain the problem, recommend and measure.', icon: <Target size={16} />, color: 'var(--bp-color)' },
     ],
   },
   {

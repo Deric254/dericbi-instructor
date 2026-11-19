@@ -36,6 +36,20 @@ const DATASETS = {
   'ds-de-ml-features': { table: 'ml_features', file: 'de_ml_features.csv' },
   'ds-de-messy-contacts': { table: 'messy_contacts', file: 'de_messy_contacts.csv' },
   'ds-de-llm-requests': { table: 'llm_requests', file: 'de_llm_requests.csv' },
+  // Business Problem Solver academy
+  'ds-shop-suppliers': { table: 'shop_suppliers', file: 'shop_suppliers.csv' },
+  'ds-shop-products': { table: 'shop_products', file: 'shop_products.csv' },
+  'ds-shop-customers': { table: 'shop_customers', file: 'shop_customers.csv' },
+  'ds-shop-sales': { table: 'shop_sales', file: 'shop_sales.csv' },
+  'ds-shop-sale-items': { table: 'shop_sale_items', file: 'shop_sale_items.csv' },
+  'ds-shop-payments': { table: 'shop_payments', file: 'shop_payments.csv' },
+  'ds-shop-refunds': { table: 'shop_refunds', file: 'shop_refunds.csv' },
+  'ds-shop-purchases': { table: 'shop_purchases', file: 'shop_purchases.csv' },
+  'ds-shop-batches': { table: 'shop_batches', file: 'shop_batches.csv' },
+  'ds-shop-expenses': { table: 'shop_expenses', file: 'shop_expenses.csv' },
+  'ds-shop-supplier-invoices': { table: 'shop_supplier_invoices', file: 'shop_supplier_invoices.csv' },
+  'ds-shop-bank': { table: 'shop_bank', file: 'shop_bank.csv' },
+  'ds-shop-actions': { table: 'shop_actions', file: 'shop_actions.csv' },
 }
 
 test.before(async () => {

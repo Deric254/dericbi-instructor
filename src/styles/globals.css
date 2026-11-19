@@ -36,6 +36,7 @@
   --sim-color:      #3B82F6;    /* blue — distinct from accent green and Playground's indigo */
   --playground-color: #818cf8;  /* indigo */
   --de-color:       #fb7185;    /* rose — Data Engineering */
+  --bp-color:       #14b8a6;    /* teal — Business Problem Solver */
 
   /* Status */
   --success:        #22c55e;
@@ -128,6 +129,7 @@
   --sim-color:      #1d4ed8;
   --playground-color: #4338ca;
   --de-color:       #be123c;
+  --bp-color:       #0f766e;
 
   --success:        #15803d;
   --success-dim:    rgba(22, 163, 74, 0.12);

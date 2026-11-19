@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Database, FileSpreadsheet, Terminal,
   BarChart3, TrendingUp, Briefcase, FlaskConical,
   Table2, FolderOpen, BookOpen, Trophy, Settings,
-  ChevronLeft, ChevronRight, Users, LogOut, ShieldCheck, KeyRound, Workflow,
+  ChevronLeft, ChevronRight, Users, LogOut, ShieldCheck, KeyRound, Workflow, Target,
 } from 'lucide-react'
 import { useAuthStore, useUIStore } from '../../store'
 import type { NavSection } from '../../types'
@@ -27,6 +27,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'statistics',  label: 'Statistics',   icon: <TrendingUp size={16} />,     color: 'var(--stats-color)' },
   { id: 'business',    label: 'Business',     icon: <Briefcase size={16} />,      color: 'var(--business-color)' },
   { id: 'dataeng',     label: 'Data Engineering', icon: <Workflow size={16} />,   color: 'var(--de-color)' },
+  { id: 'bizsolver',   label: 'Business Problem Solver', icon: <Target size={16} />, color: 'var(--bp-color)' },
 
   // Practice
   { id: 'simulations', label: 'Simulations',  icon: <Users size={16} />,          color: 'var(--sim-color)',      section: 'Practice' },
