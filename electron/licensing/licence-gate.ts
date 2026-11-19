@@ -23,6 +23,8 @@ export const renewUrl = (installCode: string): string => `${RENEW_PAGE}?app=${RE
 /**
  * Channels that still work once the licence has run out: sign-in and password recovery, viewing lessons,
  * reading progress, projects, portfolio and datasets, and taking work out (portfolio export, open the file).
+ * userdb:list/describe/export only read the person's own saved databases (export takes them out). sql:schema only
+ * lists table names.
  * lessons:start only marks a lesson as opened (no points, no completion), and the lesson pages call it on
  * every open, so refusing it would make lessons impossible to view. sql:close-sandbox only frees memory.
  */
@@ -31,9 +33,10 @@ export const READ_CHANNELS: ReadonlySet<string> = new Set([
   'progress:dashboard', 'progress:skills', 'progress:rank', 'progress:memory', 'progress:achievements',
   'lessons:list', 'lessons:get', 'lessons:start',
   'exercises:get', 'exercises:hint',
-  'sql:history', 'sql:datasets', 'sql:close-sandbox',
+  'sql:history', 'sql:datasets', 'sql:close-sandbox', 'sql:schema',
+  'userdb:list', 'userdb:describe', 'userdb:export', 'progress:export',
   'files:profile',
-  'ai:has-key', 'ai:get-provider',
+  'ai:has-key', 'ai:get-provider', 'ai:usage',
   'settings:get', 'settings:get-all', 'app:get-version',
   'projects:list', 'projects:get', 'portfolio:list', 'portfolio:export', 'portfolio:open-file',
   'admin:check', 'admin:users-list', 'admin:user-detail', 'admin:content-stats', 'admin:system-info',

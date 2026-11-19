@@ -21,6 +21,7 @@ import LessonQuiz from '../components/ui/LessonQuiz'
 import { PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'
 import { usePendingLesson } from '../hooks/usePendingLesson'
+import { usePyodide } from '../hooks/usePyodide'
 import type { Lesson, SqlResult } from '../types'
 
 type View = 'lessons' | 'lesson' | 'playground' | 'mydbs'
@@ -378,9 +379,19 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
   // What the student's query actually returns, shown under the editor (SELECT-style queries only).
   const [output, setOutput] = useState<SqlResult | null>(null)
   const sandboxId = useRef(`ex_${exercise?.id}_${user?.id}`)
+  // Python practicals: the student's code runs here, in the app's own Python, next to hidden tests.
+  const isPython = exercise?.exercise_type === 'python_code'
+  const python = usePyodide('')
+  const [pyOutput, setPyOutput] = useState<{ text: string; error: string | null } | null>(null)
 
   useEffect(() => {
-    setCode('')
+    if (isPython) python.loadRuntime()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isPython])
+
+  useEffect(() => {
+    setCode(exercise?.python_starter ?? '')
+    setPyOutput(null)
     setResult(null)
     setFeedback(null)
     setHint(null)
@@ -410,12 +421,21 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
     setOutput(null)
 
     try {
+      let pythonRun: { checkOutput: string; error: string | null } | undefined
+      if (isPython) {
+        if (python.status === 'error') throw new Error('The Python engine could not start. Check your internet connection once, then reopen this exercise.')
+        if (python.status === 'idle' || python.status === 'loading') throw new Error('Python is still starting. Give it a few seconds and press Run again.')
+        const run = await python.runGraded({ setup: exercise.python_setup, code, check: exercise.python_check })
+        setPyOutput({ text: run.output, error: run.error })
+        pythonRun = { checkOutput: run.checkOutput, error: run.error }
+      }
       const res = await window.api.exercises.submit({
         userId: user.id,
         exerciseId: exercise.id,
         answer: code,
         timeSpentS: 60,
         sandboxId: sandboxId.current,
+        pythonRun,
       })
 
       setResult(res.validation)
@@ -441,6 +461,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
       // the spinner just stops with zero explanation. Always show something.
       notify.error('Could not run this', err?.message || 'Something went wrong. Try again.')
       setResult({ success: false, correct: false, error: err?.message || 'Something went wrong running this.' })
+      setFeedback(err?.message || 'Something went wrong running this.')
     } finally {
       setRunning(false)
     }
@@ -448,7 +469,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
 
   // Starting over also restores the practice tables, in case a query (e.g. DROP TABLE) changed them.
   const resetExercise = async () => {
-    setCode(''); setResult(null); setFeedback(null); setOutput(null); setCorrect(null)
+    setCode(exercise?.python_starter ?? ''); setResult(null); setFeedback(null); setOutput(null); setPyOutput(null); setCorrect(null)
     try { await window.api.sql.closeSandbox(sandboxId.current) } catch (err) { console.error('[reset exercise]', err) }
     if (lessonModule === 'sql') refreshSqlSchema(user?.id, sandboxId.current)
   }
@@ -492,7 +513,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
               padding: '3px 9px', borderRadius: 'var(--radius-full)',
               background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.3)',
             }}>
-              <Database size={11} /> Tables ready: {String(exercise.id).startsWith('de-') ? DATAENG_TABLES : 'patients, billing'}
+              <Database size={11} /> {isPython ? 'Python practical: Run tests your code with hidden checks' : <>Tables ready: {String(exercise.id).startsWith('de-') ? DATAENG_TABLES : 'patients, billing'}</>}
             </div>
           )}
           {hint && (
@@ -513,11 +534,11 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
       second={
       <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Editor, with the query output underneath (drag the divider to resize) */}
-        <ExerciseEditorArea showOutput={lessonModule === 'sql'} output={output} running={running} comparison={result && !result.correct ? result : null}>
+        <ExerciseEditorArea showOutput={lessonModule === 'sql'} output={output} python={isPython ? (pyOutput ?? { text: '', error: null }) : null} running={running} comparison={!isPython && result && !result.correct ? result : null}>
           <Editor
             height="100%"
-            language={lessonModule === 'sql' ? 'sql' : 'python'}
-            beforeMount={lessonModule === 'sql' ? prepareSqlEditor : preparePythonEditor}
+            language={lessonModule === 'sql' && !isPython ? 'sql' : 'python'}
+            beforeMount={lessonModule === 'sql' && !isPython ? prepareSqlEditor : preparePythonEditor}
             value={code}
             onChange={v => setCode(v ?? '')}
             theme={editorTheme}
@@ -620,17 +641,22 @@ function SqlPlayground() {
   const [datasets, setDatasets] = useState<{ bundled: any[]; imported: any[] }>({ bundled: [], imported: [] })
   const [activeDataset, setActiveDataset] = useState<any>(null)
   const sandboxId = useRef(`playground_${user?.id}`)
+  // Once the person has typed, the automatic first load must not replace their text with the sample query.
+  const typed = useRef(false)
   const [tutorOpen, setTutorOpen] = useState(false)
   const [tutorRequest, setTutorRequest] = useState<{ id: number; text: string } | undefined>()
 
-  const loadDataset = async (ds: any, type: 'bundled' | 'imported') => {
+  const loadDataset = async (ds: any, type: 'bundled' | 'imported', automatic = false) => {
     if (!user) return
     try {
       const res = await window.api.sql.loadDataset(sandboxId.current, ds.id, type, user.id)
       if (res.success) {
         setActiveDataset({ ...ds, type })
         refreshSqlSchema(user.id, sandboxId.current)
-        setQuery(`-- Dataset: ${ds.name}\n-- Table: ${ds.table_name}\nSELECT * FROM ${ds.table_name} LIMIT 20;`)
+        if (!(automatic && typed.current)) {
+          typed.current = false
+          setQuery(`-- Dataset: ${ds.name}\n-- Table: ${ds.table_name}\nSELECT * FROM ${ds.table_name} LIMIT 20;`)
+        }
         notify.success(`Loaded: ${ds.name}`)
       } else {
         notify.error('Failed to load dataset', res.error)
@@ -654,7 +680,7 @@ function SqlPlayground() {
       // instead, which is the more complex, derived table.
       const preferred = ds.bundled.find((d: any) => d.id === 'ds-hospital-patients') ?? ds.bundled[0]
       if (preferred) {
-        await loadDataset(preferred, 'bundled')
+        await loadDataset(preferred, 'bundled', true)
       }
     }).catch((err: any) => reportApiError('load your datasets', err))
     return () => { window.api.sql.closeSandbox(sandboxId.current) }
@@ -744,7 +770,7 @@ function SqlPlayground() {
             language="sql"
             beforeMount={prepareSqlEditor}
             value={query}
-            onChange={v => setQuery(v ?? '')}
+            onChange={v => { typed.current = true; setQuery(v ?? '') }}
             theme={editorTheme}
             options={{
               fontSize: 13, fontFamily: 'var(--font-mono)',
@@ -857,8 +883,8 @@ function stripSqlComments(sql: string): string {
 }
 
 /** Editor on top; for SQL exercises the query output sits below it, with a side-by-side view after a wrong answer. */
-function ExerciseEditorArea({ children, showOutput, output, running, comparison }: {
-  children: React.ReactNode; showOutput: boolean; output: SqlResult | null; running: boolean; comparison: Comparison | null
+function ExerciseEditorArea({ children, showOutput, output, python, running, comparison }: {
+  children: React.ReactNode; showOutput: boolean; output: SqlResult | null; python?: { text: string; error: string | null } | null; running: boolean; comparison: Comparison | null
 }) {
   const [tab, setTab] = useState<'output' | 'compare'>('output')
   const canCompare = hasComparison(comparison)
@@ -885,7 +911,13 @@ function ExerciseEditorArea({ children, showOutput, output, running, comparison 
             </div>
             <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
               {tab === 'compare' && canCompare ? <ComparePanel comparison={comparison} /> : (
-                <>
+                python ? (
+                  <div style={{ padding: 14, fontSize: 12, fontFamily: 'var(--font-mono)', whiteSpace: 'pre-wrap' }}>
+                    {!python.text && !python.error && <span style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-sans)' }}>{running ? 'Running…' : 'Press Run: what your code prints appears here, and the hidden tests check it.'}</span>}
+                    {python.text && <div style={{ color: 'var(--text-primary)' }}>{python.text}</div>}
+                    {python.error && <div style={{ color: 'var(--error)', marginTop: python.text ? 8 : 0 }}>{python.error}</div>}
+                  </div>
+                ) : <>
                   {!output && <div style={{ padding: 14, fontSize: 12, color: 'var(--text-muted)' }}>{running ? 'Running…' : 'Press Run to see what your query returns here.'}</div>}
                   {output && !output.success && <div style={{ padding: 14, fontSize: 12, color: 'var(--error)', fontFamily: 'var(--font-mono)', whiteSpace: 'pre-wrap' }}>{output.error}</div>}
                   {output?.success && output.notice && <div style={{ padding: '6px 14px', fontSize: 12, color: 'var(--warning)' }}>{output.notice}</div>}

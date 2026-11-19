@@ -200,6 +200,7 @@ function IssueForm({ signingUnlocked, defaultAmount, onIssued }: { signingUnlock
   const [name, setName] = useState('')
   const [contact, setContact] = useState('')
   const [months, setMonths] = useState(1)
+  const [lifetime, setLifetime] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
@@ -208,10 +209,10 @@ function IssueForm({ signingUnlocked, defaultAmount, onIssued }: { signingUnlock
     setError('')
     setBusy(true)
     try {
-      const r = await window.api.owner.issueNew({ code, name, contact, months, amount: defaultAmount })
+      const r = await window.api.owner.issueNew({ code, name, contact, months, amount: defaultAmount, lifetime })
       if (r.success) {
         onIssued(r)
-        setCode(''); setName(''); setContact(''); setMonths(1)
+        setCode(''); setName(''); setContact(''); setMonths(1); setLifetime(false)
       } else {
         setError(r.error)
       }
@@ -243,11 +244,15 @@ function IssueForm({ signingUnlocked, defaultAmount, onIssued }: { signingUnlock
         </div>
         <div className="input-group">
           <label className="input-label">Months paid now</label>
-          <select className="input" value={months} onChange={(e) => setMonths(Number(e.target.value))}>
+          <select className="input" value={months} disabled={lifetime} onChange={(e) => setMonths(Number(e.target.value))}>
             {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n} month{n > 1 ? 's' : ''}</option>)}
           </select>
         </div>
       </div>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, fontSize: 12, color: 'var(--text-secondary)' }}>
+        <input type="checkbox" checked={lifetime} onChange={(e) => setLifetime(e.target.checked)} />
+        Lifetime licence (never expires; no months to tick)
+      </label>
       {error && <div style={{ color: 'var(--error)', fontSize: 12, marginTop: 12 }}>{error}</div>}
       <button className="btn btn-primary" style={{ marginTop: 14 }} type="submit" disabled={busy || !signingUnlocked || !code.trim() || !name.trim()}>
         <KeyRound size={14} /> {busy ? 'Creating…' : 'Generate licence'}
@@ -267,6 +272,7 @@ function CustomerRow({ customer: c, index, currentMonth, signingUnlocked, stripe
   const paidNow = !!c.payments[currentMonth]
 
   const renew = () => act('renew the licence', () => window.api.owner.renew(c.id), (r) => onIssued(r))
+  const makeLifetime = () => act('issue a lifetime licence', () => window.api.owner.renew(c.id, true), (r) => onIssued(r))
 
   return (
     <div style={{ background: striped ? 'var(--bg-elevated)' : 'transparent', borderRadius: 'var(--radius)', padding: '10px 8px' }}>
@@ -295,6 +301,12 @@ function CustomerRow({ customer: c, index, currentMonth, signingUnlocked, stripe
 
       {open && (
         <div style={{ marginTop: 12, padding: 14, border: '1px solid var(--border)', borderRadius: 'var(--radius)', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <button className="btn btn-secondary btn-sm" disabled={!signingUnlocked} onClick={makeLifetime}
+              title={signingUnlocked ? 'Replace this customer\'s licence with one that never expires' : 'Unlock signing first'}>
+              <KeyRound size={12} /> Issue a lifetime licence
+            </button>
+          </div>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
               <button className="btn btn-ghost btn-sm" onClick={() => setYear(year - 1)} aria-label="Previous year">‹</button>

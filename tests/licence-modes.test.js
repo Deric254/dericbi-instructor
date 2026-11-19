@@ -37,7 +37,7 @@ function setup(today = '2026-01-01') {
 }
 const advance = (now, days) => { now.d = new Date(now.d.getTime() + days * 86400000) }
 
-test('valid licence: full use, no grace flag, not read-only', { todo: "KNOWN GAP: grace period, view-only mode, lifetime plans and the pay window described in CHANGES-v1.7 are not in this snapshot's licence code" }, () => {
+test('valid licence: full use, no grace flag, not read-only', () => {
   const { cust, owner, seed, code } = setup()
   cust.activate(owner.issue(seed, code, 'Jane', 30).licence)
   const s = cust.state()
@@ -45,7 +45,7 @@ test('valid licence: full use, no grace flag, not read-only', { todo: "KNOWN GAP
   assert.equal(s.install_id, code)
 })
 
-test('grace: 5 days after the end everything works and the days left count down', { todo: "KNOWN GAP: grace period, view-only mode, lifetime plans and the pay window described in CHANGES-v1.7 are not in this snapshot's licence code" }, () => {
+test('grace: 5 days after the end everything works and the days left count down', () => {
   const { cust, owner, seed, code, now } = setup()
   cust.activate(owner.issue(seed, code, 'Jane', 30).licence)
   advance(now, 31)                                   // 1 day after the end
@@ -54,7 +54,7 @@ test('grace: 5 days after the end everything works and the days left count down'
   s = cust.state(); assert.deepEqual([s.ok, s.grace, s.grace_days_left], [true, true, 0])
 })
 
-test('after grace: view-only (kind expired, read_only), not unlicensed', { todo: "KNOWN GAP: grace period, view-only mode, lifetime plans and the pay window described in CHANGES-v1.7 are not in this snapshot's licence code" }, () => {
+test('after grace: view-only (kind expired, read_only), not unlicensed', () => {
   const { cust, owner, seed, code, now } = setup()
   cust.activate(owner.issue(seed, code, 'Jane', 30).licence)
   advance(now, 36)                                   // 6 days after the end
@@ -65,7 +65,7 @@ test('after grace: view-only (kind expired, read_only), not unlicensed', { todo:
   assert.throws(() => cust.activate((t => t.slice(0, -2) + (t.endsWith('AA') ? 'BB' : 'AA'))(owner.issue(seed, code, 'Jane', 30).licence)), /signed|licence/i) // a tampered one is still refused
 })
 
-test('renewing restores full use at once', { todo: "KNOWN GAP: grace period, view-only mode, lifetime plans and the pay window described in CHANGES-v1.7 are not in this snapshot's licence code" }, () => {
+test('renewing restores full use at once', () => {
   const { cust, owner, seed, code, now } = setup()
   cust.activate(owner.issue(seed, code, 'Jane', 30).licence)
   advance(now, 60); assert.equal(cust.state().kind, 'expired')
@@ -84,7 +84,7 @@ test('never activated, wrong computer and wound-back clock stay fully locked (no
   assert.match(s.message, /clock/)
 })
 
-test('lifetime: expires 2099-12-31 with plan lifetime, never nags or expires; days are not needed', { todo: "KNOWN GAP: grace period, view-only mode, lifetime plans and the pay window described in CHANGES-v1.7 are not in this snapshot's licence code" }, () => {
+test('lifetime: expires 2099-12-31 with plan lifetime, never nags or expires; days are not needed', () => {
   const { cust, owner, seed, code, now } = setup()
   const out = owner.issue(seed, code, 'Jane', undefined, undefined, true)
   assert.equal(out.expires, '2099-12-31')
@@ -95,7 +95,7 @@ test('lifetime: expires 2099-12-31 with plan lifetime, never nags or expires; da
   assert.throws(() => owner.issue(seed, code, 'Jane', 400), /lasts 1 to 365/)
 })
 
-test('owner console can issue lifetime licences (checkbox + renew flag reach the signer)', { todo: "KNOWN GAP: grace period, view-only mode, lifetime plans and the pay window described in CHANGES-v1.7 are not in this snapshot's licence code" }, () => {
+test('owner console can issue lifetime licences (checkbox + renew flag reach the signer)', () => {
   const svc = read('electron/services/owner.service.ts')
   assert.match(svc, /issue\(seedForSigning\(\), c\.code, c\.name, days, undefined, lifetime\)/)
   assert.match(read('electron/ipc/licence-handlers.ts'), /owner:renew', async \(_, id: string, lifetime\?: boolean\) => Owner\.renew\(id, lifetime\)/)
@@ -106,14 +106,15 @@ test('owner console can issue lifetime licences (checkbox + renew flag reach the
 const READ = ['auth:login', 'auth:validate-session', 'auth:logout', 'auth:get-security-question', 'auth:reset-password',
   'progress:dashboard', 'progress:skills', 'progress:rank', 'progress:memory', 'progress:achievements',
   'lessons:list', 'lessons:get', 'lessons:start', 'exercises:get', 'exercises:hint',
-  'sql:history', 'sql:datasets', 'sql:close-sandbox', 'files:profile', 'ai:has-key', 'ai:get-provider',
+  'sql:history', 'sql:datasets', 'sql:close-sandbox', 'sql:schema', 'userdb:list', 'userdb:describe', 'userdb:export', 'progress:export', 'files:profile', 'ai:has-key', 'ai:get-provider', 'ai:usage',
   'settings:get', 'settings:get-all', 'app:get-version', 'projects:list', 'projects:get', 'portfolio:list',
   'portfolio:export', 'portfolio:open-file',
   'admin:check', 'admin:users-list', 'admin:user-detail', 'admin:content-stats', 'admin:system-info']
 const WRITE = ['auth:register', 'auth:update-profile', 'auth:change-password', 'auth:set-security-question',
   'lessons:complete', 'exercises:submit', 'sql:execute', 'sql:load-dataset',
+  'userdb:create', 'userdb:rename', 'userdb:delete',
   'files:pick', 'files:import', 'files:delete',
-  'ai:chat', 'ai:exercise-feedback', 'ai:save-key', 'ai:list-models', 'ai:set-provider', 'settings:set',
+  'progress:import', 'ai:chat', 'ai:exercise-feedback', 'ai:save-key', 'ai:list-models', 'ai:set-provider', 'settings:set',
   'projects:create', 'projects:update', 'projects:delete', 'portfolio:create', 'portfolio:delete',
   'admin:reset-user-progress', 'admin:set-admin', 'admin:delete-user',
   'owner:overview', 'owner:unlock-file', 'owner:unlock-saved', 'owner:unlock-pasted', 'owner:lock', 'owner:issue-new', 'owner:renew',
@@ -133,7 +134,7 @@ function registeredChannels() {
   return out
 }
 
-test('every IPC channel is classified read, write or licence-screen; the code lists exactly the read ones', { todo: "KNOWN GAP: grace period, view-only mode, lifetime plans and the pay window described in CHANGES-v1.7 are not in this snapshot's licence code" }, () => {
+test('every IPC channel is classified read, write or licence-screen; the code lists exactly the read ones', () => {
   const registered = registeredChannels()
   assert.equal(new Set(registered).size, registered.length, 'a channel is registered twice')
   assert.deepEqual([...registered].sort(), [...READ, ...WRITE, ...UNGATED].sort(),
@@ -150,7 +151,7 @@ test('gate: valid licence allows all; view-only allows reads and refuses writes 
   for (const c of [...READ, ...WRITE]) assert.equal(Gate.allows(c, locked), false, c)
 })
 
-test('the safe-handle wrapper uses the gate, and the refusal text is what the screen matches on', { todo: "KNOWN GAP: grace period, view-only mode, lifetime plans and the pay window described in CHANGES-v1.7 are not in this snapshot's licence code" }, () => {
+test('the safe-handle wrapper uses the gate, and the refusal text is what the screen matches on', () => {
   assert.match(read('electron/ipc/safe-handle.ts'), /requireAccess\(channel\)/)
   assert.match(read('electron/services/licence.service.ts'), /st\.read_only \? READ_ONLY_MESSAGE/)
   assert.equal(Gate.READ_ONLY_MESSAGE, 'Your licence has expired, so this is view-only. Renew your licence to add or change anything.')
@@ -161,7 +162,7 @@ test('the safe-handle wrapper uses the gate, and the refusal text is what the sc
 })
 
 // ── pay window ──
-test('pay window: one window, right account, amounts, tag and plans', { todo: "KNOWN GAP: grace period, view-only mode, lifetime plans and the pay window described in CHANGES-v1.7 are not in this snapshot's licence code" }, () => {
+test('pay window: one window, right account, amounts, tag and plans', () => {
   assert.equal(Pay.PAY.email, 'dericmarangu@gmail.com')
   assert.equal(Pay.PAY.tag, 'INS'); assert.equal(Pay.PAY.app, 'DericBI Instructor')
   assert.deepEqual([Pay.PAY.plans.M.amount, Pay.PAY.plans.L.amount], [100, 1000])
@@ -188,7 +189,7 @@ test('proof email carries what is needed to issue the licence', () => {
   assert.match(read('src/components/ui/PayWindow.tsx'), /Attach the screenshot and press Send/)
 })
 
-test('only payment links can be opened: exact allowlist, every link the window builds passes, others fail', { todo: "KNOWN GAP: grace period, view-only mode, lifetime plans and the pay window described in CHANGES-v1.7 are not in this snapshot's licence code" }, () => {
+test('only payment links can be opened: exact allowlist, every link the window builds passes, others fail', () => {
   assert.deepEqual([...Gate.LINK_ALLOW].sort(), ['https://dericbi.vercel.app/renew.html?', 'https://mail.google.com/mail/?view=cm', 'https://www.paypal.com/', 'mailto:dericmarangu@gmail.com?'].sort())
   const m = Pay.payMail('L', 'ABCD-EFGH-JKLM')
   for (const u of [m.mailto, m.gmail, Pay.PAY.paypal, 'https://dericbi.vercel.app/renew.html?app=instructor&code=ABCD-EFGH-JKLM']) assert.equal(Gate.isAllowedLink(u), true, u)

@@ -34,13 +34,14 @@ const runLikePage = runPythonCaptured
 
 // ───────────────────────── the app and these tests use the same Python ─────────────────────────
 
-test('every place the app loads Pyodide uses the same version these tests run', () => {
-  const found = []
-  for (const f of ['src/hooks/usePyodide.ts', 'src/pages/PythonAcademy.tsx', 'src/pages/StatisticsAcademyFull.tsx']) {
-    for (const m of src(f).matchAll(/pyodide\/v([\d.]+)\//g)) found.push(`${f}: ${m[1]}`)
+test('the app starts Python from ONE loader, which uses the same version these tests run', () => {
+  const loader = src('src/lib/pyodideLoader.ts')
+  const found = [...loader.matchAll(/pyodide\/v([\d.]+)\//g)].map((m) => m[1])
+  assert.equal(found.length, 1, 'one internet address in the loader')
+  assert.equal(found[0], PY_VERSION, `the app must stay on v${PY_VERSION} (the devDependency "pyodide"). Upgrade both together.`)
+  for (const f of ['src/hooks/usePyodide.ts', 'src/pages/PythonAcademy.tsx', 'src/pages/StatisticsAcademyFull.tsx', 'src/pages/SqlAcademy.tsx']) {
+    assert.doesNotMatch(src(f), /cdn\.jsdelivr\.net\/pyodide|loadPyodide\(/, `${f} must use the shared loader, not start Python itself`)
   }
-  assert.ok(found.length >= 4, `expected the script and index URLs in the loaders, found ${found.length}`)
-  for (const entry of found) assert.ok(entry.endsWith(PY_VERSION), `${entry} - the app must stay on v${PY_VERSION} (the devDependency "pyodide"). Upgrade both together.`)
 })
 
 test('the pinned Pyodide release still exists on the CDN and still ships pandas, numpy and matplotlib', async (t) => {

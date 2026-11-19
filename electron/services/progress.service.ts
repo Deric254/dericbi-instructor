@@ -229,14 +229,23 @@ export function checkAndAwardAchievements(userId: string): string[] {
         break
       }
       case 'exercise_complete': {
-        let q = 'SELECT COUNT(*) as c FROM exercise_attempts WHERE user_id = ? AND is_correct = 1'
+        // `distinct` counts each exercise once, however many times it was solved
+        let q = `SELECT COUNT(${condition.distinct ? 'DISTINCT exercise_id' : '*'}) as c FROM exercise_attempts WHERE user_id = ? AND is_correct = 1`
         const params: any[] = [userId]
         if (condition.skill) {
           q += ' AND exercise_id IN (SELECT id FROM exercises WHERE lesson_id IN (SELECT id FROM lessons WHERE module = ?))'
           params.push(condition.skill)
         }
+        if (condition.exercise_type) {
+          q += ' AND exercise_id IN (SELECT id FROM exercises WHERE exercise_type = ?)'
+          params.push(condition.exercise_type)
+        }
         const count = (db.prepare(q).get(...params) as any).c
         met = count >= condition.count
+        break
+      }
+      case 'lesson_complete': {
+        met = !!db.prepare("SELECT 1 FROM lesson_progress WHERE user_id = ? AND lesson_id = ? AND status = 'complete'").get(userId, condition.lesson_id)
         break
       }
       case 'python_run': {
@@ -347,11 +356,18 @@ export function getLearningPlan(userId: string, now: Date = new Date()): Learnin
   `).get(userId) as any
   if (midway) next = { lesson_id: midway.id, title: midway.title, module: midway.module, status: 'in_progress' }
   else {
-    const open = (db.prepare(`
+    const candidates = db.prepare(`
       SELECT l.id, l.title, l.module, l.sort_order, lp.status AS progress
       FROM lessons l LEFT JOIN lesson_progress lp ON lp.lesson_id = l.id AND lp.user_id = ?
       WHERE (lp.status = 'available' OR (lp.status IS NULL AND l.prerequisites = '[]'))
-    `).all(userId) as any[]).sort((a, b) => moduleRank(a.module) - moduleRank(b.module) || a.sort_order - b.sort_order)[0]
+    `).all(userId) as any[]
+    // Stay in the academy they just worked in; only when it has nothing open fall back to the fixed academy order.
+    const last = db.prepare(`
+      SELECT l.module FROM lesson_progress lp JOIN lessons l ON l.id = lp.lesson_id
+      WHERE lp.user_id = ? AND lp.status = 'complete' ORDER BY lp.completed_at DESC LIMIT 1
+    `).get(userId) as any
+    const here = last ? candidates.filter((c) => c.module === last.module) : []
+    const open = (here.length ? here : candidates).sort((a, b) => moduleRank(a.module) - moduleRank(b.module) || a.sort_order - b.sort_order)[0]
     if (open) next = { lesson_id: open.id, title: open.title, module: open.module, status: open.progress ? 'available' : 'new' }
   }
 

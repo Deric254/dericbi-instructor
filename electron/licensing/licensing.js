@@ -18,6 +18,7 @@ const path = require('path');
 
 const SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex');
 const PKCS8_PREFIX = Buffer.from('302e020100300506032b657004220420', 'hex');
+const LIFETIME_YEAR = 2099;
 const ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
 class LicenceError extends Error {}
@@ -69,17 +70,23 @@ class Licensing {
   }
   ownerKeyMatches(seed) { return !!this.publicRaw && crypto.timingSafeEqual(publicFromSeed(seed), this.publicRaw); }
 
-  issue(seed, code, user, days, features) {
+  issue(seed, code, user, days, features, lifetime = false) {
     if (!this.ownerKeyMatches(seed)) throw new LicenceError("That owner key doesn't belong to this app. Use the key made for this app's installer.");
     const norm = normCode(code);
     if (norm.length !== 12) throw new Error('The activation code is 12 letters and numbers, like ABCD-EFGH-JKLM.');
     user = String(user || '').trim().replace(/\s+/g, ' ');
     if (user.length < 1 || user.length > 60) throw new Error("Give the licence holder's name (1 to 60 characters).");
-    days = Math.trunc(Number(days));
-    if (!(days >= 1 && days <= this.maxDays)) throw new Error(`A licence lasts 1 to ${this.maxDays} days.`);
     const today = this._today();
-    const expires = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + days));
+    let expires;
+    if (lifetime) {
+      expires = new Date(Date.UTC(LIFETIME_YEAR, 11, 31)); // a lifetime licence is an ordinary signed licence that ends far away
+    } else {
+      days = Math.trunc(Number(days));
+      if (!(days >= 1 && days <= this.maxDays)) throw new Error(`A licence lasts 1 to ${this.maxDays} days.`);
+      expires = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + days));
+    }
     const body = { app: this.appId, expires: isoDate(expires), for: norm, issued: isoDate(today), role: 'member', user, v: this.version };
+    if (lifetime) body.plan = 'lifetime';
     if (features && features.length) body.features = [...new Set(features.map(String))].sort();
     // keys in sorted order, no spaces: identical bytes to the Python module (verification does not depend on it)
     const payload = Buffer.from(JSON.stringify(Object.fromEntries(Object.entries(body).sort(([a], [b]) => (a < b ? -1 : 1)))));
@@ -97,7 +104,8 @@ class Licensing {
     return code;
   }
 
-  read(token, forInstall) {
+  /** Checks signature, app and computer. An ended licence is refused unless `allowEnded` (state() needs to see it to run grace/view-only). */
+  read(token, forInstall, allowEnded = false) {
     if (!this.configured()) throw new LicenceError("This copy of the app can't check licences yet (the owner key isn't set in the build).");
     const bad = new LicenceError("That doesn't look like a licence. Paste the whole text the owner sent you.");
     const parts = String(token || '').replace(/\s+/g, '').split('.');
@@ -114,7 +122,7 @@ class Licensing {
     if (!exp || isNaN(exp)) throw new LicenceError('That licence has no valid expiry date.');
     const t = this._today();
     const todayUtc = Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate());
-    if (exp.getTime() + this.graceDays * 86400000 < todayUtc) throw new LicenceError('This licence has expired. Ask the owner for a new one.');
+    if (!allowEnded && exp.getTime() < todayUtc) throw new LicenceError('This licence has expired. Ask the owner for a new one.');
     return data;
   }
 
@@ -153,11 +161,18 @@ class Licensing {
     const unlicensed = (message) => ({ ok: false, kind: 'unlicensed', message, install_id: this.installId() });
     if (!token) return unlicensed("This computer isn't licensed yet.");
     let data;
-    try { data = this.read(token); } catch (e) { if (e instanceof LicenceError) return unlicensed(e.message); throw e; }
+    try { data = this.read(token, undefined, true); } catch (e) { if (e instanceof LicenceError) return unlicensed(e.message); throw e; }
     if (!this.clockOk()) return unlicensed("This computer's clock was set back. Fix the date and time to continue.");
     const t = this._today();
     const left = Math.round((new Date(`${data.expires}T00:00:00Z`).getTime() - Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate())) / 86400000);
-    return { ok: true, kind: 'licensed', message: '', expires: data.expires, days_left: left, user: data.user, features: data.features || [] };
+    const install_id = this.installId();
+    const lifetime = data.plan === 'lifetime';
+    const base = { expires: data.expires, days_left: left, user: data.user, features: data.features || [], install_id, lifetime };
+    if (left >= 0) return { ok: true, kind: 'licensed', message: '', ...base };
+    const over = -left; // days since the end
+    if (over <= this.graceDays) return { ok: true, kind: 'licensed', message: '', ...base, grace: true, grace_days_left: this.graceDays - over };
+    // Past the grace days: the person is never locked out of their own data, they can only view it until they renew.
+    return { ok: false, kind: 'expired', read_only: true, message: `Your licence expired on ${data.expires}. You can still view your data. Renew to add or change anything.`, ...base };
   }
 }
 

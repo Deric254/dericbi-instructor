@@ -19,6 +19,7 @@ const api = {
     state: () => ipcRenderer.invoke('licence:state'),
     activate: (token: string) => ipcRenderer.invoke('licence:activate', token),
     claimOwner: (pastedKey?: string) => ipcRenderer.invoke('licence:claim-owner', pastedKey),
+    openLink: (url: string) => ipcRenderer.invoke('licence:open-link', url),
   },
 
   // Owner Console (the main process refuses these unless this computer was claimed with the owner key)
@@ -29,7 +30,7 @@ const api = {
     unlockPasted: (keyText: string) => ipcRenderer.invoke('owner:unlock-pasted', keyText),
     lock: () => ipcRenderer.invoke('owner:lock'),
     issueNew: (input: unknown) => ipcRenderer.invoke('owner:issue-new', input),
-    renew: (id: string) => ipcRenderer.invoke('owner:renew', id),
+    renew: (id: string, lifetime?: boolean) => ipcRenderer.invoke('owner:renew', id, lifetime),
     setPayment: (id: string, month: string, paid: boolean) => ipcRenderer.invoke('owner:set-payment', id, month, paid),
     updateCustomer: (id: string, patch: unknown) => ipcRenderer.invoke('owner:update-customer', id, patch),
     deleteCustomer: (id: string) => ipcRenderer.invoke('owner:delete-customer', id),
@@ -121,6 +122,13 @@ const api = {
     getProvider: (userId: string) => ipcRenderer.invoke('ai:get-provider', userId),
     setProvider: (provider: string) => ipcRenderer.invoke('ai:set-provider', { provider }),
     listModels: (userId: string, provider: string) => ipcRenderer.invoke('ai:list-models', { userId, provider }),
+    usage: (userId: string) => ipcRenderer.invoke('ai:usage', userId),
+  },
+
+  // Progress backup
+  progress_backup: {
+    export: (userId: string) => ipcRenderer.invoke('progress:export', { userId }),
+    import: (userId: string) => ipcRenderer.invoke('progress:import', { userId }),
   },
 
   // Settings

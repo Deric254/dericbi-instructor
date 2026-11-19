@@ -7,9 +7,14 @@ import { useAuthStore, useUIStore, notify } from '../store'
 import type { LicenceState } from '../types'
 import { reportApiError } from '../lib/apiError'
 import { resetAllLayouts } from '../lib/splitLayout'
+import PayPlans from '../components/ui/PayWindow'
 
 export default function Settings() {
   const { user, token, logout: storeLogout } = useAuthStore()
+  const [usage, setUsage] = useState<{ today: number; week: number; month: number } | null>(null)
+  useEffect(() => {
+    if (user) window.api.ai.usage(user.id).then(setUsage).catch(() => setUsage(null))
+  }, [user])
   const [provider, setProvider] = useState('gemini')
   const [appVersion, setAppVersion] = useState<string | null>(null)
   const [checkingUpdate, setCheckingUpdate] = useState(false)
@@ -184,17 +189,20 @@ export default function Settings() {
             The AI Instructor requires your own API key. Keys are AES-256 encrypted and stored only on your device. They are never sent to DericBI servers.
           </div>
 
-          {/* Provider selector */}
+          {usage && (
+            <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 16, padding: '8px 12px', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
+              Tutor answers used: <strong>{usage.today}</strong> today · <strong>{usage.week}</strong> in the last 7 days · <strong>{usage.month}</strong> this month. The tutor only answers when you ask, and every answer spends your AI balance.
+            </p>
+          )}
+
+          {/* Provider: one dropdown instead of a wall of buttons */}
           <div style={{ marginBottom: 18 }}>
-            <label className="input-label">Active Provider</label>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 6 }}>
+            <label className="input-label" htmlFor="ai-provider">AI provider</label>
+            <select id="ai-provider" className="input" value={provider} onChange={e => setActiveProvider(e.target.value)} style={{ marginTop: 6 }}>
               {PROVIDERS.map(p => (
-                <button key={p.id} onClick={() => setActiveProvider(p.id)} style={{ padding: '7px 16px', borderRadius: 'var(--radius)', border: `1px solid ${provider === p.id ? 'var(--accent)' : 'var(--border)'}`, background: provider === p.id ? 'var(--accent-dim)' : 'transparent', color: provider === p.id ? 'var(--accent)' : 'var(--text-muted)', cursor: 'pointer', fontSize: 12, fontWeight: provider === p.id ? 600 : 400, transition: 'all var(--transition)' }}>
-                  {provider === p.id && <CheckCircle size={11} style={{ marginRight: 5 }} />}
-                  {p.label}
-                </button>
+                <option key={p.id} value={p.id}>{p.label}{keySaved[p.id] ? '  ✓ key saved' : ''}</option>
               ))}
-            </div>
+            </select>
             <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
               {PROVIDERS.find(p => p.id === provider)?.desc}
             </p>
@@ -203,7 +211,7 @@ export default function Settings() {
           {/* Model selector - a live list from the provider, so a retired model can never be offered */}
           {keySaved[provider] && (
             <div style={{ marginBottom: 18 }}>
-              <label className="input-label">{PROVIDERS.find(p => p.id === provider)?.label} Model</label>
+              <label className="input-label" htmlFor="ai-model">{PROVIDERS.find(p => p.id === provider)?.label} model</label>
               {(() => {
                 const info = live[provider]
                 const settingKey = `${provider}_model`
@@ -220,28 +228,15 @@ export default function Settings() {
                 }
                 const choose = (id: string) => { saveSetting(settingKey, id); setLive(prev => ({ ...prev, [provider]: { ...prev[provider], selected: id } })) }
                 const auto = !saved || !info.models.includes(saved)
-                const row = (id: string, title: string, note: string, isSelected: boolean) => (
-                  <button key={id || 'auto'} onClick={() => choose(id)} style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px',
-                    borderRadius: 'var(--radius)', border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`,
-                    background: isSelected ? 'var(--accent-dim)' : 'transparent', cursor: 'pointer', textAlign: 'left',
-                  }}>
-                    <div>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: isSelected ? 'var(--accent)' : 'var(--text-primary)' }}>{title}</span>
-                      <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8 }}>{note}</span>
-                    </div>
-                    {isSelected && <CheckCircle size={13} color="var(--accent)" />}
-                  </button>
-                )
                 return (
                   <>
-                    <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>
+                    <select id="ai-model" aria-label="AI model" className="input" value={auto ? '' : saved} onChange={e => choose(e.target.value)}>
+                      <option value="">{`Automatic (currently ${info.models[0]})`}</option>
+                      {info.models.map(id => <option key={id} value={id}>{id}</option>)}
+                    </select>
+                    <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
                       This list comes live from the provider, so it is always current. Automatic always uses the best available model and keeps working when the provider retires one.
                     </p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 260, overflow: 'auto' }}>
-                      {row('', 'Automatic', `currently ${info.models[0]}`, auto)}
-                      {info.models.map(id => row(id, id, '', !auto && saved === id))}
-                    </div>
                   </>
                 )
               })()}
@@ -249,7 +244,7 @@ export default function Settings() {
           )}
 
           {/* Key inputs */}
-          {PROVIDERS.map(p => (
+          {PROVIDERS.filter(p => p.id === provider).map(p => (
             <div key={p.id} style={{ marginBottom: 14 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
                 <label className="input-label" style={{ margin: 0 }}>{p.label} API Key</label>
@@ -310,6 +305,27 @@ export default function Settings() {
           <button className="btn btn-secondary btn-sm" onClick={saveProfile} disabled={savingProfile}>
             {savingProfile ? <><Loader size={12} className="animate-spin" />Saving…</> : <><Save size={12} />Save Profile</>}
           </button>
+        </Section>
+
+        {/* ── Progress backup ── */}
+        <Section icon={<Save size={15} />} title="Back up my progress">
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12, lineHeight: 1.6 }}>
+            Save your lessons, attempts, skills, achievements and projects to one file. Keep it safe, or use it to continue on another computer or after a reinstall. It never contains your password, licence or AI keys.
+          </p>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <button className="btn btn-secondary btn-sm" onClick={async () => {
+              if (!user) return
+              const r = await window.api.progress_backup.export(user.id)
+              if (r.success) notify.success('Progress saved', r.savedTo)
+              else if (!r.cancelled) notify.error('Could not save progress', r.error)
+            }}>Save my progress to a file</button>
+            <button className="btn btn-secondary btn-sm" onClick={async () => {
+              if (!user) return
+              const r = await window.api.progress_backup.import(user.id)
+              if (r.success) notify.success('Progress restored', `${r.added} item${r.added === 1 ? '' : 's'} added${r.skipped ? `, ${r.skipped} already here or not part of this version` : ''}. Reopen a lesson list to see it.`)
+              else if (!r.cancelled) notify.error('Could not restore progress', r.error)
+            }}>Restore from a file</button>
+          </div>
         </Section>
 
         {/* ── Preferences ── */}
@@ -603,17 +619,21 @@ function LicenceSection() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
         <CheckCircle size={13} color="var(--success)" />
         <span style={{ color: 'var(--text-secondary)' }}>
-          {state.kind === 'owner' ? 'Owner copy: no expiry' : `Active until ${state.expires}`}
+          {state.kind === 'owner' ? 'Owner copy: no expiry'
+            : state.lifetime ? 'Lifetime licence: never expires'
+            : state.readOnly ? `Expired on ${state.expires}: view-only`
+            : state.grace ? `Ended ${state.expires}: ${state.graceDaysLeft} day${state.graceDaysLeft === 1 ? '' : 's'} of full use left`
+            : `Active until ${state.expires}`}
         </span>
       </div>
       {state.user && <div>Licensed to: <span style={{ color: 'var(--text-secondary)' }}>{state.user}</span></div>}
-      {state.daysLeft !== undefined && <div>Days left: <span style={{ color: 'var(--text-secondary)' }}>{state.daysLeft}</span></div>}
+      {state.daysLeft !== undefined && state.daysLeft >= 0 && !state.lifetime && <div>Days left: <span style={{ color: 'var(--text-secondary)' }}>{state.daysLeft}</span></div>}
       <div>
         Activation code: <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>{state.installCode}</span>{' '}
         <button className="btn btn-ghost btn-sm" onClick={copyCode}>{copied ? 'Copied' : 'Copy'}</button>
       </div>
 
-      {state.kind === 'licensed' && (
+      {(state.kind === 'licensed' || state.kind === 'expired') && !state.lifetime && (
         <div style={{ marginTop: 16, padding: '12px 14px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
           <div style={{ marginBottom: 8, lineHeight: 1.6 }}>
             Paid for the next period? Paste the renewal licence we send you. It works only for this computer's activation code.
@@ -624,6 +644,8 @@ function LicenceSection() {
           <button className="btn btn-secondary btn-sm" style={{ marginTop: 10 }} disabled={busy || !token.trim()} onClick={renew}>
             {busy ? 'Applying…' : 'Apply renewal'}
           </button>
+          <div className="input-label" style={{ margin: '16px 0 6px' }}>Need to pay?</div>
+          <PayPlans installCode={state.installCode} />
         </div>
       )}
     </div>

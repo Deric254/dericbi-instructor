@@ -1,9 +1,11 @@
-import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, dialog, protocol } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import path from 'path'
 import { initDb, closeDb, backupDb } from './db/database'
 import { registerAllHandlers } from './ipc/handlers'
 import { runFirstTimeSetup } from './services/setup.service'
+import { PY_SCHEME, resolvePyodideFile } from './pyodide-protocol'
+import fs from 'fs'
 
 // ─────────────────────────────────────────────
 // Trigger rebuild comment
@@ -11,6 +13,9 @@ import { runFirstTimeSetup } from './services/setup.service'
 // ─────────────────────────────────────────────
 const gotLock = app.requestSingleInstanceLock()
 if (!gotLock) { app.quit() }
+
+// The Python engine is served from inside the app (see pyodide-protocol.ts) so Python practicals work offline.
+protocol.registerSchemesAsPrivileged([{ scheme: PY_SCHEME, privileges: { standard: true, secure: true, supportFetchAPI: true, corsEnabled: true } }])
 
 let mainWindow: BrowserWindow | null = null
 let splashWindow: BrowserWindow | null = null
@@ -273,6 +278,14 @@ function setupUpdater(): void {
 // ─────────────────────────────────────────────
 
 app.whenReady().then(async () => {
+  protocol.handle(PY_SCHEME, async (request) => {
+    const hit = resolvePyodideFile(request.url, path.join(__dirname, '..'))
+    if (!hit) return new Response('Not found', { status: 404 })
+    try {
+      return new Response(await fs.promises.readFile(hit.file), { headers: { 'content-type': hit.type, 'cache-control': 'max-age=31536000' } })
+    } catch { return new Response('Not found', { status: 404 }) }
+  })
+
   // Show splash immediately
   createSplash()
   updateSplash(5, 'Initialising database…')

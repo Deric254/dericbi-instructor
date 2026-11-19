@@ -183,8 +183,7 @@ test('every SELECT exercise answer in the SQL course returns rows through the sa
 
 test('no screen uses window.prompt() or alert() (Electron does not support prompt: the button silently does nothing)', () => {
   const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]))
-  const ORPHANS = ['LicenseGate.tsx', 'PayWindow.tsx']
-  for (const f of walk(path.join(ROOT, 'src')).filter((x) => /\.tsx?$/.test(x) && !ORPHANS.includes(path.basename(x)))) {
+  for (const f of walk(path.join(ROOT, 'src')).filter((x) => /\.tsx?$/.test(x))) {
     const text = fs.readFileSync(f, 'utf8')
     assert.doesNotMatch(text, /\bwindow\.prompt\(|[^.\w]prompt\(['"`]/, `${path.relative(ROOT, f)} uses prompt()`)
     assert.doesNotMatch(text, /\bwindow\.alert\(|[^.\w]alert\(/, `${path.relative(ROOT, f)} uses alert()`)

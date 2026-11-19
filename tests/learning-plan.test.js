@@ -94,3 +94,16 @@ test('"Continue" opens the exact lesson: the Dashboard names it and every academ
   assert.match(hook, /user_status !== 'locked'/, 'a locked lesson is never opened')
   assert.match(hook, /\(\) => \(\) => setPending\(null\)/, 'the request never outlives the page')
 })
+
+test('"Next lesson" stays in the academy the student is working in, and falls back to the fixed order when it has nothing open', () => {
+  const g = db.getDb()
+  makeLearner(h, db, 'stay')
+  const put = (id, lesson, status) => g.prepare(
+    "INSERT INTO lesson_progress (id, user_id, lesson_id, status, completed_at) VALUES (?, 'stay', ?, ?, CASE WHEN ? = 'complete' THEN datetime('now') END) ON CONFLICT(user_id, lesson_id) DO UPDATE SET status = excluded.status, completed_at = excluded.completed_at"
+  ).run(id, lesson, status, status)
+  put('stay1', 'de-foundations', 'complete')
+  put('stay2', 'de-profiling', 'available')
+  assert.equal(P.getLearningPlan('stay').next.lesson_id, 'de-profiling', 'finishing a Data Engineering lesson continues in Data Engineering, not back at SQL lesson 1')
+  put('stay2', 'de-profiling', 'locked')
+  assert.equal(P.getLearningPlan('stay').next.module, 'sql', 'nothing open there: back to the fixed order')
+})

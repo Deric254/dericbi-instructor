@@ -3,6 +3,9 @@
 // the UI does (window.api.sql.execute -> 'sql:execute') and get the real handler's answer.
 const { boot } = require('./harness')
 
+/** A stand-in for the licence check: a licensed copy passes everything, an unlicensed one refuses with the real wording. */
+const licenceGate = (licensed) => () => { if (!licensed) throw new Error('This copy of DericBI Instructor is not activated.') }
+
 function bootWithIpc(opts = {}) {
   const handlers = new Map()
   const h = boot({
@@ -17,12 +20,12 @@ function bootWithIpc(opts = {}) {
     async start({ licensed = true } = {}) {
       const db = h.req('db/database')
       await db.initDb()
-      // The licence check lives in safe-handle.ts and reads isLicensed() at call time; tests flip it here.
+      // The licence check lives in safe-handle.ts and calls requireAccess() at call time; tests flip it here.
       const licence = h.req('services/licence.service')
-      licence.isLicensed = () => licensed
+      licence.requireAccess = licenceGate(licensed)
       await h.req('services/setup.service').runFirstTimeSetup(() => {})
       h.req('ipc/handlers').registerAllHandlers()
-      api.setLicensed = (v) => { licence.isLicensed = () => v }
+      api.setLicensed = (v) => { licence.requireAccess = licenceGate(v) }
       return db
     },
     /** Call a channel like ipcRenderer.invoke would. */

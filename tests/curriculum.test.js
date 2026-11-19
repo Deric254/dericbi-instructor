@@ -10,7 +10,7 @@ const { boot } = require('./helpers/harness')
 
 const h = boot({ prefix: 'dbi-curriculum' })
 const MODULES = ['sql', 'excel', 'python', 'powerbi', 'statistics', 'business', 'dataeng']
-const MODES = new Set(['exact', 'contains', 'ai_review', 'result_match'])
+const MODES = new Set(['exact', 'contains', 'ai_review', 'result_match', 'python_output'])
 const load = (m) => JSON.parse(fs.readFileSync(path.join(h.ROOT, 'content', m, 'curriculum.json'), 'utf8'))
 
 test('every course has its lessons: unique ids, a title, theory, a quiz', () => {

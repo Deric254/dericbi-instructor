@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Copy, Check, ArrowRight, ShieldCheck, MessageCircle } from 'lucide-react'
 import AppLogo from '../components/ui/AppLogo'
 import OwnerKeyInput from '../components/ui/OwnerKeyInput'
+import PayPlans from '../components/ui/PayWindow'
 import { MinimalTitlebar } from '../components/layout/Titlebar'
 import { reportApiError } from '../lib/apiError'
 import { SUPPORT_WHATSAPP, whatsappLink } from '../lib/contact'
@@ -73,6 +74,8 @@ export default function LicenceGate({ state, onChanged }: { state: LicenceState;
                    href={whatsappLink(SUPPORT_WHATSAPP, message)} target="_blank" rel="noopener noreferrer">
                   <MessageCircle size={14} /> Send my code on WhatsApp
                 </a>
+                <div className="input-label" style={{ marginBottom: 6 }}>Or pay now</div>
+                <div style={{ marginBottom: 20 }}><PayPlans installCode={state.installCode} /></div>
 
                 <form onSubmit={activate}>
                   <div className="input-group" style={{ marginBottom: 14 }}>

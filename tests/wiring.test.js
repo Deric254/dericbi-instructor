@@ -62,15 +62,10 @@ test('events the main process pushes to the screens are ones the preload listens
   assert.deepEqual(unheard, [], `main sends these events but no screen can hear them: ${unheard.join(', ')}`)
 })
 
-// Leftover files of the old licence design. Nothing imports them (so users can never reach them) but they still
-// call functions that no longer exist. Delete them and remove this list.
-const ORPHANED_FILES = ['src/pages/LicenseGate.tsx', 'src/components/ui/PayWindow.tsx']
-
 test('every window.api.group.function the screens use really exists in the preload', () => {
   const api = exposed.api
   const used = new Map()
   for (const file of walk(path.join(ROOT, 'src')).filter((f) => /\.(ts|tsx)$/.test(f) && !f.endsWith('electron.d.ts'))) {
-    if (ORPHANED_FILES.includes(path.relative(ROOT, file).split(path.sep).join('/'))) continue
     for (const m of fs.readFileSync(file, 'utf8').matchAll(/window\.api\.(\w+)\.(\w+)/g)) {
       used.set(`${m[1]}.${m[2]}`, path.relative(ROOT, file))
     }
@@ -112,15 +107,6 @@ test('every page the app can navigate to is mounted, and every sidebar and short
   }
   assert.ok(targets.has('sql') && targets.has('python') && targets.has('datasets'), 'the Playground hub links to SQL, Python and Datasets')
   for (const t of targets) assert.ok(sections.includes(t), `a button navigates to "${t}", which is not a page`)
-})
-
-test('the orphaned licence files are really unreachable (otherwise they must be fixed, not ignored)', () => {
-  for (const file of ORPHANED_FILES) {
-    const name = path.basename(file).replace(/\.tsx$/, '')
-    const importers = walk(path.join(ROOT, 'src')).filter((f) => /\.(ts|tsx)$/.test(f) && f !== path.join(ROOT, file))
-      .filter((f) => new RegExp(`from '[^']*/${name}'`).test(fs.readFileSync(f, 'utf8')))
-    assert.deepEqual(importers, [], `${file} is now imported - it can no longer be treated as dead code`)
-  }
 })
 
 test('every imported page file exists', () => {

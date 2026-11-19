@@ -79,6 +79,27 @@
           "solution": "SELECT tier, COUNT(*) AS customers FROM customers GROUP BY tier ORDER BY customers DESC, tier",
           "evaluation_mode": "exact",
           "points": 15
+        },
+        {
+          "id": "de-py-1",
+          "title": "Your First Pipeline Step: Count by Key",
+          "prompt": "A list `events` is already loaded (each event is a dict with event_id, user and type). Write a function `count_by(rows, key)` that returns a dict mapping each value of `key` to how many rows have it. The tests call it with different keys.",
+          "hint_1": "Start with an empty dict and loop over rows. Use rows' [key] to read the value.",
+          "hint_2": "counts[v] = counts.get(v, 0) + 1 adds one to a value you may not have seen yet.",
+          "hint_3": "def count_by(rows, key):\n    counts = {}\n    for r in rows:\n        counts[r[key]] = counts.get(r[key], 0) + 1\n    return counts",
+          "solution": "def count_by(rows, key):\n    counts = {}\n    for r in rows:\n        counts[r[key]] = counts.get(r[key], 0) + 1\n    return counts",
+          "evaluation_mode": "python_output",
+          "points": 50,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "events = [\n    {\"event_id\": 1, \"user\": \"ann\", \"type\": \"click\"},\n    {\"event_id\": 2, \"user\": \"ben\", \"type\": \"view\"},\n    {\"event_id\": 3, \"user\": \"ann\", \"type\": \"view\"},\n    {\"event_id\": 4, \"user\": \"cy\", \"type\": \"click\"},\n    {\"event_id\": 5, \"user\": \"ben\", \"type\": \"click\"},\n    {\"event_id\": 6, \"user\": \"ann\", \"type\": \"click\"},\n]",
+            "check": "print(sorted(count_by(events, \"type\").items()))\nprint(sorted(count_by(events, \"user\").items()))\nprint(count_by([], \"type\"))",
+            "starter": "# events is already defined. Write count_by(rows, key) below.",
+            "output": "[('click', 4), ('view', 2)]\n[('ann', 3), ('ben', 2), ('cy', 1)]\n{}",
+            "must_have": [
+              "def "
+            ]
+          }
         }
       ]
     },
@@ -172,6 +193,27 @@
           "solution": "SELECT currency, COUNT(*) AS orders FROM orders GROUP BY currency ORDER BY orders DESC, currency",
           "evaluation_mode": "exact",
           "points": 15
+        },
+        {
+          "id": "de-py-5",
+          "title": "Profile a Table in Python",
+          "prompt": "Write `profile(rows)` for a list of dicts. Return a dict with: `rows` (how many rows), and `nulls` (a dict of column -> number of rows where that column is None or an empty/blank string). Column names come from the first row. For an empty list return {'rows': 0, 'nulls': {}}.",
+          "hint_1": "Count blanks with: v is None or (isinstance(v, str) and v.strip() == '').",
+          "hint_2": "Build nulls from rows[0].keys() first, then loop over every row and every column.",
+          "hint_3": "def profile(rows):\n    if not rows:\n        return {\"rows\": 0, \"nulls\": {}}\n    nulls = {c: 0 for c in rows[0]}\n    for r in rows:\n        for c in nulls:\n            v = r.get(c)\n            if v is None or (isinstance(v, str) and v.strip() == \"\"):\n                nulls[c] += 1\n    return {\"rows\": len(rows), \"nulls\": nulls}",
+          "solution": "def profile(rows):\n    if not rows:\n        return {\"rows\": 0, \"nulls\": {}}\n    nulls = {c: 0 for c in rows[0]}\n    for r in rows:\n        for c in nulls:\n            v = r.get(c)\n            if v is None or (isinstance(v, str) and v.strip() == \"\"):\n                nulls[c] += 1\n    return {\"rows\": len(rows), \"nulls\": nulls}",
+          "evaluation_mode": "python_output",
+          "points": 70,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "people = [\n    {\"id\": 1, \"email\": \"a@x.com\", \"country\": \"Kenya\"},\n    {\"id\": 2, \"email\": \"\", \"country\": None},\n    {\"id\": 3, \"email\": \"  \", \"country\": \"Uganda\"},\n    {\"id\": 4, \"email\": None, \"country\": \"Kenya\"},\n]",
+            "check": "print(profile(people))\nprint(profile([]))",
+            "starter": "# people is already defined. Write profile(rows) below.",
+            "output": "{'rows': 4, 'nulls': {'id': 0, 'email': 3, 'country': 1}}\n{'rows': 0, 'nulls': {}}",
+            "must_have": [
+              "def "
+            ]
+          }
         }
       ]
     },
@@ -276,6 +318,48 @@
           "solution": "SELECT COUNT(DISTINCT LOWER(TRIM(email))) AS distinct_emails FROM messy_contacts WHERE email LIKE '%@%'",
           "evaluation_mode": "exact",
           "points": 40
+        },
+        {
+          "id": "de-py-2",
+          "title": "Clean a Name",
+          "prompt": "Write `clean_name(text)` that turns messy typed names into a tidy form: remove spaces at both ends, squeeze any run of spaces inside into one space, and capitalise each word ('  KWAME   schmidt ' becomes 'Kwame Schmidt').",
+          "hint_1": "text.strip() removes the ends; text.split() with no argument splits on any run of spaces.",
+          "hint_2": "' '.join(text.split()).title() does all three jobs.",
+          "hint_3": "def clean_name(text):\n    return \" \".join(text.split()).title()",
+          "solution": "def clean_name(text):\n    return \" \".join(text.split()).title()",
+          "evaluation_mode": "python_output",
+          "points": 50,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "",
+            "check": "for raw in [\"  KWAME   schmidt \", \"sofia Patel\", \"AISHA tanaka\", \"   \", \"mei\"]:\n    print(repr(clean_name(raw)))",
+            "starter": "# Write clean_name(text) below.",
+            "output": "'Kwame Schmidt'\n'Sofia Patel'\n'Aisha Tanaka'\n''\n'Mei'",
+            "must_have": [
+              "def "
+            ]
+          }
+        },
+        {
+          "id": "de-py-3",
+          "title": "Two Date Formats, One Standard",
+          "prompt": "Dates arrive as '2025-03-19' or '19/03/2025'. Write `to_iso(text)` that returns the ISO form 'YYYY-MM-DD' for both. Anything else (blank, 'N/A', None, an impossible date like '31/02/2025') returns None.",
+          "hint_1": "Check the shape: a '/' means day/month/year; a '-' means it is already year-month-day.",
+          "hint_2": "Use datetime.date(year, month, day) inside try/except ValueError to reject impossible dates; .isoformat() prints the standard form.",
+          "hint_3": "import datetime\n\ndef to_iso(text):\n    if not text:\n        return None\n    text = text.strip()\n    try:\n        if \"/\" in text:\n            d, m, y = text.split(\"/\")\n            return datetime.date(int(y), int(m), int(d)).isoformat()\n        y, m, d = text.split(\"-\")\n        return datetime.date(int(y), int(m), int(d)).isoformat()\n    except ValueError:\n        return None",
+          "solution": "import datetime\n\ndef to_iso(text):\n    if not text:\n        return None\n    text = text.strip()\n    try:\n        if \"/\" in text:\n            d, m, y = text.split(\"/\")\n            return datetime.date(int(y), int(m), int(d)).isoformat()\n        y, m, d = text.split(\"-\")\n        return datetime.date(int(y), int(m), int(d)).isoformat()\n    except ValueError:\n        return None",
+          "evaluation_mode": "python_output",
+          "points": 70,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "",
+            "check": "for raw in [\"2025-03-19\", \"19/03/2025\", \" 05/01/2025 \", \"31/02/2025\", \"N/A\", \"\", None, \"2025-13-01\"]:\n    print(raw, \"->\", to_iso(raw))",
+            "starter": "import datetime\n\n# Write to_iso(text) below.",
+            "output": "2025-03-19 -> 2025-03-19\n19/03/2025 -> 2025-03-19\n 05/01/2025  -> 2025-01-05\n31/02/2025 -> None\nN/A -> None\n -> None\nNone -> None\n2025-13-01 -> None",
+            "must_have": [
+              "def "
+            ]
+          }
         }
       ]
     },
@@ -369,6 +453,27 @@
           "solution": "SELECT source_system, COUNT(*) - COUNT(DISTINCT event_id) AS duplicate_rows FROM raw_events GROUP BY source_system ORDER BY duplicate_rows DESC, source_system",
           "evaluation_mode": "exact",
           "points": 30
+        },
+        {
+          "id": "de-py-4",
+          "title": "Keep the Newest Delivery",
+          "prompt": "`deliveries` holds events delivered more than once. Write `dedupe_latest(rows)` returning one row per event_id: the one with the latest ingested_at (timestamps are text and compare correctly as text; if two deliveries tie, keep the one that appears FIRST in the list). Return the rows sorted by event_id.",
+          "hint_1": "Loop once and keep the best row seen so far for each id in a dict.",
+          "hint_2": "Replace the stored row only when the new ingested_at is strictly greater (use >, not >=, so the first of a tie stays).",
+          "hint_3": "def dedupe_latest(rows):\n    best = {}\n    for r in rows:\n        cur = best.get(r[\"event_id\"])\n        if cur is None or r[\"ingested_at\"] > cur[\"ingested_at\"]:\n            best[r[\"event_id\"]] = r\n    return [best[k] for k in sorted(best)]",
+          "solution": "def dedupe_latest(rows):\n    best = {}\n    for r in rows:\n        cur = best.get(r[\"event_id\"])\n        if cur is None or r[\"ingested_at\"] > cur[\"ingested_at\"]:\n            best[r[\"event_id\"]] = r\n    return [best[k] for k in sorted(best)]",
+          "evaluation_mode": "python_output",
+          "points": 70,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "deliveries = [\n    {\"event_id\": 7, \"ingested_at\": \"2025-01-02 10:00\", \"v\": \"old\"},\n    {\"event_id\": 3, \"ingested_at\": \"2025-01-01 09:00\", \"v\": \"only\"},\n    {\"event_id\": 7, \"ingested_at\": \"2025-01-02 11:30\", \"v\": \"new\"},\n    {\"event_id\": 5, \"ingested_at\": \"2025-01-03 08:00\", \"v\": \"a\"},\n    {\"event_id\": 5, \"ingested_at\": \"2025-01-03 08:00\", \"v\": \"b\"},\n    {\"event_id\": 9, \"ingested_at\": \"2025-01-04 12:00\", \"v\": \"x\"},\n]",
+            "check": "for r in dedupe_latest(deliveries):\n    print(r[\"event_id\"], r[\"ingested_at\"], r[\"v\"])\nprint(len(dedupe_latest([])))",
+            "starter": "# deliveries is already defined. Write dedupe_latest(rows) below.",
+            "output": "3 2025-01-01 09:00 only\n5 2025-01-03 08:00 a\n7 2025-01-02 11:30 new\n9 2025-01-04 12:00 x\n0",
+            "must_have": [
+              "def "
+            ]
+          }
         }
       ]
     },
@@ -544,6 +649,141 @@
           "solution": "SELECT DATE(ingested_at) AS ingest_date, COUNT(*) AS rows_loaded FROM raw_events GROUP BY DATE(ingested_at) ORDER BY ingest_date",
           "evaluation_mode": "exact",
           "points": 25
+        },
+        {
+          "id": "de-py-6",
+          "title": "Incremental Load with a Watermark",
+          "prompt": "A pipeline should only pick up rows changed since its last run. Write `new_rows(rows, watermark)` returning a tuple (changed_rows, new_watermark): changed_rows are the rows whose `updated_at` is strictly greater than the watermark, in their original order; new_watermark is the largest updated_at seen among them (or the old watermark if nothing changed).",
+          "hint_1": "Filter with a list comprehension on r['updated_at'] > watermark.",
+          "hint_2": "If the filtered list is empty keep the watermark; otherwise max(r['updated_at'] for r in changed).",
+          "hint_3": "def new_rows(rows, watermark):\n    changed = [r for r in rows if r[\"updated_at\"] > watermark]\n    if not changed:\n        return changed, watermark\n    return changed, max(r[\"updated_at\"] for r in changed)",
+          "solution": "def new_rows(rows, watermark):\n    changed = [r for r in rows if r[\"updated_at\"] > watermark]\n    if not changed:\n        return changed, watermark\n    return changed, max(r[\"updated_at\"] for r in changed)",
+          "evaluation_mode": "python_output",
+          "points": 70,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "source = [\n    {\"id\": 1, \"updated_at\": \"2025-02-01\"},\n    {\"id\": 2, \"updated_at\": \"2025-02-03\"},\n    {\"id\": 3, \"updated_at\": \"2025-02-02\"},\n    {\"id\": 4, \"updated_at\": \"2025-01-15\"},\n]",
+            "check": "rows, wm = new_rows(source, \"2025-02-01\")\nprint([r[\"id\"] for r in rows], wm)\nrows, wm = new_rows(source, \"2025-02-03\")\nprint([r[\"id\"] for r in rows], wm)\nrows, wm = new_rows(source, \"2000-01-01\")\nprint([r[\"id\"] for r in rows], wm)",
+            "starter": "# source is already defined. Write new_rows(rows, watermark) below.",
+            "output": "[2, 3] 2025-02-03\n[] 2025-02-03\n[1, 2, 3, 4] 2025-02-03",
+            "must_have": [
+              "def "
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "de-pipelines-etl",
+      "title": "Building a Pipeline: Staging, Clean and Mart Layers",
+      "description": "Turn raw tables into trusted business tables in layers, the way production ELT pipelines are built",
+      "level": "intermediate",
+      "prerequisites": [
+        "de-incremental"
+      ],
+      "estimated_min": 40,
+      "sort_order": 7,
+      "theory_md": "## Building a Pipeline: Staging, Clean and Mart Layers\n\nA pipeline is not one giant query. It is a chain of small, named steps, each doing one job, so every step can be tested, re-run and explained.\n\n### The three layers (often called bronze / silver / gold, or raw / clean / mart)\n| Layer | Holds | Rule |\n|---|---|---|\n| **Staging (raw)** | An exact copy of the source | Never edited. It is your safety net |\n| **Clean** | Types fixed, duplicates removed, units unified | One row means one real thing |\n| **Mart** | Business-ready numbers (revenue by country) | Built only from the clean layer |\n\n### ETL versus ELT\n- **ETL**: transform *before* loading. Used when the target is small or strict.\n- **ELT**: load raw data first, transform *inside* the warehouse with SQL. Cheap storage and fast warehouses made this the modern default, and it lets you rebuild any layer from the raw one.\n\n### Layers as CTEs\nA CTE (`WITH name AS (...)`) is a named step. Chain them:\n```sql\nWITH clean_orders AS (\n  SELECT order_id, customer_id,\n         CASE currency WHEN 'EUR' THEN amount * 1.1 WHEN 'KES' THEN amount * 0.0077 ELSE amount END AS amount_usd\n  FROM orders WHERE status = 'paid'\n)\nSELECT customer_id, ROUND(SUM(amount_usd), 2) AS revenue_usd\nFROM clean_orders GROUP BY customer_id;\n```\nReading top to bottom you see the pipeline: first clean, then aggregate.\n\n### Habits of a good pipeline\n1. **Idempotent**: running it twice gives the same result, never double counts.\n2. **Re-buildable**: any layer can be dropped and rebuilt from the one below.\n3. **Named and small**: one idea per step.\n4. **Lineage**: you can say which source columns feed each number.\n\n### Exchange rates used in this course\nUse EUR x 1.1 and KES x 0.0077 to convert to USD (USD stays as it is).",
+      "quiz": [
+        {
+          "question": "Why is the staging layer never edited?",
+          "options": [
+            "It is faster",
+            "It is the untouched copy you can rebuild every other layer from",
+            "Editing is not allowed in SQL",
+            "It saves storage"
+          ],
+          "correct_index": 1,
+          "explanation": "If the raw copy is intact, any mistake in a later layer is fixable by rebuilding."
+        },
+        {
+          "question": "What is the main difference between ETL and ELT?",
+          "options": [
+            "ELT never uses SQL",
+            "ELT loads raw data first and transforms inside the warehouse",
+            "ETL is newer",
+            "They are the same"
+          ],
+          "correct_index": 1,
+          "explanation": "ELT postpones the transformation until the data is already in the warehouse."
+        },
+        {
+          "question": "What does an idempotent pipeline guarantee?",
+          "options": [
+            "It runs faster",
+            "Running it again gives the same result without double counting",
+            "It never fails",
+            "It uses less memory"
+          ],
+          "correct_index": 1,
+          "explanation": "Safe re-runs are what make recovery and backfills painless."
+        },
+        {
+          "question": "Which layer should a dashboard read from?",
+          "options": [
+            "Staging",
+            "The mart, built from the clean layer",
+            "Any layer",
+            "The source system directly"
+          ],
+          "correct_index": 1,
+          "explanation": "Marts hold the agreed business numbers, so every report matches."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-13-e1",
+          "title": "Staging to Clean: Orders in USD",
+          "prompt": "Build the clean orders step. From orders keep only paid orders and return order_id, customer_id, order_date and amount_usd (amount converted to USD: EUR x 1.1, KES x 0.0077, USD unchanged, rounded to 2 decimals). Sort by order_id and return the first 10 rows.",
+          "hint_1": "Use CASE currency WHEN 'EUR' THEN amount * 1.1 ... ELSE amount END, then ROUND(..., 2).",
+          "hint_2": "Add WHERE status = 'paid', ORDER BY order_id and LIMIT 10.",
+          "hint_3": "SELECT order_id, customer_id, order_date, ROUND(CASE currency WHEN 'EUR' THEN amount * 1.1 WHEN 'KES' THEN amount * 0.0077 ELSE amount END, 2) AS amount_usd FROM orders WHERE status = 'paid' ORDER BY order_id LIMIT 10",
+          "solution": "SELECT order_id, customer_id, order_date, ROUND(CASE currency WHEN 'EUR' THEN amount * 1.1 WHEN 'KES' THEN amount * 0.0077 ELSE amount END, 2) AS amount_usd FROM orders WHERE status = 'paid' ORDER BY order_id LIMIT 10",
+          "evaluation_mode": "exact",
+          "points": 40
+        },
+        {
+          "id": "de-13-e2",
+          "title": "Clean to Mart: Revenue by Country",
+          "prompt": "Build a revenue mart. Using paid orders converted to USD (EUR x 1.1, KES x 0.0077) joined to customers, return country and revenue_usd (sum rounded to 2 decimals). Orders whose customer does not exist are excluded. Sort by revenue_usd descending, then country.",
+          "hint_1": "Put the conversion in a CTE named clean_orders, then JOIN it to customers.",
+          "hint_2": "An INNER JOIN drops orphan orders automatically. GROUP BY country.",
+          "hint_3": "WITH clean_orders AS (SELECT customer_id, CASE currency WHEN 'EUR' THEN amount * 1.1 WHEN 'KES' THEN amount * 0.0077 ELSE amount END AS amount_usd FROM orders WHERE status = 'paid') SELECT c.country, ROUND(SUM(o.amount_usd), 2) AS revenue_usd FROM clean_orders o JOIN customers c ON c.customer_id = o.customer_id GROUP BY c.country ORDER BY revenue_usd DESC, c.country",
+          "solution": "WITH clean_orders AS (SELECT customer_id, CASE currency WHEN 'EUR' THEN amount * 1.1 WHEN 'KES' THEN amount * 0.0077 ELSE amount END AS amount_usd FROM orders WHERE status = 'paid') SELECT c.country, ROUND(SUM(o.amount_usd), 2) AS revenue_usd FROM clean_orders o JOIN customers c ON c.customer_id = o.customer_id GROUP BY c.country ORDER BY revenue_usd DESC, c.country",
+          "evaluation_mode": "exact",
+          "points": 60
+        },
+        {
+          "id": "de-13-e3",
+          "title": "Customer 360 Mart",
+          "prompt": "Build a customer table for enterprise customers only. Return customer_id, name, paid_orders (count of their paid orders, 0 if none) and lifetime_amount (sum of their paid order amounts as stored, 0 if none, rounded to 2 decimals). Sort by lifetime_amount descending then customer_id and return the first 10 rows.",
+          "hint_1": "Start FROM customers and LEFT JOIN paid orders so customers with no orders stay.",
+          "hint_2": "Use COALESCE(SUM(...), 0) and put the paid filter in the JOIN condition (ON ... AND o.status = 'paid').",
+          "hint_3": "SELECT c.customer_id, c.name, COUNT(o.order_id) AS paid_orders, ROUND(COALESCE(SUM(o.amount), 0), 2) AS lifetime_amount FROM customers c LEFT JOIN orders o ON o.customer_id = c.customer_id AND o.status = 'paid' WHERE c.tier = 'enterprise' GROUP BY c.customer_id, c.name ORDER BY lifetime_amount DESC, c.customer_id LIMIT 10",
+          "solution": "SELECT c.customer_id, c.name, COUNT(o.order_id) AS paid_orders, ROUND(COALESCE(SUM(o.amount), 0), 2) AS lifetime_amount FROM customers c LEFT JOIN orders o ON o.customer_id = c.customer_id AND o.status = 'paid' WHERE c.tier = 'enterprise' GROUP BY c.customer_id, c.name ORDER BY lifetime_amount DESC, c.customer_id LIMIT 10",
+          "evaluation_mode": "exact",
+          "points": 70
+        },
+        {
+          "id": "de-py-7",
+          "title": "Extract, Transform, Load (and Safe to Re-run)",
+          "prompt": "Write `transform(rows)` and `load(store, rows)`. transform keeps only rows with status 'paid' and returns new dicts {'order_id', 'usd'} where usd is the amount converted (EUR x 1.1, KES x 0.0077, USD x 1), rounded to 2 decimals. load upserts into the dict `store` keyed by order_id (a repeat overwrites, never duplicates) and returns how many rows it was given.",
+          "hint_1": "transform: loop, skip non-paid, look up the rate in a dict {'EUR': 1.1, 'KES': 0.0077, 'USD': 1}.",
+          "hint_2": "load: for r in rows: store[r['order_id']] = r. Loading the same rows twice leaves the same store.",
+          "hint_3": "RATES = {\"EUR\": 1.1, \"KES\": 0.0077, \"USD\": 1}\n\ndef transform(rows):\n    return [\n        {\"order_id\": r[\"order_id\"], \"usd\": round(r[\"amount\"] * RATES[r[\"currency\"]], 2)}\n        for r in rows if r[\"status\"] == \"paid\"\n    ]\n\ndef load(store, rows):\n    for r in rows:\n        store[r[\"order_id\"]] = r\n    return len(rows)",
+          "solution": "RATES = {\"EUR\": 1.1, \"KES\": 0.0077, \"USD\": 1}\n\ndef transform(rows):\n    return [\n        {\"order_id\": r[\"order_id\"], \"usd\": round(r[\"amount\"] * RATES[r[\"currency\"]], 2)}\n        for r in rows if r[\"status\"] == \"paid\"\n    ]\n\ndef load(store, rows):\n    for r in rows:\n        store[r[\"order_id\"]] = r\n    return len(rows)",
+          "evaluation_mode": "python_output",
+          "points": 90,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "raw_orders = [\n    {\"order_id\": 1, \"amount\": 100.0, \"currency\": \"EUR\", \"status\": \"paid\"},\n    {\"order_id\": 2, \"amount\": 5000.0, \"currency\": \"KES\", \"status\": \"paid\"},\n    {\"order_id\": 3, \"amount\": 40.0, \"currency\": \"USD\", \"status\": \"refunded\"},\n    {\"order_id\": 4, \"amount\": 19.99, \"currency\": \"USD\", \"status\": \"paid\"},\n]",
+            "check": "clean = transform(raw_orders)\nprint(clean)\nstore = {}\nprint(load(store, clean))\nprint(load(store, clean))\nprint(len(store), sorted(store))",
+            "starter": "RATES = {'EUR': 1.1, 'KES': 0.0077, 'USD': 1}\n\n# raw_orders is already defined. Write transform(rows) and load(store, rows) below.",
+            "output": "[{'order_id': 1, 'usd': 110.0}, {'order_id': 2, 'usd': 38.5}, {'order_id': 4, 'usd': 19.99}]\n3\n3\n3 [1, 2, 4]",
+            "must_have": [
+              "def transform"
+            ]
+          }
         }
       ]
     },
@@ -553,10 +793,10 @@
       "description": "Shape data so the business can ask any question fast: star schemas and the grain rule",
       "level": "intermediate",
       "prerequisites": [
-        "de-incremental"
+        "de-pipelines-etl"
       ],
       "estimated_min": 40,
-      "sort_order": 7,
+      "sort_order": 8,
       "theory_md": "## Dimensional Modeling: Facts, Dimensions & Grain\n\n### Facts and dimensions\nA **fact table** records events you want to measure: each order, each click, each model call. A **dimension table** describes the things those events are about: customers, products, dates. Fact tables are narrow and huge; dimensions are wide and small.\n\nIn Northwind Global:\n- `orders` is a **fact** table (amount is the measure).\n- `customers` is a **dimension** (country and tier are the descriptions).\n\nJoining a fact to its dimensions in a simple shape is called a **star schema**: the fact in the middle, dimensions around it.\n\n### The grain: decide it first\nThe **grain** is what one row means. \"One row per order\" is a grain. Every measure and every join must respect it. Mixing grains is the most common cause of numbers that are mysteriously too big.\n\nTest the grain with a query:\n```sql\nSELECT COUNT(*) - COUNT(DISTINCT order_id) AS grain_violations FROM orders;\n```\nZero means one row per order, as promised.\n\n### Asking business questions\n```sql\nSELECT c.country, ROUND(SUM(o.amount), 2) AS revenue\nFROM orders o\nJOIN customers c ON c.customer_id = o.customer_id\nWHERE o.status = 'paid'\nGROUP BY c.country\nORDER BY revenue DESC;\n```\nThe fact supplies the number, the dimension supplies the slice. Add `c.tier`, or a month from `order_date`, and you have a new report without changing the model.\n\n### Why this matters\nA good model lets analysts, dashboards and AI assistants all answer questions from the *same* definitions. Without it, every team invents its own \"revenue\" and the meeting becomes an argument about whose number is right.\n\n### Executive lens\nOne definition of each metric, owned and documented, is worth more than a hundred dashboards. Modeling is how you create it.",
       "quiz": [
         {
@@ -641,15 +881,108 @@
       ]
     },
     {
+      "id": "de-warehouse",
+      "title": "Warehouse Design: Facts, Dimensions and the Lakehouse",
+      "description": "Star schemas, grain, slowly changing history, partitioning and how lakes, warehouses and lakehouses fit together",
+      "level": "intermediate",
+      "prerequisites": [
+        "de-modeling"
+      ],
+      "estimated_min": 45,
+      "sort_order": 9,
+      "theory_md": "## Warehouse Design: Facts, Dimensions and the Lakehouse\n\n### Where does the data live?\n- **Data lake**: cheap file storage (Parquet, JSON, CSV) holding raw and semi-structured data. Flexible, but quality is up to you.\n- **Data warehouse**: structured, fast SQL, strong governance (Snowflake, BigQuery, Redshift).\n- **Lakehouse**: lake storage with warehouse features (tables, transactions, SQL) on one copy of the data (Delta Lake, Iceberg).\n\n### The star schema\nAnalytics tables are shaped like a star: one central **fact** table of measurable events, surrounded by **dimension** tables that describe them.\n- **Fact** (orders): one row per order; numbers you add up (amount); keys to dimensions.\n- **Dimension** (customers): one row per customer; the words you group and filter by (country, tier).\n\n```sql\nSELECT c.tier, SUM(o.amount) FROM orders o JOIN customers c ON c.customer_id = o.customer_id GROUP BY c.tier;\n```\nThat is a star query: join the fact to a dimension, group by the dimension attribute.\n\n### Grain: the first design decision\nThe **grain** says what one fact row means (\"one order\", \"one order line\", \"one customer per day\"). Decide it first and write it down. Mixed grains are the number one cause of double counting.\n\n### Slowly changing dimensions (SCD)\nA customer changes tier. Do you overwrite (**Type 1**, simple, history lost) or add a new row with valid_from / valid_to (**Type 2**, history kept)? Choose Type 2 when the business must answer \"what tier were they when they bought?\".\n\n### Partitioning and cost\nBig tables are split by a column, usually a date. A query filtering on the partition column reads only the matching slices, which is the cheapest speed-up there is. Choose the partition column people filter by most.\n\n### Cohorts\nA **cohort** groups customers by when they started. Comparing cohorts over time shows whether the product is improving.",
+      "quiz": [
+        {
+          "question": "What does the grain of a fact table define?",
+          "options": [
+            "The file size",
+            "What exactly one row represents",
+            "The number of columns",
+            "The partition count"
+          ],
+          "correct_index": 1,
+          "explanation": "Everything else depends on knowing what one row means."
+        },
+        {
+          "question": "When do you choose a Type 2 slowly changing dimension?",
+          "options": [
+            "When history does not matter",
+            "When you must know the attribute value that was true at the time",
+            "When the table is tiny",
+            "Never"
+          ],
+          "correct_index": 1,
+          "explanation": "Type 2 keeps old versions as extra rows with validity dates."
+        },
+        {
+          "question": "What is a lakehouse?",
+          "options": [
+            "A cloud database that cannot run SQL",
+            "Lake-style cheap storage with warehouse features like tables and transactions",
+            "A backup tool",
+            "A dashboard"
+          ],
+          "correct_index": 1,
+          "explanation": "It aims to give one copy of the data both flexibility and reliability."
+        },
+        {
+          "question": "Why partition a large table by date?",
+          "options": [
+            "To hide data",
+            "Queries that filter on date read only the needed slices, so they are cheaper and faster",
+            "To compress it",
+            "It is required by SQL"
+          ],
+          "correct_index": 1,
+          "explanation": "Partition pruning avoids scanning data you do not need."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-14-e1",
+          "title": "Star Query: Revenue by Month and Tier",
+          "prompt": "Using orders (fact) and customers (dimension), return month (order_date as YYYY-MM), tier, paid_orders (count) and revenue (sum of amount rounded to 2 decimals) for paid orders with a matching customer. Sort by month then tier.",
+          "hint_1": "strftime('%Y-%m', order_date) gives the month.",
+          "hint_2": "JOIN customers, filter status = 'paid', GROUP BY month and tier.",
+          "hint_3": "SELECT strftime('%Y-%m', o.order_date) AS month, c.tier, COUNT(*) AS paid_orders, ROUND(SUM(o.amount), 2) AS revenue FROM orders o JOIN customers c ON c.customer_id = o.customer_id WHERE o.status = 'paid' GROUP BY month, c.tier ORDER BY month, c.tier",
+          "solution": "SELECT strftime('%Y-%m', o.order_date) AS month, c.tier, COUNT(*) AS paid_orders, ROUND(SUM(o.amount), 2) AS revenue FROM orders o JOIN customers c ON c.customer_id = o.customer_id WHERE o.status = 'paid' GROUP BY month, c.tier ORDER BY month, c.tier",
+          "evaluation_mode": "exact",
+          "points": 50
+        },
+        {
+          "id": "de-14-e2",
+          "title": "Signup Cohorts",
+          "prompt": "Group customers into signup cohorts. Return signup_month (YYYY-MM of signup_date), customers (count) and buyers (customers in that cohort with at least one paid order). Sort by signup_month.",
+          "hint_1": "LEFT JOIN customers to their paid orders and count DISTINCT customer ids on each side.",
+          "hint_2": "buyers = COUNT(DISTINCT o.customer_id) after joining with ON ... AND o.status = 'paid'.",
+          "hint_3": "SELECT strftime('%Y-%m', c.signup_date) AS signup_month, COUNT(DISTINCT c.customer_id) AS customers, COUNT(DISTINCT o.customer_id) AS buyers FROM customers c LEFT JOIN orders o ON o.customer_id = c.customer_id AND o.status = 'paid' GROUP BY signup_month ORDER BY signup_month",
+          "solution": "SELECT strftime('%Y-%m', c.signup_date) AS signup_month, COUNT(DISTINCT c.customer_id) AS customers, COUNT(DISTINCT o.customer_id) AS buyers FROM customers c LEFT JOIN orders o ON o.customer_id = c.customer_id AND o.status = 'paid' GROUP BY signup_month ORDER BY signup_month",
+          "evaluation_mode": "exact",
+          "points": 60
+        },
+        {
+          "id": "de-14-e3",
+          "title": "Latest Order per Customer (Current-State Table)",
+          "prompt": "Build the current-state view: for each customer return their most recent order (latest order_date, ties broken by the higher order_id). Return customer_id, order_id, order_date and amount. Sort by customer_id and return the first 10 rows.",
+          "hint_1": "ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC, order_id DESC) numbers each customer's orders newest first.",
+          "hint_2": "Keep only rn = 1 in the outer query.",
+          "hint_3": "WITH ranked AS (SELECT customer_id, order_id, order_date, amount, ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC, order_id DESC) AS rn FROM orders) SELECT customer_id, order_id, order_date, amount FROM ranked WHERE rn = 1 ORDER BY customer_id LIMIT 10",
+          "solution": "WITH ranked AS (SELECT customer_id, order_id, order_date, amount, ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC, order_id DESC) AS rn FROM orders) SELECT customer_id, order_id, order_date, amount FROM ranked WHERE rn = 1 ORDER BY customer_id LIMIT 10",
+          "evaluation_mode": "exact",
+          "points": 70
+        }
+      ]
+    },
+    {
       "id": "de-trends",
       "title": "Window Functions for Pipelines & Trends",
       "description": "Running totals, day-over-day change and moving averages: the toolkit for spotting trends and anomalies",
       "level": "intermediate",
       "prerequisites": [
-        "de-modeling"
+        "de-warehouse"
       ],
       "estimated_min": 40,
-      "sort_order": 8,
+      "sort_order": 10,
       "theory_md": "## Window Functions for Pipelines & Trends\n\nA **window function** calculates across a set of related rows *without collapsing them*, so every row keeps its identity and gains a new column. For platform work, three patterns cover most needs.\n\n### 1. Running total\n```sql\nSELECT day, events,\n       SUM(events) OVER (ORDER BY day) AS running_total\nFROM (SELECT DATE(event_ts) AS day, COUNT(*) AS events FROM raw_events GROUP BY DATE(event_ts))\nORDER BY day;\n```\nUseful for cumulative volume, storage growth and spend tracking.\n\n### 2. Change versus the previous row with LAG\n```sql\nSELECT run_date, rows_loaded,\n       rows_loaded - LAG(rows_loaded) OVER (ORDER BY run_date) AS change_vs_prev\nFROM pipeline_runs\nWHERE pipeline = 'orders_ingest'\nORDER BY run_date;\n```\n`LAG(x)` reads the value from the row before. The first row has no previous value, so its result is `NULL` (correct and expected).\n\n### 3. Moving average to smooth noise\n```sql\nSELECT run_date, duration_s,\n       ROUND(AVG(duration_s) OVER (ORDER BY run_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW), 1) AS avg_7d\nFROM pipeline_runs WHERE pipeline = 'events_stream' ORDER BY run_date;\n```\n`ROWS BETWEEN 6 PRECEDING AND CURRENT ROW` means \"this row and the six before it\", a 7-run window. A single slow run is noise; a rising 7-day average is a trend.\n\n### Why engineers love them\n- A pipeline slowly getting slower never \"fails\", so only a trend reveals it.\n- A sudden drop in `rows_loaded` against the previous day flags a stalled source.\n\n### Executive lens\nLeadership cares about direction, not single points. \"Run time has grown 40% in a month\" is a call for investment, found with one window function.",
       "quiz": [
         {
@@ -723,15 +1056,399 @@
       ]
     },
     {
+      "id": "de-orchestration",
+      "title": "Orchestration: DAGs, Retries, SLAs and Backfills",
+      "description": "How schedulers like Airflow run pipelines in order, recover from failure and prove they met the deadline",
+      "level": "intermediate",
+      "prerequisites": [
+        "de-trends"
+      ],
+      "estimated_min": 45,
+      "sort_order": 11,
+      "theory_md": "## Orchestration: DAGs, Retries, SLAs and Backfills\n\nPipelines depend on each other: you cannot build the revenue mart before orders have loaded. An **orchestrator** (Airflow, Dagster, Prefect, cloud schedulers) runs tasks in the right order, on time, and handles failure.\n\n### The DAG\nA **DAG** (directed acyclic graph) is the map of tasks and their dependencies. *Directed*: arrows say what must finish first. *Acyclic*: no loops, or nothing could ever start.\n```\nextract_orders --> clean_orders --> revenue_mart --> dashboard\nextract_customers --^\n```\nA task's **level** is how many steps it sits from the start. Tasks on the same level can run in parallel.\n\n### Retries, timeouts and alerts\nMany failures are temporary (a source is down for a minute). Good orchestration:\n- **Retries** a task a few times with a growing wait (exponential backoff).\n- Sets a **timeout** so a hung task cannot block everything.\n- **Alerts** a human only when retries are exhausted, so alerts mean something.\n\n### Idempotency again\nA retried or re-run task must not double count. Write results with *replace the partition* or *upsert on key* logic, never blind appends.\n\n### SLAs and SLOs\nAn **SLA** is a promise (\"the revenue mart is ready by 07:00\"). Track each run against it, as `pipeline_runs` does with `duration_s` and `sla_s`. A rising count of near-misses is an early warning.\n\n### Backfills\nWhen logic changes or data was missing, you re-run history for a date range. Because tasks are idempotent and parameterised by date, a backfill is just the same pipeline run for old dates.\n\n### Reading failure patterns\nGroup failures by `error_type`. `source_unavailable` means talk to the owner of the source; `out_of_memory` means resize; `schema_change` means an upstream team changed a column without telling you, which is a contract problem, not a code problem.",
+      "quiz": [
+        {
+          "question": "Why must a DAG be acyclic?",
+          "options": [
+            "It looks cleaner",
+            "A loop means a task would wait on itself and could never start",
+            "SQL forbids loops",
+            "To save memory"
+          ],
+          "correct_index": 1,
+          "explanation": "Dependencies need a definite order, so cycles are not allowed."
+        },
+        {
+          "question": "What is exponential backoff for retries?",
+          "options": [
+            "Retrying instantly forever",
+            "Waiting longer after each failed attempt",
+            "Skipping failed tasks",
+            "Deleting the task"
+          ],
+          "correct_index": 1,
+          "explanation": "Growing waits give a struggling source time to recover."
+        },
+        {
+          "question": "Why should a retried task be idempotent?",
+          "options": [
+            "It runs faster",
+            "A second attempt must not double count or duplicate data",
+            "Retries are impossible otherwise",
+            "It saves money"
+          ],
+          "correct_index": 1,
+          "explanation": "Retries and backfills only work safely when repeating a task is harmless."
+        },
+        {
+          "question": "A run fails with schema_change. What is the best long-term fix?",
+          "options": [
+            "Retry until it works",
+            "Agree a data contract with the upstream team and validate the schema on arrival",
+            "Ignore it",
+            "Delete the pipeline"
+          ],
+          "correct_index": 1,
+          "explanation": "Schema changes are communication problems; contracts and validation catch them early."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-15-e1",
+          "title": "SLA Breach Report",
+          "prompt": "For each pipeline count the runs that took longer than their SLA (duration_s greater than sla_s). Return pipeline, breaches and total_runs (all runs). Only include pipelines with at least one breach. Sort by breaches descending then pipeline.",
+          "hint_1": "SUM(CASE WHEN duration_s > sla_s THEN 1 ELSE 0 END) counts the breaches.",
+          "hint_2": "Filter groups with HAVING breaches > 0 (repeat the SUM expression in HAVING).",
+          "hint_3": "SELECT pipeline, SUM(CASE WHEN duration_s > sla_s THEN 1 ELSE 0 END) AS breaches, COUNT(*) AS total_runs FROM pipeline_runs GROUP BY pipeline HAVING SUM(CASE WHEN duration_s > sla_s THEN 1 ELSE 0 END) > 0 ORDER BY breaches DESC, pipeline",
+          "solution": "SELECT pipeline, SUM(CASE WHEN duration_s > sla_s THEN 1 ELSE 0 END) AS breaches, COUNT(*) AS total_runs FROM pipeline_runs GROUP BY pipeline HAVING SUM(CASE WHEN duration_s > sla_s THEN 1 ELSE 0 END) > 0 ORDER BY breaches DESC, pipeline",
+          "evaluation_mode": "exact",
+          "points": 50
+        },
+        {
+          "id": "de-15-e2",
+          "title": "Back-to-Back Failures",
+          "prompt": "Find consecutive failures: runs that failed when the same pipeline's previous run (by run_date) also failed. Return pipeline, run_date and error_type of the later failure. Sort by run_date.",
+          "hint_1": "LAG(status) OVER (PARTITION BY pipeline ORDER BY run_date) gives the previous run's status.",
+          "hint_2": "Compute LAG in a CTE, then keep rows where status = 'failed' AND prev_status = 'failed'.",
+          "hint_3": "WITH r AS (SELECT pipeline, run_date, status, error_type, LAG(status) OVER (PARTITION BY pipeline ORDER BY run_date) AS prev_status FROM pipeline_runs) SELECT pipeline, run_date, error_type FROM r WHERE status = 'failed' AND prev_status = 'failed' ORDER BY run_date",
+          "solution": "WITH r AS (SELECT pipeline, run_date, status, error_type, LAG(status) OVER (PARTITION BY pipeline ORDER BY run_date) AS prev_status FROM pipeline_runs) SELECT pipeline, run_date, error_type FROM r WHERE status = 'failed' AND prev_status = 'failed' ORDER BY run_date",
+          "evaluation_mode": "exact",
+          "points": 70
+        },
+        {
+          "id": "de-15-e3",
+          "title": "Task Levels in a DAG",
+          "prompt": "A small DAG is stored in this table: WITH tasks(task, upstream) AS (VALUES ('extract_orders', NULL), ('extract_customers', NULL), ('clean_orders', 'extract_orders'), ('join_data', 'clean_orders'), ('join_data', 'extract_customers'), ('revenue_mart', 'join_data'), ('dashboard', 'revenue_mart')). Use a recursive CTE to return each task and its level (0 for tasks with no upstream, otherwise the LONGEST chain of steps from a start). Sort by level then task.",
+          "hint_1": "Start the recursion with the rows where upstream IS NULL at level 0.",
+          "hint_2": "In the recursive part join tasks t to the CTE on t.upstream = lvl.task and add 1. Finally take MAX(n) per task, because join_data is reachable by two routes of different length.",
+          "hint_3": "WITH RECURSIVE tasks(task, upstream) AS (VALUES ('extract_orders', NULL), ('extract_customers', NULL), ('clean_orders', 'extract_orders'), ('join_data', 'clean_orders'), ('join_data', 'extract_customers'), ('revenue_mart', 'join_data'), ('dashboard', 'revenue_mart')), lvl(task, n) AS (SELECT task, 0 FROM tasks WHERE upstream IS NULL UNION ALL SELECT t.task, l.n + 1 FROM tasks t JOIN lvl l ON t.upstream = l.task) SELECT task, MAX(n) AS level FROM lvl GROUP BY task ORDER BY level, task",
+          "solution": "WITH RECURSIVE tasks(task, upstream) AS (VALUES ('extract_orders', NULL), ('extract_customers', NULL), ('clean_orders', 'extract_orders'), ('join_data', 'clean_orders'), ('join_data', 'extract_customers'), ('revenue_mart', 'join_data'), ('dashboard', 'revenue_mart')), lvl(task, n) AS (SELECT task, 0 FROM tasks WHERE upstream IS NULL UNION ALL SELECT t.task, l.n + 1 FROM tasks t JOIN lvl l ON t.upstream = l.task) SELECT task, MAX(n) AS level FROM lvl GROUP BY task ORDER BY level, task",
+          "evaluation_mode": "exact",
+          "points": 90
+        },
+        {
+          "id": "de-py-8",
+          "title": "Run Tasks in Dependency Order",
+          "prompt": "A DAG is a dict mapping each task to the list of tasks it depends on. Write `run_order(dag)` returning a list of task names in a valid run order (every task after its dependencies). When several tasks are ready at once, pick them in alphabetical order. If the graph has a cycle, raise ValueError('cycle').",
+          "hint_1": "Repeat: find all tasks whose dependencies are all done, take the alphabetically first, mark it done.",
+          "hint_2": "If at some step no task is ready but some remain, there is a cycle.",
+          "hint_3": "def run_order(dag):\n    done = []\n    remaining = set(dag)\n    while remaining:\n        ready = sorted(t for t in remaining if all(d in done for d in dag[t]))\n        if not ready:\n            raise ValueError(\"cycle\")\n        done.append(ready[0])\n        remaining.remove(ready[0])\n    return done",
+          "solution": "def run_order(dag):\n    done = []\n    remaining = set(dag)\n    while remaining:\n        ready = sorted(t for t in remaining if all(d in done for d in dag[t]))\n        if not ready:\n            raise ValueError(\"cycle\")\n        done.append(ready[0])\n        remaining.remove(ready[0])\n    return done",
+          "evaluation_mode": "python_output",
+          "points": 90,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "",
+            "check": "dag = {\"report\": [\"mart\"], \"mart\": [\"clean\"], \"clean\": [\"extract_a\", \"extract_b\"], \"extract_a\": [], \"extract_b\": []}\nprint(run_order(dag))\nprint(run_order({\"b\": [], \"a\": []}))\ntry:\n    run_order({\"a\": [\"b\"], \"b\": [\"a\"]})\nexcept ValueError as e:\n    print(\"error:\", e)",
+            "starter": "# Write run_order(dag) below.",
+            "output": "['extract_a', 'extract_b', 'clean', 'mart', 'report']\n['a', 'b']\nerror: cycle",
+            "must_have": [
+              "def "
+            ]
+          }
+        },
+        {
+          "id": "de-py-9",
+          "title": "Retry with Exponential Backoff",
+          "prompt": "Write `with_retry(fn, tries, base, sleep)`. Call fn(); if it raises, wait base * 2**(attempt-1) seconds by calling sleep(seconds) (attempt starts at 1) and try again, up to `tries` attempts in total. Return fn's result on success. If the last attempt also fails, re-raise its error WITHOUT sleeping after it.",
+          "hint_1": "A loop for attempt in range(1, tries + 1) with try/except around fn().",
+          "hint_2": "On the final attempt just `raise`; otherwise sleep(base * 2 ** (attempt - 1)).",
+          "hint_3": "def with_retry(fn, tries, base, sleep):\n    for attempt in range(1, tries + 1):\n        try:\n            return fn()\n        except Exception:\n            if attempt == tries:\n                raise\n            sleep(base * 2 ** (attempt - 1))",
+          "solution": "def with_retry(fn, tries, base, sleep):\n    for attempt in range(1, tries + 1):\n        try:\n            return fn()\n        except Exception:\n            if attempt == tries:\n                raise\n            sleep(base * 2 ** (attempt - 1))",
+          "evaluation_mode": "python_output",
+          "points": 100,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "def make_flaky(failures):\n    state = {\"calls\": 0}\n    def fn():\n        state[\"calls\"] += 1\n        if state[\"calls\"] <= failures:\n            raise ConnectionError(\"source down\")\n        return \"loaded\"\n    return fn, state",
+            "check": "waits = []\nfn, st = make_flaky(2)\nprint(with_retry(fn, 4, 1.0, waits.append), st[\"calls\"], waits)\nwaits = []\nfn, st = make_flaky(10)\ntry:\n    with_retry(fn, 3, 0.5, waits.append)\nexcept ConnectionError as e:\n    print(\"gave up:\", e, st[\"calls\"], waits)\nwaits = []\nfn, st = make_flaky(0)\nprint(with_retry(fn, 3, 1, waits.append), waits)",
+            "starter": "# make_flaky is already defined for the tests. Write with_retry(fn, tries, base, sleep) below.",
+            "output": "loaded 3 [1.0, 2.0]\ngave up: source down 3 [0.5, 1.0]\nloaded []",
+            "must_have": [
+              "def "
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "de-streaming",
+      "title": "Streaming & Event Time: Windows, Late Data and Sessions",
+      "description": "How real-time pipelines group events into windows, cope with late arrivals and rebuild user sessions",
+      "level": "advanced",
+      "prerequisites": [
+        "de-orchestration"
+      ],
+      "estimated_min": 45,
+      "sort_order": 12,
+      "theory_md": "## Streaming & Event Time: Windows, Late Data and Sessions\n\n**Batch** processes a big pile at a scheduled time (\"every night\"). **Streaming** processes events continuously as they arrive (Kafka, Kinesis, Pub/Sub, Flink, Spark Structured Streaming). Choose streaming only when the business really needs results in seconds; batch is simpler and cheaper.\n\n### Two clocks\nEvery event has an **event time** (`event_ts`, when it happened) and a **processing / ingestion time** (`ingested_at`, when your system saw it). Phones go offline, partners batch uploads, networks lag, so the two differ. Always aggregate by **event time** or your charts will show when data *arrived*, not when things *happened*.\n\n### Windows\nStreams are infinite, so we cut them into windows:\n- **Tumbling**: fixed, non-overlapping (every 6 hours).\n- **Sliding**: overlapping (the last 1 hour, updated every 5 minutes).\n- **Session**: a burst of activity closed by a gap of inactivity.\n\nA tumbling window in SQL is just a computed key:\n```sql\nSELECT DATE(event_ts) || ' ' || printf('%02d:00', (CAST(strftime('%H', event_ts) AS INTEGER) / 6) * 6) AS window_start,\n       COUNT(*) AS events\nFROM raw_events GROUP BY window_start;\n```\n\n### Late data and watermarks\nA **watermark** is the engine's statement \"I do not expect events older than this any more\". Late events inside the allowed lateness update the window; later ones go to a side output or a correction job. Measure your lateness: `(julianday(ingested_at) - julianday(event_ts)) * 1440` is the delay in minutes.\n\n### Delivery guarantees\n- **At-most-once**: may lose events.\n- **At-least-once**: never loses, may duplicate (the duplicate deliveries in `raw_events`).\n- **Exactly-once**: effectively achieved by at-least-once delivery plus idempotent writes keyed by `event_id`.\n\n### Sessions with LAG\nCompare each event with the user's previous one; a gap larger than the limit starts a new session:\n```sql\nSUM(CASE WHEN gap_minutes IS NULL OR gap_minutes > 30 THEN 1 ELSE 0 END)\n```",
+      "quiz": [
+        {
+          "question": "Which time should you aggregate by to answer 'when did it happen'?",
+          "options": [
+            "Ingestion time",
+            "Event time",
+            "Server time",
+            "Either"
+          ],
+          "correct_index": 1,
+          "explanation": "Ingestion time reflects delivery delays, not reality."
+        },
+        {
+          "question": "What does at-least-once delivery imply?",
+          "options": [
+            "No event is ever lost, but duplicates can occur",
+            "Events may be lost",
+            "Each event arrives exactly once, guaranteed",
+            "Events arrive in order"
+          ],
+          "correct_index": 0,
+          "explanation": "That is why consumers must deduplicate or write idempotently."
+        },
+        {
+          "question": "What is a watermark?",
+          "options": [
+            "A security stamp",
+            "The engine's estimate that older events will not arrive any more",
+            "A backup file",
+            "A window type"
+          ],
+          "correct_index": 1,
+          "explanation": "It tells the stream when a window can be considered complete."
+        },
+        {
+          "question": "When is streaming a good choice over batch?",
+          "options": [
+            "Always",
+            "When the business needs results within seconds or minutes",
+            "When data is small",
+            "When SQL is unavailable"
+          ],
+          "correct_index": 1,
+          "explanation": "Streaming adds complexity and cost, so use it when freshness truly pays for it."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-16-e1",
+          "title": "Tumbling Windows",
+          "prompt": "Count distinct events (by event_id) in 6-hour tumbling windows on event time for the day 2025-01-10. Return window_start (text like '2025-01-10 06:00') and events. Sort by window_start.",
+          "hint_1": "Window hour = (CAST(strftime('%H', event_ts) AS INTEGER) / 6) * 6 (integer division).",
+          "hint_2": "Build the label with DATE(event_ts) || ' ' || printf('%02d:00', hour_block) and COUNT(DISTINCT event_id).",
+          "hint_3": "SELECT DATE(event_ts) || ' ' || printf('%02d:00', (CAST(strftime('%H', event_ts) AS INTEGER) / 6) * 6) AS window_start, COUNT(DISTINCT event_id) AS events FROM raw_events WHERE DATE(event_ts) = '2025-01-10' GROUP BY window_start ORDER BY window_start",
+          "solution": "SELECT DATE(event_ts) || ' ' || printf('%02d:00', (CAST(strftime('%H', event_ts) AS INTEGER) / 6) * 6) AS window_start, COUNT(DISTINCT event_id) AS events FROM raw_events WHERE DATE(event_ts) = '2025-01-10' GROUP BY window_start ORDER BY window_start",
+          "evaluation_mode": "exact",
+          "points": 60
+        },
+        {
+          "id": "de-16-e2",
+          "title": "How Late Is Late?",
+          "prompt": "Measure ingestion lag. For each event_type, count the rows that were ingested more than 10 minutes after they happened (late_events) and the average lag of those late rows in minutes rounded to 1 decimal (avg_late_min). Sort by late_events descending then event_type.",
+          "hint_1": "lag minutes = (julianday(ingested_at) - julianday(event_ts)) * 1440.",
+          "hint_2": "Filter with WHERE lag > 10 before grouping by event_type.",
+          "hint_3": "SELECT event_type, COUNT(*) AS late_events, ROUND(AVG((julianday(ingested_at) - julianday(event_ts)) * 1440), 1) AS avg_late_min FROM raw_events WHERE (julianday(ingested_at) - julianday(event_ts)) * 1440 > 10 GROUP BY event_type ORDER BY late_events DESC, event_type",
+          "solution": "SELECT event_type, COUNT(*) AS late_events, ROUND(AVG((julianday(ingested_at) - julianday(event_ts)) * 1440), 1) AS avg_late_min FROM raw_events WHERE (julianday(ingested_at) - julianday(event_ts)) * 1440 > 10 GROUP BY event_type ORDER BY late_events DESC, event_type",
+          "evaluation_mode": "exact",
+          "points": 70
+        },
+        {
+          "id": "de-16-e3",
+          "title": "Activity Bursts per User",
+          "prompt": "Sessionize users. First keep one row per event_id (the newest delivery by ingested_at). Then for each user a new burst starts at their first event or when the gap since their previous event is more than 3 days (4320 minutes). Return user_id and bursts for the 5 users with the most bursts (ties by user_id).",
+          "hint_1": "Deduplicate with ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY ingested_at DESC) = 1, then LAG(event_ts) OVER (PARTITION BY user_id ORDER BY event_ts).",
+          "hint_2": "bursts = SUM(CASE WHEN prev_ts IS NULL OR (julianday(event_ts) - julianday(prev_ts)) * 1440 > 4320 THEN 1 ELSE 0 END). Finish with ORDER BY bursts DESC, user_id LIMIT 5.",
+          "hint_3": "WITH d AS (SELECT user_id, event_ts, ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY ingested_at DESC) AS rn FROM raw_events), u AS (SELECT user_id, event_ts, LAG(event_ts) OVER (PARTITION BY user_id ORDER BY event_ts) AS prev_ts FROM d WHERE rn = 1) SELECT user_id, SUM(CASE WHEN prev_ts IS NULL OR (julianday(event_ts) - julianday(prev_ts)) * 1440 > 4320 THEN 1 ELSE 0 END) AS bursts FROM u GROUP BY user_id ORDER BY bursts DESC, user_id LIMIT 5",
+          "solution": "WITH d AS (SELECT user_id, event_ts, ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY ingested_at DESC) AS rn FROM raw_events), u AS (SELECT user_id, event_ts, LAG(event_ts) OVER (PARTITION BY user_id ORDER BY event_ts) AS prev_ts FROM d WHERE rn = 1) SELECT user_id, SUM(CASE WHEN prev_ts IS NULL OR (julianday(event_ts) - julianday(prev_ts)) * 1440 > 4320 THEN 1 ELSE 0 END) AS bursts FROM u GROUP BY user_id ORDER BY bursts DESC, user_id LIMIT 5",
+          "evaluation_mode": "exact",
+          "points": 90
+        },
+        {
+          "id": "de-py-10",
+          "title": "Tumbling Windows in Python",
+          "prompt": "`stamps` is a list of timestamps like '2025-01-10 06:15:00'. Write `tumbling(stamps, minutes)` returning a dict that maps each window start (text 'YYYY-MM-DD HH:MM') to the number of timestamps inside it. Windows are fixed blocks of `minutes` minutes counted from midnight (30-minute windows start at :00 and :30).",
+          "hint_1": "Pull out hour and minute with int(s[11:13]) and int(s[14:16]).",
+          "hint_2": "minute_of_day = hour*60 + minute; block = minute_of_day // minutes * minutes; convert back with divmod(block, 60).",
+          "hint_3": "def tumbling(stamps, minutes):\n    out = {}\n    for s in stamps:\n        total = int(s[11:13]) * 60 + int(s[14:16])\n        block = total // minutes * minutes\n        h, m = divmod(block, 60)\n        key = f\"{s[:10]} {h:02d}:{m:02d}\"\n        out[key] = out.get(key, 0) + 1\n    return out",
+          "solution": "def tumbling(stamps, minutes):\n    out = {}\n    for s in stamps:\n        total = int(s[11:13]) * 60 + int(s[14:16])\n        block = total // minutes * minutes\n        h, m = divmod(block, 60)\n        key = f\"{s[:10]} {h:02d}:{m:02d}\"\n        out[key] = out.get(key, 0) + 1\n    return out",
+          "evaluation_mode": "python_output",
+          "points": 100,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "stamps = [\"2025-01-10 06:15:00\", \"2025-01-10 06:29:59\", \"2025-01-10 06:30:00\", \"2025-01-10 07:45:10\", \"2025-01-11 00:00:01\", \"2025-01-10 06:59:59\"]",
+            "check": "print(sorted(tumbling(stamps, 30).items()))\nprint(sorted(tumbling(stamps, 60).items()))\nprint(sorted(tumbling(stamps, 360).items()))",
+            "starter": "# stamps is already defined. Write tumbling(stamps, minutes) below.",
+            "output": "[('2025-01-10 06:00', 2), ('2025-01-10 06:30', 2), ('2025-01-10 07:30', 1), ('2025-01-11 00:00', 1)]\n[('2025-01-10 06:00', 4), ('2025-01-10 07:00', 1), ('2025-01-11 00:00', 1)]\n[('2025-01-10 06:00', 5), ('2025-01-11 00:00', 1)]",
+            "must_have": [
+              "def "
+            ]
+          }
+        },
+        {
+          "id": "de-py-11",
+          "title": "Sessionise a User's Clicks",
+          "prompt": "`times` is a sorted list of minutes (numbers) at which one user was active. Write `sessions(times, gap)` returning the number of sessions: a new session starts at the first time, and whenever the gap from the previous time is MORE than `gap` minutes. Empty input has 0 sessions.",
+          "hint_1": "Count 1 for the first time, then compare each time with the previous one.",
+          "hint_2": "if t - prev > gap: count += 1 (strictly more, not equal).",
+          "hint_3": "def sessions(times, gap):\n    count = 0\n    prev = None\n    for t in times:\n        if prev is None or t - prev > gap:\n            count += 1\n        prev = t\n    return count",
+          "solution": "def sessions(times, gap):\n    count = 0\n    prev = None\n    for t in times:\n        if prev is None or t - prev > gap:\n            count += 1\n        prev = t\n    return count",
+          "evaluation_mode": "python_output",
+          "points": 80,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "",
+            "check": "print(sessions([], 30))\nprint(sessions([1, 5, 20], 30))\nprint(sessions([0, 10, 50, 55, 200, 230, 260], 30))\nprint(sessions([0, 30, 60], 30))",
+            "starter": "# Write sessions(times, gap) below.",
+            "output": "0\n1\n3\n1",
+            "must_have": [
+              "def "
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "de-testing",
+      "title": "Testing Data: Quality Tests, Freshness and Reconciliation",
+      "description": "Treat data like software: automated tests that fail loudly before bad numbers reach the board",
+      "level": "advanced",
+      "prerequisites": [
+        "de-streaming"
+      ],
+      "estimated_min": 40,
+      "sort_order": 13,
+      "theory_md": "## Testing Data: Quality Tests, Freshness and Reconciliation\n\nSoftware has unit tests. Data needs them too, because the most expensive bug is a **wrong number nobody noticed**. A data test is simply a query that returns the rows that break a rule; zero rows means pass.\n\n### The four everyday tests\n1. **Unique**: a key appears once. `SELECT order_id FROM orders GROUP BY order_id HAVING COUNT(*) > 1`\n2. **Not null**: required columns are filled.\n3. **Relationships**: every foreign key finds its parent (the orphan orders from the integrity lesson).\n4. **Accepted values**: status is one of the agreed list.\n\nTools such as dbt and Great Expectations run these on every pipeline run, in CI before a change ships and in production after each load.\n\n### Freshness\nData that stopped arriving is silently wrong. A freshness test compares the newest timestamp with now and fails when the gap exceeds the promise.\n\n### Volume and anomaly tests\nA table that suddenly loads 0 rows, or 40 percent less than usual, is broken even though nothing errored. Compare today with the typical level.\n\n### Reconciliation\nProve that two systems agree: the totals loaded into the warehouse equal the totals in the source. Differences are investigated, not ignored.\n\n### Where to run tests\n- **At the door**: validate raw data as it arrives; quarantine bad rows.\n- **In the middle**: after each transformation.\n- **At the end**: on the marts people read.\n\n### Severity\nNot every failing test should stop the line. Mark tests as **error** (block the run, e.g. duplicate keys in revenue) or **warn** (notify, e.g. 2 percent of countries missing).\n\n### CI for data\nChanges to pipeline code go through pull requests, the tests run automatically on a sample, and only green changes are deployed. This is what lets many engineers change a platform safely.",
+      "quiz": [
+        {
+          "question": "What does a passing data test usually look like?",
+          "options": [
+            "It returns many rows",
+            "The test query returns zero offending rows",
+            "It returns one row",
+            "It writes a file"
+          ],
+          "correct_index": 1,
+          "explanation": "The query is written to find violations, so none found means pass."
+        },
+        {
+          "question": "Why is a freshness test important?",
+          "options": [
+            "Data can stop arriving without any error",
+            "It makes queries faster",
+            "It deletes old data",
+            "It is required by SQL"
+          ],
+          "correct_index": 0,
+          "explanation": "A stalled source produces stale but valid-looking numbers."
+        },
+        {
+          "question": "What does reconciliation prove?",
+          "options": [
+            "Code is fast",
+            "Two systems agree on the same totals",
+            "A table is small",
+            "Columns have the right names"
+          ],
+          "correct_index": 1,
+          "explanation": "Matching totals show nothing was lost or duplicated in transit."
+        },
+        {
+          "question": "When should a failing test block the pipeline?",
+          "options": [
+            "Never",
+            "When the rule protects numbers people rely on (an error-severity test)",
+            "Always, for every test",
+            "Only on Fridays"
+          ],
+          "correct_index": 1,
+          "explanation": "Severity levels keep the line moving for minor issues and stop it for serious ones."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-17-e1",
+          "title": "The Test Suite",
+          "prompt": "Run four data tests in one result. Return test_name and failing_rows (count of offending rows) for: 'orders_unique_id' (order_id values that occur more than once), 'orders_have_customer' (orders whose customer_id has no row in customers), 'events_unique_id' (event_id values that occur more than once) and 'customers_country_present' (customers with NULL country). Sort by test_name.",
+          "hint_1": "Write one SELECT per test returning a constant name and a count, then combine them with UNION ALL.",
+          "hint_2": "Duplicates: SELECT COUNT(*) FROM (SELECT id FROM t GROUP BY id HAVING COUNT(*) > 1). Orphans: LEFT JOIN ... WHERE c.customer_id IS NULL.",
+          "hint_3": "SELECT 'orders_unique_id' AS test_name, COUNT(*) AS failing_rows FROM (SELECT order_id FROM orders GROUP BY order_id HAVING COUNT(*) > 1) UNION ALL SELECT 'orders_have_customer', COUNT(*) FROM orders o LEFT JOIN customers c ON c.customer_id = o.customer_id WHERE c.customer_id IS NULL UNION ALL SELECT 'events_unique_id', COUNT(*) FROM (SELECT event_id FROM raw_events GROUP BY event_id HAVING COUNT(*) > 1) UNION ALL SELECT 'customers_country_present', COUNT(*) FROM customers WHERE country IS NULL ORDER BY test_name",
+          "solution": "SELECT 'orders_unique_id' AS test_name, COUNT(*) AS failing_rows FROM (SELECT order_id FROM orders GROUP BY order_id HAVING COUNT(*) > 1) UNION ALL SELECT 'orders_have_customer', COUNT(*) FROM orders o LEFT JOIN customers c ON c.customer_id = o.customer_id WHERE c.customer_id IS NULL UNION ALL SELECT 'events_unique_id', COUNT(*) FROM (SELECT event_id FROM raw_events GROUP BY event_id HAVING COUNT(*) > 1) UNION ALL SELECT 'customers_country_present', COUNT(*) FROM customers WHERE country IS NULL ORDER BY test_name",
+          "evaluation_mode": "exact",
+          "points": 70
+        },
+        {
+          "id": "de-17-e2",
+          "title": "Freshness Check",
+          "prompt": "Treat today as 2025-11-30. For each pipeline return pipeline, last_success (its newest run_date with status 'success') and days_stale (whole days between 2025-11-30 and last_success). Sort by days_stale descending then pipeline.",
+          "hint_1": "MAX(run_date) over only the successful rows gives last_success.",
+          "hint_2": "days_stale = CAST(julianday('2025-11-30') - julianday(MAX(run_date)) AS INTEGER).",
+          "hint_3": "SELECT pipeline, MAX(run_date) AS last_success, CAST(julianday('2025-11-30') - julianday(MAX(run_date)) AS INTEGER) AS days_stale FROM pipeline_runs WHERE status = 'success' GROUP BY pipeline ORDER BY days_stale DESC, pipeline",
+          "solution": "SELECT pipeline, MAX(run_date) AS last_success, CAST(julianday('2025-11-30') - julianday(MAX(run_date)) AS INTEGER) AS days_stale FROM pipeline_runs WHERE status = 'success' GROUP BY pipeline ORDER BY days_stale DESC, pipeline",
+          "evaluation_mode": "exact",
+          "points": 60
+        },
+        {
+          "id": "de-17-e3",
+          "title": "Volume Anomaly Test",
+          "prompt": "For the orders_ingest pipeline, find runs that loaded less than half of the pipeline's average rows_loaded (average over all its runs). Return run_date, rows_loaded and status. Sort by run_date.",
+          "hint_1": "A scalar subquery (SELECT AVG(rows_loaded) FROM pipeline_runs WHERE pipeline = 'orders_ingest') gives the typical volume.",
+          "hint_2": "Filter rows_loaded < 0.5 * that average.",
+          "hint_3": "SELECT run_date, rows_loaded, status FROM pipeline_runs WHERE pipeline = 'orders_ingest' AND rows_loaded < 0.5 * (SELECT AVG(rows_loaded) FROM pipeline_runs WHERE pipeline = 'orders_ingest') ORDER BY run_date",
+          "solution": "SELECT run_date, rows_loaded, status FROM pipeline_runs WHERE pipeline = 'orders_ingest' AND rows_loaded < 0.5 * (SELECT AVG(rows_loaded) FROM pipeline_runs WHERE pipeline = 'orders_ingest') ORDER BY run_date",
+          "evaluation_mode": "exact",
+          "points": 70
+        },
+        {
+          "id": "de-py-12",
+          "title": "Write Data Tests",
+          "prompt": "`orders` is a list of dicts with order_id, customer_id and status. Write `run_tests(rows, valid_customers)` returning a dict with three counts: 'duplicate_ids' (how many order_id values appear more than once), 'orphans' (rows whose customer_id is not in the set valid_customers) and 'bad_status' (rows whose status is not one of 'paid', 'pending', 'refunded').",
+          "hint_1": "Use a dict or collections.Counter to count ids; duplicates are ids with count > 1.",
+          "hint_2": "Count distinct duplicated ids, not extra rows.",
+          "hint_3": "def run_tests(rows, valid_customers):\n    seen = {}\n    for r in rows:\n        seen[r[\"order_id\"]] = seen.get(r[\"order_id\"], 0) + 1\n    return {\n        \"duplicate_ids\": sum(1 for n in seen.values() if n > 1),\n        \"orphans\": sum(1 for r in rows if r[\"customer_id\"] not in valid_customers),\n        \"bad_status\": sum(1 for r in rows if r[\"status\"] not in (\"paid\", \"pending\", \"refunded\")),\n    }",
+          "solution": "def run_tests(rows, valid_customers):\n    seen = {}\n    for r in rows:\n        seen[r[\"order_id\"]] = seen.get(r[\"order_id\"], 0) + 1\n    return {\n        \"duplicate_ids\": sum(1 for n in seen.values() if n > 1),\n        \"orphans\": sum(1 for r in rows if r[\"customer_id\"] not in valid_customers),\n        \"bad_status\": sum(1 for r in rows if r[\"status\"] not in (\"paid\", \"pending\", \"refunded\")),\n    }",
+          "evaluation_mode": "python_output",
+          "points": 100,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "orders = [\n    {\"order_id\": 1, \"customer_id\": 10, \"status\": \"paid\"},\n    {\"order_id\": 2, \"customer_id\": 11, \"status\": \"pending\"},\n    {\"order_id\": 2, \"customer_id\": 11, \"status\": \"pending\"},\n    {\"order_id\": 3, \"customer_id\": 99, \"status\": \"paid\"},\n    {\"order_id\": 4, \"customer_id\": 10, \"status\": \"PAID\"},\n    {\"order_id\": 5, \"customer_id\": 98, \"status\": \"shipped\"},\n    {\"order_id\": 5, \"customer_id\": 98, \"status\": \"shipped\"},\n    {\"order_id\": 5, \"customer_id\": 98, \"status\": \"shipped\"},\n]",
+            "check": "print(run_tests(orders, {10, 11}))\nprint(run_tests([], {1}))",
+            "starter": "# orders is already defined. Write run_tests(rows, valid_customers) below.",
+            "output": "{'duplicate_ids': 2, 'orphans': 4, 'bad_status': 4}\n{'duplicate_ids': 0, 'orphans': 0, 'bad_status': 0}",
+            "must_have": [
+              "def "
+            ]
+          }
+        }
+      ]
+    },
+    {
       "id": "de-observability",
       "title": "Pipeline Reliability, SLAs & Observability",
       "description": "Measure failure rates, SLA breaches and silent failures so the platform earns trust",
       "level": "intermediate",
       "prerequisites": [
-        "de-trends"
+        "de-testing"
       ],
       "estimated_min": 40,
-      "sort_order": 9,
+      "sort_order": 14,
       "theory_md": "## Pipeline Reliability, SLAs & Observability\n\n### Pipelines fail. The question is who finds out first\nIf a stakeholder discovers a broken dashboard before you do, trust drops. **Data observability** is the practice of measuring the health of your data and pipelines continuously so *you* find problems first.\n\n### Service level vocabulary\n- **SLA** (agreement): the promise made to users, such as \"daily orders data ready by 06:00\".\n- **SLO** (objective): the internal target, usually stricter, such as \"99% of runs finish under 15 minutes\".\n- **SLI** (indicator): the measurement you track, such as run duration or failure rate.\n\nIn `pipeline_runs`, `sla_s` is each pipeline's allowed run time in seconds.\n\n### Core health queries\nFailure rate per pipeline:\n```sql\nSELECT pipeline,\n       ROUND(100.0 * SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) / COUNT(*), 1) AS failure_pct\nFROM pipeline_runs GROUP BY pipeline;\n```\nSLA breaches (run succeeded, but too slowly):\n```sql\nSELECT pipeline, COUNT(*) AS sla_breaches\nFROM pipeline_runs WHERE status = 'success' AND duration_s > sla_s GROUP BY pipeline;\n```\nRoot causes of failure:\n```sql\nSELECT error_type, COUNT(*) FROM pipeline_runs WHERE status = 'failed' GROUP BY error_type;\n```\n\n### Silent failures\nThe worst failure shows no error: a job \"succeeds\" but loads far less data than usual. Volume checks catch it:\n```sql\nSELECT run_id, pipeline, run_date, rows_loaded\nFROM pipeline_runs WHERE status = 'success' AND rows_loaded < 10000;\n```\n\n### The five pillars to monitor\n**Freshness, volume, schema, distribution, lineage.** If you watch these, most incidents are caught within minutes.\n\n### Executive lens\nReliability is a budget. Know the failure rate, the top root cause and the SLA breaches, and you can decide where one engineer-week buys the most trust.",
       "quiz": [
         {
@@ -812,6 +1529,236 @@
           "solution": "SELECT run_id, pipeline, run_date, rows_loaded FROM pipeline_runs WHERE status = 'success' AND rows_loaded < 10000 ORDER BY run_id",
           "evaluation_mode": "exact",
           "points": 30
+        },
+        {
+          "id": "de-py-13",
+          "title": "Spot the Outliers",
+          "prompt": "Pipeline durations (seconds) are in a list. Write `outliers(values, z)` returning the INDEXES (in order) of values whose absolute z-score is greater than z. Use the population standard deviation (statistics.pstdev). If the standard deviation is 0 return an empty list.",
+          "hint_1": "z-score = (value - mean) / stdev. import statistics for mean and pstdev.",
+          "hint_2": "Guard the zero stdev first, then use enumerate and abs((v - mean) / sd) > z.",
+          "hint_3": "import statistics\n\ndef outliers(values, z):\n    mean = statistics.mean(values)\n    sd = statistics.pstdev(values)\n    if sd == 0:\n        return []\n    return [i for i, v in enumerate(values) if abs((v - mean) / sd) > z]",
+          "solution": "import statistics\n\ndef outliers(values, z):\n    mean = statistics.mean(values)\n    sd = statistics.pstdev(values)\n    if sd == 0:\n        return []\n    return [i for i, v in enumerate(values) if abs((v - mean) / sd) > z]",
+          "evaluation_mode": "python_output",
+          "points": 90,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "",
+            "check": "data = [300, 310, 295, 305, 2400, 298, 302, 20, 301, 299]\nprint(outliers(data, 2))\nprint(outliers(data, 3))\nprint(outliers([5, 5, 5, 5], 1))",
+            "starter": "import statistics\n\n# Write outliers(values, z) below.",
+            "output": "[4]\n[]\n[]",
+            "must_have": [
+              "def "
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "de-python-pipelines",
+      "title": "Python for Pipelines: Extract, Transform, Load",
+      "description": "The Python patterns behind real pipelines: small functions, validation, retries and idempotent loads",
+      "level": "intermediate",
+      "prerequisites": [
+        "de-observability"
+      ],
+      "estimated_min": 45,
+      "sort_order": 15,
+      "theory_md": "## Python for Pipelines: Extract, Transform, Load\n\nSQL transforms data that is already in a database. **Python** gets it there: calling APIs, reading files, applying logic SQL cannot express, and gluing steps together. Nearly every data engineering job uses both. Here are the patterns, each one short enough to learn in a sitting. (Run them in the Python Academy playground; the exercises in this lesson check the matching SQL ideas.)\n\n### 1. Three small functions\n```python\ndef extract(path):\n    import csv\n    with open(path, newline=\"\") as f:\n        return list(csv.DictReader(f))\n\ndef transform(rows):\n    clean = []\n    for r in rows:\n        email = (r[\"email\"] or \"\").strip().lower()\n        if \"@\" not in email:\n            continue            # reject, but count it (see below)\n        clean.append({**r, \"email\": email, \"spend\": float(r[\"spend\"])})\n    return clean\n\ndef load(rows, conn):\n    conn.executemany(\n        \"INSERT INTO contacts (contact_id, email, spend) VALUES (:contact_id, :email, :spend) \"\n        \"ON CONFLICT(contact_id) DO UPDATE SET email = excluded.email, spend = excluded.spend\",\n        rows)\n    conn.commit()\n```\nThe `ON CONFLICT ... DO UPDATE` makes the load an **upsert**: running it twice leaves the same rows, so it is idempotent.\n\n### 2. Never lose rejected rows\nCount and store what you reject. A pipeline that silently drops 20 percent of rows is a bug with a nice log.\n```python\nrejected = [r for r in rows if \"@\" not in (r[\"email\"] or \"\")]\n```\n\n### 3. Process big files in chunks\nDo not load everything in memory. Generators yield one piece at a time:\n```python\ndef batches(rows, size=500):\n    for i in range(0, len(rows), size):\n        yield rows[i:i + size]\n```\n\n### 4. Retry with backoff\n```python\nimport time\ndef with_retry(fn, tries=4, wait=1.0):\n    for attempt in range(1, tries + 1):\n        try:\n            return fn()\n        except Exception:\n            if attempt == tries:\n                raise            # let the orchestrator alert\n            time.sleep(wait * 2 ** (attempt - 1))   # 1s, 2s, 4s\n```\n\n### 5. Validate at the door\nUse a schema (dataclasses, pydantic, pandera) so bad types fail early with a clear message instead of deep inside a model run.\n\n### 6. Logging, config and secrets\n`logging` with counts (read, rejected, loaded), configuration through environment variables, and **secrets never in code**: use a secrets manager.\n\n### 7. Test your transforms\nA transform is a pure function: rows in, rows out. That makes it trivially testable with a handful of tiny inputs.\n\n### 8. Speed: the difference between seconds and hours\nThe same job can be written so it takes 0.1 seconds or 10 minutes. The usual cause is **searching a list inside a loop**:\n```python\n# SLOW: x in a list (or ids.count(x)) scans the whole list, every time. 120,000 x 120,000 steps.\ndups = [x for x in set(ids) if ids.count(x) > 1]\n\n# FAST: a set or dict finds a value in one step, however large it is.\nseen, dups = set(), set()\nfor x in ids:\n    (dups if x in seen else seen).add(x)\n```\nRule of thumb: **build an index once (a dict or set), then look things up in it.** This is exactly what a database index and a hash join do for you at scale. The last two exercises give you 120,000 rows: the slow way is stopped after 5 seconds, so you will feel the difference.\n\n### Pandas versus SQL\nPandas is fine for one machine and files up to a few GB. Beyond that, push the heavy work into the warehouse (SQL) or a distributed engine (Spark) and keep Python for orchestration and glue.",
+      "quiz": [
+        {
+          "question": "What makes a load step idempotent?",
+          "options": [
+            "Using INSERT every time",
+            "Upserting on a key so a re-run leaves the same rows",
+            "Running it once only",
+            "Deleting the table first and hoping"
+          ],
+          "correct_index": 1,
+          "explanation": "ON CONFLICT DO UPDATE (an upsert) means repeats do not duplicate data."
+        },
+        {
+          "question": "Why generate data in batches with a generator?",
+          "options": [
+            "It is shorter",
+            "It avoids loading everything into memory at once",
+            "It sorts the data",
+            "Python requires it"
+          ],
+          "correct_index": 1,
+          "explanation": "Yielding chunks keeps memory use small regardless of file size."
+        },
+        {
+          "question": "A transform silently drops 20 percent of the rows. What should have happened?",
+          "options": [
+            "Nothing",
+            "The rejected rows are counted and stored so the loss is visible",
+            "The pipeline should crash always",
+            "The rows should be duplicated"
+          ],
+          "correct_index": 1,
+          "explanation": "Rejects are information; hiding them hides bugs."
+        },
+        {
+          "question": "Where should API keys live?",
+          "options": [
+            "In the Python file",
+            "In a secrets manager or environment variables, never in code",
+            "In the README",
+            "In a CSV"
+          ],
+          "correct_index": 1,
+          "explanation": "Secrets in code end up in version control and leak."
+        },
+        {
+          "question": "When should heavy work move from pandas to the warehouse or Spark?",
+          "options": [
+            "Never",
+            "When data outgrows one machine's memory or time budget",
+            "When the code is short",
+            "When using SQL is forbidden"
+          ],
+          "correct_index": 1,
+          "explanation": "Push-down to a scalable engine is the standard answer to size."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-18-e1",
+          "title": "Validator Report",
+          "prompt": "Mirror a Python validator in SQL. For the messy_contacts table return reason and rows, where reason is 'missing_email' when email is NULL or blank after trimming, otherwise 'bad_spend' when spend is NULL or not a number (use CAST to REAL after checking GLOB '[0-9]*'), otherwise 'ok'. Sort by reason.",
+          "hint_1": "Use a CASE with the checks in the order given; the first match wins. Missing email: email IS NULL OR TRIM(email) = ''.",
+          "hint_2": "Bad spend: spend IS NULL OR NOT (CAST(spend AS TEXT) GLOB '[0-9]*'). Wrap the CASE in a subquery, then GROUP BY reason.",
+          "hint_3": "SELECT reason, COUNT(*) AS rows FROM (SELECT CASE WHEN email IS NULL OR TRIM(email) = '' THEN 'missing_email' WHEN spend IS NULL OR NOT (CAST(spend AS TEXT) GLOB '[0-9]*') THEN 'bad_spend' ELSE 'ok' END AS reason FROM messy_contacts) GROUP BY reason ORDER BY reason",
+          "solution": "SELECT reason, COUNT(*) AS rows FROM (SELECT CASE WHEN email IS NULL OR TRIM(email) = '' THEN 'missing_email' WHEN spend IS NULL OR NOT (CAST(spend AS TEXT) GLOB '[0-9]*') THEN 'bad_spend' ELSE 'ok' END AS reason FROM messy_contacts) GROUP BY reason ORDER BY reason",
+          "evaluation_mode": "exact",
+          "points": 70
+        },
+        {
+          "id": "de-18-e2",
+          "title": "Chunked Extraction",
+          "prompt": "Split the orders table into batches of 500 rows by order_id (orders 1-500 are batch 1, 501-1000 batch 2, and so on). Return batch, rows (count), first_order_id and last_order_id. Sort by batch.",
+          "hint_1": "batch = (order_id - 1) / 500 + 1 using integer division.",
+          "hint_2": "GROUP BY that expression and use MIN / MAX of order_id.",
+          "hint_3": "SELECT (order_id - 1) / 500 + 1 AS batch, COUNT(*) AS rows, MIN(order_id) AS first_order_id, MAX(order_id) AS last_order_id FROM orders GROUP BY batch ORDER BY batch",
+          "solution": "SELECT (order_id - 1) / 500 + 1 AS batch, COUNT(*) AS rows, MIN(order_id) AS first_order_id, MAX(order_id) AS last_order_id FROM orders GROUP BY batch ORDER BY batch",
+          "evaluation_mode": "exact",
+          "points": 50
+        },
+        {
+          "id": "de-18-e3",
+          "title": "Idempotency Proof",
+          "prompt": "Prove a load is safe to repeat. Return one row with total_rows (all rows in raw_events), distinct_events (distinct event_id) and duplicates_to_remove (total_rows minus distinct_events).",
+          "hint_1": "COUNT(*) counts all rows; COUNT(DISTINCT event_id) counts unique events.",
+          "hint_2": "duplicates_to_remove = COUNT(*) - COUNT(DISTINCT event_id).",
+          "hint_3": "SELECT COUNT(*) AS total_rows, COUNT(DISTINCT event_id) AS distinct_events, COUNT(*) - COUNT(DISTINCT event_id) AS duplicates_to_remove FROM raw_events",
+          "solution": "SELECT COUNT(*) AS total_rows, COUNT(DISTINCT event_id) AS distinct_events, COUNT(*) - COUNT(DISTINCT event_id) AS duplicates_to_remove FROM raw_events",
+          "evaluation_mode": "exact",
+          "points": 40
+        },
+        {
+          "id": "de-py-14",
+          "title": "Process Big Data in Batches",
+          "prompt": "Write a generator `batches(items, size)` that yields lists of at most `size` items, in order, without building all the batches in memory first. The last batch may be shorter. The tests also check that it is a generator.",
+          "hint_1": "A for loop over range(0, len(items), size) with slicing items[i:i + size].",
+          "hint_2": "Use `yield` instead of returning a list; the function then returns a generator.",
+          "hint_3": "def batches(items, size):\n    for i in range(0, len(items), size):\n        yield items[i:i + size]",
+          "solution": "def batches(items, size):\n    for i in range(0, len(items), size):\n        yield items[i:i + size]",
+          "evaluation_mode": "python_output",
+          "points": 80,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "",
+            "check": "import types\ng = batches(list(range(7)), 3)\nprint(isinstance(g, types.GeneratorType))\nprint(list(g))\nprint(list(batches([], 5)))\nprint(list(batches([1, 2], 10)))",
+            "starter": "# Write the generator batches(items, size) below.",
+            "output": "True\n[[0, 1, 2], [3, 4, 5], [6]]\n[]\n[[1, 2]]",
+            "must_have": [
+              "yield"
+            ]
+          }
+        },
+        {
+          "id": "de-py-15",
+          "title": "Validate at the Door: Keep and Reject",
+          "prompt": "Write `validate(rows)` for contact rows. A row is valid when it has an email containing '@' (after trimming) AND its spend converts to a number >= 0. Return (valid, rejected) where valid holds the original rows that passed (in order) and rejected is a list of (row_id, reason) tuples, reason being 'bad_email' or 'bad_spend' (check the email first).",
+          "hint_1": "Convert spend inside try/except (ValueError, TypeError) so text like 'n/a' is rejected instead of crashing.",
+          "hint_2": "Return the SAME dicts for valid rows; build the tuples (r['id'], reason) for rejects.",
+          "hint_3": "def validate(rows):\n    valid, rejected = [], []\n    for r in rows:\n        email = (r.get(\"email\") or \"\").strip()\n        if \"@\" not in email:\n            rejected.append((r[\"id\"], \"bad_email\"))\n            continue\n        try:\n            ok = float(r[\"spend\"]) >= 0\n        except (ValueError, TypeError):\n            ok = False\n        if ok:\n            valid.append(r)\n        else:\n            rejected.append((r[\"id\"], \"bad_spend\"))\n    return valid, rejected",
+          "solution": "def validate(rows):\n    valid, rejected = [], []\n    for r in rows:\n        email = (r.get(\"email\") or \"\").strip()\n        if \"@\" not in email:\n            rejected.append((r[\"id\"], \"bad_email\"))\n            continue\n        try:\n            ok = float(r[\"spend\"]) >= 0\n        except (ValueError, TypeError):\n            ok = False\n        if ok:\n            valid.append(r)\n        else:\n            rejected.append((r[\"id\"], \"bad_spend\"))\n    return valid, rejected",
+          "evaluation_mode": "python_output",
+          "points": 100,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "contacts = [\n    {\"id\": 1, \"email\": \"a@x.com\", \"spend\": \"10.5\"},\n    {\"id\": 2, \"email\": \"  \", \"spend\": \"3\"},\n    {\"id\": 3, \"email\": \"c@x.com\", \"spend\": \"n/a\"},\n    {\"id\": 4, \"email\": \"d@x.com\", \"spend\": \"-4\"},\n    {\"id\": 5, \"email\": None, \"spend\": None},\n    {\"id\": 6, \"email\": \" f@x.com \", \"spend\": 0},\n]",
+            "check": "ok, bad = validate(contacts)\nprint([r[\"id\"] for r in ok])\nprint(bad)\nprint(validate([]))",
+            "starter": "# contacts is already defined. Write validate(rows) below.",
+            "output": "[1, 6]\n[(2, 'bad_email'), (3, 'bad_spend'), (4, 'bad_spend'), (5, 'bad_email')]\n([], [])",
+            "must_have": [
+              "def "
+            ]
+          }
+        },
+        {
+          "id": "de-py-16",
+          "title": "An Idempotent Upsert",
+          "prompt": "Write `upsert(table, rows, key)`: `table` is a dict of key -> row. For each row, insert it when its key is new, or merge it into the existing row (new values win, columns that are not in the new row stay). Return a tuple (inserted, updated) counting what happened. Running the same rows again must change nothing in the table (it should report 0 inserted, and the rows count as updated).",
+          "hint_1": "existing = table.get(row[key]); if it is None insert a copy, otherwise existing.update(row).",
+          "hint_2": "Insert a copy (dict(row)) so later changes to your input do not change the table.",
+          "hint_3": "def upsert(table, rows, key):\n    inserted = updated = 0\n    for row in rows:\n        existing = table.get(row[key])\n        if existing is None:\n            table[row[key]] = dict(row)\n            inserted += 1\n        else:\n            existing.update(row)\n            updated += 1\n    return inserted, updated",
+          "solution": "def upsert(table, rows, key):\n    inserted = updated = 0\n    for row in rows:\n        existing = table.get(row[key])\n        if existing is None:\n            table[row[key]] = dict(row)\n            inserted += 1\n        else:\n            existing.update(row)\n            updated += 1\n    return inserted, updated",
+          "evaluation_mode": "python_output",
+          "points": 100,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "",
+            "check": "t = {}\nrows = [{\"id\": 1, \"name\": \"Ann\", \"tier\": \"free\"}, {\"id\": 2, \"name\": \"Ben\", \"tier\": \"pro\"}]\nprint(upsert(t, rows, \"id\"))\nsnapshot = {k: dict(v) for k, v in t.items()}\nprint(upsert(t, rows, \"id\"))\nprint(t == snapshot)\nprint(upsert(t, [{\"id\": 1, \"tier\": \"enterprise\"}, {\"id\": 3, \"name\": \"Cy\", \"tier\": \"free\"}], \"id\"))\nprint(sorted(t.items()))\nrows[0][\"name\"] = \"CHANGED\"\nprint(t[1][\"name\"])",
+            "starter": "# Write upsert(table, rows, key) below.",
+            "output": "(2, 0)\n(0, 2)\nTrue\n(1, 1)\n[(1, {'id': 1, 'name': 'Ann', 'tier': 'enterprise'}), (2, {'id': 2, 'name': 'Ben', 'tier': 'pro'}), (3, {'id': 3, 'name': 'Cy', 'tier': 'free'})]\nAnn",
+            "must_have": [
+              "def "
+            ]
+          }
+        },
+        {
+          "id": "de-py-24",
+          "title": "Make It Fast: Find Duplicates in 120,000 IDs",
+          "prompt": "`ids` holds 120,000 numbers, and some appear twice. Write `find_duplicates(ids)` returning the sorted list of values that appear more than once. A slow approach (checking each value against the whole list) takes minutes at this size and is stopped after 5 seconds; the right approach does ONE pass and uses a set or a dict.",
+          "hint_1": "ids.count(x) scans the whole list every time: 120,000 x 120,000 steps. Avoid it.",
+          "hint_2": "Walk the list once keeping a set `seen`; when a value is already in seen, add it to a second set `dups`. Return sorted(dups).",
+          "hint_3": "def find_duplicates(ids):\n    seen, dups = set(), set()\n    for x in ids:\n        if x in seen:\n            dups.add(x)\n        else:\n            seen.add(x)\n    return sorted(dups)",
+          "solution": "def find_duplicates(ids):\n    seen, dups = set(), set()\n    for x in ids:\n        if x in seen:\n            dups.add(x)\n        else:\n            seen.add(x)\n    return sorted(dups)",
+          "evaluation_mode": "python_output",
+          "points": 120,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "ids = [(i * 7919) % 100003 for i in range(120000)]",
+            "check": "d = find_duplicates(ids)\nprint(len(d), d[:5], d[-3:])\nprint(find_duplicates([]), find_duplicates([1, 1, 1, 2]))",
+            "starter": "# ids is already defined (120,000 numbers). Write find_duplicates(ids) below.",
+            "output": "19997 [0, 13, 15, 17, 30] [99997, 99999, 100001]\n[] [1]",
+            "must_have": [
+              "def find_duplicates"
+            ]
+          }
+        },
+        {
+          "id": "de-py-25",
+          "title": "Make It Fast: Join Two Big Lists",
+          "prompt": "`orders` has 60,000 rows (order_id, customer_id, cents) and `customers` has 20,000 rows (customer_id, country). Write `revenue_by_country(orders, customers)` returning a dict country -> total cents. Looking up each order's customer by scanning the customer list is 1.2 billion steps and is stopped after 5 seconds. Build a dict of customer_id -> country first (an index), then do one pass over the orders. Orders with an unknown customer are ignored.",
+          "hint_1": "A dict lookup takes one step no matter how big the dict is.",
+          "hint_2": "country_of = {cid: country for cid, country in customers}; then loop over orders and add cents to totals[country_of[cid]] when cid is in country_of.",
+          "hint_3": "def revenue_by_country(orders, customers):\n    country_of = {cid: country for cid, country in customers}\n    totals = {}\n    for _, cid, cents in orders:\n        country = country_of.get(cid)\n        if country is not None:\n            totals[country] = totals.get(country, 0) + cents\n    return totals",
+          "solution": "def revenue_by_country(orders, customers):\n    country_of = {cid: country for cid, country in customers}\n    totals = {}\n    for _, cid, cents in orders:\n        country = country_of.get(cid)\n        if country is not None:\n            totals[country] = totals.get(country, 0) + cents\n    return totals",
+          "evaluation_mode": "python_output",
+          "points": 120,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "countries = [\"Kenya\", \"Uganda\", \"Nigeria\", \"Ghana\", \"Brazil\"]\ncustomers = [(c, countries[c % 5]) for c in range(1, 20001)]\norders = [(o, (o * 37) % 20500 + 1, (o * 13) % 997 + 100) for o in range(1, 60001)]",
+            "check": "t = revenue_by_country(orders, customers)\nprint(sorted(t.items()))\nprint(revenue_by_country([], customers), revenue_by_country(orders[:3], []))",
+            "starter": "# orders and customers are already defined. Write revenue_by_country(orders, customers) below.",
+            "output": "[('Brazil', 6995218), ('Ghana', 7004476), ('Kenya', 6999713), ('Nigeria', 6998860), ('Uganda', 7005738)]\n{} {}",
+            "must_have": [
+              "def revenue_by_country"
+            ]
+          }
         }
       ]
     },
@@ -821,10 +1768,10 @@
       "description": "Prepare trustworthy training data: class balance, missing values, leakage and bias",
       "level": "advanced",
       "prerequisites": [
-        "de-observability"
+        "de-python-pipelines"
       ],
       "estimated_min": 45,
-      "sort_order": 10,
+      "sort_order": 16,
       "theory_md": "## Feature Engineering & Training Data for AI\n\n### The data engineer's hidden power\nResearchers get the headlines, but a model's ceiling is set by its **training data**: what is in it, what is missing, how it was labelled. The data engineer builds the **feature pipelines** that turn raw business data into model-ready columns, and keeps them identical in training and in production.\n\n### A feature table\n`ml_features` has one row per customer and a label, `churned` (1 = the customer left):\n`orders_30d`, `avg_order_value`, `days_since_last_order`, `support_tickets`, `churned`.\n\n### Check 1: label balance\n```sql\nSELECT churned, COUNT(*) AS customers,\n       ROUND(100.0 * COUNT(*) / (SELECT COUNT(*) FROM ml_features), 1) AS pct\nFROM ml_features GROUP BY churned;\n```\nIf only a small share churn, a lazy model that always predicts \"no churn\" looks accurate while being useless. This is **class imbalance**.\n\n### Check 2: missing values\n```sql\nSELECT ROUND(AVG(avg_order_value), 2) AS mean_aov,\n       SUM(CASE WHEN avg_order_value IS NULL THEN 1 ELSE 0 END) AS nulls\nFROM ml_features;\n```\n`AVG` ignores NULLs. Choose a strategy on purpose (drop, fill with mean or median, or add a \"was missing\" flag) and document it. Never let a pipeline guess silently.\n\n### Check 3: does the feature carry signal?\nBucket a feature and compare the label rate in each bucket:\n```sql\nSELECT CASE WHEN days_since_last_order <= 30 THEN '0-30'\n            WHEN days_since_last_order <= 75 THEN '31-75' ELSE '76+' END AS inactivity_bucket,\n       COUNT(*) AS customers, ROUND(100.0 * AVG(churned), 1) AS churn_pct\nFROM ml_features GROUP BY inactivity_bucket;\n```\n`AVG(churned)` of a 0/1 column is the churn rate, a neat trick.\n\n### Dangers to design out\n- **Leakage**: a feature that contains the answer or information from the future (for example \"cancellation_date\" used to predict cancellation). The model looks brilliant in testing and fails in production.\n- **Training/serving skew**: features computed differently offline and online.\n- **Bias**: groups under-represented in the data get worse predictions. Always slice quality by segment (tier, country).\n\n### Executive lens\nEvery AI initiative is really a data initiative. Whoever controls trustworthy, governed, well-documented data controls how fast the company can ship AI.",
       "quiz": [
         {
@@ -905,6 +1852,48 @@
           "solution": "SELECT c.tier, COUNT(*) AS customers, ROUND(100.0 * AVG(f.churned), 1) AS churn_pct FROM ml_features f JOIN customers c ON c.customer_id = f.customer_id GROUP BY c.tier ORDER BY churn_pct DESC, c.tier",
           "evaluation_mode": "exact",
           "points": 40
+        },
+        {
+          "id": "de-py-17",
+          "title": "Build a Feature: Days Since Last Order",
+          "prompt": "`history` maps each customer id to a list of order dates ('YYYY-MM-DD'). Write `days_since_last(history, today)` returning a dict customer -> whole days between today and the customer's most recent order; customers with no orders get None. Use the datetime module.",
+          "hint_1": "datetime.date.fromisoformat(text) turns text into a date; subtracting two dates gives a timedelta with .days.",
+          "hint_2": "Find the latest date with max(), but handle the empty list first.",
+          "hint_3": "import datetime\n\ndef days_since_last(history, today):\n    t = datetime.date.fromisoformat(today)\n    out = {}\n    for cust, dates in history.items():\n        if not dates:\n            out[cust] = None\n        else:\n            out[cust] = (t - datetime.date.fromisoformat(max(dates))).days\n    return out",
+          "solution": "import datetime\n\ndef days_since_last(history, today):\n    t = datetime.date.fromisoformat(today)\n    out = {}\n    for cust, dates in history.items():\n        if not dates:\n            out[cust] = None\n        else:\n            out[cust] = (t - datetime.date.fromisoformat(max(dates))).days\n    return out",
+          "evaluation_mode": "python_output",
+          "points": 90,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "history = {\n    1: [\"2025-10-01\", \"2025-11-20\", \"2025-09-15\"],\n    2: [],\n    3: [\"2025-12-01\"],\n}",
+            "check": "print(sorted(days_since_last(history, \"2025-12-01\").items(), key=lambda kv: kv[0]))\nprint(days_since_last(history, \"2025-12-31\")[1])",
+            "starter": "import datetime\n\n# history is already defined. Write days_since_last(history, today) below.",
+            "output": "[(1, 11), (2, None), (3, 0)]\n41",
+            "must_have": [
+              "def "
+            ]
+          }
+        },
+        {
+          "id": "de-py-18",
+          "title": "Split Train and Test Without Leaking the Future",
+          "prompt": "Models must be tested on data AFTER the data they learn from. Write `time_split(rows, cutoff)` returning (train, test): train has rows whose `date` is before the cutoff, test has rows on or after it. Both keep the original order. The tests also check that no train row is later than any test row.",
+          "hint_1": "Two list comprehensions, comparing r['date'] with the cutoff (ISO dates compare correctly as text).",
+          "hint_2": "Use < for train and >= for test, so every row lands in exactly one side.",
+          "hint_3": "def time_split(rows, cutoff):\n    train = [r for r in rows if r[\"date\"] < cutoff]\n    test = [r for r in rows if r[\"date\"] >= cutoff]\n    return train, test",
+          "solution": "def time_split(rows, cutoff):\n    train = [r for r in rows if r[\"date\"] < cutoff]\n    test = [r for r in rows if r[\"date\"] >= cutoff]\n    return train, test",
+          "evaluation_mode": "python_output",
+          "points": 80,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "data = [\n    {\"date\": \"2025-03-01\", \"y\": 1}, {\"date\": \"2025-01-10\", \"y\": 0}, {\"date\": \"2025-04-15\", \"y\": 1},\n    {\"date\": \"2025-02-20\", \"y\": 0}, {\"date\": \"2025-04-01\", \"y\": 1},\n]",
+            "check": "train, test = time_split(data, \"2025-04-01\")\nprint([r[\"date\"] for r in train])\nprint([r[\"date\"] for r in test])\nprint(len(train) + len(test) == len(data), max(r[\"date\"] for r in train) < min(r[\"date\"] for r in test))",
+            "starter": "# data is already defined. Write time_split(rows, cutoff) below.",
+            "output": "['2025-03-01', '2025-01-10', '2025-02-20']\n['2025-04-15', '2025-04-01']\nTrue True",
+            "must_have": [
+              "def "
+            ]
+          }
         }
       ]
     },
@@ -917,7 +1906,7 @@
         "de-ai-features"
       ],
       "estimated_min": 40,
-      "sort_order": 11,
+      "sort_order": 17,
       "theory_md": "## LLM Ops: Cost, Latency & Safety Analytics\n\n### AI has a bill\nOnce a company uses language models in many products, the *usage log* becomes one of its most important datasets. Every call records which model, which team, how many tokens in and out, how long it took, what it cost and whether it was flagged by a safety filter. That is `llm_requests`.\n\n**Tokens** are the pieces of text a model reads and writes; providers charge per token, and output tokens usually cost more than input tokens. Bigger models cost much more and are slower.\n\n### Three questions every CTO asks\n**1. Where is the money going?**\n```sql\nSELECT model, COUNT(*) AS requests, ROUND(SUM(cost_usd), 2) AS total_cost\nFROM llm_requests GROUP BY model ORDER BY total_cost DESC;\n```\nOften a minority of calls on the largest model creates most of the cost. That is where routing simple tasks to smaller models saves the most.\n\n**2. Which team is driving it?**\n```sql\nSELECT team, ROUND(SUM(cost_usd), 2) AS total_cost\nFROM llm_requests GROUP BY team ORDER BY total_cost DESC, team;\n```\nCost attribution per team enables **chargeback** and accountability.\n\n**3. Is it safe?**\n```sql\nSELECT model, ROUND(100.0 * SUM(flagged) / COUNT(*), 2) AS flagged_pct\nFROM llm_requests GROUP BY model;\n```\n`flagged` is 0 or 1, so its sum is the number of flagged calls.\n\n### Unit economics\nTotal cost alone misleads. Compare the **cost per 1,000 requests** for each model:\n```sql\nSELECT model, ROUND(1000.0 * SUM(cost_usd) / COUNT(*), 3) AS cost_per_1k FROM llm_requests GROUP BY model;\n```\nThis is the number you use to decide which model to route which workload to.\n\n### Executive lens\nControl of AI spend, quality and safety is a competitive advantage. A company that measures cost per task can ship ten times more AI features for the same budget.",
       "quiz": [
         {
@@ -998,6 +1987,48 @@
           "solution": "SELECT model, ROUND(1000.0 * SUM(cost_usd) / COUNT(*), 3) AS cost_per_1k FROM llm_requests GROUP BY model ORDER BY cost_per_1k DESC",
           "evaluation_mode": "exact",
           "points": 40
+        },
+        {
+          "id": "de-py-19",
+          "title": "Route Requests and Price Them",
+          "prompt": "Write `route(tokens)` returning the model name: 'small' for fewer than 500 tokens, 'medium' for 500 to 3999 tokens, otherwise 'large'. Then write `total_cost(requests, price_per_1k)` where requests is a list of token counts and price_per_1k maps a model name to dollars per 1,000 tokens; return the total cost rounded to 4 decimals, pricing each request with the model that route() picks.",
+          "hint_1": "route is three if/elif branches. For the cost: sum(tokens / 1000 * price_per_1k[route(tokens)]).",
+          "hint_2": "Round only the final total, with round(total, 4).",
+          "hint_3": "def route(tokens):\n    if tokens < 500:\n        return \"small\"\n    if tokens < 4000:\n        return \"medium\"\n    return \"large\"\n\ndef total_cost(requests, price_per_1k):\n    return round(sum(t / 1000 * price_per_1k[route(t)] for t in requests), 4)",
+          "solution": "def route(tokens):\n    if tokens < 500:\n        return \"small\"\n    if tokens < 4000:\n        return \"medium\"\n    return \"large\"\n\ndef total_cost(requests, price_per_1k):\n    return round(sum(t / 1000 * price_per_1k[route(t)] for t in requests), 4)",
+          "evaluation_mode": "python_output",
+          "points": 90,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "prices = {\"small\": 0.0002, \"medium\": 0.003, \"large\": 0.03}",
+            "check": "print([route(t) for t in (0, 499, 500, 3999, 4000, 90000)])\nprint(total_cost([100, 600, 5000], prices))\nprint(total_cost([], prices))\nprint(total_cost([10000] * 3, prices))",
+            "starter": "# prices is already defined. Write route(tokens) and total_cost(requests, price_per_1k) below.",
+            "output": "['small', 'small', 'medium', 'medium', 'large', 'large']\n0.1518\n0\n0.9",
+            "must_have": [
+              "def route"
+            ]
+          }
+        },
+        {
+          "id": "de-py-20",
+          "title": "Redact Personal Data Before Logging",
+          "prompt": "Prompts must not store personal data. Write `redact(text)` that replaces every email address with '[EMAIL]' and every phone number written as '+' followed by 9 to 13 digits with '[PHONE]'. Use the re module. Everything else stays as it was.",
+          "hint_1": "re.sub(pattern, replacement, text) replaces every match.",
+          "hint_2": "Emails: r'[\\w.+-]+@[\\w-]+\\.[\\w.]+'. Phones: r'\\+\\d{9,13}'.",
+          "hint_3": "import re\n\ndef redact(text):\n    text = re.sub(r\"[\\w.+-]+@[\\w-]+\\.[\\w.]+\", \"[EMAIL]\", text)\n    return re.sub(r\"\\+\\d{9,13}\", \"[PHONE]\", text)",
+          "solution": "import re\n\ndef redact(text):\n    text = re.sub(r\"[\\w.+-]+@[\\w-]+\\.[\\w.]+\", \"[EMAIL]\", text)\n    return re.sub(r\"\\+\\d{9,13}\", \"[PHONE]\", text)",
+          "evaluation_mode": "python_output",
+          "points": 90,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "",
+            "check": "print(redact(\"Contact ann.lee+work@mail.example.com or +254712345678 today.\"))\nprint(redact(\"No personal data here, order 12345.\"))\nprint(redact(\"a@b.co, c@d.org +4915112345678\"))",
+            "starter": "import re\n\n# Write redact(text) below.",
+            "output": "Contact [EMAIL] or [PHONE] today.\nNo personal data here, order 12345.\n[EMAIL], [EMAIL] [PHONE]",
+            "must_have": [
+              "re\\."
+            ]
+          }
         }
       ]
     },
@@ -1010,7 +2041,7 @@
         "de-llm-ops"
       ],
       "estimated_min": 45,
-      "sort_order": 12,
+      "sort_order": 18,
       "theory_md": "## Architecture, Governance & Cost: the CTO View\n\nAt this level the question changes from \"does the query work?\" to \"does the *system* work, safely, at a sensible cost, for ten years?\"\n\n### Data contracts\nA **data contract** is an agreement between a producer and its consumers about what data will look like: columns, types, allowed values, freshness. Enforce it automatically. A contract check is just a query that counts violations:\n```sql\nSELECT COUNT(*) AS contract_breaches\nFROM raw_events\nWHERE country IS NULL OR payload_kb > 300;\n```\nA rising number means a producer changed something. You catch it before the dashboards break, and you know whom to call.\n\n### Compute and cost\nCloud platforms bill for compute time and storage. Know your most expensive workloads:\n```sql\nSELECT pipeline, ROUND(SUM(duration_s) / 3600.0, 2) AS compute_hours\nFROM pipeline_runs GROUP BY pipeline ORDER BY compute_hours DESC;\n```\nOptimise the top one first. The same logic applies to storage tiers and to the LLM spend you measured earlier.\n\n### Concentration risk\nIf one country, one customer or one vendor is most of the business, a single event can hurt badly. Window functions give shares in one query:\n```sql\nSELECT c.country,\n       ROUND(100.0 * SUM(o.amount) / SUM(SUM(o.amount)) OVER (), 1) AS revenue_share_pct\nFROM orders o JOIN customers c ON c.customer_id = o.customer_id\nWHERE o.status = 'paid' GROUP BY c.country;\n```\n`SUM(SUM(...)) OVER ()` is the grand total of the grouped sums, so the shares add up to 100.\n\n### Governance checklist\n- **Ownership**: every dataset has a named owner.\n- **Access control**: least privilege; personal data masked or tokenised.\n- **Retention**: keep data only as long as there is a reason and a legal basis.\n- **Lineage**: you can trace any number back to its sources.\n- **Auditability**: who changed what and when.\n\n### Build vs buy\nBuy commodity (storage, orchestration, ingestion connectors); build what differentiates you (domain models, proprietary features). Revisit the decision every year, and always count the engineers' time as a cost.\n\n### Executive lens\nA CTO is judged on reliability, cost and speed of delivery together. Contracts, cost visibility and concentration awareness are how you hold all three.",
       "quiz": [
         {
@@ -1080,6 +2111,152 @@
           "solution": "SELECT c.country, ROUND(100.0 * SUM(o.amount) / SUM(SUM(o.amount)) OVER (), 1) AS revenue_share_pct FROM orders o JOIN customers c ON c.customer_id = o.customer_id WHERE o.status = 'paid' GROUP BY c.country ORDER BY revenue_share_pct DESC, c.country",
           "evaluation_mode": "exact",
           "points": 50
+        },
+        {
+          "id": "de-py-21",
+          "title": "Pseudonymise and Mask",
+          "prompt": "Write `pseudonymise(value, salt)` returning the first 10 hex characters of the SHA-256 hash of salt + value (same input always gives the same output; use hashlib). Write `mask_email(email)` that keeps the first character of the name, replaces the rest of the name with '***', and keeps the domain: 'deric@example.com' becomes 'd***@example.com'.",
+          "hint_1": "hashlib.sha256((salt + value).encode()).hexdigest()[:10].",
+          "hint_2": "name, domain = email.split('@'); build name[0] + '***@' + domain.",
+          "hint_3": "import hashlib\n\ndef pseudonymise(value, salt):\n    return hashlib.sha256((salt + value).encode()).hexdigest()[:10]\n\ndef mask_email(email):\n    name, domain = email.split(\"@\")\n    return name[:1] + \"***@\" + domain",
+          "solution": "import hashlib\n\ndef pseudonymise(value, salt):\n    return hashlib.sha256((salt + value).encode()).hexdigest()[:10]\n\ndef mask_email(email):\n    name, domain = email.split(\"@\")\n    return name[:1] + \"***@\" + domain",
+          "evaluation_mode": "python_output",
+          "points": 90,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "",
+            "check": "print(pseudonymise(\"deric@example.com\", \"s1\"))\nprint(pseudonymise(\"deric@example.com\", \"s1\") == pseudonymise(\"deric@example.com\", \"s1\"))\nprint(pseudonymise(\"deric@example.com\", \"s2\"))\nprint(mask_email(\"deric@example.com\"), mask_email(\"a@b.org\"))",
+            "starter": "import hashlib\n\n# Write pseudonymise(value, salt) and mask_email(email) below.",
+            "output": "b1f572e722\nTrue\n737e990395\nd***@example.com a***@b.org",
+            "must_have": [
+              "def pseudonymise"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "de-system-design",
+      "title": "Platform Design: Cost, Trade-offs and Leading the Data Team",
+      "description": "Think like a CTO: capacity, cost per unit, batch versus stream, build versus buy and how to run the team",
+      "level": "advanced",
+      "prerequisites": [
+        "de-governance"
+      ],
+      "estimated_min": 50,
+      "sort_order": 19,
+      "theory_md": "## Platform Design: Cost, Trade-offs and Leading the Data Team\n\nA senior data engineer, and later a CTO, is paid for **judgement**: choosing the simplest design that meets the need, and being able to defend the cost.\n\n### A design checklist (use it on every project)\n1. **Requirement**: who uses this and what decision does it change?\n2. **Freshness**: seconds, hours, days? (Streaming costs 5 to 10 times more than daily batch.)\n3. **Volume and growth**: rows per day now, in a year, in five.\n4. **Quality bar**: what error rate is acceptable?\n5. **Failure plan**: what happens at 3 a.m. when it breaks? Who is paged?\n6. **Cost**: per month, and per unit (per 1,000 events, per model call).\n7. **Security and governance**: who may see what, and where does it live?\n\n### Architectures you must recognise\n- **Batch**: nightly loads. Simple, cheap, easy to debug.\n- **Lambda**: a batch path (accurate) plus a stream path (fast). Powerful but two codebases.\n- **Kappa**: everything is a stream, history is replayed from the log. One codebase, needs a strong log (Kafka).\n- **Medallion** (bronze, silver, gold): the layered cleaning from the pipeline lesson, on a lakehouse.\n- **Data mesh**: domain teams own their data products; a platform team provides self-service tools and standards.\n\n### Capacity maths in your head\nEvents per day x average size x 365 = yearly storage. Always add replication (x3) and indexes. A quick estimate in a meeting beats a perfect one next week.\n\n### Unit economics for AI\nCost per 1,000 output tokens, cost per resolved ticket, cost per team. Models differ by 100 times in price; routing easy requests to a small model is often the largest saving a platform engineer can deliver.\n\n### Build versus buy\nBuy what is a commodity (ingestion connectors, the warehouse, the orchestrator). Build what differentiates you (your features, your models, your domain logic). Count the people-cost of running something yourself.\n\n### Leading the team\n- Write down **SLAs** and review them monthly.\n- Run **blameless post-mortems** after incidents: fix the system, not the person.\n- Keep a **roadmap** of reliability, cost and capability work; do not only ship features.\n- Hire for judgement and communication as well as tools; tools change every two years.\n- Translate: to executives, speak in money, risk and time; to engineers, speak in design.\n\n### The AI-era platform\nModels need: trustworthy training and evaluation data, a **feature store** with point-in-time correctness, vector and retrieval stores, prompt and response logging with privacy controls, cost and latency monitoring, and guardrails. Own the data platform and you own the foundation every AI product stands on.",
+      "quiz": [
+        {
+          "question": "Which design question comes first?",
+          "options": [
+            "Which tool is trendy",
+            "Who uses it and what decision it changes",
+            "How many servers",
+            "Which cloud"
+          ],
+          "correct_index": 1,
+          "explanation": "Requirements drive every other choice."
+        },
+        {
+          "question": "What is the main drawback of the Lambda architecture?",
+          "options": [
+            "It cannot scale",
+            "You maintain two code paths for the same logic",
+            "It has no history",
+            "It uses no SQL"
+          ],
+          "correct_index": 1,
+          "explanation": "Batch and stream paths must stay consistent, which doubles the work."
+        },
+        {
+          "question": "A quick way to cut LLM spend with little quality loss is to...",
+          "options": [
+            "Use the biggest model for everything",
+            "Route simple requests to a cheaper, smaller model",
+            "Disable logging",
+            "Cache nothing"
+          ],
+          "correct_index": 1,
+          "explanation": "Price differences between models are huge; routing exploits them."
+        },
+        {
+          "question": "What is the point of a blameless post-mortem?",
+          "options": [
+            "To find who to fire",
+            "To find and fix the system weakness that allowed the incident",
+            "To write a report nobody reads",
+            "To delay the fix"
+          ],
+          "correct_index": 1,
+          "explanation": "Teams that fear blame hide problems; teams that learn get more reliable."
+        },
+        {
+          "question": "When should a company build rather than buy?",
+          "options": [
+            "For every component",
+            "For the parts that differentiate its business, buying commodities",
+            "Never",
+            "Only for databases"
+          ],
+          "correct_index": 1,
+          "explanation": "Spend scarce engineering time where it creates unique value."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-19-e1",
+          "title": "Capacity Planning",
+          "prompt": "Estimate yearly storage per source system. The raw_events table covers 30 days. For each source_system return source_system, events_per_day (rows divided by 30, rounded to 1 decimal) and gb_per_year (sum of payload_kb divided by 30, times 365, divided by 1048576, rounded to 4 decimals). Sort by gb_per_year descending then source_system.",
+          "hint_1": "Daily volume = COUNT(*) / 30.0 (use 30.0 so the division is not an integer division).",
+          "hint_2": "gb_per_year = ROUND(SUM(payload_kb) / 30.0 * 365 / 1048576.0, 4).",
+          "hint_3": "SELECT source_system, ROUND(COUNT(*) / 30.0, 1) AS events_per_day, ROUND(SUM(payload_kb) / 30.0 * 365 / 1048576.0, 4) AS gb_per_year FROM raw_events GROUP BY source_system ORDER BY gb_per_year DESC, source_system",
+          "solution": "SELECT source_system, ROUND(COUNT(*) / 30.0, 1) AS events_per_day, ROUND(SUM(payload_kb) / 30.0 * 365 / 1048576.0, 4) AS gb_per_year FROM raw_events GROUP BY source_system ORDER BY gb_per_year DESC, source_system",
+          "evaluation_mode": "exact",
+          "points": 60
+        },
+        {
+          "id": "de-19-e2",
+          "title": "Unit Economics of AI Models",
+          "prompt": "For each model in llm_requests that produced output (tokens_out greater than 0) return model, requests (count) and cost_per_1k_out_tokens (total cost_usd divided by total tokens_out, times 1000, rounded to 4 decimals). Sort by cost_per_1k_out_tokens descending then model.",
+          "hint_1": "Filter WHERE tokens_out > 0 first, then group by model.",
+          "hint_2": "ROUND(SUM(cost_usd) / SUM(tokens_out) * 1000, 4).",
+          "hint_3": "SELECT model, COUNT(*) AS requests, ROUND(SUM(cost_usd) / SUM(tokens_out) * 1000, 4) AS cost_per_1k_out_tokens FROM llm_requests WHERE tokens_out > 0 GROUP BY model ORDER BY cost_per_1k_out_tokens DESC, model",
+          "solution": "SELECT model, COUNT(*) AS requests, ROUND(SUM(cost_usd) / SUM(tokens_out) * 1000, 4) AS cost_per_1k_out_tokens FROM llm_requests WHERE tokens_out > 0 GROUP BY model ORDER BY cost_per_1k_out_tokens DESC, model",
+          "evaluation_mode": "exact",
+          "points": 70
+        },
+        {
+          "id": "de-19-e3",
+          "title": "Where Does the Money Go?",
+          "prompt": "For each team in llm_requests return team, spend_usd (total cost_usd rounded to 2 decimals) and share_pct (that team's share of the grand total cost, as a percentage rounded to 1 decimal). Sort by spend_usd descending then team.",
+          "hint_1": "SUM(cost_usd) per team gives the spend; the grand total is SUM(SUM(cost_usd)) OVER () or a scalar subquery.",
+          "hint_2": "share_pct = ROUND(100.0 * SUM(cost_usd) / (SELECT SUM(cost_usd) FROM llm_requests), 1).",
+          "hint_3": "SELECT team, ROUND(SUM(cost_usd), 2) AS spend_usd, ROUND(100.0 * SUM(cost_usd) / (SELECT SUM(cost_usd) FROM llm_requests), 1) AS share_pct FROM llm_requests GROUP BY team ORDER BY spend_usd DESC, team",
+          "solution": "SELECT team, ROUND(SUM(cost_usd), 2) AS spend_usd, ROUND(100.0 * SUM(cost_usd) / (SELECT SUM(cost_usd) FROM llm_requests), 1) AS share_pct FROM llm_requests GROUP BY team ORDER BY spend_usd DESC, team",
+          "evaluation_mode": "exact",
+          "points": 70
+        },
+        {
+          "id": "de-py-22",
+          "title": "Capacity Planner",
+          "prompt": "Write `capacity_gb(events_per_day, avg_kb, years, replication)` returning the storage needed in GB (1 GB = 1,048,576 KB): events per day x average KB x 365 x years x replication, converted to GB and rounded to 2 decimals. Then write `will_fit(gb_needed, disk_gb)` returning True when the data uses at most 80 percent of the disk.",
+          "hint_1": "Multiply everything first, then divide by 1048576, then round.",
+          "hint_2": "will_fit: gb_needed <= 0.8 * disk_gb.",
+          "hint_3": "def capacity_gb(events_per_day, avg_kb, years, replication):\n    return round(events_per_day * avg_kb * 365 * years * replication / 1048576, 2)\n\ndef will_fit(gb_needed, disk_gb):\n    return gb_needed <= 0.8 * disk_gb",
+          "solution": "def capacity_gb(events_per_day, avg_kb, years, replication):\n    return round(events_per_day * avg_kb * 365 * years * replication / 1048576, 2)\n\ndef will_fit(gb_needed, disk_gb):\n    return gb_needed <= 0.8 * disk_gb",
+          "evaluation_mode": "python_output",
+          "points": 80,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "",
+            "check": "print(capacity_gb(1_000_000, 2, 1, 3))\nprint(capacity_gb(50_000_000, 5, 3, 3))\nprint(capacity_gb(0, 5, 3, 3))\nprint(will_fit(800, 1000), will_fit(800.01, 1000), will_fit(0, 1))",
+            "starter": "# Write capacity_gb(...) and will_fit(...) below.",
+            "output": "2088.55\n783205.03\n0.0\nTrue False True",
+            "must_have": [
+              "def capacity_gb"
+            ]
+          }
         }
       ]
     },
@@ -1089,10 +2266,10 @@
       "description": "Bring everything together: build the numbers a CEO reads on Monday morning",
       "level": "advanced",
       "prerequisites": [
-        "de-governance"
+        "de-system-design"
       ],
       "estimated_min": 50,
-      "sort_order": 13,
+      "sort_order": 20,
       "theory_md": "## Capstone: The Executive Data Platform Scorecard\n\nYou now have the full toolkit: profiling, deduplication, integrity checks, incremental loading, modeling, trend analysis, observability, AI data quality and governance. The capstone asks you to combine them the way a platform lead does when the CEO says: *\"Can I trust our numbers?\"*\n\n### The scorecard idea\nExecutives do not want fifty tables. They want a handful of **trust metrics** next to the headline numbers, so they know how much weight to put on each. A good scorecard answers:\n1. **Is the pipeline reliable?** success rate, average duration, volume.\n2. **Is the data clean?** duplicates removed, orphans found.\n3. **Is the headline number right?** revenue computed on clean, joined data.\n\n### Building blocks you will combine\n```sql\n-- dedupe first (Lesson 3), then aggregate\nWITH clean AS (\n  SELECT *, ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY ingested_at DESC) AS rn\n  FROM raw_events\n)\nSELECT event_type, COUNT(*) FROM clean WHERE rn = 1 AND country IS NOT NULL GROUP BY event_type;\n```\n```sql\n-- several independent measures in one row using scalar subqueries\nSELECT\n  (SELECT COUNT(*) FROM pipeline_runs WHERE status = 'failed') AS failed_runs,\n  (SELECT COUNT(*) - COUNT(DISTINCT event_id) FROM raw_events) AS duplicate_events;\n```\nScalar subqueries each return one value, so they can sit side by side in a single result row: a classic way to build a KPI strip.\n\n### Working method\n1. Write the smallest query that returns the right shape.\n2. Check one number by hand (a small filter, a `LIMIT`).\n3. Combine, then re-check that the totals still make sense.\n\n### Executive lens\nThis is the job: turn a messy, multi-source, AI-hungry data estate into a few numbers the whole company trusts, and be able to explain every one of them. People who can do that are very hard to replace.",
       "quiz": [
         {
@@ -1162,6 +2339,27 @@
           "solution": "SELECT (SELECT ROUND(SUM(o.amount), 2) FROM orders o JOIN customers c ON c.customer_id = o.customer_id WHERE o.status = 'paid') AS paid_revenue, (SELECT COUNT(*) FROM orders o LEFT JOIN customers c ON c.customer_id = o.customer_id WHERE c.customer_id IS NULL) AS orphan_orders, (SELECT COUNT(*) - COUNT(DISTINCT event_id) FROM raw_events) AS duplicate_events, (SELECT COUNT(*) FROM pipeline_runs WHERE status = 'failed') AS failed_runs",
           "evaluation_mode": "exact",
           "points": 80
+        },
+        {
+          "id": "de-py-23",
+          "title": "Capstone: A Mini Pipeline in Python",
+          "prompt": "Put it together. `raw` holds delivered events with duplicates and bad rows. Write `run_pipeline(raw)` returning a dict with: 'loaded' (the number of distinct valid events), 'rejected' (rows with no user, or an event_ts not in the form 'YYYY-MM-DD HH:MM:SS'), 'duplicates' (rows removed because the event_id was already seen; the FIRST delivery is kept), and 'by_type' (a dict type -> count over the loaded events). Reject first, then deduplicate only the valid rows.",
+          "hint_1": "Check validity with a regex like r'^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$' and a non-empty user.",
+          "hint_2": "Loop once with a `seen` set; count rejected, duplicate and loaded in the same loop.",
+          "hint_3": "import re\n\nPATTERN = re.compile(r\"^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$\")\n\ndef run_pipeline(raw):\n    seen = set()\n    rejected = duplicates = 0\n    by_type = {}\n    for r in raw:\n        if not r.get(\"user\") or not PATTERN.match(str(r.get(\"event_ts\") or \"\")):\n            rejected += 1\n            continue\n        if r[\"event_id\"] in seen:\n            duplicates += 1\n            continue\n        seen.add(r[\"event_id\"])\n        by_type[r[\"type\"]] = by_type.get(r[\"type\"], 0) + 1\n    return {\"loaded\": len(seen), \"rejected\": rejected, \"duplicates\": duplicates, \"by_type\": by_type}",
+          "solution": "import re\n\nPATTERN = re.compile(r\"^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}$\")\n\ndef run_pipeline(raw):\n    seen = set()\n    rejected = duplicates = 0\n    by_type = {}\n    for r in raw:\n        if not r.get(\"user\") or not PATTERN.match(str(r.get(\"event_ts\") or \"\")):\n            rejected += 1\n            continue\n        if r[\"event_id\"] in seen:\n            duplicates += 1\n            continue\n        seen.add(r[\"event_id\"])\n        by_type[r[\"type\"]] = by_type.get(r[\"type\"], 0) + 1\n    return {\"loaded\": len(seen), \"rejected\": rejected, \"duplicates\": duplicates, \"by_type\": by_type}",
+          "evaluation_mode": "python_output",
+          "points": 150,
+          "exercise_type": "python_code",
+          "expected_output": {
+            "setup": "raw = [\n    {\"event_id\": 1, \"user\": \"ann\", \"type\": \"click\", \"event_ts\": \"2025-01-01 10:00:00\"},\n    {\"event_id\": 1, \"user\": \"ann\", \"type\": \"click\", \"event_ts\": \"2025-01-01 10:00:00\"},\n    {\"event_id\": 2, \"user\": \"\", \"type\": \"view\", \"event_ts\": \"2025-01-01 10:01:00\"},\n    {\"event_id\": 3, \"user\": \"ben\", \"type\": \"view\", \"event_ts\": \"01/01/2025 10:02\"},\n    {\"event_id\": 4, \"user\": \"ben\", \"type\": \"view\", \"event_ts\": \"2025-01-01 10:03:00\"},\n    {\"event_id\": 5, \"user\": \"cy\", \"type\": \"click\", \"event_ts\": \"2025-01-01 10:04:00\"},\n    {\"event_id\": 4, \"user\": \"ben\", \"type\": \"view\", \"event_ts\": \"2025-01-01 10:03:00\"},\n    {\"event_id\": 6, \"user\": None, \"type\": \"click\", \"event_ts\": None},\n]",
+            "check": "res = run_pipeline(raw)\nprint(res[\"loaded\"], res[\"rejected\"], res[\"duplicates\"])\nprint(sorted(res[\"by_type\"].items()))\nprint(run_pipeline([]))",
+            "starter": "import re\n\n# raw is already defined. Write run_pipeline(raw) below.",
+            "output": "3 3 2\n[('click', 2), ('view', 1)]\n{'loaded': 0, 'rejected': 0, 'duplicates': 0, 'by_type': {}}",
+            "must_have": [
+              "def run_pipeline"
+            ]
+          }
         }
       ]
     }

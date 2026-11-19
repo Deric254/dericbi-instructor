@@ -11,10 +11,17 @@ import { notify } from '../store'
  * - Returns `undefined` so it can be chained straight after `.then()`
  *   and the caller can still run a `.finally()` to clear loading state.
  */
+/** The refusal the main process sends once a licence has lapsed (see READ_ONLY_MESSAGE in the licence gate). */
+export const VIEW_ONLY_MARK = 'view-only'
+
 export function reportApiError(context: string, err: unknown): undefined {
   // eslint-disable-next-line no-console
   console.error(`[${context}]`, err)
   const raw = err instanceof Error ? err.message : typeof err === 'string' ? err : ''
+  if (raw.includes(VIEW_ONLY_MARK)) {
+    notify.warning('This copy is view-only', 'Your licence has expired. Renew it in Settings to add or change anything. Your data is safe.')
+    return undefined
+  }
   // IPC failures often carry a long "Error invoking remote method..." wrapper —
   // keep only the tail after the last colon-space if it looks like that, and
   // fall back to a generic message if what's left is empty or unhelpfully long.

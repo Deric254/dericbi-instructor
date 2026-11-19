@@ -223,12 +223,18 @@ export type NavSection =
 // ── Licensing and the Owner Console ──
 export interface LicenceState {
   ok: boolean
-  kind: 'owner' | 'licensed' | 'unlicensed' | 'unconfigured'
+  kind: 'owner' | 'licensed' | 'expired' | 'unlicensed' | 'unconfigured'
   message: string
   installCode: string
   user?: string
   expires?: string
   daysLeft?: number
+  /** Past the end date but inside the grace days: everything still works. */
+  grace?: boolean
+  graceDaysLeft?: number
+  /** Past the grace days: data can be viewed but not changed. */
+  readOnly?: boolean
+  lifetime?: boolean
 }
 
 export type OwnerResult<T extends object = {}> = ({ success: true } & T) | { success: false; error: string; cancelled?: boolean }
@@ -262,5 +268,5 @@ export interface OwnerOverview {
   customers: OwnerCustomer[]
 }
 
-export interface OwnerIssueInput { code: string; name: string; contact?: string; notes?: string; months?: number; amount?: number | null }
+export interface OwnerIssueInput { code: string; name: string; contact?: string; notes?: string; months?: number; amount?: number | null; lifetime?: boolean }
 export interface IssuedLicence { licence: string; expires: string; name: string; contact: string; customerId: string }

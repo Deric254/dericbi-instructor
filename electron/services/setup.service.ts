@@ -6,7 +6,7 @@ import { getDb, getDatasetsPath } from '../db/database'
 import { v4 as uuidv4 } from 'uuid'
 import { DATAENG_DATASETS, generateDataEngDatasets } from './dataeng.datasets'
 
-const SETUP_VERSION = 6 // increment to force re-seed on app update
+const SETUP_VERSION = 8 // increment to force re-seed on app update
 
 // Bump when the generated CSV *contents* change shape, so installs that already have older
 // CSVs on disk get them regenerated (generateDatasets() otherwise skips files that exist).
@@ -309,12 +309,13 @@ function seedCurriculum(jsonPath: string, exerciseType: string): void {
   const insertExercise = db.prepare(`
     INSERT INTO exercises
     (id, lesson_id, exercise_type, title, prompt, hint_1, hint_2, hint_3,
-     solution, evaluation_mode, points, sort_order)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     solution, evaluation_mode, points, sort_order, expected_output)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
       lesson_id = excluded.lesson_id, exercise_type = excluded.exercise_type, title = excluded.title, prompt = excluded.prompt,
       hint_1 = excluded.hint_1, hint_2 = excluded.hint_2, hint_3 = excluded.hint_3, solution = excluded.solution,
-      evaluation_mode = excluded.evaluation_mode, points = excluded.points, sort_order = excluded.sort_order
+      evaluation_mode = excluded.evaluation_mode, points = excluded.points, sort_order = excluded.sort_order,
+      expected_output = excluded.expected_output
   `)
 
   const tx = db.transaction(() => {
@@ -336,7 +337,8 @@ function seedCurriculum(jsonPath: string, exerciseType: string): void {
           ex.title, ex.prompt,
           ex.hint_1 || null, ex.hint_2 || null, ex.hint_3 || null,
           ex.solution || '', ex.evaluation_mode || 'exact',
-          ex.points || 10, ex.sort_order || i + 1
+          ex.points || 10, ex.sort_order || i + 1,
+          ex.expected_output ? JSON.stringify(ex.expected_output) : null
         )
       }
     }
@@ -407,6 +409,11 @@ function seedAchievements(): void {
     ['ach_all_skills_50',   'Well-Rounded Analyst',  'Reached 50+ score in all 6 skill areas',           'layers',      '{"type":"all_skills","min_score":50}',                       500,  'epic'],
     ['ach_all_skills_80',   'Master Analyst',        'Reached 80+ score in all 6 skill areas',           'gem',         '{"type":"all_skills","min_score":80}',                       1500, 'legendary'],
     ['ach_senior_rank',     'Senior Analyst',        'Achieved Senior Analyst rank',                     'trending-up', '{"type":"rank","rank":"senior_analyst"}',                   300,  'epic'],
+    ['ach_de_first',        'First Pipeline',        'Solved your first Data Engineering exercise',      'zap',         '{"type":"exercise_complete","skill":"dataeng","count":1,"distinct":true}',    20,  'common'],
+    ['ach_de_10',           'Pipeline Builder',      'Solved 10 different Data Engineering exercises',   'code-2',      '{"type":"exercise_complete","skill":"dataeng","count":10,"distinct":true}',   100, 'rare'],
+    ['ach_de_py_10',        'Python Pipeliner',      'Passed 10 Python practicals with hidden tests',    'terminal',    '{"type":"exercise_complete","skill":"dataeng","exercise_type":"python_code","count":10,"distinct":true}', 200, 'rare'],
+    ['ach_de_50',           'Platform Engineer',     'Solved 50 different Data Engineering exercises',   'layers',      '{"type":"exercise_complete","skill":"dataeng","count":50,"distinct":true}',   400, 'epic'],
+    ['ach_de_capstone',     'Data Engineer',         'Completed the Data Engineering capstone',          'trophy',      '{"type":"lesson_complete","lesson_id":"de-capstone"}',                         800, 'legendary'],
     ['ach_consultant_rank', 'Analytics Consultant',  'Achieved Analytics Consultant rank',               'briefcase',   '{"type":"rank","rank":"analytics_consultant"}',             1000, 'legendary'],
   ]
 

@@ -32,7 +32,7 @@ test('owner channels only delegate to the owner service; licence channels are th
   const handlers = read('electron/ipc/licence-handlers.ts')
   for (const m of handlers.matchAll(/safeHandle\('owner:[\w-]+'.*$/gm)) assert.match(m[0], /Owner\.\w+\(/, m[0])
   const ungated = read('electron/ipc/safe-handle.ts').match(/UNGATED = new Set\(\[([^\]]*)\]\)/)[1]
-  assert.deepEqual(ungated.split(',').map((s) => s.trim().replace(/'/g, '')).sort(), ['licence:activate', 'licence:claim-owner', 'licence:state'])
+  assert.deepEqual(ungated.split(',').map((s) => s.trim().replace(/'/g, '')).sort(), ['licence:activate', 'licence:claim-owner', 'licence:open-link', 'licence:state'])
 })
 
 test('every data channel goes through the shared gated wrapper (nothing registers ipcMain directly)', () => {
@@ -56,7 +56,7 @@ test('the owner key is never written to disk or logged by the app', () => {
   assert.doesNotMatch(owner + licence, /console\.\w+\([^)]*(seed|keyText)/i)
 })
 
-test('no leftovers from the previous licence design', { todo: 'KNOWN GAP: files of the old licence design are still in the repo (seller-tools/, electron/services/license.service.ts, src/pages/LicenseGate.tsx, src/components/ui/PayWindow.tsx) - delete them and this test passes' }, () => {
+test('no leftovers from the previous licence design', () => {
   const stale = ['seller-tools', '@noble', 'SELLER_PUBLIC_KEY', 'license:status', 'license:activate', 'license:deactivate', 'LicenseGate', 'license.service', 'generate-license-key']
   const hits = []
   const skip = new Set(['node_modules', 'dist', 'dist-electron', 'release', '.git', 'tests'])

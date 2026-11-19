@@ -14,6 +14,7 @@ declare global {
         state: () => Promise<import('./index').LicenceState>
         activate: (token: string) => Promise<{ success: boolean; error?: string }>
         claimOwner: (pastedKey?: string) => Promise<{ success: boolean; error?: string; cancelled?: boolean }>
+        openLink: (url: string) => Promise<{ ok: boolean }>
       }
       owner: {
         overview: () => Promise<import('./index').OwnerOverview>
@@ -22,7 +23,7 @@ declare global {
         unlockPasted: (keyText: string) => Promise<import('./index').OwnerResult>
         lock: () => Promise<{ success: boolean }>
         issueNew: (input: import('./index').OwnerIssueInput) => Promise<import('./index').OwnerResult<import('./index').IssuedLicence>>
-        renew: (id: string) => Promise<import('./index').OwnerResult<import('./index').IssuedLicence>>
+        renew: (id: string, lifetime?: boolean) => Promise<import('./index').OwnerResult<import('./index').IssuedLicence>>
         setPayment: (id: string, month: string, paid: boolean) => Promise<import('./index').OwnerResult>
         updateCustomer: (id: string, patch: { name?: string; contact?: string; code?: string; notes?: string }) => Promise<import('./index').OwnerResult>
         deleteCustomer: (id: string) => Promise<import('./index').OwnerResult>
@@ -89,6 +90,11 @@ declare global {
         getProvider: (userId: string) => Promise<{ provider: string }>
         setProvider: (provider: string) => Promise<any>
         listModels: (userId: string, provider: string) => Promise<{ success: boolean; models?: string[]; selected?: string; error?: string }>
+        usage: (userId: string) => Promise<{ today: number; week: number; month: number }>
+      }
+      progress_backup: {
+        export: (userId: string) => Promise<{ success: boolean; cancelled?: boolean; savedTo?: string; error?: string }>
+        import: (userId: string) => Promise<{ success: boolean; cancelled?: boolean; added?: number; skipped?: number; error?: string }>
       }
       settings: {
         get: (key: string) => Promise<{ value: string | null }>

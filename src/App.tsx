@@ -18,7 +18,8 @@ export default function App() {
   const setOwner = useUIStore((s) => s.setOwner)
   const [licence, setLicence] = useState<LicenceState | null>(null)
   const licenceChecked = licence !== null
-  const activated = licence?.ok === true
+  // A lapsed licence still opens the app, read-only: the person is never locked out of their own data.
+  const activated = licence?.ok === true || licence?.readOnly === true
 
   // Apply the persisted theme to the document root so the CSS variable
   // overrides in globals.css take effect everywhere, immediately.

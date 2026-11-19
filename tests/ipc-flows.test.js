@@ -146,7 +146,7 @@ test('AI keys: saved per provider, reported without ever being returned to the s
 test('an unactivated copy refuses EVERY data channel, including SQL, AI and the exercises', async () => {
   app.setLicensed(false)
   try {
-    const open = new Set(['licence:state', 'licence:activate', 'licence:claim-owner'])
+    const open = new Set(['licence:state', 'licence:activate', 'licence:claim-owner', 'licence:open-link'])
     const dataChannels = [...app.handlers.keys()].filter((c) => !open.has(c))
     assert.ok(dataChannels.length > 50, `expected the whole app surface to be registered, found ${dataChannels.length}`)
     assert.ok(dataChannels.includes('sql:execute') && dataChannels.includes('ai:chat') && dataChannels.includes('exercises:submit'))

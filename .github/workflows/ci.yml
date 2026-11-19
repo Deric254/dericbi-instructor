@@ -16,6 +16,10 @@ concurrency:
 permissions:
   contents: read
 
+# GitHub is retiring the Node 20 runtime for actions; opt in to Node 24 now so the warning (and the later forced switch) never surprises a build.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   test:
     name: Tests (${{ matrix.os }})
@@ -46,11 +50,7 @@ jobs:
       - name: Run the tests
         run: npm test
 
-      - name: Type-check the interface (informational)
-        # Currently reports 3 errors, all in leftover files of the old licence design
-        # (src/pages/LicenseGate.tsx, src/components/ui/PayWindow.tsx). Delete them, then remove
-        # `continue-on-error` to make this check blocking.
-        continue-on-error: true
+      - name: Type-check the interface
         run: npm run typecheck
 
   python-packages:

@@ -10,11 +10,11 @@ import { reportApiError } from '../../lib/apiError'
 
 interface Props {
   context: InstructorContext
-  initialPrompt?: string        // auto-send on mount
+  /** The question about the student's latest attempt. Sent only when they press the button. */
+  initialPrompt?: string
   /** Send a message on request (a new id sends again, even with the same text). */
   request?: { id: number; text: string }
   compact?: boolean             // collapsed panel mode
-  onFeedbackReady?: (msg: string) => void
 }
 
 export default function InstructorPanel({
@@ -22,7 +22,6 @@ export default function InstructorPanel({
   initialPrompt,
   request,
   compact = false,
-  onFeedbackReady,
 }: Props) {
   const { user } = useAuthStore()
   const { messages, loading, error, unavailable, sendMessage, clearConversation } = useInstructor(context)
@@ -33,7 +32,7 @@ export default function InstructorPanel({
   const [keyCheckFailed, setKeyCheckFailed] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const lastSentPrompt = useRef<string | null>(null)
+  const [sentPrompt, setSentPrompt] = useState<string | null>(null)
   const lastRequestId = useRef<number | null>(null)
 
   // Check API key
@@ -56,20 +55,13 @@ export default function InstructorPanel({
     check()
   }, [user])
 
-  // Auto-send the initial prompt whenever it changes to a new value — this
-  // fires once per exercise attempt (not just the first one), so a student
-  // who gets it wrong, then retries and gets it right, gets AI feedback both
-  // times rather than only ever on their very first attempt.
-  useEffect(() => {
-    if (!apiKeyOk || !initialPrompt || initialPrompt === lastSentPrompt.current) return
-    lastSentPrompt.current = initialPrompt
-    sendMessage(initialPrompt, context).then(() => {
-      if (onFeedbackReady && messages.length > 0) {
-        const last = messages[messages.length - 1]
-        if (last?.role === 'assistant') onFeedbackReady(last.content)
-      }
-    })
-  }, [apiKeyOk, initialPrompt])
+  // The tutor never speaks on its own (every reply spends the student's AI tokens): a finished attempt only
+  // OFFERS a button, and a new attempt offers it again.
+  const askAboutAttempt = () => {
+    if (!initialPrompt || loading) return
+    setSentPrompt(initialPrompt)
+    sendMessage(initialPrompt, context)
+  }
 
   useEffect(() => {
     if (!apiKeyOk || !request || request.id === lastRequestId.current) return
@@ -226,6 +218,12 @@ export default function InstructorPanel({
 
         {!checkingKey && messages.length === 0 && (
           <EmptyInstructorState context={context} onPrompt={(p) => sendMessage(p, context)} />
+        )}
+
+        {apiKeyOk && initialPrompt && initialPrompt !== sentPrompt && !loading && (
+          <button className="btn btn-primary btn-sm" onClick={askAboutAttempt} style={{ alignSelf: 'flex-start' }}>
+            <Sparkles size={12} /> Ask the tutor about this attempt
+          </button>
         )}
 
         {messages.map(msg => (

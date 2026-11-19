@@ -1,9 +1,11 @@
 import { useState, useCallback, useRef } from 'react'
-import { runPythonCaptured, type PythonRunResult } from '../lib/pythonRunner'
+import { loadPythonEngine } from '../lib/pyodideLoader'
+import { runPythonCaptured, runPythonGraded, type PythonRunResult, type PythonGradedRun } from '../lib/pythonRunner'
 
 type RuntimeStatus = 'idle' | 'loading' | 'ready' | 'running' | 'error'
 
-export function usePyodide() {
+/** `packages`: Python imports to pre-load. Pass '' for the core language only (starts faster, nothing extra to download). */
+export function usePyodide(packages = 'import pandas, numpy') {
   const [status, setStatus] = useState<RuntimeStatus>('idle')
   const pyodideRef = useRef<any>(null)
 
@@ -12,22 +14,7 @@ export function usePyodide() {
     setStatus('loading')
 
     try {
-      if (!(window as any).loadPyodide) {
-        await new Promise<void>((resolve, reject) => {
-          const script = document.createElement('script')
-          script.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js'
-          script.onload = () => resolve()
-          script.onerror = () => reject(new Error('Failed to load Pyodide'))
-          document.head.appendChild(script)
-        })
-      }
-
-      const pyodide = await (window as any).loadPyodide({
-        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.1/full/',
-      })
-
-      // Pre-load analytics packages
-      await pyodide.loadPackagesFromImports('import pandas, numpy')
+      const pyodide = await loadPythonEngine(packages)
 
       pyodideRef.current = pyodide
       setStatus('ready')
@@ -35,7 +22,7 @@ export function usePyodide() {
       console.error('[Pyodide]', err)
       setStatus('error')
     }
-  }, [status])
+  }, [status, packages])
 
   const runCode = useCallback(async (code: string): Promise<PythonRunResult> => {
     if (!pyodideRef.current) {
@@ -49,5 +36,15 @@ export function usePyodide() {
     }
   }, [])
 
-  return { status, loadRuntime, runCode }
+  const runGraded = useCallback(async (parts: { setup?: string; code: string; check?: string }): Promise<PythonGradedRun> => {
+    if (!pyodideRef.current) return { output: '', checkOutput: '', error: 'Python runtime not loaded.', exec_ms: 0 }
+    setStatus('running')
+    try {
+      return runPythonGraded(pyodideRef.current, parts)
+    } finally {
+      setStatus('ready')
+    }
+  }, [])
+
+  return { status, loadRuntime, runCode, runGraded }
 }

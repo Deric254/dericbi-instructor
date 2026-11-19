@@ -6,19 +6,26 @@
  * public key that is built into the app. The app can only VERIFY; creating licences needs the owner key
  * (see owner.service.ts), which is never stored by the app.
  */
-import { app, dialog } from 'electron'
+import { app, dialog, shell } from 'electron'
 import * as fs from 'fs'
 import { Licensing, FileStore, LicenceError } from '../licensing/licensing'
 import config from '../licensing/licensing.config.json'
+import { GRACE_DAYS, READ_ONLY_MESSAGE, allows, isAllowedLink } from '../licensing/licence-gate'
 
 export interface LicenceState {
   ok: boolean
-  kind: 'owner' | 'licensed' | 'unlicensed' | 'unconfigured'
+  kind: 'owner' | 'licensed' | 'expired' | 'unlicensed' | 'unconfigured'
   message: string
   installCode: string
   user?: string
   expires?: string
   daysLeft?: number
+  /** Past the end date but inside the grace days: everything still works. */
+  grace?: boolean
+  graceDaysLeft?: number
+  /** Past the grace days: the data can be viewed but not changed. */
+  readOnly?: boolean
+  lifetime?: boolean
 }
 
 const CACHE_MS = 60_000
@@ -27,7 +34,7 @@ const CACHE_MS = 60_000
 export const MAX_LICENCE_DAYS = 365
 
 let instance: Licensing | null = null
-let cache: { at: number; ok: boolean } | null = null
+let cache: { at: number; ok: boolean; read_only?: boolean } | null = null
 
 export function licensing(): Licensing {
   if (!instance) {
@@ -36,6 +43,7 @@ export function licensing(): Licensing {
       prefix: config.prefix,
       publicKeyHex: config.ownerPublicKey,
       maxDays: MAX_LICENCE_DAYS,
+      graceDays: GRACE_DAYS,
       store: new FileStore(app.getPath('userData')),
     })
   }
@@ -53,16 +61,26 @@ export function getState(): LicenceState {
     user: st.user,
     expires: st.expires,
     daysLeft: st.days_left,
+    grace: st.grace,
+    graceDaysLeft: st.grace_days_left,
+    readOnly: st.read_only,
+    lifetime: st.lifetime,
   }
 }
 
-/** Cheap check used to guard every data-touching IPC channel (re-verified at most once a minute). */
-export function isLicensed(): boolean {
+/**
+ * Called before every data channel runs (re-verified at most once a minute). A valid licence, or one inside its
+ * grace days, lets every channel through; a lapsed one lets only the read channels through; anything else refuses.
+ */
+export function requireAccess(channel: string): void {
   const now = Date.now()
-  if (cache && now - cache.at < CACHE_MS) return cache.ok
-  const ok = licensing().state().ok
-  cache = { at: now, ok }
-  return ok
+  if (!cache || now - cache.at >= CACHE_MS) {
+    const st = licensing().state()
+    cache = { at: now, ok: st.ok, read_only: st.read_only }
+  }
+  if (allows(channel, cache)) return
+  const st = cache
+  throw new Error(st.read_only ? READ_ONLY_MESSAGE : 'This copy of DericBI Instructor is not activated.')
 }
 
 export function requireOwner(): void {
@@ -103,5 +121,16 @@ export function claimOwner(keyText: string): { success: true } | { success: fals
     return { success: true }
   } catch (e) {
     return fail(e)
+  }
+}
+
+/** Opens a payment or renewal link in the person's own browser or mail app. Anything off the allowlist is refused. */
+export async function openLink(url: unknown): Promise<{ ok: boolean }> {
+  if (!isAllowedLink(url)) return { ok: false }
+  try {
+    await shell.openExternal(url)
+    return { ok: true }
+  } catch {
+    return { ok: false }
   }
 }

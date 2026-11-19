@@ -15,65 +15,9 @@ import { preparePythonEditor, useEditorTheme } from '../lib/editorTheme'
 import { reportApiError } from '../lib/apiError'
 import { SplitPane, LessonWorkspace } from '../components/ui/SplitPane'
 import type { Lesson } from '../types'
-import { runPythonCaptured, type PythonRunResult } from '../lib/pythonRunner'
+import { usePyodide } from '../hooks/usePyodide'
 
 type View = 'lessons' | 'playground'
-type RuntimeStatus = 'idle' | 'loading' | 'ready' | 'running' | 'error'
-
-// ─────────────────────────────────────────────
-// PYODIDE RUNTIME HOOK
-// Loads Pyodide once, exposes runCode()
-// ─────────────────────────────────────────────
-
-function usePyodide() {
-  const [status, setStatus] = useState<RuntimeStatus>('idle')
-  const pyodideRef = useRef<any>(null)
-
-  const loadRuntime = useCallback(async () => {
-    if (pyodideRef.current || status === 'loading') return
-    setStatus('loading')
-
-    try {
-      // Inject Pyodide CDN script if not already present
-      if (!(window as any).loadPyodide) {
-        await new Promise<void>((resolve, reject) => {
-          const script = document.createElement('script')
-          script.src = 'https://cdn.jsdelivr.net/pyodide/v0.26.1/full/pyodide.js'
-          script.onload = () => resolve()
-          script.onerror = () => reject(new Error('Failed to load Pyodide script'))
-          document.head.appendChild(script)
-        })
-      }
-
-      const pyodide = await (window as any).loadPyodide({
-        indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.26.1/full/',
-      })
-
-      // Pre-install common packages
-      await pyodide.loadPackagesFromImports('import pandas, numpy, matplotlib')
-
-      pyodideRef.current = pyodide
-      setStatus('ready')
-    } catch (err: any) {
-      console.error('[Pyodide]', err)
-      setStatus('error')
-    }
-  }, [status])
-
-  const runCode = useCallback(async (code: string): Promise<PythonRunResult> => {
-    if (!pyodideRef.current) {
-      return { output: '', error: 'Python runtime not loaded.', exec_ms: 0 }
-    }
-    setStatus('running')
-    try {
-      return runPythonCaptured(pyodideRef.current, code)
-    } finally {
-      setStatus('ready')
-    }
-  }, [])
-
-  return { status, loadRuntime, runCode }
-}
 
 // ─────────────────────────────────────────────
 // MAIN PAGE
@@ -294,7 +238,7 @@ const STARTER_SNIPPETS = [
 function PythonPlayground({ contextLessonId }: { contextLessonId?: string }) {
   const editorTheme = useEditorTheme()
   const { user } = useAuthStore()
-  const { status, loadRuntime, runCode } = usePyodide()
+  const { status, loadRuntime, runCode } = usePyodide('import pandas, numpy, matplotlib')
   const [code, setCode] = useState(STARTER_SNIPPETS[0].code)
   const [output, setOutput] = useState<{ text: string; type: 'output' | 'error' | 'info' }[]>([])
   const [activeSnippet, setActiveSnippet] = useState(0)

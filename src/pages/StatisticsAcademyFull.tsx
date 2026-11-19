@@ -271,7 +271,7 @@ function StatExercise({ exercise }: { exercise: any }) {
       } />
       }
       second={
-      /* AI Instructor — kicks in automatically after every run, since there's
+      /* AI Instructor — offered after every run (the student presses the button), since there's
          no single mechanical "correct" output to check freeform code against. */
       <div style={{ flex: 1, minHeight: 0 }}>
         <InstructorPanel

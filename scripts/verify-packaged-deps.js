@@ -77,4 +77,13 @@ if (wronglyExcluded.length) {
   console.error('\nFix: delete those names from the "!node_modules/{...}/**/*" entry in package.json -> build.files.\n')
   process.exit(1)
 }
+// The Python engine's core must ship inside the interface folder (Python practicals work offline); a build without it
+// would silently fall back to the internet copy.
+const missingPy = ['pyodide.js', 'pyodide.asm.js', 'pyodide.asm.wasm', 'python_stdlib.zip', 'pyodide-lock.json']
+  .filter((f) => !fs.existsSync(path.join(ROOT, 'dist', 'pyodide', f)))
+if (missingPy.length) {
+  console.error('verify-packaged-deps: dist/pyodide is missing ' + missingPy.join(', ') + ' - run `npm run build:vite` (the build copies the Python engine there)')
+  process.exit(1)
+}
+
 console.log(`verify-packaged-deps: OK - the ${neededNames.size} packages the main process needs are all shipped (${excluded.size} unused packages excluded).`)

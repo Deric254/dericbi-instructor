@@ -3,6 +3,8 @@ import * as AuthService from '../services/auth.service'
 import * as ProgressService from '../services/progress.service'
 import * as SqlService from '../services/sql.service'
 import * as AiService from '../services/ai.service'
+import { gradePythonOutput } from '../services/pygrade'
+import { exportProgress, importProgress, MAX_BACKUP_BYTES } from '../services/backup.service'
 import * as UserDb from '../services/userdb.service'
 import { registerPortfolioHandlers } from '../services/portfolio.service'
 import { getDb } from '../db/database'
@@ -136,7 +138,11 @@ export function registerLessonHandlers() {
     `).get(userId, lessonId)
 
     const exercises = db.prepare(`
-      SELECT id, title, prompt, exercise_type, points, sort_order, hint_1
+      SELECT id, title, prompt, exercise_type, points, sort_order, hint_1,
+             -- Python practicals: the hidden set-up and tests the app runs next to the student's code (never the answer key)
+             CASE WHEN evaluation_mode = 'python_output' AND json_valid(expected_output) THEN json_extract(expected_output, '$.setup') END AS python_setup,
+             CASE WHEN evaluation_mode = 'python_output' AND json_valid(expected_output) THEN json_extract(expected_output, '$.check') END AS python_check,
+             CASE WHEN evaluation_mode = 'python_output' AND json_valid(expected_output) THEN json_extract(expected_output, '$.starter') END AS python_starter
       FROM exercises WHERE lesson_id = ? ORDER BY sort_order
     `).all(lessonId)
 
@@ -225,7 +231,7 @@ export function registerExerciseHandlers() {
     return db.prepare('SELECT * FROM exercises WHERE id = ?').get(exerciseId)
   })
 
-  safeHandle('exercises:submit', async (_, { userId, exerciseId, answer, timeSpentS, sandboxId }) => {
+  safeHandle('exercises:submit', async (_, { userId, exerciseId, answer, timeSpentS, sandboxId, pythonRun }) => {
     const exercise = db.prepare('SELECT * FROM exercises WHERE id = ?').get(exerciseId) as any
     if (!exercise) return { success: false, error: 'Exercise not found' }
 
@@ -243,6 +249,10 @@ export function registerExerciseHandlers() {
         evaluationMode: exercise.evaluation_mode,
         expectedOutput: exercise.expected_output ? JSON.parse(exercise.expected_output) : undefined,
       })
+    } else if (exercise.evaluation_mode === 'python_output') {
+      let key = null
+      try { key = exercise.expected_output ? JSON.parse(exercise.expected_output) : null } catch { key = null }
+      validationResult = gradePythonOutput(answer, pythonRun, key)
     } else {
       // For other types (MCQ, freeform) — basic exact match for now
       validationResult = {
@@ -431,6 +441,15 @@ export function registerAiHandlers() {
     return { has_key: !!key }
   })
 
+  // How often the tutor has answered: every answer spends the student's AI balance, so they can see their own use.
+  safeHandle('ai:usage', async (_, userId: string) => {
+    const db = getDb()
+    const count = (since: string) => (db.prepare(`
+      SELECT COUNT(*) AS c FROM ai_messages m JOIN ai_conversations c ON c.id = m.conversation_id
+      WHERE c.user_id = ? AND m.role = 'assistant' AND m.created_at >= ${since}`).get(userId) as any).c as number
+    return { today: count("date('now')"), week: count("date('now', '-6 days')"), month: count("date('now', 'start of month')") }
+  })
+
   safeHandle('ai:get-provider', async (_, userId: string) => {
     return { provider: AiService.getActiveProvider(userId) }
   })
@@ -454,6 +473,30 @@ export function registerAiHandlers() {
 // ─────────────────────────────────────────────
 // SETTINGS HANDLERS
 // ─────────────────────────────────────────────
+
+export function registerBackupHandlers() {
+  safeHandle('progress:export', async (_, { userId }) => {
+    const data = exportProgress(userId)
+    const opts = { title: 'Save my progress', defaultPath: `dericbi-progress-${new Date().toISOString().slice(0, 10)}.json`, filters: [{ name: 'DericBI progress', extensions: ['json'] }] }
+    const win = BrowserWindow.getFocusedWindow()
+    const pick = win ? await dialog.showSaveDialog(win, opts) : await dialog.showSaveDialog(opts)
+    if (pick.canceled || !pick.filePath) return { success: false, cancelled: true }
+    require('fs').writeFileSync(pick.filePath, JSON.stringify(data))
+    return { success: true, savedTo: pick.filePath }
+  })
+
+  safeHandle('progress:import', async (_, { userId }) => {
+    const opts = { title: 'Restore my progress', properties: ['openFile' as const], filters: [{ name: 'DericBI progress', extensions: ['json'] }] }
+    const win = BrowserWindow.getFocusedWindow()
+    const pick = win ? await dialog.showOpenDialog(win, opts) : await dialog.showOpenDialog(opts)
+    if (pick.canceled || !pick.filePaths[0]) return { success: false, cancelled: true }
+    const fs = require('fs')
+    if (fs.statSync(pick.filePaths[0]).size > MAX_BACKUP_BYTES) return { success: false, error: 'That file is too large to be a progress backup.' }
+    let parsed: unknown
+    try { parsed = JSON.parse(fs.readFileSync(pick.filePaths[0], 'utf8')) } catch { return { success: false, error: 'That file could not be read as a progress backup.' } }
+    return importProgress(userId, parsed)
+  })
+}
 
 export function registerSettingsHandlers() {
   const db = getDb()
@@ -613,6 +656,7 @@ export function registerAllHandlers() {
   registerFileHandlers()
   registerAiHandlers()
   registerSettingsHandlers()
+  registerBackupHandlers()
   registerPortfolioHandlers()
   registerAdminHandlers()
 
