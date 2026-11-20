@@ -76,3 +76,9 @@ $RECYCLE.BIN/
 
 # Stray PowerShell cache that was once committed
 Microsoft/
+
+# Signing/owner key material: never commit. The owner key lives in Documents\DericBI Owner Key\
+# (outside the repo); these patterns catch an accidental copy dropped inside the project.
+private-key*.txt
+*.seed
+DericBI Owner Key/
