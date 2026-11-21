@@ -103,3 +103,33 @@ test('the panel, the explain box and the channels are wired', () => {
   assert.match(src('src/pages/SqlAcademy.tsx'), /<ExplainBack lessonId=\{lesson\.id\} \/>/)
   assert.match(src('electron/preload.ts'), /'explain:get'/); assert.match(src('electron/preload.ts'), /'explain:submit'/)
 })
+
+// A learner who words the idea differently must not be failed for it: word forms are matched, and a genuine attempt that still
+// misses the listed words can be confirmed by the learner after two real misses (never for filler, short or copied text).
+test('word forms match, other wording of a good explanation passes, and filler still does not', async () => {
+  makeLearner(h, db, 'wordy'); makeLearner(h, db, 'filler')
+  const say = (u, id, text) => h.invoke('explain:submit', { userId: u, lessonId: id, text })
+  assert.equal((await say('wordy', 'fo-problem', 'Folks keep hitting it, it eats their time and cash, and they are already hiring somebody to patch it, so first I ask them how they handle it.')).passed, true)
+  assert.equal((await say('wordy', 'fo-offer', 'The lowest price I can accept covers what it costs me plus a margin, and the most a buyer will pay is limited by the benefit they get; if I only look at my expenses I might ask too little.')).passed, true)
+  assert.equal((await say('wordy', 'fo-runway', 'It is the number of months I can keep going before the money in my pocket is finished, found by splitting my savings by what I lose each month; a company can make gains yet be unable to settle bills when invoices are unpaid.')).passed, true)
+  for (const id of ['fo-problem', 'fo-offer', 'fo-runway', 'fo-market', 'fo-unit']) {
+    assert.equal((await say('filler', id, 'I think this was a very interesting lesson and I learned a great deal from reading it carefully today.')).passed, false, `${id}: filler passed`)
+  }
+})
+
+test('the learner can confirm after a real miss, but not with nothing written, a short or copied attempt, or twice', async () => {
+  makeLearner(h, db, 'conf')
+  const confirm = (id) => h.invoke('explain:confirm', { userId: 'conf', lessonId: id })
+  assert.equal((await confirm('fo-mvp')).success, false, 'nothing written yet')
+  await h.invoke('explain:submit', { userId: 'conf', lessonId: 'fo-mvp', text: 'too short' })
+  assert.equal((await confirm('fo-mvp')).success, false, 'a short attempt cannot be confirmed')
+  const theory = JSON.parse(fs.readFileSync(path.join(h.ROOT, 'content/founder/curriculum.json'), 'utf8')).lessons.find((l) => l.id === 'fo-mvp').theory_md
+  await h.invoke('explain:submit', { userId: 'conf', lessonId: 'fo-mvp', text: theory.split('## The first principle')[1].slice(0, 400) })
+  assert.equal((await confirm('fo-mvp')).success, false, 'copied text cannot be confirmed')
+  await h.invoke('explain:submit', { userId: 'conf', lessonId: 'fo-mvp', text: 'I think it means putting out something rough to see if anyone cares before spending big, because wasting a fortune on a polished thing nobody wants would hurt.' })
+  assert.equal((await h.invoke('explain:get', { userId: 'conf', lessonId: 'fo-mvp' })).passed, false)
+  assert.equal((await confirm('fo-mvp')).success, true)
+  assert.equal((await h.invoke('explain:get', { userId: 'conf', lessonId: 'fo-mvp' })).passed, true)
+  assert.equal((await confirm('fo-mvp')).success, false, 'already passed')
+  assert.match(src('src/components/ui/ExplainBack.tsx'), /misses >= 2/, 'the option appears only after two real misses')
+})

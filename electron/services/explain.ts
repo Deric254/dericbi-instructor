@@ -15,12 +15,25 @@ function conceptOf(lessonId: string): Concept | undefined {
   return loadConcepts().find((c) => c.lessons[0] === lessonId && c.explain)
 }
 
+/** A rough word stem, so "frequently", "charged" and "customers" match "frequent", "charge" and "customer". */
+function stem(w: string): string {
+  let s = w
+  for (const suf of ['ing', 'ly', 'ed', 'es', 's']) if (s.length > suf.length + 3 && s.endsWith(suf)) { s = s.slice(0, -suf.length); break }
+  return s.length > 4 ? s.replace(/e$/, '') : s
+}
+
 /** Which of the rubric's key points the text covers. A point is covered when any of its phrases appears. */
 function covered(text: string, concept: Concept) {
   const flat = ` ${text.toLowerCase().replace(/[‘’]/g, "'")} `
+  const stems = words(text).map(stem)
+  // A phrase is found as written, or as the same words in other forms (plural, past tense, -ly) one after another.
+  const stemmed = (phrase: string) => {
+    const p = words(phrase).map(stem)
+    return p.length > 0 && stems.some((_, i) => p.every((w, k) => stems[i + k] === w))
+  }
   const has = (phrase: string) => phrase === '#digit' ? /\d/.test(flat)
     : phrase.startsWith('#both:') ? phrase.slice(6).split(',').every((w) => flat.includes(w))
-    : flat.includes(phrase)
+    : flat.includes(phrase) || stemmed(phrase)
   return concept.explain!.points.map((p) => ({ hint: p.hint, met: p.any.some(has) }))
 }
 
@@ -46,6 +59,21 @@ export function getExplain(userId: string, lessonId: string) {
 export function explainPending(userId: string, lessonId: string): boolean {
   const e = getExplain(userId, lessonId)
   return !!e && !e.passed
+}
+
+/**
+ * The learner has written a real explanation that did not match the key ideas (they may have used other words) and says they
+ * have compared it with the ideas and understand. The check cannot judge understanding, so it never blocks someone who has
+ * made a genuine attempt. Only allowed after a substantive, uncopied, not-yet-passed attempt is on record.
+ */
+export function confirmExplain(userId: string, lessonId: string): boolean {
+  const concept = conceptOf(lessonId)
+  if (!concept) return false
+  const row = getDb().prepare('SELECT passed, answer FROM explain_results WHERE user_id = ? AND concept_id = ?').get(userId, concept.id) as { passed: number; answer: string } | undefined
+  const lesson = getDb().prepare('SELECT theory_md FROM lessons WHERE id = ?').get(lessonId) as { theory_md: string } | undefined
+  if (!row || !lesson || row.passed === 1 || words(row.answer).length < MIN_WORDS || copiedFrom(row.answer, lesson.theory_md)) return false
+  getDb().prepare("UPDATE explain_results SET passed = 1, updated_at = datetime('now') WHERE user_id = ? AND concept_id = ?").run(userId, concept.id)
+  return true
 }
 
 /**

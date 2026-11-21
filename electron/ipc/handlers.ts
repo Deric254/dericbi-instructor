@@ -11,7 +11,7 @@ import { getDb } from '../db/database'
 import { recordQuiz, bestQuizPct, masteryGaps } from '../services/mastery'
 import { getPlacement, submitPlacement } from '../services/placement'
 import { enrollConcepts, getReview, answerReview } from '../services/review'
-import { getExplain, submitExplain } from '../services/explain'
+import { getExplain, submitExplain, confirmExplain } from '../services/explain'
 import { getFieldTask, saveFieldTask, deleteFieldTask, listFieldTasks } from '../services/fieldwork'
 import { safeHandle } from './safe-handle'
 import { registerLicenceHandlers } from './licence-handlers'
@@ -189,6 +189,8 @@ export function registerLessonHandlers() {
   safeHandle('fieldwork:list', async (_, userId: string) => listFieldTasks(userId))
   safeHandle('fieldwork:save', async (_, { userId, lessonId, did, learned }) => saveFieldTask(userId, lessonId, did, learned))
   safeHandle('fieldwork:delete', async (_, { userId, lessonId }) => ({ success: deleteFieldTask(userId, lessonId) }))
+
+  safeHandle('explain:confirm', async (_, { userId, lessonId }) => ({ success: confirmExplain(userId, lessonId) }))
 
   safeHandle('review:due', async (_, userId: string) => getReview(userId))
 

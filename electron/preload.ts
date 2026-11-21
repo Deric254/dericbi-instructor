@@ -79,6 +79,7 @@ const api = {
   explain: {
     get: (userId: string, lessonId: string) => ipcRenderer.invoke('explain:get', { userId, lessonId }),
     submit: (userId: string, lessonId: string, text: string) => ipcRenderer.invoke('explain:submit', { userId, lessonId, text }),
+    confirm: (userId: string, lessonId: string) => ipcRenderer.invoke('explain:confirm', { userId, lessonId }),
   },
 
   // Real-world tasks

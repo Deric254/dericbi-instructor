@@ -861,7 +861,12 @@
               "lowest",
               "minimum",
               "profit",
-              "below"
+              "below",
+              "lowest price",
+              "break even",
+              "need to cover",
+              "expenses",
+              "margin"
             ]
           },
           {
@@ -873,7 +878,14 @@
               "customer saves",
               "save",
               "highest",
-              "maximum"
+              "maximum",
+              "benefit",
+              "afford",
+              "willing to pay",
+              "gain",
+              "what it is worth",
+              "most a customer",
+              "most a buyer"
             ]
           },
           {
@@ -885,7 +897,14 @@
               "undercharge",
               "money on the table",
               "worth more",
-              "charge more"
+              "charge more",
+              "too little",
+              "too cheap",
+              "underprice",
+              "ask too",
+              "charge less",
+              "lose out",
+              "miss out"
             ]
           }
         ],

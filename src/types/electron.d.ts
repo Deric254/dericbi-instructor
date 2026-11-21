@@ -59,6 +59,7 @@ declare global {
       explain: {
         get: (userId: string, lessonId: string) => Promise<any>
         submit: (userId: string, lessonId: string, text: string) => Promise<any>
+        confirm: (userId: string, lessonId: string) => Promise<{ success: boolean }>
       }
       fieldwork: {
         get: (userId: string, lessonId: string) => Promise<any>

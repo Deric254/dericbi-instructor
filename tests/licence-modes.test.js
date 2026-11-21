@@ -111,7 +111,7 @@ const READ = ['auth:login', 'auth:validate-session', 'auth:logout', 'auth:get-se
   'portfolio:export', 'portfolio:open-file',
   'admin:check', 'admin:users-list', 'admin:user-detail', 'admin:content-stats', 'admin:system-info']
 const WRITE = ['auth:register', 'auth:update-profile', 'auth:change-password', 'auth:set-security-question',
-  'lessons:complete', 'quizzes:submit', 'placement:submit', 'review:answer', 'explain:submit', 'fieldwork:save', 'fieldwork:delete', 'exercises:submit', 'sql:execute', 'sql:load-dataset',
+  'lessons:complete', 'quizzes:submit', 'placement:submit', 'review:answer', 'explain:submit', 'explain:confirm', 'fieldwork:save', 'fieldwork:delete', 'exercises:submit', 'sql:execute', 'sql:load-dataset',
   'userdb:create', 'userdb:rename', 'userdb:delete',
   'files:pick', 'files:import', 'files:delete',
   'progress:import', 'ai:chat', 'ai:exercise-feedback', 'ai:save-key', 'ai:list-models', 'ai:set-provider', 'settings:set',

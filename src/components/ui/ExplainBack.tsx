@@ -17,9 +17,11 @@ export default function ExplainBack({ lessonId }: { lessonId: string }) {
   const [text, setText] = useState('')
   const [outcome, setOutcome] = useState<Outcome | null>(null)
   const [busy, setBusy] = useState(false)
+  // Real attempts that did not match the key ideas (the learner may simply have used other words).
+  const [misses, setMisses] = useState(0)
 
   useEffect(() => {
-    setPrompt(null); setOutcome(null); setPassed(false); setText('')
+    setPrompt(null); setOutcome(null); setPassed(false); setText(''); setMisses(0)
     if (!user) return
     window.api.explain.get(user.id, lessonId)
       .then((e: { prompt: string; passed: boolean; last_answer: string } | null) => { if (e) { setPrompt(e.prompt); setPassed(e.passed); setText(e.last_answer) } })
@@ -33,9 +35,20 @@ export default function ExplainBack({ lessonId }: { lessonId: string }) {
     setBusy(true)
     try {
       const r = await window.api.explain.submit(user.id, lessonId, text)
-      if (r?.success) { setOutcome(r); if (r.passed) setPassed(true) }
+      if (r?.success) { setOutcome(r); if (r.passed) setPassed(true); else if (!r.reason) setMisses((m) => m + 1) }
       else reportApiError('check your explanation', new Error('The explanation could not be checked'))
     } catch (err) { reportApiError('check your explanation', err) } finally { setBusy(false) }
+  }
+
+  // The check looks for key ideas in plain words, so it can miss a good explanation written differently. After two real misses the
+  // learner can say they have compared it with the ideas and understand; it never blocks a genuine attempt.
+  const confirm = async () => {
+    if (!user || busy) return
+    setBusy(true)
+    try {
+      const r = await window.api.explain.confirm(user.id, lessonId)
+      if (r?.success) { setPassed(true); setOutcome(null) } else reportApiError('confirm your explanation', new Error('It could not be confirmed'))
+    } catch (err) { reportApiError('confirm your explanation', err) } finally { setBusy(false) }
   }
 
   return (
@@ -58,6 +71,12 @@ export default function ExplainBack({ lessonId }: { lessonId: string }) {
               <ul style={{ margin: '4px 0 0 18px' }}>{outcome.missing.map((m) => <li key={m}>{m}</li>)}</ul>
             </>
           )}
+        </div>
+      )}
+      {!passed && misses >= 2 && outcome && !outcome.passed && !outcome.reason && (
+        <div style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <span>This check looks for particular words, so a good explanation in different words can be missed. Compare yours with the ideas above. If you cover them in your own way, you can go on. You can also use "Check my explanation" in the AI tutor for a fuller read.</span>
+          <button className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start' }} disabled={busy} onClick={confirm}>I have compared it and I understand this</button>
         </div>
       )}
     </div>
