@@ -173,3 +173,15 @@ test('the academy is wired into every place a course lives, and the other academ
   assert.match(src('src/styles/globals.css'), /--fo-color:\s+#9a3412/)
   assert.match(src('src/pages/SqlAcademy.tsx'), /foundations: \{[\s\S]*?placement: true/)
 })
+
+test('the tutor can be brought in with context: help is offered from the 2nd wrong try, stepping in by itself is opt-in, and the learner\'s live work is sent', () => {
+  const panel = src('src/components/ui/InstructorPanel.tsx'); const academy = src('src/pages/SqlAcademy.tsx')
+  assert.match(academy, /stuck=\{\{ key: String\(exercise\.id\), wrong \}\}/)
+  assert.match(academy, /setWrong\(\(w\) => \(res\.validation\.correct \? 0 : w \+ 1\)\)/)
+  assert.match(academy, /code,\n\s+error: result && !result\.correct/)
+  assert.match(panel, /const isStuck = !!stuck && stuck\.wrong >= 2/)
+  assert.match(panel, /Help me, I am stuck/); assert.match(panel, /Look at my work/)
+  assert.match(panel, /useState\(false\)\n[\s\S]*?const autoSent/, 'stepping in by itself starts switched off')
+  assert.match(panel, /stuck\.wrong !== 2 && stuck\.wrong !== 4/, 'at most two automatic replies per exercise')
+  assert.match(panel, /if \(!autoRescue \|\| !apiKeyOk/, 'nothing is sent by itself unless the learner turned it on and an AI key exists')
+})

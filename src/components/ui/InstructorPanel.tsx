@@ -14,6 +14,8 @@ interface Props {
   initialPrompt?: string
   /** Send a message on request (a new id sends again, even with the same text). */
   request?: { id: number; text: string }
+  /** Wrong attempts in a row on the current exercise. From 2 on the tutor offers to step in, or does so by itself if the student turned that on. */
+  stuck?: { key: string; wrong: number }
   compact?: boolean             // collapsed panel mode
 }
 
@@ -21,6 +23,7 @@ export default function InstructorPanel({
   context,
   initialPrompt,
   request,
+  stuck,
   compact = false,
 }: Props) {
   const { user } = useAuthStore()
@@ -35,6 +38,13 @@ export default function InstructorPanel({
   const inputRef = useRef<HTMLInputElement>(null)
   const [sentPrompt, setSentPrompt] = useState<string | null>(null)
   const lastRequestId = useRef<number | null>(null)
+  // "Step in when I'm stuck": the student's own choice, off by default because every reply spends their AI tokens.
+  const autoKey = `dbi-auto-rescue-${user?.id ?? ''}`
+  const [autoRescue, setAutoRescue] = useState(false)
+  const autoSent = useRef<Set<string>>(new Set())
+  useEffect(() => { try { setAutoRescue(localStorage.getItem(autoKey) === '1') } catch { setAutoRescue(false) } }, [autoKey])
+  const toggleAuto = (on: boolean) => { setAutoRescue(on); try { localStorage.setItem(autoKey, on ? '1' : '0') } catch { /* the choice only lasts this session */ } }
+  const isStuck = !!stuck && stuck.wrong >= 2
 
   // Check API key
   useEffect(() => {
@@ -63,6 +73,18 @@ export default function InstructorPanel({
     setSentPrompt(initialPrompt)
     sendMessage(initialPrompt, context)
   }
+
+  // Stepping in by itself happens at most twice per exercise (on the 2nd and 4th wrong attempt in a row), only when the student asked for it.
+  useEffect(() => {
+    if (!autoRescue || !apiKeyOk || !stuck || !initialPrompt || loading) return
+    if (stuck.wrong !== 2 && stuck.wrong !== 4) return
+    const id = `${stuck.key}:${stuck.wrong}`
+    if (autoSent.current.has(id)) return
+    autoSent.current.add(id)
+    setSentPrompt(initialPrompt)
+    sendMessage(`I have been stuck for ${stuck.wrong} attempts. ${initialPrompt}`, context)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoRescue, apiKeyOk, stuck?.key, stuck?.wrong, initialPrompt])
 
   useEffect(() => {
     if (!apiKeyOk || !request || request.id === lastRequestId.current) return
@@ -227,9 +249,12 @@ export default function InstructorPanel({
         )}
 
         {apiKeyOk && initialPrompt && initialPrompt !== sentPrompt && !loading && (
-          <button className="btn btn-primary btn-sm" onClick={askAboutAttempt} style={{ alignSelf: 'flex-start' }}>
-            <Sparkles size={12} /> Ask the tutor about this attempt
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignSelf: 'stretch' }}>
+            {isStuck && <div style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Stuck? That was {stuck!.wrong} tries in a row. The tutor can look at exactly what you wrote.</div>}
+            <button className="btn btn-primary btn-sm" onClick={askAboutAttempt} style={{ alignSelf: 'flex-start' }}>
+              <Sparkles size={12} /> {isStuck ? 'Help me, I am stuck' : 'Ask the tutor about this attempt'}
+            </button>
+          </div>
         )}
 
         {messages.map(msg => (
@@ -290,10 +315,16 @@ export default function InstructorPanel({
         flexShrink: 0,
       }}>
         {(context.type === 'lesson' || context.type === 'exercise') && apiKeyOk && (
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8, alignItems: 'center' }}>
+            {context.type === 'exercise' && <button className="btn btn-ghost btn-sm" disabled={loading} onClick={() => sendMessage('Look at what I have written so far and give me one nudge on what to try next, without giving the answer.', context)}>Look at my work</button>}
             <button className="btn btn-ghost btn-sm" disabled={loading} onClick={() => askMode('simpler', 'Explain this more simply, with an everyday example.')}>Explain simpler</button>
             <button className="btn btn-ghost btn-sm" disabled={loading} onClick={() => askMode('ask', 'Ask me a question to test whether I understand this.')}>Ask me</button>
             <button className="btn btn-ghost btn-sm" disabled={loading} aria-pressed={checkMode} onClick={() => { setCheckMode(true); inputRef.current?.focus() }}>Check my explanation</button>
+            {context.type === 'exercise' && stuck && (
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--text-muted)', cursor: 'pointer' }} title="Off by default: each reply uses your AI tokens">
+                <input type="checkbox" checked={autoRescue} onChange={(e) => toggleAuto(e.target.checked)} /> Step in when I'm stuck
+              </label>
+            )}
           </div>
         )}
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>

@@ -424,6 +424,8 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
   const [hint, setHint] = useState<string | null>(null)
   const [running, setRunning] = useState(false)
   const [correct, setCorrect] = useState<boolean | null>(null)
+  // Wrong attempts in a row on this exercise: lets the tutor offer help (or step in, if the student chose that) when they are stuck.
+  const [wrong, setWrong] = useState(0)
   // What the student's query actually returns, shown under the editor (SELECT-style queries only).
   const [output, setOutput] = useState<SqlResult | null>(null)
   const sandboxId = useRef(`ex_${exercise?.id}_${user?.id}`)
@@ -445,6 +447,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
     setHint(null)
     setHintsUsed(0)
     setCorrect(null)
+    setWrong(0)
     setOutput(null)
   }, [exercise?.id])
 
@@ -488,6 +491,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
 
       setResult(res.validation)
       setCorrect(res.validation.correct)
+      setWrong((w) => (res.validation.correct ? 0 : w + 1))
       if (lessonModule === 'sql') refreshSqlSchema(user.id, sandboxId.current)
 
       if (res.validation.feedback && res.validation.feedback !== 'ai_review_required') {
@@ -662,7 +666,10 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
             type: 'exercise',
             lesson: lessonModule,
             exercise: exercise.title,
+            code,
+            error: result && !result.correct ? (result.error || undefined) : undefined,
           }}
+          stuck={{ key: String(exercise.id), wrong }}
           initialPrompt={
             result
               ? result.correct

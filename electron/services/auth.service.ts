@@ -34,7 +34,7 @@ export async function register(params: {
 }): Promise<AuthResult> {
   const db = getDb()
 
-  const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(params.email)
+  const existing = db.prepare('SELECT id FROM users WHERE lower(trim(email)) = lower(trim(?))').get(params.email)
   if (existing) {
     return { success: false, error: 'An account with this email already exists.' }
   }
@@ -100,7 +100,7 @@ export async function login(params: {
 }): Promise<AuthResult> {
   const db = getDb()
 
-  const row = db.prepare('SELECT * FROM users WHERE email = ?').get(params.email) as any
+  const row = db.prepare('SELECT * FROM users WHERE lower(trim(email)) = lower(trim(?))').get(params.email) as any
   if (!row) {
     return { success: false, error: 'No account found with this email.' }
   }
@@ -256,7 +256,7 @@ export function setSecurityQuestion(userId: string, question: string, answer: st
 
 export function getSecurityQuestion(email: string): { question: string; userId: string } | null {
   const db = getDb()
-  const user = db.prepare('SELECT id FROM users WHERE email = ?').get(email) as any
+  const user = db.prepare('SELECT id FROM users WHERE lower(trim(email)) = lower(trim(?))').get(email) as any
   if (!user) return null
 
   const q = db.prepare(`SELECT value FROM app_settings WHERE key = ?`)
@@ -272,7 +272,7 @@ export async function resetPasswordWithAnswer(params: {
   newPassword: string
 }): Promise<{ success: boolean; error?: string }> {
   const db = getDb()
-  const user = db.prepare('SELECT id FROM users WHERE email = ?').get(params.email) as any
+  const user = db.prepare('SELECT id FROM users WHERE lower(trim(email)) = lower(trim(?))').get(params.email) as any
   if (!user) return { success: false, error: 'No account found with this email.' }
 
   const storedHash = db.prepare(`SELECT value FROM app_settings WHERE key = ?`)

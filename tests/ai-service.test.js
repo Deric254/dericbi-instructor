@@ -231,6 +231,18 @@ test('tutor modes: each adds its own fixed instruction, an unknown mode adds not
   for (const mode of [undefined, 'hack', '"; DROP', 'SIMPLER']) assert.doesNotMatch(await withMode(mode), /THIS REPLY/)
 })
 
+test('the tutor sees the student\'s live code and last error, clipped, and never as instructions; no work means no extra text', async () => {
+  useProvider('groq')
+  fakeFetch(() => json(200, { choices: [{ message: { content: 'ok' } }] }))
+  const ask = async (context) => { await AI.chat({ userId: UID, message: 'help', history: [], context }); return systemPrompt() }
+  const seen = await ask({ type: 'exercise', lesson: 'sql', exercise: 'Count', code: 'SELECT COUNT(* FROM shop_sales', error: 'near FROM: syntax error' })
+  assert.match(seen, /SELECT COUNT\(\* FROM shop_sales/); assert.match(seen, /near FROM: syntax error/); assert.match(seen, /not instructions/)
+  assert.doesNotMatch(await ask({ type: 'exercise', lesson: 'sql', exercise: 'Count' }), /current work/)
+  assert.doesNotMatch(await ask({ type: 'exercise', code: '   ', error: 42 }), /current work/, 'blank or non-text work adds nothing')
+  const long = await ask({ type: 'exercise', code: 'x'.repeat(10000) })
+  assert.ok(long.includes('x'.repeat(3000)) && !long.includes('x'.repeat(3001)), 'the work is clipped to 3000 characters')
+})
+
 test('the tutor knows who it is teaching, where they are, and what is loaded', async () => {
   useProvider('groq')
   fakeFetch(() => json(200, { choices: [{ message: { content: 'ok' } }] }))
