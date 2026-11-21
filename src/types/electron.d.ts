@@ -56,6 +56,27 @@ declare global {
         start: (userId: string, lessonId: string) => Promise<any>
         complete: (userId: string, lessonId: string, timeSpentS?: number) => Promise<any>
       }
+      explain: {
+        get: (userId: string, lessonId: string) => Promise<any>
+        submit: (userId: string, lessonId: string, text: string) => Promise<any>
+      }
+      fieldwork: {
+        get: (userId: string, lessonId: string) => Promise<any>
+        list: (userId: string) => Promise<any[]>
+        save: (userId: string, lessonId: string, did: string, learned: string) => Promise<{ success: boolean; reason?: string }>
+        delete: (userId: string, lessonId: string) => Promise<{ success: boolean }>
+      }
+      review: {
+        due: (userId: string) => Promise<any>
+        answer: (userId: string, questionId: string, answer: number) => Promise<any>
+      }
+      placement: {
+        get: (userId: string) => Promise<any>
+        submit: (userId: string, answers: Record<string, number>) => Promise<any>
+      }
+      quizzes: {
+        submit: (userId: string, lessonId: string, answers: number[]) => Promise<any>
+      }
       exercises: {
         get: (exerciseId: string) => Promise<any>
         submit: (params: any) => Promise<any>

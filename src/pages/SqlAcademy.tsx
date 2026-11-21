@@ -5,7 +5,7 @@ import {
   Database, Play, ChevronRight, Lock, CheckCircle, Circle,
   Clock, BookOpen, Lightbulb, X, Loader, AlertCircle,
   ChevronDown, RotateCcw, HelpCircle, MessageSquare, Star,
-  Brain, Workflow, Target,
+  Brain, Workflow, Target, Compass, Rocket,
 } from 'lucide-react'
 import { useAuthStore, useUIStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
@@ -19,13 +19,16 @@ import ComparePanel, { hasComparison, type Comparison } from '../components/sql/
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
 import SkillMap from '../components/ui/SkillMap'
+import PlacementCheck, { PlacementBanner } from '../components/ui/PlacementCheck'
+import ExplainBack from '../components/ui/ExplainBack'
+import RealWorldTask from '../components/ui/RealWorldTask'
 import { PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'
 import { usePendingLesson } from '../hooks/usePendingLesson'
 import { usePyodide } from '../hooks/usePyodide'
 import type { Lesson, NavSection, SqlResult } from '../types'
 
-type View = 'lessons' | 'lesson' | 'playground' | 'mydbs' | 'skills'
+type View = 'lessons' | 'lesson' | 'playground' | 'mydbs' | 'skills' | 'placement'
 
 const DATAENG_TABLES = 'customers, orders, raw_events, pipeline_runs, ml_features, llm_requests, messy_contacts'
 const SHOP_TABLES = 'shop_sales, shop_sale_items, shop_products, shop_customers, shop_suppliers, shop_purchases, shop_batches, shop_payments, shop_refunds, shop_expenses, shop_supplier_invoices, shop_bank, shop_actions'
@@ -34,15 +37,23 @@ const SHOP_TABLES = 'shop_sales, shop_sale_items, shop_products, shop_customers,
 const COURSES = {
   sql: {
     module: 'sql', title: 'SQL Academy', tint: 'rgba(34,211,238,0.15)', icon: <Database size={16} />,
-    subtitle: 'From SELECT to window functions — real execution on real data', myDatabases: true, skillMap: false, color: null,
+    subtitle: 'From SELECT to window functions — real execution on real data', myDatabases: true, skillMap: false, placement: false, color: null,
   },
   dataeng: {
     module: 'dataeng', title: 'Data Engineering Academy', tint: 'rgba(251,113,133,0.15)', icon: <Workflow size={16} />,
-    subtitle: 'Pipelines, data quality and AI-ready data — for the people who run the platform', myDatabases: false, skillMap: false, color: 'var(--de-color)',
+    subtitle: 'Pipelines, data quality and AI-ready data — for the people who run the platform', myDatabases: false, skillMap: false, placement: false, color: 'var(--de-color)',
+  },
+  foundations: {
+    module: 'foundations', title: 'Start Here', tint: 'rgba(163,230,53,0.15)', icon: <Compass size={16} />,
+    subtitle: 'From zero: how a business makes money, explained from first principles, with real numbers', myDatabases: false, skillMap: false, placement: true, color: 'var(--fd-color)',
+  },
+  founder: {
+    module: 'founder', title: 'Founder Track', tint: 'rgba(251,146,60,0.15)', icon: <Rocket size={16} />,
+    subtitle: 'Find a real problem, test an offer, run the numbers and start, with real figures and real-world tasks', myDatabases: false, skillMap: false, placement: false, color: 'var(--fo-color)',
   },
   bizsolver: {
     module: 'bizsolver', title: 'Business Problem Solver', tint: 'rgba(20,184,166,0.15)', icon: <Target size={16} />,
-    subtitle: 'Find the money, explain the problem, recommend and measure — on a real trading business', myDatabases: false, skillMap: true, color: 'var(--bp-color)',
+    subtitle: 'Find the money, explain the problem, recommend and measure — on a real trading business', myDatabases: false, skillMap: true, placement: false, color: 'var(--bp-color)',
   },
 } as const
 
@@ -106,6 +117,11 @@ export default function SqlAcademy({ course = 'sql' }: { course?: keyof typeof C
           <TabBtn active={view === 'lessons'} onClick={() => setView('lessons')}>
             <BookOpen size={13} /> Lessons
           </TabBtn>
+          {cfg.placement && (
+            <TabBtn active={view === 'placement'} onClick={() => setView('placement')}>
+              <Compass size={13} /> Check what I know
+            </TabBtn>
+          )}
           {cfg.skillMap && (
             <TabBtn active={view === 'skills'} onClick={() => setView('skills')}>
               <Target size={13} /> Skill map
@@ -125,7 +141,8 @@ export default function SqlAcademy({ course = 'sql' }: { course?: keyof typeof C
       {/* Content */}
       <div style={{ flex: 1, overflow: 'hidden' }}>
         {view === 'lessons' && (
-          <LessonList lessons={lessons} loading={loading} onOpen={openLesson} />
+          <LessonList lessons={lessons} loading={loading} onOpen={openLesson}
+            top={cfg.placement ? <PlacementBanner onStart={() => setView('placement')} /> : undefined} />
         )}
         {view === 'lesson' && activeLessonId && (
           <LessonView
@@ -137,6 +154,12 @@ export default function SqlAcademy({ course = 'sql' }: { course?: keyof typeof C
               if (user) window.api.lessons.list(user.id, cfg.module).then(setLessons).catch((err: any) => reportApiError('refresh your lessons', err))
             }}
           />
+        )}
+        {view === 'placement' && cfg.placement && (
+          <PlacementCheck onDone={() => {
+            setView('lessons')
+            if (user) window.api.lessons.list(user.id, cfg.module).then(setLessons).catch((err: any) => reportApiError('refresh your lessons', err))
+          }} />
         )}
         {view === 'skills' && cfg.skillMap && (
           <SkillMap onOpen={(module, lessonId) => {
@@ -155,8 +178,8 @@ export default function SqlAcademy({ course = 'sql' }: { course?: keyof typeof C
 // LESSON LIST
 // ─────────────────────────────────────────────
 
-function LessonList({ lessons, loading, onOpen }: {
-  lessons: Lesson[]; loading: boolean; onOpen: (id: string) => void
+function LessonList({ lessons, loading, onOpen, top }: {
+  lessons: Lesson[]; loading: boolean; onOpen: (id: string) => void; top?: React.ReactNode
 }) {
   if (loading) return <CenteredSpinner />
 
@@ -164,6 +187,7 @@ function LessonList({ lessons, loading, onOpen }: {
 
   return (
     <div style={{ height: '100%', overflow: 'auto', padding: 24 }}>
+      {top}
       {lessons.length === 0 && (
         <EmptyState
           icon={<Database size={32} />}
@@ -283,6 +307,10 @@ function LessonView({ lessonId, onBack, onComplete }: {
     const elapsed = Math.floor((Date.now() - startTime.current) / 1000)
     try {
       const result = await window.api.lessons.complete(user.id, lessonId, elapsed)
+      if (result.success === false) {
+        notify.warning('Not complete yet', (result.mastery_gaps ?? []).join('. '))
+        return
+      }
       if (result.new_achievements?.length > 0) {
         notify.success('Achievement Unlocked!', `You earned ${result.new_achievements.length} new achievement(s)`)
       }
@@ -323,7 +351,9 @@ function LessonView({ lessonId, onBack, onComplete }: {
               Lesson content will appear here once seeded.
             </p>
           )}
-          <LessonQuiz quizJson={lesson.quiz} accentColor="var(--sql-color)" />
+          <LessonQuiz quizJson={lesson.quiz} lessonId={lesson.id} accentColor="var(--sql-color)" />
+          <ExplainBack lessonId={lesson.id} />
+          <RealWorldTask lessonId={lesson.id} />
         </div>
         <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)' }}>
           <button className="btn btn-primary" onClick={handleComplete} style={{ width: '100%', justifyContent: 'center' }}>
@@ -528,10 +558,10 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
             <div style={{
               marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 5,
               fontSize: 11, color: 'var(--sql-color)', fontWeight: 500,
-              padding: '3px 9px', borderRadius: String(exercise.id).startsWith('bp-') && !isPython ? 'var(--radius)' : 'var(--radius-full)', // thirteen table names wrap onto several lines
+              padding: '3px 9px', borderRadius: /^(bp|fd|fo)-/.test(String(exercise.id)) && !isPython ? 'var(--radius)' : 'var(--radius-full)', // thirteen table names wrap onto several lines
               background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.3)',
             }}>
-              <Database size={11} /> {isPython ? 'Python practical: Run tests your code with hidden checks' : <>Tables ready: {String(exercise.id).startsWith('de-') ? DATAENG_TABLES : String(exercise.id).startsWith('bp-') ? SHOP_TABLES : 'patients, billing'}</>}
+              <Database size={11} /> {isPython ? 'Python practical: Run tests your code with hidden checks' : <>Tables ready: {String(exercise.id).startsWith('de-') ? DATAENG_TABLES : /^(bp|fd|fo)-/.test(String(exercise.id)) ? SHOP_TABLES : 'patients, billing'}</>}
             </div>
           )}
           {hint && (

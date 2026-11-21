@@ -10,6 +10,7 @@ export const MAX_BACKUP_BYTES = 25 * 1024 * 1024
 const TABLES = [
   'lesson_progress', 'exercise_attempts', 'skill_ratings', 'learning_memory', 'user_achievements', 'analyst_ranks',
   'projects', 'portfolio_items', 'simulation_sessions', 'sql_query_history', 'python_code_history',
+  'quiz_results', 'placement_results', 'review_items', 'explain_results', 'field_tasks',
 ] as const
 
 const RANK = (col: string) => `CASE ${col} WHEN 'complete' THEN 3 WHEN 'in_progress' THEN 2 WHEN 'available' THEN 1 ELSE 0 END`

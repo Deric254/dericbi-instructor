@@ -270,7 +270,7 @@ function OnboardingFlow({ data, onBack }: { data: any; onBack: () => void }) {
   }
 
   const steps = [
-    { title: 'Your experience level', subtitle: 'We personalise your learning path based on where you are now' },
+    { title: 'Your experience level', subtitle: 'Your tutor adapts to where you are now; the Start Here check can skip what you already know' },
     { title: 'Your learning goals', subtitle: 'Select all that apply' },
     { title: 'Account security', subtitle: 'Set a security question so you can reset your password if needed' },
   ]

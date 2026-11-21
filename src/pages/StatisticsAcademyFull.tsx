@@ -167,7 +167,7 @@ function StatLessonView({ lesson, exercises, onBack }: { lesson: any; exercises:
         first={
         <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: 16 }}>
           <LessonTheory markdown={lesson.theory_md} />
-          <LessonQuiz quizJson={lesson.quiz} accentColor="var(--stats-color)" />
+          <LessonQuiz quizJson={lesson.quiz} lessonId={lesson.id} accentColor="var(--stats-color)" />
         </div>
         }
         second={

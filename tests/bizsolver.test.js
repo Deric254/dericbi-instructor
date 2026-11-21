@@ -250,7 +250,7 @@ test('the academy is wired into every place a course lives, and the Skill map ta
   assert.equal((page.match(/skillMap: true/g) || []).length, 1, 'only the Business Problem Solver has the Skill map')
   assert.match(page, /view === 'skills' && cfg\.skillMap/)
   assert.match(src('electron/services/sql.service.ts'), /startsWith\('ex_bp-'\)/)
-  assert.match(src('electron/services/progress.service.ts'), /'dataeng', 'bizsolver', 'simulation'/)
+  assert.match(src('electron/services/progress.service.ts'), /'dataeng', 'bizsolver', 'foundations', 'founder', 'simulation'/)
 })
 
 test('Business Problem Solver achievements are earned by real work: distinct exercises, Python practicals, and the capstone', async () => {

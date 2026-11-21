@@ -1,0 +1,916 @@
+{
+  "module": "foundations",
+  "version": "1.0",
+  "lessons": [
+    {
+      "id": "fd-value",
+      "title": "What Value Is, and Why Anyone Pays",
+      "description": "The idea every business starts from: someone pays because what you give them is worth more to them than the money.",
+      "level": "beginner",
+      "prerequisites": [],
+      "estimated_min": 25,
+      "sort_order": 1,
+      "theory_md": "## Why this matters\nEvery business that has ever lasted rests on one fact: **someone gave money because they got something worth more to them than that money.** If you understand that, you can judge any business idea, including your own.\n\n## The first principle\nValue is not what something cost you. Value is what it is worth **to the person buying it, right now**.\n\n- A bottle of water costs a shop about KES 15. To a runner who is thirsty on a hot afternoon it is worth KES 50. The shop did not create the water. It created *water, cold, here, now*.\n- Because the buyer gets more than they give, they are happy to pay. Because the seller receives more than the goods cost, the seller is happy to sell. **Both sides gain, or the sale does not happen.**\n\nSo a business does three things: find a person with a need, give them something that meets it, and keep the difference between what they pay and what it cost you.\n\n## A worked example\nMama Wanjiru makes mandazi and sells 40 of them in a day at KES 10 each.\n\n- She receives 40 x 10 = **KES 400**.\n- The flour, oil and charcoal for those 40 mandazi cost her **KES 260**.\n- What is left is **KES 140**. That gain is her pay for the work and the risk.\n\nWrite it as a line: `gain = what the customer pays - what it cost you`.\n\n## Try it\nThe practice here is a calculator. In SQL you can write `SELECT 150 - 120 AS gain` and the answer comes back as a column called `gain`. `AS` just names the result. Use `*` to multiply and `-` to subtract.\n\n## What you can and cannot claim\nA gain on one sale is not yet a business. It does not include rent, your time, or the days nobody buys. You will add those in the next lessons.\n\n## Say it in your own words\nWhy would a person pay KES 50 for something that cost the seller KES 15? Say it in two sentences without using the word \"profit\".\n\n## Do this in real life\nPick one thing you bought this week. Write what you paid, and what it was worth to you at that moment. Then write who made money from that sale and how much.",
+      "quiz": [
+        {
+          "question": "Where does the value of a product come from?",
+          "options": [
+            "What it cost the seller to make",
+            "What it is worth to the buyer who needs it",
+            "The price printed on it",
+            "How long the seller worked"
+          ],
+          "correct_index": 1,
+          "explanation": "Value is judged by the buyer. Cost only tells you what the seller spent."
+        },
+        {
+          "question": "Why does a sale happen?",
+          "options": [
+            "The seller wants it",
+            "The buyer gets something worth more to them than the money, and the seller receives more than it cost",
+            "The price is low",
+            "The seller is polite"
+          ],
+          "correct_index": 1,
+          "explanation": "Both sides gain, or neither agrees."
+        },
+        {
+          "question": "A trader buys goods for KES 800 and sells them for KES 1,000. What is the gain on that sale?",
+          "options": [
+            "KES 200",
+            "KES 800",
+            "KES 1,000",
+            "KES 1,800"
+          ],
+          "correct_index": 0,
+          "explanation": "1,000 - 800 = 200."
+        },
+        {
+          "question": "Cold water is worth more to a thirsty runner than the same water at a warm tap. Why?",
+          "options": [
+            "The water is different",
+            "It is water, in the right place, at the right time",
+            "Runners are richer",
+            "Cold water is rare"
+          ],
+          "correct_index": 1,
+          "explanation": "Value depends on the need of the person at that moment."
+        },
+        {
+          "question": "Does a gain on one sale mean the business is making money?",
+          "options": [
+            "Yes, always",
+            "Not yet: rent, wages and slow days still have to be paid",
+            "Only for food",
+            "Only for big sales"
+          ],
+          "correct_index": 1,
+          "explanation": "One sale ignores the other costs of running the business."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fd-1-e1",
+          "title": "The Gain on One Sale",
+          "prompt": "Mama Wanjiru buys a bag of flour for 120 and sells it for 150. Return one row with one column called gain.",
+          "hint_1": "Subtract the cost from the price and name the result with AS gain.",
+          "hint_2": "SELECT 150 - 120 AS gain",
+          "hint_3": "SELECT 150 - 120 AS gain",
+          "solution": "SELECT 150 - 120 AS gain",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-1-e2",
+          "title": "A Day's Takings",
+          "prompt": "She sells 40 mandazi at 10 each. Return one row with one column called revenue (what she receives).",
+          "hint_1": "Revenue is quantity times price. In SQL multiplication is *.",
+          "hint_2": "SELECT 40 * 10 AS revenue",
+          "hint_3": "SELECT 40 * 10 AS revenue",
+          "solution": "SELECT 40 * 10 AS revenue",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-1-e3",
+          "title": "Was It Worth It?",
+          "prompt": "Making those 40 mandazi cost 260. Return one row with three columns: revenue, cost and gain.",
+          "hint_1": "revenue is 40 * 10, cost is 260, and gain is revenue minus cost. Separate columns with commas.",
+          "hint_2": "SELECT 40 * 10 AS revenue, 260 AS cost, ...",
+          "hint_3": "SELECT 40 * 10 AS revenue, 260 AS cost, 40 * 10 - 260 AS gain",
+          "solution": "SELECT 40 * 10 AS revenue, 260 AS cost, 40 * 10 - 260 AS gain",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fd-tables",
+      "title": "Reading a Table: Rows, Columns and Questions",
+      "description": "Business facts live in tables. Learn to read one, and to ask it a question, using a real trading business.",
+      "level": "beginner",
+      "prerequisites": [
+        "fd-value"
+      ],
+      "estimated_min": 30,
+      "sort_order": 2,
+      "theory_md": "## Why this matters\nAlmost every business keeps its facts in tables: a notebook of sales, a list of customers, a spreadsheet of stock. If you can read a table and ask it a clear question, you can find out what is really happening instead of guessing.\n\n## The first principle\nA table is a list of **things**, with the same facts written down about each one.\n\n- Each **row** is one thing: one product, one sale, one customer.\n- Each **column** is one fact about every thing: the name, the price, the town.\n- A good question to a table names **which rows** (the ones I care about) and **which facts** (the columns I need).\n\nFrom now on you practise on **Mwangi Trading Co.**, a trading shop in the Rift Valley. It has tables such as `shop_products` (what it sells, with `unit_cost` and `unit_price`) and `shop_customers` (who buys, with `town` and `segment`).\n\n## A worked example\nTo count how many products the shop sells: `SELECT COUNT(*) AS products FROM shop_products`. Read it aloud: *select the count of rows, call it products, from the products table.*\n\nTo see the three most expensive products:\n\n`SELECT name, unit_price FROM shop_products ORDER BY unit_price DESC LIMIT 3`\n\n- `SELECT` names the columns you want.\n- `FROM` names the table.\n- `ORDER BY ... DESC` puts the biggest first.\n- `LIMIT 3` keeps the first three rows.\n\nTo keep only some rows, add `WHERE`: `... WHERE town = 'Eldoret'`. Words in quotes are text.\n\n## Try it\nCount rows, list a few columns in order, and filter by one fact.\n\n## What you can and cannot claim\nA count tells you how many rows exist, not whether the data is right. If a customer was typed twice, the count is too high. You will check for that later.\n\n## Say it in your own words\nWhat is the difference between a row and a column? Use the shop's customers as your example.\n\n## Do this in real life\nTake any list you keep (contacts, expenses, stock). Write down what one row is and what each column is. If you cannot say what one row is, the list is not ready to answer questions.",
+      "quiz": [
+        {
+          "question": "In a table of customers, what is one row?",
+          "options": [
+            "One fact about every customer",
+            "One customer",
+            "The table's name",
+            "A total"
+          ],
+          "correct_index": 1,
+          "explanation": "A row is one thing; a column is one fact about every thing."
+        },
+        {
+          "question": "What does a column hold?",
+          "options": [
+            "One thing",
+            "One fact about every thing in the table",
+            "A question",
+            "The answer"
+          ],
+          "correct_index": 1,
+          "explanation": "For example the town of every customer."
+        },
+        {
+          "question": "Which keeps only the first 5 rows?",
+          "options": [
+            "ORDER BY 5",
+            "LIMIT 5",
+            "WHERE 5",
+            "COUNT 5"
+          ],
+          "correct_index": 1,
+          "explanation": "LIMIT sets how many rows come back."
+        },
+        {
+          "question": "What does WHERE do?",
+          "options": [
+            "Names the table",
+            "Keeps only the rows that meet a condition",
+            "Sorts the rows",
+            "Adds the rows up"
+          ],
+          "correct_index": 1,
+          "explanation": "WHERE filters rows, for example town = 'Eldoret'."
+        },
+        {
+          "question": "A count says 150 customers. What can you safely say?",
+          "options": [
+            "There are exactly 150 different people",
+            "There are 150 rows; I still need to check for repeats",
+            "Sales are good",
+            "All data is correct"
+          ],
+          "correct_index": 1,
+          "explanation": "Counts rows. Duplicates and gaps must be checked separately."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fd-2-e1",
+          "title": "How Many Products?",
+          "prompt": "How many products does the shop sell? Return one row with one column called products.",
+          "hint_1": "Use COUNT(*) on the products table.",
+          "hint_2": "SELECT COUNT(*) AS products FROM shop_products",
+          "hint_3": "SELECT COUNT(*) AS products FROM shop_products",
+          "solution": "SELECT COUNT(*) AS products FROM shop_products",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-2-e2",
+          "title": "The Dearest Products",
+          "prompt": "List the name and unit_price of the 3 most expensive products, most expensive first.",
+          "hint_1": "ORDER BY unit_price DESC, then LIMIT 3.",
+          "hint_2": "SELECT name, unit_price FROM shop_products ORDER BY ... DESC LIMIT 3",
+          "hint_3": "SELECT name, unit_price FROM shop_products ORDER BY unit_price DESC LIMIT 3",
+          "solution": "SELECT name, unit_price FROM shop_products ORDER BY unit_price DESC LIMIT 3",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-2-e3",
+          "title": "Customers in Eldoret",
+          "prompt": "How many customers live in Eldoret? Return one row with one column called customers.",
+          "hint_1": "COUNT(*) with a WHERE on town. Text goes in single quotes.",
+          "hint_2": "SELECT COUNT(*) AS customers FROM shop_customers WHERE town = ...",
+          "hint_3": "SELECT COUNT(*) AS customers FROM shop_customers WHERE town = 'Eldoret'",
+          "solution": "SELECT COUNT(*) AS customers FROM shop_customers WHERE town = 'Eldoret'",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fd-profit",
+      "title": "How a Business Makes Money: Revenue, Cost and Profit",
+      "description": "Revenue, cost, profit and break-even, first on one small stall and then on the real numbers of a trading shop.",
+      "level": "beginner",
+      "prerequisites": [
+        "fd-tables"
+      ],
+      "estimated_min": 35,
+      "sort_order": 3,
+      "theory_md": "## Why this matters\nPlenty of busy shops lose money. Busy is not the same as profitable. Three words separate the two.\n\n## The first principle\n- **Revenue** is the money customers pay you for what you sold.\n- **Cost of goods** is what the things you sold cost you to buy or make.\n- **Gross profit** is revenue minus cost of goods.\n- **Expenses** are the costs of running the business whether or not you sell much: rent, salaries, electricity.\n- **Profit** is what is left after expenses: `profit = gross profit - expenses`.\n\nSome costs move with sales (flour for each mandazi: **variable**). Some do not (shop rent: **fixed**). Break-even is the number of units at which the gain on each unit has paid for all the fixed costs:\n\n`break-even units = fixed costs / (price - variable cost per unit)`\n\n## A worked example\nA stall sells 300 units a month at 50 each. Each unit costs 30 to make. Rent and other fixed costs are 4,000.\n\n- Revenue = 300 x 50 = 15,000. Variable costs = 300 x 30 = 9,000.\n- Fixed costs = 4,000. Profit = 15,000 - 9,000 - 4,000 = **2,000**.\n- Each unit gains 50 - 30 = 20, so break-even is 4,000 / 20 = **200 units**. Below 200 units a month the stall loses money.\n\n## Try it\nWork the stall by hand in SQL, then use the real shop: revenue and cost come from `shop_sale_items` (`qty`, `unit_price`, `unit_cost`) and expenses from `shop_expenses` (`amount`).\n\n## What you can and cannot claim\nThese totals cover the whole year at the shop. They say whether the year made money, not which product or month did. And profit on paper is not cash in the bank; that is the next lesson.\n\n## Say it in your own words\nExplain the difference between a fixed and a variable cost, using a business you know.\n\n## Do this in real life\nFor one small business you know, write its monthly revenue, its variable costs and its fixed costs. Work out its break-even point. Is it above or below what it sells now?",
+      "quiz": [
+        {
+          "question": "Revenue is:",
+          "options": [
+            "What you keep after all costs",
+            "Money customers pay for what you sold",
+            "What you owe suppliers",
+            "Cash in the bank"
+          ],
+          "correct_index": 1,
+          "explanation": "Revenue is the money coming in from sales, before any cost."
+        },
+        {
+          "question": "Which is a fixed cost for a shop?",
+          "options": [
+            "Stock bought for each sale",
+            "Monthly rent",
+            "Packaging per order",
+            "Sales commission"
+          ],
+          "correct_index": 1,
+          "explanation": "Rent does not change with sales."
+        },
+        {
+          "question": "Revenue 15,000, variable costs 9,000, fixed costs 4,000. What is profit?",
+          "options": [
+            "2,000",
+            "6,000",
+            "11,000",
+            "15,000"
+          ],
+          "correct_index": 0,
+          "explanation": "15,000 - 9,000 - 4,000 = 2,000."
+        },
+        {
+          "question": "A stall gains 20 on each unit and has fixed costs of 4,000. Break-even units?",
+          "options": [
+            "20",
+            "80",
+            "200",
+            "4,000"
+          ],
+          "correct_index": 2,
+          "explanation": "4,000 / 20 = 200."
+        },
+        {
+          "question": "Why is a busy shop not always a profitable one?",
+          "options": [
+            "Busy shops pay more tax",
+            "Costs and expenses can be as large as the revenue",
+            "Customers pay less",
+            "Profit is only for factories"
+          ],
+          "correct_index": 1,
+          "explanation": "Profit is what remains after cost of goods and expenses."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fd-3-e1",
+          "title": "The Stall's Month",
+          "prompt": "The stall sells 300 units at 50. Each unit costs 30 and fixed costs are 4000. Return one row with four columns: revenue, variable_costs, fixed_costs and profit.",
+          "hint_1": "revenue = 300 * 50; variable_costs = 300 * 30; fixed_costs = 4000; profit = revenue - variable_costs - fixed_costs (write the sums out).",
+          "hint_2": "SELECT 300 * 50 AS revenue, 300 * 30 AS variable_costs, 4000 AS fixed_costs, ...",
+          "hint_3": "SELECT 300 * 50 AS revenue, 300 * 30 AS variable_costs, 4000 AS fixed_costs, 300 * 50 - 300 * 30 - 4000 AS profit",
+          "solution": "SELECT 300 * 50 AS revenue, 300 * 30 AS variable_costs, 4000 AS fixed_costs, 300 * 50 - 300 * 30 - 4000 AS profit",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-3-e2",
+          "title": "Break-Even",
+          "prompt": "How many units must the stall sell to break even? Price 50, variable cost 30, fixed costs 4000. Return one column called breakeven_units.",
+          "hint_1": "fixed costs divided by (price minus variable cost).",
+          "hint_2": "SELECT 4000 / (50 - 30) AS breakeven_units",
+          "hint_3": "SELECT 4000 / (50 - 30) AS breakeven_units",
+          "solution": "SELECT 4000 / (50 - 30) AS breakeven_units",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-3-e3",
+          "title": "The Shop's Gross Profit",
+          "prompt": "From shop_sale_items, return one row with revenue (qty times unit_price, added up), cost (qty times unit_cost, added up) and gross_profit (revenue minus cost).",
+          "hint_1": "SUM(qty * unit_price) adds up the revenue of every line. Subtract the cost sum for gross profit.",
+          "hint_2": "SELECT SUM(qty * unit_price) AS revenue, SUM(qty * unit_cost) AS cost, ... FROM shop_sale_items",
+          "hint_3": "SELECT SUM(qty * unit_price) AS revenue, SUM(qty * unit_cost) AS cost, SUM(qty * unit_price) - SUM(qty * unit_cost) AS gross_profit FROM shop_sale_items",
+          "solution": "SELECT SUM(qty * unit_price) AS revenue, SUM(qty * unit_cost) AS cost, SUM(qty * unit_price) - SUM(qty * unit_cost) AS gross_profit FROM shop_sale_items",
+          "evaluation_mode": "exact",
+          "points": 20,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-3-e4",
+          "title": "What Is Left?",
+          "prompt": "Return one row with gross_profit, expenses (the total of shop_expenses amount) and profit (gross_profit minus expenses). Gross profit is the sale items revenue minus cost, as before.",
+          "hint_1": "Use scalar subqueries side by side: SELECT (SELECT ...) AS gross_profit, (SELECT SUM(amount) FROM shop_expenses) AS expenses, ...",
+          "hint_2": "SELECT (SELECT SUM(qty*(unit_price-unit_cost)) FROM shop_sale_items) AS gross_profit, (SELECT SUM(amount) FROM shop_expenses) AS expenses, ... ",
+          "hint_3": "SELECT (SELECT SUM(qty * (unit_price - unit_cost)) FROM shop_sale_items) AS gross_profit, (SELECT SUM(amount) FROM shop_expenses) AS expenses, (SELECT SUM(qty * (unit_price - unit_cost)) FROM shop_sale_items) - (SELECT SUM(amount) FROM shop_expenses) AS profit",
+          "solution": "SELECT (SELECT SUM(qty * (unit_price - unit_cost)) FROM shop_sale_items) AS gross_profit, (SELECT SUM(amount) FROM shop_expenses) AS expenses, (SELECT SUM(qty * (unit_price - unit_cost)) FROM shop_sale_items) - (SELECT SUM(amount) FROM shop_expenses) AS profit",
+          "evaluation_mode": "exact",
+          "points": 25,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fd-cash",
+      "title": "Cash Is Not Profit",
+      "description": "Why a business can show a profit and still run out of money, and how to see how much is still owed to it.",
+      "level": "beginner",
+      "prerequisites": [
+        "fd-profit"
+      ],
+      "estimated_min": 30,
+      "sort_order": 4,
+      "theory_md": "## Why this matters\nMany businesses that fail were making a profit on paper. They failed because the money was not in the bank when the bills came due.\n\n## The first principle\n**Profit is what you earned. Cash is what you actually hold.** They differ whenever you are paid later than you sell, or pay later than you buy.\n\n- A sale on credit counts as revenue the day you deliver, but the cash arrives only when the customer pays.\n- Stock you buy is cash out the day you pay, but it only becomes profit when you sell it.\n\nThe rule of survival: **you can lose cash while showing a profit, but you cannot pay a supplier with profit.** Only cash pays bills.\n\n## A worked example\nA trader sells goods worth 10,000 this month. Customers pay 6,000 now and the other 4,000 next month.\n\n- Revenue this month: 10,000. Cash received this month: 6,000. **Still owed to the trader: 4,000.**\n- If the trader also has to pay suppliers 7,500 this month and began with 5,000 in cash, the closing cash is 5,000 + 6,000 - 7,500 = **3,500**, even though the month showed a profit.\n\nAt Mwangi Trading Co. some sales are marked `credit`. The column `payment_status` shows how it was sold, and `shop_payments` records money actually received. Careful: a sale marked credit may have been paid since, so compare totals, do not trust the label alone.\n\n## Try it\nCompare what was sold with what has been received, first with small numbers, then on the real tables.\n\n## What you can and cannot claim\nThe gap between total sales and total payments shows money **not yet received**. It does not tell you who owes it, or whether they will pay. That needs the sale-by-sale view in a later lesson.\n\n## Say it in your own words\nA friend says \"I made a profit, so why is my account empty?\" Give two reasons in plain language.\n\n## Do this in real life\nFor one month of a business you know, write total sales, money actually received, and money paid out. Is the cash left higher or lower than the profit?",
+      "quiz": [
+        {
+          "question": "Profit and cash differ mainly because:",
+          "options": [
+            "Banks take fees",
+            "Customers can pay later and suppliers are paid at other times",
+            "Cash is smaller by law",
+            "Profit is estimated"
+          ],
+          "correct_index": 1,
+          "explanation": "Timing: credit sales and stock purchases move cash and profit on different days."
+        },
+        {
+          "question": "A sale on credit counts as revenue when:",
+          "options": [
+            "The customer pays",
+            "The goods are delivered",
+            "The invoice is printed",
+            "The month ends"
+          ],
+          "correct_index": 1,
+          "explanation": "Revenue is earned at delivery; cash comes later."
+        },
+        {
+          "question": "Sales 10,000, received 6,000. How much is still owed?",
+          "options": [
+            "4,000",
+            "6,000",
+            "10,000",
+            "16,000"
+          ],
+          "correct_index": 0,
+          "explanation": "10,000 - 6,000 = 4,000."
+        },
+        {
+          "question": "Opening cash 5,000, received 6,000, paid out 7,500. Closing cash?",
+          "options": [
+            "3,500",
+            "4,500",
+            "9,500",
+            "11,000"
+          ],
+          "correct_index": 0,
+          "explanation": "5,000 + 6,000 - 7,500 = 3,500."
+        },
+        {
+          "question": "A sale is labelled 'credit'. What can you conclude?",
+          "options": [
+            "It has not been paid",
+            "It was sold on credit; check the payments to see if it has been paid",
+            "The customer is bad",
+            "It is not revenue"
+          ],
+          "correct_index": 1,
+          "explanation": "The label says how it was sold, not whether it has since been paid."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fd-4-e1",
+          "title": "Sold Versus Received",
+          "prompt": "A trader sold 10000 this month and received 6000. Return one row with sold, received and still_owed.",
+          "hint_1": "still_owed is sold minus received.",
+          "hint_2": "SELECT 10000 AS sold, 6000 AS received, ... AS still_owed",
+          "hint_3": "SELECT 10000 AS sold, 6000 AS received, 10000 - 6000 AS still_owed",
+          "solution": "SELECT 10000 AS sold, 6000 AS received, 10000 - 6000 AS still_owed",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-4-e2",
+          "title": "Cash at Month End",
+          "prompt": "Opening cash 5000, received 6000, paid out 7500. Return one column called closing_cash.",
+          "hint_1": "Add what came in, subtract what went out.",
+          "hint_2": "SELECT 5000 + 6000 - 7500 AS closing_cash",
+          "hint_3": "SELECT 5000 + 6000 - 7500 AS closing_cash",
+          "solution": "SELECT 5000 + 6000 - 7500 AS closing_cash",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-4-e3",
+          "title": "The Shop's Year: Sold, Received, Owed",
+          "prompt": "Return one row with sold (the total of shop_sales total), received (the total of shop_payments amount) and still_owed (sold minus received).",
+          "hint_1": "Two scalar subqueries side by side: one SUM on shop_sales, one SUM on shop_payments.",
+          "hint_2": "SELECT (SELECT SUM(total) FROM shop_sales) AS sold, (SELECT SUM(amount) FROM shop_payments) AS received, ...",
+          "hint_3": "SELECT (SELECT SUM(total) FROM shop_sales) AS sold, (SELECT SUM(amount) FROM shop_payments) AS received, (SELECT SUM(total) FROM shop_sales) - (SELECT SUM(amount) FROM shop_payments) AS still_owed",
+          "solution": "SELECT (SELECT SUM(total) FROM shop_sales) AS sold, (SELECT SUM(amount) FROM shop_payments) AS received, (SELECT SUM(total) FROM shop_sales) - (SELECT SUM(amount) FROM shop_payments) AS still_owed",
+          "evaluation_mode": "exact",
+          "points": 20,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-4-e4",
+          "title": "Sold on Credit",
+          "prompt": "How many sales were made on credit and what were they worth in total? Return credit_sales (the count) and credit_value (the total of total) for sales whose payment_status is 'credit'.",
+          "hint_1": "COUNT(*) and SUM(total) with WHERE payment_status = 'credit'.",
+          "hint_2": "SELECT COUNT(*) AS credit_sales, SUM(total) AS credit_value FROM shop_sales WHERE ...",
+          "hint_3": "SELECT COUNT(*) AS credit_sales, SUM(total) AS credit_value FROM shop_sales WHERE payment_status = 'credit'",
+          "solution": "SELECT COUNT(*) AS credit_sales, SUM(total) AS credit_value FROM shop_sales WHERE payment_status = 'credit'",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fd-numbers",
+      "title": "Numbers You Must Read: Percent, Average and Spread",
+      "description": "The three tools for making sense of any number: what share, what is typical, and how far from typical.",
+      "level": "beginner",
+      "prerequisites": [
+        "fd-cash"
+      ],
+      "estimated_min": 30,
+      "sort_order": 5,
+      "theory_md": "## Why this matters\nA raw number means little. \"We sold 2,046 times\" does not say if that is good. You need to compare it to something: a share of the whole, a typical value, or a range.\n\n## The first principle\n- **Percent** answers *what share?* `percent = 100 x part / whole`. 20 out of 80 is 25 percent.\n- **Average** answers *what is typical?* `average = total / how many`. It is the value every item would have if they were all equal.\n- **Spread** (smallest and largest) answers *how far apart are they?* An average hides this. Two shops can both average KES 15,000 a sale, but one sells only between 14,000 and 16,000 and the other between 500 and 90,000.\n\nAlways ask: **percent of what?** \"27 percent of sales\" is only meaningful when you know it is of all sales, not just this month.\n\n## A worked example\n- 566 of 2,046 sales were on credit: 100 x 566 / 2046 = **27.7 percent**.\n- The average sale is the total of all sales divided by 2,046.\n- `MIN(total)` and `MAX(total)` give the smallest and largest sale. If the largest is far above the average, a few big sales are pulling the average up.\n\nIn SQL, `100.0 * part / whole` keeps decimals (the `.0` matters), and `ROUND(x, 1)` rounds to one decimal place.\n\n## Try it\nWork out a percent by hand, then an average, a share and a spread on the real shop's sales.\n\n## What you can and cannot claim\nAn average is not a promise about the next sale. And a percent without its \"of what\" is a number without a meaning.\n\n## Say it in your own words\nWhy can two shops with the same average sale be very different businesses?\n\n## Do this in real life\nTake one business number you hear often (\"we grew 20 percent\"). Write down: 20 percent of what, compared to when?",
+      "quiz": [
+        {
+          "question": "What is 20 out of 80 as a percent?",
+          "options": [
+            "20",
+            "25",
+            "40",
+            "4"
+          ],
+          "correct_index": 1,
+          "explanation": "100 x 20 / 80 = 25."
+        },
+        {
+          "question": "What does an average tell you?",
+          "options": [
+            "The biggest value",
+            "A typical value: the total shared equally",
+            "How many there are",
+            "The most common value"
+          ],
+          "correct_index": 1,
+          "explanation": "Total divided by how many."
+        },
+        {
+          "question": "Two shops both average KES 15,000 a sale. What can differ?",
+          "options": [
+            "Nothing",
+            "How spread out the sales are",
+            "Their names",
+            "The average"
+          ],
+          "correct_index": 1,
+          "explanation": "The spread: one may be steady, the other swing between tiny and huge sales."
+        },
+        {
+          "question": "'Sales grew 30 percent.' What must you ask?",
+          "options": [
+            "Who said it",
+            "30 percent of what, compared to which period",
+            "Is it a lot",
+            "Is it rounded"
+          ],
+          "correct_index": 1,
+          "explanation": "A percent always needs its whole and its comparison."
+        },
+        {
+          "question": "Why write 100.0 instead of 100 in SQL?",
+          "options": [
+            "It is faster",
+            "It keeps the decimals instead of rounding down to whole numbers",
+            "It is required",
+            "It adds a percent sign"
+          ],
+          "correct_index": 1,
+          "explanation": "Whole-number division drops the decimals."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fd-5-e1",
+          "title": "A Share by Hand",
+          "prompt": "What percent is 20 out of 80? Return one column called pct.",
+          "hint_1": "100.0 * part / whole.",
+          "hint_2": "SELECT 100.0 * 20 / 80 AS pct",
+          "hint_3": "SELECT 100.0 * 20 / 80 AS pct",
+          "solution": "SELECT 100.0 * 20 / 80 AS pct",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-5-e2",
+          "title": "The Average Sale",
+          "prompt": "What is the average sale at the shop? Return one column called average_sale, rounded to 2 decimal places (use shop_sales total).",
+          "hint_1": "AVG(total) inside ROUND(..., 2).",
+          "hint_2": "SELECT ROUND(AVG(total), 2) AS average_sale FROM shop_sales",
+          "hint_3": "SELECT ROUND(AVG(total), 2) AS average_sale FROM shop_sales",
+          "solution": "SELECT ROUND(AVG(total), 2) AS average_sale FROM shop_sales",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-5-e3",
+          "title": "What Share Was on Credit?",
+          "prompt": "What percent of the shop's sales (by number of sales) were on credit? Return one column called credit_pct, rounded to 1 decimal place. Credit means payment_status = 'credit'.",
+          "hint_1": "100.0 times the credit count divided by the count of all sales. Two scalar subqueries inside ROUND(..., 1).",
+          "hint_2": "SELECT ROUND(100.0 * (SELECT COUNT(*) FROM shop_sales WHERE ...) / (SELECT COUNT(*) FROM shop_sales), 1) AS credit_pct",
+          "hint_3": "SELECT ROUND(100.0 * (SELECT COUNT(*) FROM shop_sales WHERE payment_status = 'credit') / (SELECT COUNT(*) FROM shop_sales), 1) AS credit_pct",
+          "solution": "SELECT ROUND(100.0 * (SELECT COUNT(*) FROM shop_sales WHERE payment_status = 'credit') / (SELECT COUNT(*) FROM shop_sales), 1) AS credit_pct",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-5-e4",
+          "title": "How Spread Out?",
+          "prompt": "Return one row with the smallest sale (smallest), the largest sale (largest) and the average sale (average, rounded to 2 decimals), all from shop_sales total.",
+          "hint_1": "MIN(total), MAX(total) and ROUND(AVG(total), 2) in one SELECT.",
+          "hint_2": "SELECT MIN(total) AS smallest, MAX(total) AS largest, ROUND(AVG(total), 2) AS average FROM shop_sales",
+          "hint_3": "SELECT MIN(total) AS smallest, MAX(total) AS largest, ROUND(AVG(total), 2) AS average FROM shop_sales",
+          "solution": "SELECT MIN(total) AS smallest, MAX(total) AS largest, ROUND(AVG(total), 2) AS average FROM shop_sales",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fd-customers",
+      "title": "Customers and Problems",
+      "description": "A business exists to solve a customer's problem. Learn to see who your customers are and who really pays the bills.",
+      "level": "beginner",
+      "prerequisites": [
+        "fd-numbers"
+      ],
+      "estimated_min": 30,
+      "sort_order": 6,
+      "theory_md": "## Why this matters\nNo customers, no business. But \"customers\" is not one thing. Before you build, price or advertise, you need to know **who** has the problem, **how many** of them there are, and **how much each matters to you**.\n\n## The first principle\nA customer is a person (or organisation) with a **problem** they will pay to solve. If you cannot name the problem in the customer's own words, you do not yet have a business, you have a guess.\n\nThen ask three questions of your customers:\n1. **Who are they?** Group them (retail, wholesale, institutions; by town).\n2. **How often do they buy?** Repeat buyers are cheaper than new ones.\n3. **How much of my business is one customer?** If one customer is a large share of your sales, losing them hurts badly.\n\n## A worked example\nAt Mwangi Trading Co. customers fall into segments (`Retail`, `Wholesale`, `Institution`) in `shop_customers`. Counting rows per segment uses `GROUP BY`:\n\n`SELECT segment, COUNT(*) AS customers FROM shop_customers GROUP BY segment`\n\nCounting each customer's sales uses a **join**, which lines up rows from two tables by a shared key (here `customer_id`):\n\n`FROM shop_sales s JOIN shop_customers c ON c.customer_id = s.customer_id`\n\n`s` and `c` are short names for the tables so you can write `c.name`.\n\n## Try it\nCount customers by segment, find the customer who buys most often, and count who was active in December.\n\n## What you can and cannot claim\nBuying often is not the same as being worth the most; a customer can buy often in small amounts. Also, \"active in December\" only says they bought, not that they will again.\n\n## Say it in your own words\nDescribe the customer for a business you might start: who are they, and what problem do they have, in their own words?\n\n## Do this in real life\nSpeak to one person who might buy what you imagine selling. Ask: \"What is the hardest part of this for you today?\" and write down the exact words.",
+      "quiz": [
+        {
+          "question": "What is a customer, at its simplest?",
+          "options": [
+            "Anyone who walks in",
+            "Someone with a problem they will pay to solve",
+            "A name on a list",
+            "A person who likes you"
+          ],
+          "correct_index": 1,
+          "explanation": "No paying problem, no business."
+        },
+        {
+          "question": "Why group customers into segments?",
+          "options": [
+            "To make the list longer",
+            "Different groups have different needs and value",
+            "It is a legal rule",
+            "To sell more of the same"
+          ],
+          "correct_index": 1,
+          "explanation": "Segments show who you serve and how."
+        },
+        {
+          "question": "One customer is 40 percent of your sales. What is the risk?",
+          "options": [
+            "None",
+            "Losing them would hurt the business badly",
+            "They are paying too much",
+            "You are too popular"
+          ],
+          "correct_index": 1,
+          "explanation": "Dependence on one customer is a risk."
+        },
+        {
+          "question": "What does a JOIN do?",
+          "options": [
+            "Deletes rows",
+            "Lines up rows from two tables by a shared key",
+            "Sorts a table",
+            "Adds two numbers"
+          ],
+          "correct_index": 1,
+          "explanation": "For example sales joined to customers by customer_id."
+        },
+        {
+          "question": "A customer bought 200 times in small amounts. Are they your most valuable customer?",
+          "options": [
+            "Yes, always",
+            "Not necessarily: check how much they spend in total",
+            "No, never",
+            "Only if wholesale"
+          ],
+          "correct_index": 1,
+          "explanation": "Frequency and value are different things."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fd-6-e1",
+          "title": "Who Are the Customers?",
+          "prompt": "How many customers are in each segment? Return segment and customers (the count), ordered by segment.",
+          "hint_1": "GROUP BY segment, COUNT(*), then ORDER BY segment.",
+          "hint_2": "SELECT segment, COUNT(*) AS customers FROM shop_customers GROUP BY segment ORDER BY segment",
+          "hint_3": "SELECT segment, COUNT(*) AS customers FROM shop_customers GROUP BY segment ORDER BY segment",
+          "solution": "SELECT segment, COUNT(*) AS customers FROM shop_customers GROUP BY segment ORDER BY segment",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-6-e2",
+          "title": "The Most Frequent Buyer",
+          "prompt": "Which customer made the most sales? Return the customer name (column name) and the number of sales (column sales) for that one customer. Join shop_sales to shop_customers on customer_id.",
+          "hint_1": "JOIN the two tables, GROUP BY the customer name, ORDER BY the count descending, LIMIT 1.",
+          "hint_2": "SELECT c.name, COUNT(*) AS sales FROM shop_sales s JOIN shop_customers c ON c.customer_id = s.customer_id GROUP BY c.name ORDER BY ... LIMIT 1",
+          "hint_3": "SELECT c.name, COUNT(*) AS sales FROM shop_sales s JOIN shop_customers c ON c.customer_id = s.customer_id GROUP BY c.name ORDER BY sales DESC LIMIT 1",
+          "solution": "SELECT c.name, COUNT(*) AS sales FROM shop_sales s JOIN shop_customers c ON c.customer_id = s.customer_id GROUP BY c.name ORDER BY sales DESC LIMIT 1",
+          "evaluation_mode": "exact",
+          "points": 20,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-6-e3",
+          "title": "Active in December",
+          "prompt": "How many different customers bought in December 2025 (sale_date from '2025-12-01')? Return one column called active_customers.",
+          "hint_1": "COUNT(DISTINCT customer_id) with a WHERE on sale_date.",
+          "hint_2": "SELECT COUNT(DISTINCT customer_id) AS active_customers FROM shop_sales WHERE sale_date >= '2025-12-01'",
+          "hint_3": "SELECT COUNT(DISTINCT customer_id) AS active_customers FROM shop_sales WHERE sale_date >= '2025-12-01'",
+          "solution": "SELECT COUNT(DISTINCT customer_id) AS active_customers FROM shop_sales WHERE sale_date >= '2025-12-01'",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fd-price",
+      "title": "Price and Margin",
+      "description": "How to choose a price: the lowest it can safely be, the margin it leaves, and what a small price change does.",
+      "level": "beginner",
+      "prerequisites": [
+        "fd-customers"
+      ],
+      "estimated_min": 30,
+      "sort_order": 7,
+      "theory_md": "## Why this matters\nPrice is the one decision that touches every sale. A price that is too low means the more you sell, the more you lose. A price that is too high means nobody buys.\n\n## The first principle\nPrice sits between two limits:\n- The **floor**: what it costs you. Below that, every sale loses money.\n- The **ceiling**: what it is worth to the customer (lesson 1). Above that, they do not buy.\n\nYour **margin** is how much of the price you keep after the cost of the goods:\n- `profit each = price - cost`\n- `margin percent = 100 x (price - cost) / price`\n\nTo reach a target margin from a known cost: `price = cost / (1 - margin)`. For a 25 percent margin on a cost of 330, price = 330 / 0.75 = 440.\n\n**Margin is not markup.** Markup divides by cost, margin divides by price. A 25 percent margin is a 33 percent markup. Mixing them up is the most common pricing mistake.\n\n## A worked example\nMaize flour 2 kg costs the shop 330 and sells for 432. Profit each is 102. Margin is 100 x 102 / 432 = **23.6 percent**. Cooking oil 1 L costs 350 and sells for 392: profit each is only 42, a margin of **10.7 percent**. A small price rise on a thin-margin product changes profit a lot; the same rise on a fat-margin product changes it little.\n\n## Try it\nWork out a margin by hand, read one product's margin, find the thinnest margins in the shop, and set a price for a target margin.\n\n## What you can and cannot claim\nA thin margin is a warning, not a verdict: a product that sells fast on a thin margin can still earn well. And raising a price does not lift profit if customers leave.\n\n## Say it in your own words\nExplain the difference between margin and markup in your own words, with an example.\n\n## Do this in real life\nTake one product you could sell. Write its cost, the price you think of, the margin that leaves, and the lowest price you would ever accept.",
+      "quiz": [
+        {
+          "question": "What is the 'floor' of a price?",
+          "options": [
+            "What the competitor charges",
+            "What it costs you",
+            "What the customer likes",
+            "The tax"
+          ],
+          "correct_index": 1,
+          "explanation": "Below cost, every sale loses money."
+        },
+        {
+          "question": "Cost 330, price 432. Margin percent (rounded)?",
+          "options": [
+            "23.6",
+            "30.9",
+            "76.4",
+            "102"
+          ],
+          "correct_index": 0,
+          "explanation": "100 x 102 / 432 = 23.6."
+        },
+        {
+          "question": "Cost 330, target margin 25 percent. Price?",
+          "options": [
+            "412.50",
+            "440",
+            "330",
+            "495"
+          ],
+          "correct_index": 1,
+          "explanation": "330 / (1 - 0.25) = 440."
+        },
+        {
+          "question": "Margin and markup differ because:",
+          "options": [
+            "They are the same thing",
+            "Margin divides by price, markup divides by cost",
+            "Markup is always smaller",
+            "Margin is for services"
+          ],
+          "correct_index": 1,
+          "explanation": "They use different denominators."
+        },
+        {
+          "question": "A product has a 10 percent margin and sells fast. Is it automatically bad?",
+          "options": [
+            "Yes",
+            "No: a thin margin on high sales can still earn well; it is a warning to look closer",
+            "Only in food",
+            "Yes, always raise the price"
+          ],
+          "correct_index": 1,
+          "explanation": "Margin is one signal, not the verdict."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fd-7-e1",
+          "title": "A Margin by Hand",
+          "prompt": "Cost 330, price 432. Return profit_each (price minus cost) and margin_pct (100.0 times profit each over price, rounded to 1 decimal).",
+          "hint_1": "profit_each = 432 - 330. margin_pct = ROUND(100.0 * (432 - 330) / 432, 1).",
+          "hint_2": "SELECT 432 - 330 AS profit_each, ROUND(100.0 * (432 - 330) / 432, 1) AS margin_pct",
+          "hint_3": "SELECT 432 - 330 AS profit_each, ROUND(100.0 * (432 - 330) / 432, 1) AS margin_pct",
+          "solution": "SELECT 432 - 330 AS profit_each, ROUND(100.0 * (432 - 330) / 432, 1) AS margin_pct",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-7-e2",
+          "title": "One Product's Margin",
+          "prompt": "For the product named 'Cooking oil 1L' return its name, profit_each (unit_price minus unit_cost) and margin_pct (rounded to 1 decimal) from shop_products.",
+          "hint_1": "WHERE name = 'Cooking oil 1L', and use the two columns unit_price and unit_cost.",
+          "hint_2": "SELECT name, unit_price - unit_cost AS profit_each, ROUND(100.0 * (unit_price - unit_cost) / unit_price, 1) AS margin_pct FROM shop_products WHERE ...",
+          "hint_3": "SELECT name, unit_price - unit_cost AS profit_each, ROUND(100.0 * (unit_price - unit_cost) / unit_price, 1) AS margin_pct FROM shop_products WHERE name = 'Cooking oil 1L'",
+          "solution": "SELECT name, unit_price - unit_cost AS profit_each, ROUND(100.0 * (unit_price - unit_cost) / unit_price, 1) AS margin_pct FROM shop_products WHERE name = 'Cooking oil 1L'",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-7-e3",
+          "title": "The Thinnest Margins",
+          "prompt": "Which 3 products have the lowest margin? Return name and margin_pct (rounded to 1 decimal), lowest first.",
+          "hint_1": "Compute margin_pct as in the last exercise, then ORDER BY margin_pct and LIMIT 3.",
+          "hint_2": "SELECT name, ROUND(100.0 * (unit_price - unit_cost) / unit_price, 1) AS margin_pct FROM shop_products ORDER BY margin_pct LIMIT 3",
+          "hint_3": "SELECT name, ROUND(100.0 * (unit_price - unit_cost) / unit_price, 1) AS margin_pct FROM shop_products ORDER BY margin_pct LIMIT 3",
+          "solution": "SELECT name, ROUND(100.0 * (unit_price - unit_cost) / unit_price, 1) AS margin_pct FROM shop_products ORDER BY margin_pct LIMIT 3",
+          "evaluation_mode": "exact",
+          "points": 20,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-7-e4",
+          "title": "Setting a Price",
+          "prompt": "A product costs 330. What price gives a 25 percent margin? Return one column called price, rounded to 2 decimals.",
+          "hint_1": "price = cost / (1 - margin).",
+          "hint_2": "SELECT ROUND(330 / (1 - 0.25), 2) AS price",
+          "hint_3": "SELECT ROUND(330 / (1 - 0.25), 2) AS price",
+          "solution": "SELECT ROUND(330 / (1 - 0.25), 2) AS price",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fd-first-principles",
+      "title": "Thinking From First Principles: Is This Business Making Money?",
+      "description": "Break a big question into parts you can measure, then answer it and test a what-if honestly.",
+      "level": "beginner",
+      "prerequisites": [
+        "fd-price"
+      ],
+      "estimated_min": 40,
+      "sort_order": 8,
+      "theory_md": "## Why this matters\nBig questions (\"Is the shop doing well?\") feel impossible because they are vague. The skill that separates people who solve problems from people who worry about them is breaking the question down until each piece can be **measured**.\n\n## The first principle\nStart from what is certainly true, and build up. Do not start from what other people usually say.\n\nFor \"is this business making money?\", the certain truths are the ones you learned:\n1. Customers paid us **revenue**.\n2. The goods we sold cost us **cost of goods**.\n3. Running the business cost us **expenses**.\n4. **Profit = revenue - cost of goods - expenses**, and **profit percent = 100 x profit / revenue**.\n5. Then check the **cash** (lesson 4) and the **margin** by product (lesson 7).\n\nEach piece is a number you can read from a table. The big question has become four small ones.\n\n## A worked example\nAt Mwangi Trading Co. the year's revenue is KES 31,524,349, goods cost KES 25,214,926, and expenses are KES 5,914,700. Profit is about **KES 394,723**: only **1.3 percent** of revenue. The shop is busy and barely profitable.\n\nNow a **what-if**: if every price were 2 percent higher and nothing else changed, profit would be about KES 1,025,210. This is arithmetic, not a forecast. Customers may buy less when prices rise, so the real gain would be smaller. A what-if shows what is **possible**, and tells you what to test, not what will happen.\n\n## Try it\nBuild the profit from its parts, express it as a percent, and compute the what-if.\n\n## What you can and cannot claim\nYou can say: \"on last year's numbers, profit was 1.3 percent of revenue.\" You cannot say: \"raising prices will make us a million\", because the customers' reaction is unknown. Always separate what the data **shows** from what you **assume**.\n\n## Say it in your own words\nTake the question \"Should I start this business?\" and break it into four smaller questions you could answer with numbers.\n\n## Do this in real life\nChoose one decision you are facing. Write the big question, then the smallest measurable pieces beneath it, and mark each one: do I know it, or am I assuming it?",
+      "quiz": [
+        {
+          "question": "What does thinking from first principles mean?",
+          "options": [
+            "Copying what experts say",
+            "Starting from what is certainly true and building up",
+            "Guessing quickly",
+            "Using the first idea"
+          ],
+          "correct_index": 1,
+          "explanation": "You rebuild the answer from basic facts."
+        },
+        {
+          "question": "Revenue 31.5m, cost of goods 25.2m, expenses 5.9m. Roughly what is profit?",
+          "options": [
+            "0.4m",
+            "6.3m",
+            "25.2m",
+            "31.5m"
+          ],
+          "correct_index": 0,
+          "explanation": "31.5 - 25.2 - 5.9 = about 0.4 million."
+        },
+        {
+          "question": "Profit of 0.39m on revenue of 31.5m is about:",
+          "options": [
+            "1.3 percent",
+            "13 percent",
+            "39 percent",
+            "0.1 percent"
+          ],
+          "correct_index": 0,
+          "explanation": "100 x 0.39 / 31.5 = about 1.3."
+        },
+        {
+          "question": "A what-if says profit would rise by 2 percent of revenue if prices rose 2 percent. What does that tell you?",
+          "options": [
+            "It will happen",
+            "What is possible if nothing else changes; customers may react",
+            "Prices should rise",
+            "Nothing"
+          ],
+          "correct_index": 1,
+          "explanation": "A what-if is arithmetic with assumptions, not a forecast."
+        },
+        {
+          "question": "Which is a claim the data supports?",
+          "options": [
+            "Raising prices will triple profit",
+            "Last year's profit was 1.3 percent of revenue",
+            "Customers will not mind",
+            "The shop will fail"
+          ],
+          "correct_index": 1,
+          "explanation": "Only the first is measured; the others are assumptions."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fd-8-e1",
+          "title": "Build the Profit From Its Parts",
+          "prompt": "Return one row with revenue (qty times unit_price added up from shop_sale_items), cost_of_goods (qty times unit_cost added up), expenses (the total of shop_expenses amount) and profit (revenue minus cost_of_goods minus expenses).",
+          "hint_1": "Four columns from scalar subqueries; profit repeats the sums.",
+          "hint_2": "SELECT (SELECT SUM(qty * unit_price) FROM shop_sale_items) AS revenue, (SELECT SUM(qty * unit_cost) FROM shop_sale_items) AS cost_of_goods, (SELECT SUM(amount) FROM shop_expenses) AS expenses, ...",
+          "hint_3": "SELECT (SELECT SUM(qty * unit_price) FROM shop_sale_items) AS revenue, (SELECT SUM(qty * unit_cost) FROM shop_sale_items) AS cost_of_goods, (SELECT SUM(amount) FROM shop_expenses) AS expenses, (SELECT SUM(qty * unit_price) FROM shop_sale_items) - (SELECT SUM(qty * unit_cost) FROM shop_sale_items) - (SELECT SUM(amount) FROM shop_expenses) AS profit",
+          "solution": "SELECT (SELECT SUM(qty * unit_price) FROM shop_sale_items) AS revenue, (SELECT SUM(qty * unit_cost) FROM shop_sale_items) AS cost_of_goods, (SELECT SUM(amount) FROM shop_expenses) AS expenses, (SELECT SUM(qty * unit_price) FROM shop_sale_items) - (SELECT SUM(qty * unit_cost) FROM shop_sale_items) - (SELECT SUM(amount) FROM shop_expenses) AS profit",
+          "evaluation_mode": "exact",
+          "points": 25,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-8-e2",
+          "title": "Profit as a Percent",
+          "prompt": "What percent of revenue is the year's profit? Return one column called profit_pct, rounded to 1 decimal. Profit is sale items revenue minus cost minus expenses.",
+          "hint_1": "100.0 times profit over revenue, inside ROUND(..., 1). Repeat the subqueries.",
+          "hint_2": "SELECT ROUND(100.0 * ((SELECT SUM(qty * (unit_price - unit_cost)) FROM shop_sale_items) - (SELECT SUM(amount) FROM shop_expenses)) / (SELECT SUM(qty * unit_price) FROM shop_sale_items), 1) AS profit_pct",
+          "hint_3": "SELECT ROUND(100.0 * ((SELECT SUM(qty * (unit_price - unit_cost)) FROM shop_sale_items) - (SELECT SUM(amount) FROM shop_expenses)) / (SELECT SUM(qty * unit_price) FROM shop_sale_items), 1) AS profit_pct",
+          "solution": "SELECT ROUND(100.0 * ((SELECT SUM(qty * (unit_price - unit_cost)) FROM shop_sale_items) - (SELECT SUM(amount) FROM shop_expenses)) / (SELECT SUM(qty * unit_price) FROM shop_sale_items), 1) AS profit_pct",
+          "evaluation_mode": "exact",
+          "points": 20,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fd-8-e3",
+          "title": "The What-If",
+          "prompt": "If every price were 2 percent higher and nothing else changed (same quantities, same costs, same expenses), what would the year's profit be? Return one column called new_profit, rounded to a whole number.",
+          "hint_1": "New revenue is SUM(qty * unit_price) * 1.02. Subtract the cost of goods and the expenses, then ROUND(..., 0).",
+          "hint_2": "SELECT ROUND((SELECT SUM(qty * unit_price) FROM shop_sale_items) * 1.02 - (SELECT SUM(qty * unit_cost) FROM shop_sale_items) - (SELECT SUM(amount) FROM shop_expenses)) AS new_profit",
+          "hint_3": "SELECT ROUND((SELECT SUM(qty * unit_price) FROM shop_sale_items) * 1.02 - (SELECT SUM(qty * unit_cost) FROM shop_sale_items) - (SELECT SUM(amount) FROM shop_expenses)) AS new_profit",
+          "solution": "SELECT ROUND((SELECT SUM(qty * unit_price) FROM shop_sale_items) * 1.02 - (SELECT SUM(qty * unit_cost) FROM shop_sale_items) - (SELECT SUM(amount) FROM shop_expenses)) AS new_profit",
+          "evaluation_mode": "exact",
+          "points": 25,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    }
+  ]
+}

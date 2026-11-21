@@ -1,0 +1,1339 @@
+{
+  "description": "Plain-language concepts the curriculum is built on. Each names the concepts it depends on and the lessons that teach it. Checked by tests/concepts.test.js.",
+  "concepts": [
+    {
+      "id": "value",
+      "name": "Value",
+      "definition": "Value is what something is worth to the person buying it, right now; a sale happens only when both sides gain.",
+      "depends_on": [],
+      "lessons": [
+        "fd-value"
+      ],
+      "explain": {
+        "prompt": "In your own words: why would a person pay KES 50 for something that cost the seller KES 15?",
+        "points": [
+          {
+            "hint": "It is worth more to the buyer than the money they pay",
+            "any": [
+              "worth more",
+              "worth to",
+              "valuable",
+              "value to",
+              "more useful",
+              "needs it",
+              "need it",
+              "needed",
+              "useful to"
+            ]
+          },
+          {
+            "hint": "The seller gains too: they receive more than it cost",
+            "any": [
+              "seller gain",
+              "seller makes",
+              "seller profit",
+              "profit",
+              "makes money",
+              "more than it cost",
+              "more than they paid",
+              "the difference",
+              "earns"
+            ]
+          },
+          {
+            "hint": "It is the right thing, in the right place or at the right moment",
+            "any": [
+              "right place",
+              "right time",
+              "thirsty",
+              "hot",
+              "cold",
+              "at that moment",
+              "right now",
+              "convenien",
+              "here and now"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "profit",
+      "name": "Revenue, cost and profit",
+      "definition": "Profit is what is left of the money customers pay after the cost of the goods and the expenses of running the business.",
+      "depends_on": [
+        "value"
+      ],
+      "lessons": [
+        "fd-profit"
+      ],
+      "explain": {
+        "prompt": "Explain the difference between a fixed and a variable cost, using a business you know.",
+        "points": [
+          {
+            "hint": "A variable cost changes with how much you sell",
+            "any": [
+              "change with",
+              "changes with",
+              "depend on",
+              "depends on",
+              "per unit",
+              "each unit",
+              "each sale",
+              "the more you sell",
+              "increase with",
+              "go up with",
+              "vary",
+              "varies"
+            ]
+          },
+          {
+            "hint": "A fixed cost stays the same however much you sell",
+            "any": [
+              "stays the same",
+              "stay the same",
+              "same every month",
+              "regardless",
+              "whether or not",
+              "even if",
+              "does not change",
+              "doesn't change",
+              "constant",
+              "do not change",
+              "don't change"
+            ]
+          },
+          {
+            "hint": "A real example, such as rent, a salary or ingredients",
+            "any": [
+              "rent",
+              "salary",
+              "salaries",
+              "electric",
+              "flour",
+              "ingredient",
+              "stock",
+              "packaging",
+              "fuel",
+              "wage",
+              "licence",
+              "license",
+              "charcoal"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "percent",
+      "name": "Percent",
+      "definition": "A percent says what share one number is of another; it is only meaningful when you also know what it is a percent of.",
+      "depends_on": [
+        "value"
+      ],
+      "lessons": [
+        "fd-numbers"
+      ],
+      "explain": {
+        "prompt": "Why can two shops with the same average sale be very different businesses?",
+        "points": [
+          {
+            "hint": "The average hides how spread out the sales are",
+            "any": [
+              "spread",
+              "range",
+              "vary",
+              "varies",
+              "different sizes",
+              "swing",
+              "hides",
+              "smallest",
+              "largest",
+              "biggest"
+            ]
+          },
+          {
+            "hint": "One shop may rely on a few huge sales, the other on many similar ones",
+            "any": [
+              "a few",
+              "huge",
+              "tiny",
+              "big sale",
+              "many small",
+              "similar",
+              "about the same",
+              "outlier",
+              "steady",
+              "consistent"
+            ]
+          },
+          {
+            "hint": "An average alone does not tell you enough",
+            "any": [
+              "not enough",
+              "alone",
+              "only tells",
+              "does not tell",
+              "doesn't tell",
+              "cannot tell",
+              "can't tell",
+              "misleading",
+              "not the whole"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "customer-problem",
+      "name": "Customer and problem",
+      "definition": "A customer is someone with a problem they will pay to solve, and customers differ in who they are and how much they matter.",
+      "depends_on": [
+        "value"
+      ],
+      "lessons": [
+        "fd-customers"
+      ],
+      "explain": {
+        "prompt": "Describe the customer for a business you might start: who are they, and what problem do they have, in their own words?",
+        "points": [
+          {
+            "hint": "Who the customer is",
+            "any": [
+              "customer",
+              "farmers",
+              "students",
+              "mothers",
+              "shops",
+              "families",
+              "owners",
+              "traders",
+              "clients",
+              "parents",
+              "women",
+              "youth",
+              "customers"
+            ]
+          },
+          {
+            "hint": "A problem they face",
+            "any": [
+              "problem",
+              "struggle",
+              "difficult",
+              "hard for",
+              "pain",
+              "trouble",
+              "cannot",
+              "can't",
+              "waste",
+              "expensive",
+              "slow",
+              "tired",
+              "lack",
+              "frustrat",
+              "too much",
+              "too little"
+            ]
+          },
+          {
+            "hint": "Why it matters to them, ideally in their own words",
+            "any": [
+              "they say",
+              "told me",
+              "so that",
+              "they want",
+              "they wish",
+              "they need",
+              "said that"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "pricing",
+      "name": "Price and margin",
+      "definition": "A price sits between what it costs you and what it is worth to the customer; margin is the share of the price you keep.",
+      "depends_on": [
+        "profit",
+        "percent"
+      ],
+      "lessons": [
+        "fd-price"
+      ],
+      "explain": {
+        "prompt": "Explain the difference between margin and markup in your own words, with an example.",
+        "points": [
+          {
+            "hint": "Margin is measured against the price",
+            "any": [
+              "of the price",
+              "of price",
+              "divided by price",
+              "/ price",
+              "over the price",
+              "selling price",
+              "of the selling",
+              "compared to the price",
+              "share of the price",
+              "percent of what you sell"
+            ]
+          },
+          {
+            "hint": "Markup is measured against the cost",
+            "any": [
+              "of the cost",
+              "of cost",
+              "divided by cost",
+              "/ cost",
+              "over the cost",
+              "on cost",
+              "compared to the cost",
+              "added to the cost",
+              "on top of the cost",
+              "on top of cost"
+            ]
+          },
+          {
+            "hint": "A number example",
+            "any": [
+              "#digit"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "first-principles",
+      "name": "First principles",
+      "definition": "Break a big question into parts that are certainly true and can be measured, then build the answer up from them.",
+      "depends_on": [
+        "profit",
+        "cash",
+        "pricing",
+        "customer-problem"
+      ],
+      "lessons": [
+        "fd-first-principles"
+      ],
+      "explain": {
+        "prompt": "Take the question 'Should I start this business?' and break it into smaller questions you could answer with numbers.",
+        "points": [
+          {
+            "hint": "Customers: will enough people buy?",
+            "any": [
+              "customer",
+              "demand",
+              "will buy",
+              "buyers",
+              "sell enough",
+              "how many"
+            ]
+          },
+          {
+            "hint": "Profit: can it make money after its costs?",
+            "any": [
+              "profit",
+              "cost",
+              "price",
+              "margin",
+              "make money",
+              "expenses",
+              "revenue"
+            ]
+          },
+          {
+            "hint": "Cash: can I afford to start and last until customers pay?",
+            "any": [
+              "cash",
+              "afford",
+              "capital",
+              "savings",
+              "money to start",
+              "runway",
+              "survive",
+              "fund"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "table",
+      "name": "Table",
+      "definition": "A table is rows and columns: each row is one thing (a sale, a customer) and each column is one fact about it.",
+      "depends_on": [],
+      "lessons": [
+        "fd-tables",
+        "sql-select"
+      ],
+      "explain": {
+        "prompt": "What is the difference between a row and a column? Use the shop's customers as your example.",
+        "points": [
+          {
+            "hint": "A row is one thing, for example one customer",
+            "any": [
+              "one customer",
+              "single customer",
+              "each customer",
+              "one person",
+              "one thing",
+              "one record",
+              "one entry",
+              "one item"
+            ]
+          },
+          {
+            "hint": "A column is one fact about every row, for example the town",
+            "any": [
+              "town",
+              "segment",
+              "name",
+              "a fact",
+              "one fact",
+              "detail",
+              "attribute",
+              "information about",
+              "phone"
+            ]
+          },
+          {
+            "hint": "Use both words, row and column",
+            "any": [
+              "#both:row,column"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "filter",
+      "name": "Filter",
+      "definition": "Filtering keeps only the rows that meet a condition, so you look at the part of the data your question is about.",
+      "depends_on": [
+        "table"
+      ],
+      "lessons": [
+        "sql-where"
+      ]
+    },
+    {
+      "id": "aggregate",
+      "name": "Aggregate",
+      "definition": "Aggregating squeezes many rows into one number per group: a total, a count or an average for each customer, month or product.",
+      "depends_on": [
+        "filter"
+      ],
+      "lessons": [
+        "sql-groupby"
+      ]
+    },
+    {
+      "id": "join",
+      "name": "Join",
+      "definition": "A join lines up rows from two tables by a shared key, so facts kept in different places can be read together.",
+      "depends_on": [
+        "table"
+      ],
+      "lessons": [
+        "sql-joins"
+      ]
+    },
+    {
+      "id": "data-quality",
+      "name": "Data quality",
+      "definition": "Data is only usable if you have checked what is in it: how many rows, what is missing, what is out of range.",
+      "depends_on": [
+        "table"
+      ],
+      "lessons": [
+        "de-profiling"
+      ]
+    },
+    {
+      "id": "cleaning",
+      "name": "Cleaning",
+      "definition": "Cleaning means making the same thing look the same everywhere (one spelling, one date format) without losing information.",
+      "depends_on": [
+        "data-quality"
+      ],
+      "lessons": [
+        "de-cleaning"
+      ]
+    },
+    {
+      "id": "duplicates",
+      "name": "Duplicates",
+      "definition": "A duplicate is the same real-world thing recorded twice; counting it twice makes every total wrong.",
+      "depends_on": [
+        "cleaning"
+      ],
+      "lessons": [
+        "de-dedup"
+      ]
+    },
+    {
+      "id": "reconcile",
+      "name": "Reconcile",
+      "definition": "Reconciling compares two records of the same facts (ledger and bank statement) and explains every difference.",
+      "depends_on": [
+        "join",
+        "data-quality"
+      ],
+      "lessons": [
+        "de-testing"
+      ]
+    },
+    {
+      "id": "metric",
+      "name": "Metric",
+      "definition": "A metric is one agreed number that tracks how the business is doing, with a clear definition and a time period.",
+      "depends_on": [
+        "aggregate"
+      ],
+      "lessons": [
+        "business-metrics"
+      ]
+    },
+    {
+      "id": "unit-economics",
+      "name": "Unit economics",
+      "definition": "Unit economics asks whether one sale, one customer or one product makes money after the costs it causes.",
+      "depends_on": [
+        "metric",
+        "profit"
+      ],
+      "lessons": [
+        "business-unit-economics"
+      ]
+    },
+    {
+      "id": "margin",
+      "name": "Margin",
+      "definition": "Margin is what is left of the price after the cost of what you sold, shown as money and as a share of the price.",
+      "depends_on": [
+        "unit-economics",
+        "aggregate",
+        "pricing"
+      ],
+      "lessons": [
+        "bp-margins"
+      ]
+    },
+    {
+      "id": "kpi",
+      "name": "KPI",
+      "definition": "A KPI is a metric chosen because a decision depends on it, shown with a target so people know when to act.",
+      "depends_on": [
+        "metric"
+      ],
+      "lessons": [
+        "business-kpi"
+      ]
+    },
+    {
+      "id": "spread",
+      "name": "Average and spread",
+      "definition": "An average says what is typical; the spread says how far real values stray from it. You need both to judge a number.",
+      "depends_on": [
+        "aggregate",
+        "percent"
+      ],
+      "lessons": [
+        "stat-descriptive"
+      ]
+    },
+    {
+      "id": "trend",
+      "name": "Trend",
+      "definition": "A trend is the direction a number moves over time once the ups and downs of single periods are set aside.",
+      "depends_on": [
+        "spread"
+      ],
+      "lessons": [
+        "stats-timeseries"
+      ]
+    },
+    {
+      "id": "compare-groups",
+      "name": "Compare groups",
+      "definition": "To say one group did better than another you must allow for chance, not only compare the two averages.",
+      "depends_on": [
+        "spread"
+      ],
+      "lessons": [
+        "stats-abtesting"
+      ]
+    },
+    {
+      "id": "stock",
+      "name": "Stock",
+      "definition": "Stock is money turned into goods: slow-moving or expiring stock ties up cash that cannot be used elsewhere.",
+      "depends_on": [
+        "aggregate",
+        "join"
+      ],
+      "lessons": [
+        "bp-stock"
+      ]
+    },
+    {
+      "id": "cash",
+      "name": "Cash",
+      "definition": "Cash is what is actually received and paid; a sale not yet paid for is profit on paper but not money in hand.",
+      "depends_on": [
+        "metric",
+        "join",
+        "profit"
+      ],
+      "lessons": [
+        "fd-cash",
+        "bp-cash"
+      ],
+      "explain": {
+        "prompt": "A friend says 'I made a profit, so why is my account empty?' Give two reasons in plain language.",
+        "points": [
+          {
+            "hint": "Customers have not paid yet, because they bought on credit",
+            "any": [
+              "credit",
+              "not paid",
+              "not yet paid",
+              "owe",
+              "owed",
+              "pay later",
+              "unpaid",
+              "haven't paid",
+              "have not paid",
+              "paid late",
+              "paid me later"
+            ]
+          },
+          {
+            "hint": "The cash already went out for stock, bills or suppliers",
+            "any": [
+              "stock",
+              "supplier",
+              "bills",
+              "rent",
+              "bought",
+              "paid for",
+              "inventory",
+              "expenses",
+              "spent",
+              "paid out"
+            ]
+          },
+          {
+            "hint": "Profit is what you earned; cash is what you actually hold",
+            "any": [
+              "earned",
+              "on paper",
+              "cash is",
+              "profit is",
+              "timing",
+              "not the same",
+              "different thing",
+              "different things"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "investigate",
+      "name": "Investigate",
+      "definition": "Investigating splits a change (profit fell) into its parts until you find which part moved and why.",
+      "depends_on": [
+        "margin",
+        "trend"
+      ],
+      "lessons": [
+        "bp-investigate"
+      ]
+    },
+    {
+      "id": "monitor",
+      "name": "Monitor",
+      "definition": "Monitoring watches the numbers that matter, raises an alert at an agreed threshold, and records whether the action worked.",
+      "depends_on": [
+        "kpi",
+        "investigate"
+      ],
+      "lessons": [
+        "bp-monitor"
+      ]
+    },
+    {
+      "id": "problem",
+      "name": "Real problem",
+      "definition": "A problem worth solving happens often, hurts, and people already pay money or effort to cope with it.",
+      "depends_on": [
+        "customer-problem",
+        "first-principles"
+      ],
+      "lessons": [
+        "fo-problem"
+      ],
+      "explain": {
+        "prompt": "What three things make a problem worth solving, and how would you find out what people do about it today?",
+        "points": [
+          {
+            "hint": "It happens often",
+            "any": [
+              "often",
+              "every day",
+              "daily",
+              "regular",
+              "frequent",
+              "repeat"
+            ]
+          },
+          {
+            "hint": "It hurts or costs something",
+            "any": [
+              "hurt",
+              "cost",
+              "pain",
+              "loses",
+              "lose",
+              "expens",
+              "time"
+            ]
+          },
+          {
+            "hint": "People already pay or cope; ask them what they do today",
+            "any": [
+              "already pay",
+              "pay to",
+              "cope",
+              "do today",
+              "do about",
+              "ask them",
+              "what they do",
+              "workaround",
+              "spend"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "interview",
+      "name": "Customer interview",
+      "definition": "Ask about what people did and paid in the past, not whether they would buy in future, and count what you hear.",
+      "depends_on": [
+        "problem",
+        "percent"
+      ],
+      "lessons": [
+        "fo-interviews"
+      ],
+      "explain": {
+        "prompt": "Why is 'Would you buy this?' a weak question, and what would you ask instead?",
+        "points": [
+          {
+            "hint": "People are polite or poor at predicting",
+            "any": [
+              "polite",
+              "predict",
+              "say yes",
+              "nice",
+              "kind",
+              "guess",
+              "future",
+              "lie"
+            ]
+          },
+          {
+            "hint": "Ask about the past or present",
+            "any": [
+              "last time",
+              "past",
+              "what did",
+              "what do you do",
+              "today",
+              "already",
+              "happened",
+              "tried"
+            ]
+          },
+          {
+            "hint": "Count or record what they say",
+            "any": [
+              "count",
+              "write",
+              "record",
+              "note",
+              "how many",
+              "percent"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "market-size",
+      "name": "Market size",
+      "definition": "Size an opportunity bottom-up: reachable customers times the share who need it times what each pays.",
+      "depends_on": [
+        "interview",
+        "percent"
+      ],
+      "lessons": [
+        "fo-market"
+      ],
+      "explain": {
+        "prompt": "Why is '1 percent of the whole country' a weak way to size a business, and what do you do instead?",
+        "points": [
+          {
+            "hint": "It starts from a population not real people",
+            "any": [
+              "population",
+              "whole country",
+              "everyone",
+              "big number",
+              "guess",
+              "not real",
+              "no evidence",
+              "tells you nothing"
+            ]
+          },
+          {
+            "hint": "Count customers you can reach",
+            "any": [
+              "reach",
+              "count",
+              "name",
+              "group",
+              "estate",
+              "bottom",
+              "own customers",
+              "real customers"
+            ]
+          },
+          {
+            "hint": "Multiply by share and price",
+            "any": [
+              "multiply",
+              "price",
+              "times",
+              "share",
+              "percent",
+              "pay",
+              "revenue"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "offer",
+      "name": "Offer and price",
+      "definition": "An offer says what the customer gets, for how much and by when, priced between your cost floor and the customer's value ceiling.",
+      "depends_on": [
+        "pricing",
+        "interview"
+      ],
+      "lessons": [
+        "fo-offer"
+      ],
+      "explain": {
+        "prompt": "What are the floor and the ceiling of a price, and why not price from cost alone?",
+        "points": [
+          {
+            "hint": "Floor is your cost plus needed profit",
+            "any": [
+              "floor",
+              "cost",
+              "lowest",
+              "minimum",
+              "profit",
+              "below"
+            ]
+          },
+          {
+            "hint": "Ceiling is the value to the customer",
+            "any": [
+              "ceiling",
+              "value",
+              "worth",
+              "customer saves",
+              "save",
+              "highest",
+              "maximum"
+            ]
+          },
+          {
+            "hint": "Cost-only pricing leaves money on the table",
+            "any": [
+              "leave",
+              "too low",
+              "less than",
+              "undercharge",
+              "money on the table",
+              "worth more",
+              "charge more"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "break-even",
+      "name": "Break-even",
+      "definition": "Break-even sales equal fixed costs divided by the contribution each sale earns after its variable cost.",
+      "depends_on": [
+        "unit-economics",
+        "margin"
+      ],
+      "lessons": [
+        "fo-unit"
+      ],
+      "explain": {
+        "prompt": "What is the difference between a fixed and a variable cost, and how do they give a break-even number?",
+        "points": [
+          {
+            "hint": "Fixed costs stay the same",
+            "any": [
+              "fixed",
+              "rent",
+              "same",
+              "does not change",
+              "doesn't change",
+              "regardless",
+              "monthly"
+            ]
+          },
+          {
+            "hint": "Variable costs rise with each sale",
+            "any": [
+              "variable",
+              "each sale",
+              "per sale",
+              "per unit",
+              "stock",
+              "rises",
+              "goes up"
+            ]
+          },
+          {
+            "hint": "Fixed costs divided by contribution per sale",
+            "any": [
+              "divide",
+              "contribution",
+              "price minus",
+              "cover",
+              "per sale",
+              "break even",
+              "break-even"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "runway",
+      "name": "Runway",
+      "definition": "Runway is how many months your cash lasts at the current monthly burn, which is why a profitable business can still run out of cash.",
+      "depends_on": [
+        "cash",
+        "profit"
+      ],
+      "lessons": [
+        "fo-runway"
+      ],
+      "explain": {
+        "prompt": "What is runway, and why can a profitable business still run out of cash?",
+        "points": [
+          {
+            "hint": "Cash divided by monthly burn",
+            "any": [
+              "divide",
+              "burn",
+              "months",
+              "cash in hand",
+              "how long",
+              "lasts",
+              "per month"
+            ]
+          },
+          {
+            "hint": "Customers pay late while bills are due now",
+            "any": [
+              "late",
+              "pay later",
+              "delay",
+              "timing",
+              "due now",
+              "bills",
+              "before customers",
+              "waiting"
+            ]
+          },
+          {
+            "hint": "Profit is not cash",
+            "any": [
+              "profit is not",
+              "not the same",
+              "cash is",
+              "on paper",
+              "paper",
+              "cash"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "conversion",
+      "name": "Conversion rate",
+      "definition": "A conversion rate is the share of people at one step of the sales funnel who move to the next, such as visits to sales.",
+      "depends_on": [
+        "percent",
+        "offer"
+      ],
+      "lessons": [
+        "fo-sale"
+      ],
+      "explain": {
+        "prompt": "What is a conversion rate, and what do you do with the reasons people say no?",
+        "points": [
+          {
+            "hint": "Share of people who move to the next step",
+            "any": [
+              "share",
+              "percent",
+              "out of",
+              "divided",
+              "buyers",
+              "proportion",
+              "step",
+              "fraction"
+            ]
+          },
+          {
+            "hint": "Record the reasons for no",
+            "any": [
+              "reason",
+              "record",
+              "write",
+              "note",
+              "why",
+              "listen",
+              "list"
+            ]
+          },
+          {
+            "hint": "Learn and change the offer",
+            "any": [
+              "learn",
+              "improve",
+              "change",
+              "adjust",
+              "fix",
+              "product",
+              "better",
+              "feedback"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "mvp",
+      "name": "Smallest version",
+      "definition": "The smallest version gives a real customer the one result they pay for, often by hand, before anything is built.",
+      "depends_on": [
+        "problem",
+        "offer"
+      ],
+      "lessons": [
+        "fo-mvp"
+      ],
+      "explain": {
+        "prompt": "What is an MVP, and why start by doing the work by hand?",
+        "points": [
+          {
+            "hint": "The smallest thing that gives the result",
+            "any": [
+              "smallest",
+              "minimum",
+              "least",
+              "simple",
+              "basic",
+              "one thing",
+              "bare"
+            ]
+          },
+          {
+            "hint": "Cheaper and fast to test whether people pay",
+            "any": [
+              "cheap",
+              "cost",
+              "save",
+              "test",
+              "before building",
+              "quick",
+              "pay",
+              "fast"
+            ]
+          },
+          {
+            "hint": "Learn before building or scaling",
+            "any": [
+              "learn",
+              "demand",
+              "before",
+              "prove",
+              "validate",
+              "find out",
+              "evidence"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "funding",
+      "name": "Funding options",
+      "definition": "Fund first with savings and sales, borrow only for something that earns more than the loan costs, and always confirm current terms.",
+      "depends_on": [
+        "runway"
+      ],
+      "lessons": [
+        "fo-funding"
+      ],
+      "explain": {
+        "prompt": "Why should a founder prefer savings and sales first, and what must a loan earn to be worth taking?",
+        "points": [
+          {
+            "hint": "Savings and sales carry no interest or ownership cost",
+            "any": [
+              "no interest",
+              "cheapest",
+              "own money",
+              "no debt",
+              "do not owe",
+              "don't owe",
+              "keep ownership",
+              "no repay",
+              "savings"
+            ]
+          },
+          {
+            "hint": "A loan must earn more than it costs",
+            "any": [
+              "earn more",
+              "more than",
+              "interest",
+              "cost",
+              "repay",
+              "worth",
+              "return",
+              "profit"
+            ]
+          },
+          {
+            "hint": "Check current terms and total repayment",
+            "any": [
+              "total",
+              "check",
+              "confirm",
+              "terms",
+              "current",
+              "official",
+              "verify"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "compliance",
+      "name": "Registration, tax and contracts",
+      "definition": "The law decides who may trade, who owes tax and who is bound by a promise, and the figures change, so confirm them at the official source.",
+      "depends_on": [
+        "profit"
+      ],
+      "lessons": [
+        "fo-legal"
+      ],
+      "explain": {
+        "prompt": "What are the three questions the law answers for a small business, and why must you check the figures yourself?",
+        "points": [
+          {
+            "hint": "Who may trade (registration)",
+            "any": [
+              "register",
+              "registration",
+              "permit",
+              "licence",
+              "license",
+              "trade",
+              "name"
+            ]
+          },
+          {
+            "hint": "Who owes tax or what is owed",
+            "any": [
+              "tax",
+              "kra",
+              "pin",
+              "turnover",
+              "vat",
+              "owe"
+            ]
+          },
+          {
+            "hint": "Contracts or promises; figures change so check",
+            "any": [
+              "contract",
+              "promise",
+              "agreement",
+              "written",
+              "change",
+              "confirm",
+              "check",
+              "verify",
+              "official",
+              "update"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "hiring",
+      "name": "Hiring",
+      "definition": "A hire costs the salary plus the employer's statutory payments and should be made when the work is proven and the hire earns or saves more than they cost.",
+      "depends_on": [
+        "runway",
+        "compliance"
+      ],
+      "lessons": [
+        "fo-team"
+      ],
+      "explain": {
+        "prompt": "Why is a salary not the true cost of an employee, and when should you hire?",
+        "points": [
+          {
+            "hint": "Employer pays extra contributions",
+            "any": [
+              "nssf",
+              "levy",
+              "contribution",
+              "statutory",
+              "extra",
+              "employer",
+              "on top",
+              "plus"
+            ]
+          },
+          {
+            "hint": "Hire when work is proven",
+            "any": [
+              "proven",
+              "enough work",
+              "busy",
+              "demand",
+              "sure",
+              "steady",
+              "customers"
+            ]
+          },
+          {
+            "hint": "The hire must pay for themselves",
+            "any": [
+              "pay for",
+              "earn",
+              "bring",
+              "save",
+              "afford",
+              "worth",
+              "cover",
+              "more than they cost"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "iterate",
+      "name": "Measure and iterate",
+      "definition": "Track a few numbers each week, compare with last time, change one thing at a time and measure again.",
+      "depends_on": [
+        "metric",
+        "conversion",
+        "mvp"
+      ],
+      "lessons": [
+        "fo-iterate"
+      ],
+      "explain": {
+        "prompt": "Why change only one thing at a time, and which three numbers would you track?",
+        "points": [
+          {
+            "hint": "Only one change shows the cause",
+            "any": [
+              "one thing",
+              "cause",
+              "which",
+              "tell what",
+              "know what",
+              "single",
+              "separate"
+            ]
+          },
+          {
+            "hint": "Track a few key numbers",
+            "any": [
+              "customers",
+              "contribution",
+              "cash",
+              "sales",
+              "profit",
+              "revenue",
+              "numbers",
+              "kpi"
+            ]
+          },
+          {
+            "hint": "Measure, then repeat to avoid luck",
+            "any": [
+              "measure",
+              "repeat",
+              "again",
+              "weeks",
+              "compare",
+              "luck",
+              "over time",
+              "loop"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    }
+  ]
+}

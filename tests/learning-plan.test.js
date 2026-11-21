@@ -38,7 +38,7 @@ test('a new learner is pointed at the first open lesson, then at the one in prog
   let plan = P.getLearningPlan('L1')
   assert.ok(plan.next, 'there is somewhere to start')
   assert.ok(['new', 'available'].includes(plan.next.status))
-  assert.equal(plan.next.module, 'sql')
+  assert.equal(plan.next.module, 'foundations', 'a learner who has finished nothing starts at Start Here')
   assert.equal(plan.streak_days, 0)
 
   const first = plan.next.lesson_id
@@ -56,12 +56,12 @@ test('a new learner is pointed at the first open lesson, then at the one in prog
 
 test('progress per academy counts only this learner\'s completed lessons', () => {
   const plan = P.getLearningPlan('L1')
-  const sql = plan.modules.find((m) => m.module === 'sql')
-  assert.equal(sql.complete, 1)
-  assert.ok(sql.total > 1)
+  const start = plan.modules.find((m) => m.module === 'foundations') // L1's first lesson, from the test above
+  assert.equal(start.complete, 1)
+  assert.ok(start.total > 1)
   assert.deepEqual(plan.modules.map((m) => m.module).slice(0, 3), ['sql', 'excel', 'python'].filter((m) => plan.modules.some((x) => x.module === m)))
   makeLearner(h, db, 'L2')
-  assert.equal(P.getLearningPlan('L2').modules.find((m) => m.module === 'sql').complete, 0)
+  assert.equal(P.getLearningPlan('L2').modules.find((m) => m.module === 'foundations').complete, 0)
 })
 
 test('an exercise missed days ago comes back for review until it is answered correctly', () => {

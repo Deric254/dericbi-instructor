@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
 import { getDb } from '../db/database'
 import { SKILLS, SKILLS_CAPSTONE } from './skills'
+import { knownLessonIds } from './placement'
 
 // ─────────────────────────────────────────────
 // SKILL RATINGS
@@ -326,7 +327,7 @@ export interface LearningPlan {
   review: { exercise_id: string; title: string; lesson_title: string; module: string }[]
 }
 
-const MODULE_ORDER = ['sql', 'excel', 'python', 'powerbi', 'statistics', 'business', 'dataeng', 'bizsolver', 'simulation']
+const MODULE_ORDER = ['sql', 'excel', 'python', 'powerbi', 'statistics', 'business', 'dataeng', 'bizsolver', 'foundations', 'founder', 'simulation']
 const moduleRank = (m: string) => { const i = MODULE_ORDER.indexOf(m); return i === -1 ? MODULE_ORDER.length : i }
 
 const dayKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -357,18 +358,25 @@ export function getLearningPlan(userId: string, now: Date = new Date()): Learnin
   `).get(userId) as any
   if (midway) next = { lesson_id: midway.id, title: midway.title, module: midway.module, status: 'in_progress' }
   else {
-    const candidates = db.prepare(`
+    const allOpen = db.prepare(`
       SELECT l.id, l.title, l.module, l.sort_order, lp.status AS progress
       FROM lessons l LEFT JOIN lesson_progress lp ON lp.lesson_id = l.id AND lp.user_id = ?
       WHERE (lp.status = 'available' OR (lp.status IS NULL AND l.prerequisites = '[]'))
     `).all(userId) as any[]
+    // Lessons the learner showed they already know (placement check) stay open but are not suggested as next.
+    const known = new Set(knownLessonIds(userId))
+    const candidates = allOpen.filter((c) => !known.has(c.id))
     // Stay in the academy they just worked in; only when it has nothing open fall back to the fixed academy order.
     const last = db.prepare(`
       SELECT l.module FROM lesson_progress lp JOIN lessons l ON l.id = lp.lesson_id
       WHERE lp.user_id = ? AND lp.status = 'complete' ORDER BY lp.completed_at DESC LIMIT 1
     `).get(userId) as any
     const here = last ? candidates.filter((c) => c.module === last.module) : []
-    const open = (here.length ? here : candidates).sort((a, b) => moduleRank(a.module) - moduleRank(b.module) || a.sort_order - b.sort_order)[0]
+    // Someone who has not finished anything yet is pointed at Start Here; everyone else keeps the order above.
+    const fresh = last ? [] : candidates.filter((c) => c.module === 'foundations')
+    // Having just finished Start Here, the natural next step is the Founder Track.
+    const founderNext = last?.module === 'foundations' ? candidates.filter((c) => c.module === 'founder') : []
+    const open = (here.length ? here : founderNext.length ? founderNext : fresh.length ? fresh : candidates).sort((a, b) => moduleRank(a.module) - moduleRank(b.module) || a.sort_order - b.sort_order)[0]
     if (open) next = { lesson_id: open.id, title: open.title, module: open.module, status: open.progress ? 'available' : 'new' }
   }
 

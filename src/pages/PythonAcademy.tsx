@@ -101,7 +101,7 @@ export default function PythonAcademy() {
                 </div>
                 <div style={{ flex: 1, overflow: 'auto', padding: 16 }}>
                   <LessonTheory markdown={lessons.find(l => l.id === activeLessonId)?.theory_md ?? ''} />
-                  <LessonQuiz quizJson={lessons.find(l => l.id === activeLessonId)?.quiz} accentColor="var(--python-color)" />
+                  <LessonQuiz quizJson={lessons.find(l => l.id === activeLessonId)?.quiz} lessonId={activeLessonId ?? undefined} accentColor="var(--python-color)" />
                 </div>
                 <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
                   <button className="btn btn-primary" style={{ width: '100%', justifyContent: 'center' }} onClick={async () => {

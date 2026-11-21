@@ -9,6 +9,8 @@ export interface InstructorContext {
   code?: string
   error?: string
   dataset_info?: string
+  /** How the tutor should answer this message (see the tutor modes in InstructorPanel). */
+  mode?: 'simpler' | 'ask' | 'check'
 }
 
 export interface UseInstructorReturn {

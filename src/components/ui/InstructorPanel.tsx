@@ -26,6 +26,7 @@ export default function InstructorPanel({
   const { user } = useAuthStore()
   const { messages, loading, error, unavailable, sendMessage, clearConversation } = useInstructor(context)
   const [input, setInput] = useState('')
+  const [checkMode, setCheckMode] = useState(false)
   const [collapsed, setCollapsed] = useState(compact)
   const [apiKeyOk, setApiKeyOk] = useState<boolean | null>(null)
   const [checkingKey, setCheckingKey] = useState(true)
@@ -78,8 +79,13 @@ export default function InstructorPanel({
     const text = input.trim()
     if (!text || loading) return
     setInput('')
-    await sendMessage(text, context)
+    const mode = checkMode ? 'check' : undefined
+    setCheckMode(false)
+    await sendMessage(text, mode ? { ...context, mode } : context)
   }
+
+  // Tutor modes, offered while the learner is on a lesson or exercise. Each only changes how the tutor answers.
+  const askMode = (mode: 'simpler' | 'ask', text: string) => { if (!loading) sendMessage(text, { ...context, mode }) }
 
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -283,13 +289,20 @@ export default function InstructorPanel({
         background: 'var(--bg-elevated)',
         flexShrink: 0,
       }}>
+        {(context.type === 'lesson' || context.type === 'exercise') && apiKeyOk && (
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+            <button className="btn btn-ghost btn-sm" disabled={loading} onClick={() => askMode('simpler', 'Explain this more simply, with an everyday example.')}>Explain simpler</button>
+            <button className="btn btn-ghost btn-sm" disabled={loading} onClick={() => askMode('ask', 'Ask me a question to test whether I understand this.')}>Ask me</button>
+            <button className="btn btn-ghost btn-sm" disabled={loading} aria-pressed={checkMode} onClick={() => { setCheckMode(true); inputRef.current?.focus() }}>Check my explanation</button>
+          </div>
+        )}
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
           <input
             ref={inputRef}
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKey}
-            placeholder="Ask the instructor anything…"
+            placeholder={checkMode ? 'Write your explanation in your own words, then press Enter' : 'Ask the instructor anything…'}
             disabled={loading || checkingKey}
             style={{
               flex: 1,

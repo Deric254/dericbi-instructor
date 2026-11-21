@@ -75,6 +75,38 @@ const api = {
       ipcRenderer.invoke('lessons:complete', { userId, lessonId, timeSpentS }),
   },
 
+  // Explain it back
+  explain: {
+    get: (userId: string, lessonId: string) => ipcRenderer.invoke('explain:get', { userId, lessonId }),
+    submit: (userId: string, lessonId: string, text: string) => ipcRenderer.invoke('explain:submit', { userId, lessonId, text }),
+  },
+
+  // Real-world tasks
+  fieldwork: {
+    get: (userId: string, lessonId: string) => ipcRenderer.invoke('fieldwork:get', { userId, lessonId }),
+    list: (userId: string) => ipcRenderer.invoke('fieldwork:list', userId),
+    save: (userId: string, lessonId: string, did: string, learned: string) => ipcRenderer.invoke('fieldwork:save', { userId, lessonId, did, learned }),
+    delete: (userId: string, lessonId: string) => ipcRenderer.invoke('fieldwork:delete', { userId, lessonId }),
+  },
+
+  // Spaced review
+  review: {
+    due: (userId: string) => ipcRenderer.invoke('review:due', userId),
+    answer: (userId: string, questionId: string, answer: number) => ipcRenderer.invoke('review:answer', { userId, questionId, answer }),
+  },
+
+  // Placement check (Start Here)
+  placement: {
+    get: (userId: string) => ipcRenderer.invoke('placement:get', userId),
+    submit: (userId: string, answers: Record<string, number>) => ipcRenderer.invoke('placement:submit', { userId, answers }),
+  },
+
+  // Quizzes
+  quizzes: {
+    submit: (userId: string, lessonId: string, answers: number[]) =>
+      ipcRenderer.invoke('quizzes:submit', { userId, lessonId, answers }),
+  },
+
   // Exercises
   exercises: {
     get: (exerciseId: string) => ipcRenderer.invoke('exercises:get', exerciseId),

@@ -271,7 +271,7 @@ function BusinessLessonView({ lesson, exercises, onBack }: { lesson: any; exerci
         first={
         <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: 18 }}>
           <LessonTheory markdown={lesson.theory_md} />
-          <LessonQuiz quizJson={lesson.quiz} accentColor="var(--business-color)" />
+          <LessonQuiz quizJson={lesson.quiz} lessonId={lesson.id} accentColor="var(--business-color)" />
         </div>
         }
         second={

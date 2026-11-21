@@ -220,6 +220,17 @@ test('REGRESSION: the tutor is given the real table and column names, not "[obje
   assert.match(prompt, /Columns: patient_id, patient_name, age/, 'in the real order')
 })
 
+test('tutor modes: each adds its own fixed instruction, an unknown mode adds nothing, and the answer rule stays', async () => {
+  useProvider('groq')
+  fakeFetch(() => json(200, { choices: [{ message: { content: 'ok' } }] }))
+  const withMode = async (mode) => { await AI.chat({ userId: UID, message: 'hi', history: [], context: { type: 'lesson', lesson: 'Value', mode } }); return systemPrompt() }
+  assert.match(await withMode('simpler'), /THIS REPLY: EXPLAIN IT SIMPLER/)
+  assert.match(await withMode('ask'), /THIS REPLY: ASK ME QUESTIONS/)
+  const check = await withMode('check')
+  assert.match(check, /THIS REPLY: CHECK MY EXPLANATION/); assert.match(check, /Never give the answer directly/)
+  for (const mode of [undefined, 'hack', '"; DROP', 'SIMPLER']) assert.doesNotMatch(await withMode(mode), /THIS REPLY/)
+})
+
 test('the tutor knows who it is teaching, where they are, and what is loaded', async () => {
   useProvider('groq')
   fakeFetch(() => json(200, { choices: [{ message: { content: 'ok' } }] }))

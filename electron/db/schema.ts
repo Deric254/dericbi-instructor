@@ -1,7 +1,7 @@
 // DericBI Instructor — Complete Database Schema
 // All DDL statements in migration order
 
-export const SCHEMA_VERSION = 3
+export const SCHEMA_VERSION = 8
 
 export const CREATE_TABLES = `
 
@@ -89,6 +89,7 @@ CREATE TABLE IF NOT EXISTS lessons (
   theory_md     TEXT NOT NULL DEFAULT '',
   quiz          TEXT NOT NULL DEFAULT '[]',  -- JSON array of {question, options, correct_index, explanation}
   content_path  TEXT,  -- path to full content JSON file
+  mastery_required INTEGER NOT NULL DEFAULT 0,  -- 1 = needs a recorded quiz pass and passed practicals before it can be completed
   sort_order    INTEGER NOT NULL DEFAULT 0,
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -107,6 +108,67 @@ CREATE TABLE IF NOT EXISTS lesson_progress (
   time_spent_s INTEGER NOT NULL DEFAULT 0,
   notes        TEXT,
   UNIQUE(user_id, lesson_id)
+);
+
+-- ─────────────────────────────────────────────
+-- QUIZ RESULTS (one row per finished quiz, graded by the app)
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS quiz_results (
+  id         TEXT PRIMARY KEY,
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  lesson_id  TEXT NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+  correct    INTEGER NOT NULL,
+  total      INTEGER NOT NULL,
+  pct        INTEGER NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- ─────────────────────────────────────────────
+-- PLACEMENT (what a learner showed they already know, one row per concept)
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS placement_results (
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  concept_id TEXT NOT NULL,
+  known      INTEGER NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, concept_id)
+);
+
+-- ─────────────────────────────────────────────
+-- REVIEW (spaced review: one row per idea a learner has been taught)
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS review_items (
+  user_id          TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  concept_id       TEXT NOT NULL,
+  box              INTEGER NOT NULL DEFAULT 1,   -- 1..4; the higher the box, the longer until the next review
+  due_at           TEXT NOT NULL,
+  reviews          INTEGER NOT NULL DEFAULT 0,
+  last_reviewed_at TEXT,
+  PRIMARY KEY (user_id, concept_id)
+);
+
+-- ─────────────────────────────────────────────
+-- EXPLAIN IT BACK (the learner's own explanation of a concept; stays on this computer)
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS explain_results (
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  concept_id TEXT NOT NULL,
+  passed     INTEGER NOT NULL DEFAULT 0,
+  answer     TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, concept_id)
+);
+
+-- ─────────────────────────────────────────────
+-- REAL-WORLD TASKS (what a learner did outside the app and what they learned; their own words)
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS field_tasks (
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  lesson_id  TEXT NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+  did        TEXT NOT NULL,
+  learned    TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, lesson_id)
 );
 
 -- ─────────────────────────────────────────────
@@ -386,6 +448,7 @@ CREATE INDEX IF NOT EXISTS idx_sessions_token      ON sessions(token_hash);
 CREATE INDEX IF NOT EXISTS idx_skill_ratings_user  ON skill_ratings(user_id);
 CREATE INDEX IF NOT EXISTS idx_learning_memory_user ON learning_memory(user_id);
 CREATE INDEX IF NOT EXISTS idx_lesson_progress_user ON lesson_progress(user_id);
+CREATE INDEX IF NOT EXISTS idx_quiz_results_user_lesson ON quiz_results(user_id, lesson_id);
 CREATE INDEX IF NOT EXISTS idx_lesson_progress_lesson ON lesson_progress(lesson_id);
 CREATE INDEX IF NOT EXISTS idx_attempts_user       ON exercise_attempts(user_id);
 CREATE INDEX IF NOT EXISTS idx_attempts_exercise   ON exercise_attempts(exercise_id);

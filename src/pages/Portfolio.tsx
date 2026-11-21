@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import {
   BookOpen, Download, Trash2, Plus, FileText,
   Loader, CheckCircle,
-  ExternalLink, Star, Brain, ChevronRight,
+  ExternalLink, Star, Brain, ChevronRight, Footprints,
 } from 'lucide-react'
 import { useAuthStore, notify } from '../store'
 import { PageError } from '../components/ui/PageState'
@@ -15,6 +15,7 @@ export default function Portfolio() {
   const [showAddModal, setShowAddModal] = useState(false)
   const [exportingId, setExportingId] = useState<string | null>(null)
   const [loadError, setLoadError] = useState(false)
+  const [field, setField] = useState<any[]>([])
   const { user } = useAuthStore()
 
   const load = async () => {
@@ -28,6 +29,7 @@ export default function Portfolio() {
       ])
       setItems(portItems)
       setProjects(projList.filter((p: any) => p.status === 'complete'))
+      setField(await window.api.fieldwork.list(user.id).catch(() => [])) // evidence is extra: the portfolio still opens without it
     } catch (err) {
       reportApiError('load your portfolio', err)
       setLoadError(true)
@@ -97,6 +99,7 @@ export default function Portfolio() {
       )}
 
       <div style={{ flex: 1, overflow: 'auto', padding: 24 }}>
+        {!loadError && !loading && field.length > 0 && <FieldEvidence entries={field} />}
         {loadError ? (
           <PageError message="Couldn't load your portfolio." onRetry={load} />
         ) : loading ? (
@@ -117,6 +120,32 @@ export default function Portfolio() {
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+/** What the learner recorded doing in the real world: their own words, kept on this computer, never written by the app. */
+function FieldEvidence({ entries }: { entries: any[] }) {
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>
+        <Footprints size={13} /> Real-world evidence ({entries.length})
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {entries.map((e) => (
+          <div key={e.lesson_id} style={{ padding: '14px 16px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', background: 'var(--bg-surface)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
+              <h3 style={{ fontSize: 13 }}>{e.lesson_title}</h3>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{String(e.updated_at).slice(0, 10)}</span>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2 }}>What I did</div>
+            <p style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--text-secondary)', marginBottom: 8, whiteSpace: 'pre-wrap' }}>{e.did}</p>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 2 }}>What I learned</div>
+            <p style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--text-secondary)', whiteSpace: 'pre-wrap' }}>{e.learned}</p>
+          </div>
+        ))}
+      </div>
+      <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>Written by you and kept on this computer. The app never adds results for you.</p>
     </div>
   )
 }

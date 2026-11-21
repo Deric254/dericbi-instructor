@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { DATAENG_DATASETS, generateDataEngDatasets } from './dataeng.datasets'
 import { SHOP_DATASETS, generateShopDatasets } from './shop.datasets'
 
-const SETUP_VERSION = 9 // increment to force re-seed on app update
+const SETUP_VERSION = 11 // increment to force re-seed on app update
 
 // Bump when the generated CSV *contents* change shape, so installs that already have older
 // CSVs on disk get them regenerated (generateDatasets() otherwise skips files that exist).
@@ -269,6 +269,8 @@ function generateEmployees(dir: string, n: number): void {
 function seedAllCurricula(): void {
   const contentRoot = getContentPath('')
   const curricula = [
+    { file: 'foundations/curriculum.json', type: 'sql_query'   },
+    { file: 'founder/curriculum.json',     type: 'sql_query'   },
     { file: 'sql/curriculum.json',        type: 'sql_query'   },
     { file: 'python/curriculum.json',     type: 'python_code' },
     { file: 'statistics/curriculum.json', type: 'python_code' },
@@ -301,12 +303,12 @@ function seedCurriculum(jsonPath: string, exerciseType: string): void {
   // into every student's lesson progress and exercise attempts. A content update must never touch progress.
   const insertLesson = db.prepare(`
     INSERT INTO lessons
-    (id, module, title, description, level, prerequisites, estimated_min, sort_order, theory_md, quiz)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (id, module, title, description, level, prerequisites, estimated_min, sort_order, theory_md, quiz, mastery_required)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET
       module = excluded.module, title = excluded.title, description = excluded.description, level = excluded.level,
       prerequisites = excluded.prerequisites, estimated_min = excluded.estimated_min, sort_order = excluded.sort_order,
-      theory_md = excluded.theory_md, quiz = excluded.quiz
+      theory_md = excluded.theory_md, quiz = excluded.quiz, mastery_required = excluded.mastery_required
   `)
 
   const insertExercise = db.prepare(`
@@ -330,7 +332,8 @@ function seedCurriculum(jsonPath: string, exerciseType: string): void {
         lesson.estimated_min || 30,
         lesson.sort_order || 0,
         lesson.theory_md || '',
-        JSON.stringify(lesson.quiz || [])
+        JSON.stringify(lesson.quiz || []),
+        lesson.mastery_required ? 1 : 0
       )
 
       for (let i = 0; i < (lesson.exercises || []).length; i++) {
@@ -424,6 +427,10 @@ function seedAchievements(): void {
     ['ach_bp_25',           'Money Finder',          'Solved 25 different Business Problem Solver exercises', 'search',  '{"type":"exercise_complete","skill":"bizsolver","count":25,"distinct":true}', 200, 'rare'],
     ['ach_bp_py_8',         'Practical Analyst',     'Passed 8 Python practicals with hidden tests in the Business Problem Solver', 'terminal', '{"type":"exercise_complete","skill":"bizsolver","exercise_type":"python_code","count":8,"distinct":true}', 250, 'rare'],
     ['ach_bp_capstone',     'Business Problem Solver', 'Completed the Owner\'s Briefing capstone',      'trophy',      '{"type":"lesson_complete","lesson_id":"bp-capstone"}',                         800, 'legendary'],
+    ['ach_fd_first',        'First Steps',           'Solved your first Start Here exercise',            'compass',     '{"type":"exercise_complete","skill":"foundations","count":1,"distinct":true}', 20,  'common'],
+    ['ach_fd_done',         'First Principles',      'Completed the Start Here track',                   'trophy',      '{"type":"lesson_complete","lesson_id":"fd-first-principles"}',                 300, 'epic'],
+    ['ach_fo_first',        'First Founder Step',    'Solved your first Founder Track exercise',         'rocket',      '{"type":"exercise_complete","skill":"founder","count":1,"distinct":true}',     20,  'common'],
+    ['ach_fo_done',         'Ready to Start',        'Completed the Founder Track',                      'trophy',      '{"type":"lesson_complete","lesson_id":"fo-iterate"}',                      500, 'epic'],
     ['ach_consultant_rank', 'Analytics Consultant',  'Achieved Analytics Consultant rank',               'briefcase',   '{"type":"rank","rank":"analytics_consultant"}',             1000, 'legendary'],
   ]
 
@@ -467,7 +474,7 @@ function unlockIntroLessons(specificUserId?: string): void {
 // HELPERS
 // ─────────────────────────────────────────────
 
-function getContentPath(subPath: string): string {
+export function getContentPath(subPath: string): string {
   // In production (packaged), content is in app resources
   // In development, content is relative to project root
   if (app.isPackaged) {

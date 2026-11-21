@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Database, FileSpreadsheet, Terminal,
   BarChart3, TrendingUp, Briefcase, FlaskConical,
   Table2, FolderOpen, BookOpen, Trophy, Settings,
-  ChevronLeft, ChevronRight, Users, LogOut, ShieldCheck, KeyRound, Workflow, Target,
+  ChevronLeft, ChevronRight, Users, LogOut, ShieldCheck, KeyRound, Workflow, Target, Compass, Rocket,
 } from 'lucide-react'
 import { useAuthStore, useUIStore } from '../../store'
 import type { NavSection } from '../../types'
@@ -20,7 +20,9 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'dashboard',   label: 'Dashboard',    icon: <LayoutDashboard size={16} /> },
 
   // Learning modules
-  { id: 'sql',         label: 'SQL',          icon: <Database size={16} />,       color: 'var(--sql-color)',      section: 'Academies' },
+  { id: 'foundations', label: 'Start Here',   icon: <Compass size={16} />,        color: 'var(--fd-color)',       section: 'Academies' },
+  { id: 'founder',     label: 'Founder Track', icon: <Rocket size={16} />,        color: 'var(--fo-color)' },
+  { id: 'sql',         label: 'SQL',          icon: <Database size={16} />,       color: 'var(--sql-color)' },
   { id: 'excel',       label: 'Excel',        icon: <FileSpreadsheet size={16} />, color: 'var(--excel-color)' },
   { id: 'python',      label: 'Python',       icon: <Terminal size={16} />,       color: 'var(--python-color)' },
   { id: 'powerbi',     label: 'Power BI',     icon: <BarChart3 size={16} />,      color: 'var(--powerbi-color)' },

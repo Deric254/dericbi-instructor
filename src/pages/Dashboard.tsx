@@ -3,12 +3,13 @@ import {
   BookOpen, CheckCircle, Clock, TrendingUp,
   Award, ChevronRight, Database, FileSpreadsheet,
   Terminal, BarChart3, Briefcase, Users, FlaskConical,
-  Table2, FolderOpen, Trophy, Sparkles, Workflow, Target,
+  Table2, FolderOpen, Trophy, Sparkles, Workflow, Target, Compass, Rocket,
 } from 'lucide-react'
 import { useAuthStore, useUIStore } from '../store'
 import type { DashboardStats, SkillRating, NavSection } from '../types'
 import AppLogo from '../components/ui/AppLogo'
 import LearningPlan from '../components/ui/LearningPlan'
+import ReviewCard from '../components/ui/ReviewCard'
 import { PageLoader, PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'
 
@@ -41,6 +42,8 @@ const JOURNEY: JourneyGroup[] = [
   {
     phase: 'Academies',
     items: [
+      { id: 'foundations', label: 'Start Here', desc: 'From zero: value, money, customers, price and how to think from first principles.', icon: <Compass size={16} />, color: 'var(--fd-color)' },
+      { id: 'founder', label: 'Founder Track', desc: 'Find a real problem, test an offer, run the numbers and start: twelve lessons for new founders.', icon: <Rocket size={16} />, color: 'var(--fo-color)' },
       { id: 'sql',        label: 'SQL',        desc: 'Query real databases — SELECT, joins, subqueries.',     icon: <Database size={16} />,       color: 'var(--sql-color)' },
       { id: 'excel',      label: 'Excel',      desc: 'Formulas, PivotTables, and dashboards.',                  icon: <FileSpreadsheet size={16} />, color: 'var(--excel-color)' },
       { id: 'python',     label: 'Python',     desc: 'Data wrangling and automation with real code.',          icon: <Terminal size={16} />,       color: 'var(--python-color)' },
@@ -126,10 +129,10 @@ export default function Dashboard() {
         {isNewcomer && (
           <button
             className="btn btn-primary"
-            onClick={() => setActiveSection('sql')}
+            onClick={() => setActiveSection('foundations')}
             style={{ flexShrink: 0 }}
           >
-            <Sparkles size={14} /> Start with SQL
+            <Sparkles size={14} /> Start here
           </button>
         )}
       </div>
@@ -183,6 +186,7 @@ export default function Dashboard() {
         </div>
       )}
 
+      <ReviewCard />
       {stats?.plan && !isNewcomer && <LearningPlan plan={stats.plan} onOpen={(section, lessonId) => { setPendingLesson(lessonId ?? null); setActiveSection(section) }} />}
 
       {/* Stats grid */}

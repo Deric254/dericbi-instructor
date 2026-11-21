@@ -37,6 +37,8 @@
   --playground-color: #818cf8;  /* indigo */
   --de-color:       #fb7185;    /* rose — Data Engineering */
   --bp-color:       #14b8a6;    /* teal — Business Problem Solver */
+  --fd-color:       #a3e635;    /* lime — Start Here */
+  --fo-color:       #fb923c;    /* orange — Founder Track */
 
   /* Status */
   --success:        #22c55e;
@@ -130,6 +132,8 @@
   --playground-color: #4338ca;
   --de-color:       #be123c;
   --bp-color:       #0f766e;
+  --fd-color:       #3f6212;
+  --fo-color:       #9a3412;
 
   --success:        #15803d;
   --success-dim:    rgba(22, 163, 74, 0.12);

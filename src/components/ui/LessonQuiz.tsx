@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { CheckCircle, XCircle, Sparkles, RotateCcw } from 'lucide-react'
+import { useAuthStore } from '../../store'
 
 export interface QuizQuestion {
   question: string
@@ -14,13 +15,18 @@ export interface QuizQuestion {
  * right/wrong feedback and an explanation — no backend call needed, since
  * the correct answer is already present in data the client has loaded.
  *
+ * When `lessonId` is given, a finished run is sent to the app to be marked and saved (the app grades it
+ * against the lesson's own questions). A failed save never interrupts the quiz.
+ *
  * Renders nothing if the lesson has no quiz questions yet, so it's always
  * safe to drop into any lesson view unconditionally.
  */
-export default function LessonQuiz({ quizJson, accentColor = 'var(--accent)' }: {
+export default function LessonQuiz({ quizJson, lessonId, accentColor = 'var(--accent)' }: {
   quizJson?: string
+  lessonId?: string
   accentColor?: string
 }) {
+  const { user } = useAuthStore()
   const questions: QuizQuestion[] = React.useMemo(() => {
     if (!quizJson) return []
     try {
@@ -34,6 +40,7 @@ export default function LessonQuiz({ quizJson, accentColor = 'var(--accent)' }: 
   const [index, setIndex] = useState(0)
   const [selected, setSelected] = useState<number | null>(null)
   const [answers, setAnswers] = useState<boolean[]>([])
+  const [choices, setChoices] = useState<number[]>([])
   const [started, setStarted] = useState(false)
 
   if (questions.length === 0) return null
@@ -46,6 +53,11 @@ export default function LessonQuiz({ quizJson, accentColor = 'var(--accent)' }: 
     if (selected !== null) return // already answered this one
     setSelected(i)
     setAnswers(prev => [...prev, i === q.correct_index])
+    const chosen = [...choices, i]
+    setChoices(chosen)
+    if (lessonId && user && chosen.length === questions.length) {
+      window.api.quizzes.submit(user.id, lessonId, chosen).catch(() => { /* saving is best-effort; the quiz still works */ })
+    }
   }
 
   const next = () => {
@@ -56,6 +68,7 @@ export default function LessonQuiz({ quizJson, accentColor = 'var(--accent)' }: 
   const restart = () => {
     setSelected(null)
     setAnswers([])
+    setChoices([])
     setIndex(0)
     setStarted(true)
   }

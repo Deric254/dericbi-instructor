@@ -63,7 +63,7 @@ export default function PowerBIAcademy() {
           <div style={{ flex: 1, overflow: 'auto', padding: 24 }}>
             <div style={{ maxWidth: 680 }}>
               <LessonTheory markdown={activeLesson.theory_md} />
-              <LessonQuiz quizJson={activeLesson.quiz} accentColor="var(--powerbi-color)" />
+              <LessonQuiz quizJson={activeLesson.quiz} lessonId={activeLesson.id} accentColor="var(--powerbi-color)" />
               <div style={{ marginTop: 24, padding: '14px 16px', background: 'var(--info-dim)', border: '1px solid var(--info)', borderRadius: 'var(--radius)', fontSize: 12, color: 'var(--info)', display: 'flex', gap: 8 }}>
                 <Info size={14} style={{ flexShrink: 0, marginTop: 1 }} />
                 <span>Power BI exercises use guided walkthroughs. Open Power BI Desktop alongside this lesson and follow the steps. The AI Instructor will evaluate your work based on your descriptions and screenshots.</span>

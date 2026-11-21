@@ -1,0 +1,1300 @@
+{
+  "module": "founder",
+  "version": "1.0",
+  "lessons": [
+    {
+      "id": "fo-problem",
+      "title": "Find a Real Problem Worth Solving",
+      "description": "Start from a problem people already have and already spend money or time on, not from your idea.",
+      "level": "beginner",
+      "prerequisites": [],
+      "estimated_min": 30,
+      "sort_order": 1,
+      "theory_md": "## Why this matters\nMost businesses fail because they solved a problem nobody had, or one nobody would pay to fix. Finding the problem first protects your savings and your time.\n\n## The first principle\nA real problem has three signs: **it happens often, it hurts, and people already pay (money or effort) to cope with it.**\n\n- A boda boda rider who loses an hour a day queuing for fuel has a problem that happens often, costs real money, and he already pays for it with his time.\n- \"People should eat healthier\" is an opinion. It has no visible cost today, so nobody is paying to fix it.\n\nThe test: **what do these people do today about it, and what does that cost them?** If the answer is \"nothing\", be careful.\n\n## A worked example\nWanjiru notices that small shops in her estate run out of airtime and mobile-money float by midday and send a child to a far agent.\n\n- How often: nearly every day.\n- How much it hurts: 30 minutes lost and sometimes a missed sale.\n- What they do today: they walk, and pay the child KES 20.\n\nShe writes: `cost of the problem per shop per month = 20 x 26 days = KES 520`. A solution that costs a shop KES 300 a month and removes the trip is worth testing.\n\n## Try it\nSQL works as a calculator. `SELECT 20 * 26 AS monthly_cost` returns the answer in a column called `monthly_cost`.\n\n## What you can and cannot claim\nA problem that you have seen once, or that only you have, is a guess. Treat it as a question to test, not a fact. The next lesson shows how.\n\n## Say it in your own words\nWhat three things make a problem worth solving, and how would you find out what people do about it today?\n\n## Do this in real life\nWrite down five problems you saw this week in your area or work. For each, note how often, what it costs, and what people do now. Circle the one with the clearest cost.",
+      "quiz": [
+        {
+          "question": "Which sign shows a problem is worth solving?",
+          "options": [
+            "You find it interesting",
+            "People already pay money or effort to cope with it",
+            "It is new",
+            "Friends say it is a nice idea"
+          ],
+          "correct_index": 1,
+          "explanation": "Existing spending of money or effort is evidence that the problem hurts."
+        },
+        {
+          "question": "Why start with the problem instead of your idea?",
+          "options": [
+            "Ideas are expensive",
+            "A good idea for a problem nobody has earns nothing",
+            "Problems are easier to patent",
+            "Customers dislike ideas"
+          ],
+          "correct_index": 1,
+          "explanation": "Without a real problem there is no buyer."
+        },
+        {
+          "question": "A shop sends a child to the agent every day, paying KES 20, 26 days a month. What does the problem cost per month?",
+          "options": [
+            "KES 46",
+            "KES 520",
+            "KES 260",
+            "KES 20"
+          ],
+          "correct_index": 1,
+          "explanation": "20 x 26 = 520."
+        },
+        {
+          "question": "A problem you have seen once, in one place, is best treated as",
+          "options": [
+            "A proven market",
+            "A question to test with real people",
+            "A guaranteed sale",
+            "A reason to quit"
+          ],
+          "correct_index": 1,
+          "explanation": "One sighting is a guess until others confirm it."
+        },
+        {
+          "question": "What question tests a problem fastest?",
+          "options": [
+            "Would you like my product?",
+            "What do you do about this today, and what does it cost you?",
+            "Do you think this is clever?",
+            "Would you tell friends?"
+          ],
+          "correct_index": 1,
+          "explanation": "It asks about real behaviour and cost, not opinions."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fo-1-e1",
+          "title": "Cost of the Problem",
+          "prompt": "A shop pays 20 per trip, one trip a day for 26 days in a month. Return one row with one column called monthly_cost.",
+          "hint_1": "Multiply the daily cost by the days. Name it with AS monthly_cost.",
+          "hint_2": "SELECT 20 * 26 AS monthly_cost",
+          "hint_3": "SELECT 20 * 26 AS monthly_cost",
+          "solution": "SELECT 20 * 26 AS monthly_cost",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-1-e2",
+          "title": "Is It Worth Solving?",
+          "prompt": "A solution would cost a shop 300 a month. The problem costs 520 a month. Return one row with one column called saving.",
+          "hint_1": "The saving is the cost of the problem minus the cost of the solution.",
+          "hint_2": "SELECT 520 - 300 AS saving",
+          "hint_3": "SELECT 520 - 300 AS saving",
+          "solution": "SELECT 520 - 300 AS saving",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-1-e3",
+          "title": "The Whole Estate",
+          "prompt": "There are 60 such shops. Return one row with two columns: shops_saving (60) and estate_saving (60 shops times the saving of 220 each).",
+          "hint_1": "estate_saving is 60 * 220. Separate the two columns with a comma.",
+          "hint_2": "SELECT 60 AS shops_saving, 60 * 220 AS estate_saving",
+          "hint_3": "SELECT 60 AS shops_saving, 60 * 220 AS estate_saving",
+          "solution": "SELECT 60 AS shops_saving, 60 * 220 AS estate_saving",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fo-interviews",
+      "title": "Talk to Customers Before You Build",
+      "description": "How to ask questions that give you the truth about what people do and pay, and how to count what you hear.",
+      "level": "beginner",
+      "prerequisites": [
+        "fo-problem"
+      ],
+      "estimated_min": 30,
+      "sort_order": 2,
+      "theory_md": "## Why this matters\nFriends say \"great idea\" to be kind. Only real customers can tell you whether they would spend money. A short, honest conversation costs nothing and can save months.\n\n## The first principle\nAsk about **the past and the present, not the future.** People are poor at predicting what they will do, but they know what they did last week.\n\nGood questions:\n- \"Tell me about the last time this happened.\"\n- \"What did you do about it? What did it cost?\"\n- \"What have you tried before?\"\n\nWeak questions: \"Would you buy this?\" and \"Do you like my idea?\" Both invite a polite yes.\n\n## A worked example\nWanjiru talks to 10 shop owners about running out of float.\n\n- 8 say it happened this week.\n- 6 say they have paid someone to fetch it.\n- 3 say they would try a delivery service for KES 300 a month.\n\nShe counts: `6 of 10 already pay = 60 percent`. Her sentence is not \"people love the idea\". It is \"6 of 10 already pay to cope, and 3 of 10 will try my price\".\n\n## Try it\nPercent is the part divided by the whole times 100. In SQL: `SELECT 6 * 100.0 / 10 AS percent_paying`. Using `100.0` keeps the decimals.\n\n## What you can and cannot claim\nTen conversations do not prove a market. They show whether the problem is real for people like the ones you met. Write down exactly who you spoke to.\n\n## Say it in your own words\nWhy is \"Would you buy this?\" a weak question, and what would you ask instead?\n\n## Do this in real life\nInterview five people who have the problem. Write each answer straight after the conversation, in their words. Count how many already pay or try to cope.",
+      "quiz": [
+        {
+          "question": "Which question gives the most reliable answer?",
+          "options": [
+            "Would you buy this?",
+            "Tell me about the last time this happened and what you did",
+            "Do you like my idea?",
+            "Would you tell your friends?"
+          ],
+          "correct_index": 1,
+          "explanation": "Past behaviour is more reliable than predictions."
+        },
+        {
+          "question": "Why do friends make poor first interviewees?",
+          "options": [
+            "They are busy",
+            "They tend to be polite instead of honest",
+            "They know too much",
+            "They have no money"
+          ],
+          "correct_index": 1,
+          "explanation": "Kindness hides the truth you need."
+        },
+        {
+          "question": "Out of 10 owners, 6 already pay someone to cope. What percent is that?",
+          "options": [
+            "6 percent",
+            "60 percent",
+            "16 percent",
+            "40 percent"
+          ],
+          "correct_index": 1,
+          "explanation": "6 / 10 x 100 = 60."
+        },
+        {
+          "question": "After 10 conversations, what can you honestly say?",
+          "options": [
+            "I have proven a market",
+            "What I found among the people I met",
+            "Everyone wants it",
+            "The business will succeed"
+          ],
+          "correct_index": 1,
+          "explanation": "Report exactly who you spoke to and what they said."
+        },
+        {
+          "question": "Which result is the strongest evidence?",
+          "options": [
+            "Five people said it is a good idea",
+            "Five people already pay to solve it",
+            "Five people smiled",
+            "Five people asked to be updated"
+          ],
+          "correct_index": 1,
+          "explanation": "Paying today is stronger than praise."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fo-2-e1",
+          "title": "How Many Pay Already",
+          "prompt": "Of 10 owners, 6 already pay. Return one row with one column called percent_paying (use 100.0 so decimals work).",
+          "hint_1": "Part times 100.0 divided by the whole: 6 * 100.0 / 10.",
+          "hint_2": "SELECT 6 * 100.0 / 10 AS percent_paying",
+          "hint_3": "SELECT 6 * 100.0 / 10 AS percent_paying",
+          "solution": "SELECT 6 * 100.0 / 10 AS percent_paying",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-2-e2",
+          "title": "Will Try My Price",
+          "prompt": "3 of the 10 would try the service. Return one row with percent_would_try.",
+          "hint_1": "3 * 100.0 / 10 with AS percent_would_try.",
+          "hint_2": "SELECT 3 * 100.0 / 10 AS percent_would_try",
+          "hint_3": "SELECT 3 * 100.0 / 10 AS percent_would_try",
+          "solution": "SELECT 3 * 100.0 / 10 AS percent_would_try",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-2-e3",
+          "title": "Scale the Evidence",
+          "prompt": "If 30 percent of the 60 shops in the estate would try it, how many shops is that? Return one column called shops.",
+          "hint_1": "60 * 30 / 100 gives the count.",
+          "hint_2": "SELECT 60 * 30 / 100 AS shops",
+          "hint_3": "SELECT 60 * 30 / 100 AS shops",
+          "solution": "SELECT 60 * 30 / 100 AS shops",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fo-market",
+      "title": "Size an Opportunity Honestly",
+      "description": "Count reachable customers bottom-up, one real group at a time, instead of quoting a huge top-down market.",
+      "level": "beginner",
+      "prerequisites": [
+        "fo-interviews"
+      ],
+      "estimated_min": 30,
+      "sort_order": 3,
+      "theory_md": "## Why this matters\n\"Kenya has 50 million people, so if we get 1 percent...\" is the most common false start in business planning. It sounds big and tells you nothing. An honest size tells you whether the business can support you.\n\n## The first principle\nCount **who you can actually reach, who actually needs it, and what each pays**, and multiply: `customers x price x times per year`.\n\nThis is called **bottom-up**. Start from a group you can name (60 shops in one estate), not from a population.\n\n## A worked example\nWanjiru plans a float-delivery service for shops in her estate.\n\n- Shops she can reach this year: 60.\n- Share likely to buy (from her interviews): 30 percent, so 18 shops.\n- Price: KES 300 a month, so 3,600 a year per shop.\n- Yearly revenue if it works: `18 x 3,600 = KES 64,800`.\n\nThat is about KES 5,400 a month. Honest, small, and useful: it tells her one estate cannot pay a full salary, so she must plan a second estate or a higher price.\n\n## Try it\nChain multiplication in SQL: `SELECT 18 * 300 * 12 AS yearly_revenue`.\n\n## Check it from two sides\nSize the same opportunity a second way: start from what customers spend today on the problem. If 60 shops each lose KES 520 a month, the problem costs the estate `60 x 520 = KES 31,200` a month. Your service at KES 300 a month per shop can capture only part of that. If the two methods are far apart, one of your numbers is wrong, and finding which one is the work.\n\n## What you can and cannot claim\nYour size is a guess built on your interview numbers. Show the numbers you used so anyone can change them and see the result.\n\n## Say it in your own words\nWhy is \"1 percent of the whole country\" a weak way to size a business, and what do you do instead?\n\n## Do this in real life\nName your first group of customers, count how many you can reach in six months, apply the share your interviews suggest, and write the yearly revenue.",
+      "quiz": [
+        {
+          "question": "Which method sizes a business honestly?",
+          "options": [
+            "1 percent of the population",
+            "Reachable customers x share who need it x price",
+            "The biggest number you can find",
+            "What competitors say"
+          ],
+          "correct_index": 1,
+          "explanation": "Bottom-up counting uses people you can actually reach."
+        },
+        {
+          "question": "18 shops each pay KES 300 a month. What is the yearly revenue?",
+          "options": [
+            "KES 5,400",
+            "KES 64,800",
+            "KES 3,600",
+            "KES 21,600"
+          ],
+          "correct_index": 1,
+          "explanation": "18 x 300 x 12 = 64,800."
+        },
+        {
+          "question": "Why show the numbers behind your estimate?",
+          "options": [
+            "To look serious",
+            "So others can change them and see the effect",
+            "Because the law requires it",
+            "To hide the method"
+          ],
+          "correct_index": 1,
+          "explanation": "A visible assumption can be tested and corrected."
+        },
+        {
+          "question": "What does a small honest size tell you?",
+          "options": [
+            "Quit",
+            "Whether one group can support you and what you must add",
+            "That you are unqualified",
+            "Nothing"
+          ],
+          "correct_index": 1,
+          "explanation": "It guides the next decision, such as a second estate or a higher price."
+        },
+        {
+          "question": "Where does the share who will buy come from?",
+          "options": [
+            "A guess you like",
+            "Your customer interviews",
+            "The country's population",
+            "A news article"
+          ],
+          "correct_index": 1,
+          "explanation": "Use what real people told you."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fo-3-e1",
+          "title": "Shops Who Will Buy",
+          "prompt": "60 shops, 30 percent likely to buy. Return one row with one column called buyers.",
+          "hint_1": "60 * 30 / 100.",
+          "hint_2": "SELECT 60 * 30 / 100 AS buyers",
+          "hint_3": "SELECT 60 * 30 / 100 AS buyers",
+          "solution": "SELECT 60 * 30 / 100 AS buyers",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-3-e2",
+          "title": "Yearly Revenue",
+          "prompt": "18 shops pay 300 a month for 12 months. Return one row with one column called yearly_revenue.",
+          "hint_1": "18 * 300 * 12.",
+          "hint_2": "SELECT 18 * 300 * 12 AS yearly_revenue",
+          "hint_3": "SELECT 18 * 300 * 12 AS yearly_revenue",
+          "solution": "SELECT 18 * 300 * 12 AS yearly_revenue",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-3-e3",
+          "title": "Per Month",
+          "prompt": "Return one row with two columns: yearly_revenue (64800) and monthly_revenue (that divided by 12).",
+          "hint_1": "Divide 64800 by 12 for the monthly figure.",
+          "hint_2": "SELECT 64800 AS yearly_revenue, 64800 / 12 AS monthly_revenue",
+          "hint_3": "SELECT 64800 AS yearly_revenue, 64800 / 12 AS monthly_revenue",
+          "solution": "SELECT 64800 AS yearly_revenue, 64800 / 12 AS monthly_revenue",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fo-offer",
+      "title": "Make an Offer and Set the Price",
+      "description": "Turn a problem into something specific a customer can say yes to, and price it from cost and from value.",
+      "level": "intermediate",
+      "prerequisites": [
+        "fo-market"
+      ],
+      "estimated_min": 30,
+      "sort_order": 4,
+      "theory_md": "## Why this matters\n\"We help businesses grow\" is not an offer. An offer says exactly what the customer gets, for how much, by when. A clear offer is easier to say yes to, and easier to test.\n\n## The first principle\nA price has a **floor** and a **ceiling**.\n\n- The **floor** is your cost to deliver, plus the profit you need.\n- The **ceiling** is the value to the customer, in money they save or earn.\n- Any price between the two works. Choose near the middle first, and test it.\n\nNever set a price from cost alone. If your cost is KES 100 but the customer saves KES 520, you are leaving money on the table.\n\n## A worked example\nWanjiru's service costs her KES 120 per shop per month to deliver. The shop saves KES 520.\n\n- Floor: 120 plus a profit she wants, say 80, is KES 200.\n- Ceiling: KES 520.\n- She offers KES 300 a month: \"Float and airtime delivered to your shop twice a day, cancel any month.\"\n\nMargin per shop: `(300 - 120) / 300 = 60 percent`.\n\n## Try it\nMargin percent is `(price - cost) * 100.0 / price`.\n\n## Test the price, do not guess it\nShow the same offer to three customers at three different prices, for example KES 200, 300 and 400 a month. Count how many say yes at each price and keep the one that gives the most **total contribution**, not the most yeses. At 180 contribution, 10 shops at KES 300 beat 12 shops at KES 200 (which gives only 80 each).\n\n## What you can and cannot claim\nThe ceiling is what the customer says it is worth, not what you hope. Check it in interviews.\n\n## Say it in your own words\nWhat are the floor and the ceiling of a price, and why not price from cost alone?\n\n## Do this in real life\nWrite your offer in one sentence: who, what they get, price, and how fast. Show it to three customers and note their reaction to the price.",
+      "quiz": [
+        {
+          "question": "What is the floor of a price?",
+          "options": [
+            "What competitors charge",
+            "Your cost to deliver plus the profit you need",
+            "The customer's budget",
+            "Half the ceiling"
+          ],
+          "correct_index": 1,
+          "explanation": "Below the floor you lose money."
+        },
+        {
+          "question": "What is the ceiling of a price?",
+          "options": [
+            "The value to the customer",
+            "Your costs",
+            "The highest price in town",
+            "Your hope"
+          ],
+          "correct_index": 0,
+          "explanation": "Above the customer's value they will not buy."
+        },
+        {
+          "question": "Cost is 120 and price is 300. What is the margin percent?",
+          "options": [
+            "40 percent",
+            "60 percent",
+            "180 percent",
+            "120 percent"
+          ],
+          "correct_index": 1,
+          "explanation": "(300 - 120) / 300 x 100 = 60."
+        },
+        {
+          "question": "Which is a clear offer?",
+          "options": [
+            "We help shops grow",
+            "Float and airtime delivered to your shop twice a day for KES 300 a month",
+            "Best service in town",
+            "Contact us"
+          ],
+          "correct_index": 1,
+          "explanation": "A clear offer says what, how often and for how much."
+        },
+        {
+          "question": "Why not price from cost alone?",
+          "options": [
+            "It is illegal",
+            "You may charge far less than the value you create",
+            "Costs change",
+            "Customers do not know costs"
+          ],
+          "correct_index": 1,
+          "explanation": "The customer pays for value, not for your cost."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fo-4-e1",
+          "title": "Margin on One Shop",
+          "prompt": "Price 300, cost 120. Return one row with one column called margin_percent (use 100.0).",
+          "hint_1": "(300 - 120) * 100.0 / 300.",
+          "hint_2": "SELECT (300 - 120) * 100.0 / 300 AS margin_percent",
+          "hint_3": "SELECT (300 - 120) * 100.0 / 300 AS margin_percent",
+          "solution": "SELECT (300 - 120) * 100.0 / 300 AS margin_percent",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-4-e2",
+          "title": "The Floor",
+          "prompt": "Cost 120 plus the profit she wants, 80. Return one column called floor_price.",
+          "hint_1": "120 + 80.",
+          "hint_2": "SELECT 120 + 80 AS floor_price",
+          "hint_3": "SELECT 120 + 80 AS floor_price",
+          "solution": "SELECT 120 + 80 AS floor_price",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-4-e3",
+          "title": "Where the Offer Sits",
+          "prompt": "Return one row with three columns: floor_price (200), offer (300) and ceiling (520).",
+          "hint_1": "Three literal numbers with names.",
+          "hint_2": "SELECT 200 AS floor_price, 300 AS offer, 520 AS ceiling",
+          "hint_3": "SELECT 200 AS floor_price, 300 AS offer, 520 AS ceiling",
+          "solution": "SELECT 200 AS floor_price, 300 AS offer, 520 AS ceiling",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fo-unit",
+      "title": "Unit Economics and Break-Even",
+      "description": "How much one sale earns after its own costs, and how many sales cover your fixed costs.",
+      "level": "intermediate",
+      "prerequisites": [
+        "fo-offer"
+      ],
+      "estimated_min": 35,
+      "sort_order": 5,
+      "theory_md": "## Why this matters\nA business can be busy and still lose money. Unit economics tells you, for one sale, whether you earn or lose, and break-even tells you how many sales you need before you earn anything.\n\n## The first principle\nSplit costs in two.\n\n- **Variable costs** rise with each sale (stock, delivery, mobile-money fees).\n- **Fixed costs** are the same whether you sell one or a hundred (rent, licences, your phone bill).\n\nEach sale gives a **contribution**: `price - variable cost`. It is what each sale puts toward fixed costs. Then:\n\n`break-even sales = fixed costs / contribution per sale`\n\nBelow that number you lose. Above it, each extra sale is profit.\n\n## A worked example\nWanjiru's service: price KES 300, variable cost KES 120, so contribution KES 180 per shop per month. Her fixed costs are KES 6,000 a month (a motorbike lease and phone).\n\n- Break-even: `6,000 / 180 = 33.3`, so she needs **34 shops** to cover fixed costs.\n- Her first estate has only 18 buyers. She loses money until she reaches more estates.\n\nThat is a useful result before she spends anything.\n\n## Try it\nUse `SELECT 6000.0 / 180 AS break_even`. In SQL, `CAST(x AS INTEGER)` drops decimals; to round up use `CAST(x AS INTEGER) + 1` when x is not whole.\n\nYou can also practise on real shop data: `shop_sale_items` has `qty`, `unit_price` and `unit_cost`.\n\n## What you can and cannot claim\nBreak-even assumes costs stay as stated. Check it again each time price or costs move.\n\n## Say it in your own words\nWhat is the difference between a fixed and a variable cost, and how do they give a break-even number?\n\n## Do this in real life\nList your own fixed costs per month and the variable cost of one sale. Work out your contribution and break-even. Write the number somewhere you will see it.",
+      "quiz": [
+        {
+          "question": "Which of these is a fixed cost?",
+          "options": [
+            "Stock for each sale",
+            "Monthly shop rent",
+            "Delivery per order",
+            "Packaging per item"
+          ],
+          "correct_index": 1,
+          "explanation": "Rent does not change with the number of sales."
+        },
+        {
+          "question": "Price 300, variable cost 120. What is the contribution per sale?",
+          "options": [
+            "120",
+            "180",
+            "300",
+            "420"
+          ],
+          "correct_index": 1,
+          "explanation": "300 - 120 = 180."
+        },
+        {
+          "question": "Fixed costs are 6,000 and contribution is 180. How many sales to break even (round up)?",
+          "options": [
+            "33",
+            "34",
+            "36",
+            "40"
+          ],
+          "correct_index": 1,
+          "explanation": "6,000 / 180 = 33.3, so 34 whole sales are needed."
+        },
+        {
+          "question": "A business is busy but losing money. What is a likely reason?",
+          "options": [
+            "Too many customers",
+            "Contribution per sale is too small to cover fixed costs",
+            "Prices are too high",
+            "It is too new"
+          ],
+          "correct_index": 1,
+          "explanation": "Busy is not profitable if contribution cannot cover fixed costs."
+        },
+        {
+          "question": "What should you do when your price or costs change?",
+          "options": [
+            "Nothing",
+            "Recalculate the break-even",
+            "Hire staff",
+            "Close"
+          ],
+          "correct_index": 1,
+          "explanation": "The break-even moves with every change."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fo-5-e1",
+          "title": "Contribution per Shop",
+          "prompt": "Price 300, variable cost 120. Return one column called contribution.",
+          "hint_1": "300 - 120.",
+          "hint_2": "SELECT 300 - 120 AS contribution",
+          "hint_3": "SELECT 300 - 120 AS contribution",
+          "solution": "SELECT 300 - 120 AS contribution",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-5-e2",
+          "title": "Break-Even Shops",
+          "prompt": "Fixed costs 6000 a month, contribution 180. Return one column called break_even_shops, rounded UP to a whole number: use CAST(... AS INTEGER) + 1 because 6000/180 is not whole.",
+          "hint_1": "6000.0 / 180 = 33.33. Take its integer part and add 1.",
+          "hint_2": "SELECT CAST(6000.0 / 180 AS INTEGER) + 1 AS break_even_shops",
+          "hint_3": "SELECT CAST(6000.0 / 180 AS INTEGER) + 1 AS break_even_shops",
+          "solution": "SELECT CAST(6000.0 / 180 AS INTEGER) + 1 AS break_even_shops",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-5-e3",
+          "title": "Real Shop Contribution",
+          "prompt": "From shop_sale_items, return one row with contribution: the sum of qty * (unit_price - unit_cost).",
+          "hint_1": "SUM(qty * (unit_price - unit_cost)) over the whole table.",
+          "hint_2": "SELECT SUM(qty * (unit_price - unit_cost)) AS contribution FROM shop_sale_items",
+          "hint_3": "SELECT SUM(qty * (unit_price - unit_cost)) AS contribution FROM shop_sale_items",
+          "solution": "SELECT SUM(qty * (unit_price - unit_cost)) AS contribution FROM shop_sale_items",
+          "evaluation_mode": "exact",
+          "points": 20,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fo-runway",
+      "title": "Cash Flow and Runway",
+      "description": "How long your cash lasts, and why a profitable business can still run out of money.",
+      "level": "intermediate",
+      "prerequisites": [
+        "fo-unit"
+      ],
+      "estimated_min": 30,
+      "sort_order": 6,
+      "theory_md": "## Why this matters\nBusinesses do not close because they are unprofitable on paper. They close the day cash runs out: the rent is due and customers have not yet paid.\n\n## The first principle\n**Cash is what you can spend today.** Profit is what is left over after costs, but customers may pay you late while you pay suppliers now.\n\n- **Burn** is the cash you lose each month when more goes out than comes in.\n- **Runway** is how many months your cash lasts: `runway = cash in hand / monthly burn`.\n\nRunway gives you a deadline. Before it ends you must raise sales, cut costs or find money.\n\n## A worked example\nWanjiru starts with KES 90,000 in savings. Each month she spends KES 40,000 (lease, phone, fuel, stock) and receives KES 22,000 from shops.\n\n- Burn: `40,000 - 22,000 = KES 18,000` a month.\n- Runway: `90,000 / 18,000 = 5 months`.\n\nIf shops pay 30 days late, her first receipts arrive in month 2, and the real runway is shorter. She must plan for the delay.\n\n## Try it\n`SELECT 90000 / 18000 AS runway_months`. Use `.0` if you need decimals.\n\n## Three ways to lengthen runway\nRunway is cash divided by burn, so there are only three levers: raise cash (sales, savings, funding), raise receipts, or cut spending. Collecting money upfront or on delivery, instead of 30 days later, helps most for small businesses because it moves cash in earlier without any new customer. Always rework the number after you change one lever.\n\n## What you can and cannot claim\nRunway assumes burn stays the same. Recalculate monthly with real numbers from your own records.\n\n## Say it in your own words\nWhat is runway, and why can a profitable business still run out of cash?\n\n## Do this in real life\nWrite your cash in hand, your monthly spending and your monthly receipts. Work out your burn and runway. Set a reminder for the date it would reach zero.",
+      "quiz": [
+        {
+          "question": "What is runway?",
+          "options": [
+            "Yearly profit",
+            "How many months your cash lasts at the current burn",
+            "Your credit limit",
+            "Your best month's sales"
+          ],
+          "correct_index": 1,
+          "explanation": "Runway = cash in hand / monthly burn."
+        },
+        {
+          "question": "Spending 40,000 and receiving 22,000 a month, what is the burn?",
+          "options": [
+            "22,000",
+            "18,000",
+            "40,000",
+            "62,000"
+          ],
+          "correct_index": 1,
+          "explanation": "40,000 - 22,000 = 18,000."
+        },
+        {
+          "question": "Cash 90,000 and burn 18,000. What is the runway?",
+          "options": [
+            "3 months",
+            "5 months",
+            "9 months",
+            "18 months"
+          ],
+          "correct_index": 1,
+          "explanation": "90,000 / 18,000 = 5."
+        },
+        {
+          "question": "Why can a profitable business run out of cash?",
+          "options": [
+            "Profit is illegal",
+            "Customers pay late while bills are due now",
+            "Prices drop",
+            "Staff leave"
+          ],
+          "correct_index": 1,
+          "explanation": "Timing of cash matters as much as profit."
+        },
+        {
+          "question": "What should you do when runway is short?",
+          "options": [
+            "Ignore it",
+            "Raise sales, cut costs or find funding before it ends",
+            "Spend faster",
+            "Wait"
+          ],
+          "correct_index": 1,
+          "explanation": "Runway is a deadline for action."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fo-6-e1",
+          "title": "Monthly Burn",
+          "prompt": "Spending 40000 and receipts 22000 a month. Return one column called burn.",
+          "hint_1": "40000 - 22000.",
+          "hint_2": "SELECT 40000 - 22000 AS burn",
+          "hint_3": "SELECT 40000 - 22000 AS burn",
+          "solution": "SELECT 40000 - 22000 AS burn",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-6-e2",
+          "title": "Runway",
+          "prompt": "Cash 90000, burn 18000. Return one column called runway_months.",
+          "hint_1": "90000 / 18000.",
+          "hint_2": "SELECT 90000 / 18000 AS runway_months",
+          "hint_3": "SELECT 90000 / 18000 AS runway_months",
+          "solution": "SELECT 90000 / 18000 AS runway_months",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-6-e3",
+          "title": "Late Payers",
+          "prompt": "Shops pay one month late, so month 1 brings no receipts. Return one row with first_month_burn (40000, since nothing comes in) and cash_after_month_1 (90000 minus that).",
+          "hint_1": "Nothing is received in month 1, so the burn that month is the full spending.",
+          "hint_2": "SELECT 40000 AS first_month_burn, 90000 - 40000 AS cash_after_month_1",
+          "hint_3": "SELECT 40000 AS first_month_burn, 90000 - 40000 AS cash_after_month_1",
+          "solution": "SELECT 40000 AS first_month_burn, 90000 - 40000 AS cash_after_month_1",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fo-sale",
+      "title": "Make the First Sale",
+      "description": "How to win real paying customers, and how to read a funnel of enquiries, offers and sales.",
+      "level": "intermediate",
+      "prerequisites": [
+        "fo-runway"
+      ],
+      "estimated_min": 30,
+      "sort_order": 7,
+      "theory_md": "## Why this matters\nUntil someone pays, everything is a theory. The first sale proves the problem, the offer and the price at once.\n\n## The first principle\nSelling is **helping a person with a problem decide**. You find people with the problem, show the offer, ask clearly for the sale, and listen to why not.\n\nCount your **funnel**: people you spoke to, how many saw the offer, how many bought. The share that buys at each step is a **conversion rate**: `buyers / people at that step x 100`.\n\n## A worked example\nWanjiru visits 40 shops in a week.\n\n- 25 listen to the offer.\n- 10 ask for a trial.\n- 6 pay for the first month.\n\nConversion from visit to sale: `6 / 40 = 15 percent`. From offer to sale: `6 / 25 = 24 percent`. If she wants 18 customers, she needs about 120 visits at 15 percent.\n\nShe also writes the reasons the other 19 gave. Those reasons are her best product advice.\n\n## Try it\n`SELECT 6 * 100.0 / 40 AS conversion_percent`. On the real shop data, `shop_sales` has `payment_status`, so you can measure the share of sales that were paid.\n\n## Make asking easy to answer\nEnd every visit with one clear question: \"Shall I start tomorrow at KES 300 a month?\" A vague \"think about it\" is a no that has not been said yet. If the answer is no, ask one follow-up: \"What would need to be true for you to say yes?\" Write the answer down word for word.\n\n## What you can and cannot claim\nA rate from 40 visits is rough. Keep counting each week and watch the trend.\n\n## Say it in your own words\nWhat is a conversion rate, and what do you do with the reasons people say no?\n\n## Do this in real life\nAsk for a real sale from ten people with the problem. Count visits, offers and sales. Write each \"no\" reason.",
+      "quiz": [
+        {
+          "question": "What is a conversion rate?",
+          "options": [
+            "The price you charge",
+            "The share of people at one step who move to the next",
+            "The number of visits",
+            "Your profit"
+          ],
+          "correct_index": 1,
+          "explanation": "It is buyers divided by the people at that step."
+        },
+        {
+          "question": "40 visits and 6 sales. What is the visit-to-sale rate?",
+          "options": [
+            "6 percent",
+            "15 percent",
+            "24 percent",
+            "40 percent"
+          ],
+          "correct_index": 1,
+          "explanation": "6 / 40 x 100 = 15."
+        },
+        {
+          "question": "At 15 percent conversion, about how many visits for 18 customers?",
+          "options": [
+            "27",
+            "120",
+            "18",
+            "270"
+          ],
+          "correct_index": 1,
+          "explanation": "18 / 0.15 = 120."
+        },
+        {
+          "question": "What is the most useful thing to do with a no?",
+          "options": [
+            "Argue",
+            "Record the reason and learn from it",
+            "Ignore it",
+            "Drop the price at once"
+          ],
+          "correct_index": 1,
+          "explanation": "Reasons for no show what to change."
+        },
+        {
+          "question": "Why is the first sale important?",
+          "options": [
+            "It makes money",
+            "It proves that someone will pay for the offer at the price",
+            "It ends the work",
+            "It impresses investors only"
+          ],
+          "correct_index": 1,
+          "explanation": "A real payment is the strongest evidence."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fo-7-e1",
+          "title": "Visit to Sale",
+          "prompt": "40 visits, 6 sales. Return one column called conversion_percent (use 100.0).",
+          "hint_1": "6 * 100.0 / 40.",
+          "hint_2": "SELECT 6 * 100.0 / 40 AS conversion_percent",
+          "hint_3": "SELECT 6 * 100.0 / 40 AS conversion_percent",
+          "solution": "SELECT 6 * 100.0 / 40 AS conversion_percent",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-7-e2",
+          "title": "Offer to Sale",
+          "prompt": "25 heard the offer, 6 bought. Return one column called offer_conversion_percent.",
+          "hint_1": "6 * 100.0 / 25.",
+          "hint_2": "SELECT 6 * 100.0 / 25 AS offer_conversion_percent",
+          "hint_3": "SELECT 6 * 100.0 / 25 AS offer_conversion_percent",
+          "solution": "SELECT 6 * 100.0 / 25 AS offer_conversion_percent",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-7-e3",
+          "title": "Paid Sales in the Real Shop",
+          "prompt": "From shop_sales, return one row with paid_sales (count where payment_status = 'paid') and all_sales (the count of every row).",
+          "hint_1": "Use SUM(CASE WHEN payment_status = 'paid' THEN 1 ELSE 0 END) and COUNT(*).",
+          "hint_2": "SELECT SUM(CASE WHEN payment_status = 'paid' THEN 1 ELSE 0 END) AS paid_sales, COUNT(*) AS all_sales FROM shop_sales",
+          "hint_3": "SELECT SUM(CASE WHEN payment_status = 'paid' THEN 1 ELSE 0 END) AS paid_sales, COUNT(*) AS all_sales FROM shop_sales",
+          "solution": "SELECT SUM(CASE WHEN payment_status = 'paid' THEN 1 ELSE 0 END) AS paid_sales, COUNT(*) AS all_sales FROM shop_sales",
+          "evaluation_mode": "exact",
+          "points": 20,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fo-mvp",
+      "title": "Build the Smallest Version",
+      "description": "Test your offer with the least you can build, by doing by hand before building anything.",
+      "level": "intermediate",
+      "prerequisites": [
+        "fo-sale"
+      ],
+      "estimated_min": 30,
+      "sort_order": 8,
+      "theory_md": "## Why this matters\nBuilding a full product before anyone pays is the costliest mistake a new founder makes. The smallest version teaches you the same thing for a fraction of the money.\n\n## The first principle\nA minimum viable product (MVP) is **the smallest thing that lets a real customer get the result and pay for it.** It can be manual, ugly and slow, as long as the customer gets the value.\n\nAsk: *what is the one thing the customer is paying for?* Build only that.\n\n## A worked example\nWanjiru does not buy a delivery app. For the first month she delivers float herself, writes orders in a notebook, and collects by mobile money.\n\n- Cost of the first test: KES 4,000 (fuel and airtime) for 6 shops.\n- A full app would have cost KES 250,000 before a single shop had paid.\n- Cost per test shop: `4,000 / 6 = KES 667`.\n\nThe test tells her whether shops pay and renew. Only then does she think about an app.\n\n## Try it\n`SELECT 4000 / 6 AS cost_per_test_shop`, and compare with 250,000.\n\n## Decide the pass mark before you start\nBefore the test, write what result means \"yes, build more\". For example: at least 4 of 6 shops pay and 3 renew for a second month. Deciding beforehand stops you from reading a weak result as a win.\n\n## What you can and cannot claim\nA manual test proves demand. It does not prove you can serve 500 shops. Plan the next step only after it works.\n\n## Say it in your own words\nWhat is an MVP, and why start by doing the work by hand?\n\n## Do this in real life\nWrite the one result your customer pays for. List the cheapest way to deliver it by hand to three real customers this month.",
+      "quiz": [
+        {
+          "question": "What is an MVP?",
+          "options": [
+            "A finished product",
+            "The smallest thing that gives a customer the result and lets them pay",
+            "A prototype never shown",
+            "A logo"
+          ],
+          "correct_index": 1,
+          "explanation": "It tests the offer at the lowest cost."
+        },
+        {
+          "question": "Why do the work by hand at first?",
+          "options": [
+            "It is cheaper and teaches whether people pay",
+            "Software is illegal",
+            "It looks better",
+            "Customers prefer paper"
+          ],
+          "correct_index": 0,
+          "explanation": "Manual work tests demand before building."
+        },
+        {
+          "question": "A test costs 4,000 for 6 shops. What is the cost per test shop?",
+          "options": [
+            "KES 24,000",
+            "About KES 667",
+            "KES 4,000",
+            "KES 6"
+          ],
+          "correct_index": 1,
+          "explanation": "4,000 / 6 = 666.7."
+        },
+        {
+          "question": "What question decides what to build?",
+          "options": [
+            "What is cool?",
+            "What is the one thing the customer is paying for?",
+            "What do competitors have?",
+            "What is easy?"
+          ],
+          "correct_index": 1,
+          "explanation": "Build only the paid-for result."
+        },
+        {
+          "question": "What does a successful manual test not prove?",
+          "options": [
+            "That people will pay",
+            "That you can serve hundreds of customers",
+            "That the problem is real",
+            "That the price works"
+          ],
+          "correct_index": 1,
+          "explanation": "Scale needs a separate plan."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fo-8-e1",
+          "title": "Cost per Test Shop",
+          "prompt": "A test costs 4000 for 6 shops. Return one column called cost_per_shop (use 4000.0 so decimals show).",
+          "hint_1": "4000.0 / 6.",
+          "hint_2": "SELECT 4000.0 / 6 AS cost_per_shop",
+          "hint_3": "SELECT 4000.0 / 6 AS cost_per_shop",
+          "solution": "SELECT 4000.0 / 6 AS cost_per_shop",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-8-e2",
+          "title": "What the App Would Have Cost",
+          "prompt": "An app costs 250000. How many test rounds of 4000 is that? Return one column called rounds (whole number).",
+          "hint_1": "250000 / 4000 in whole numbers.",
+          "hint_2": "SELECT 250000 / 4000 AS rounds",
+          "hint_3": "SELECT 250000 / 4000 AS rounds",
+          "solution": "SELECT 250000 / 4000 AS rounds",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-8-e3",
+          "title": "Test Revenue",
+          "prompt": "The 6 shops each pay 300. Return one row with revenue (6 * 300), test_cost (4000) and result (revenue minus test_cost).",
+          "hint_1": "Three columns: 1800, 4000 and the difference.",
+          "hint_2": "SELECT 6 * 300 AS revenue, 4000 AS test_cost, 6 * 300 - 4000 AS result",
+          "hint_3": "SELECT 6 * 300 AS revenue, 4000 AS test_cost, 6 * 300 - 4000 AS result",
+          "solution": "SELECT 6 * 300 AS revenue, 4000 AS test_cost, 6 * 300 - 4000 AS result",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fo-funding",
+      "title": "Funding Options in Kenya",
+      "description": "The real ways to fund a small business, what each costs, and why checking the current rules matters.",
+      "level": "intermediate",
+      "prerequisites": [
+        "fo-mvp"
+      ],
+      "estimated_min": 35,
+      "sort_order": 9,
+      "theory_md": "## Why this matters\nHow you fund a business decides who owns it, what you owe and how much risk you carry. Knowing the options and their true cost stops a loan from becoming a trap.\n\n## The first principle\nMoney comes from four places, each with a price.\n\n1. **Your own savings and sales**: no interest, but your own risk. Cheapest.\n2. **Borrowing**: from a SACCO, bank, mobile-lender or government fund. You repay with interest whether or not the business works.\n3. **Grants**: money you do not repay, but you must qualify and often report.\n4. **Investors**: they give money for a share of the business and expect it to grow a lot.\n\n**The rule of thumb:** fund with sales and savings first, borrow only for something that clearly earns more than it costs, and never borrow for a business you have not yet sold from.\n\n## Check the current rules (as of November 2026)\nGovernment programmes change. One report dated 12 June 2026 (TechTrends Kenya, citing budget documents) says the Treasury stopped adding new budget money to the Hustler Fund from the 2026/27 year, that the fund continues to operate on repayments, and that NYOTA is getting a larger role in support for young entrepreneurs. Treat this as a news report, not a rulebook: before you rely on any fund, confirm its current status and terms with the fund itself or the official source.\n\n## A worked example\nWanjiru needs a motorbike lease deposit of KES 60,000. A loan costs 10 percent interest for the 6-month term.\n\n- Interest: `60,000 x 10 / 100 = KES 6,000`.\n- Total to repay: `66,000`, so about `11,000` a month.\n- Her contribution is 18 shops x 180 = KES 3,240 a month. She cannot repay on that. She should not borrow yet.\n\n## Try it\nLoan interest is `amount * rate / 100`. Monthly repayment is `total / months`.\n\n## What you can and cannot claim\nInterest rates and fees differ. Always ask for the **total** you will repay in shillings, then compare it with what the money will earn.\n\n## Say it in your own words\nWhy should a founder prefer savings and sales first, and what must a loan earn to be worth taking?\n\n## Do this in real life\nList two funding options you could use. For each, write the total you would repay or the share you would give up, and who you would call to confirm today's terms.",
+      "quiz": [
+        {
+          "question": "Which funding option never needs repaying?",
+          "options": [
+            "A loan",
+            "A grant",
+            "A mobile loan",
+            "An overdraft"
+          ],
+          "correct_index": 1,
+          "explanation": "Grants are not repaid, though you must qualify and often report."
+        },
+        {
+          "question": "What does an investor receive in exchange for money?",
+          "options": [
+            "Interest only",
+            "A share of the business",
+            "Nothing",
+            "Your savings"
+          ],
+          "correct_index": 1,
+          "explanation": "Investors take ownership and expect growth."
+        },
+        {
+          "question": "A loan of 60,000 at 10 percent interest over 6 months. What is the total to repay?",
+          "options": [
+            "60,000",
+            "66,000",
+            "70,000",
+            "6,000"
+          ],
+          "correct_index": 1,
+          "explanation": "60,000 + 6,000 = 66,000."
+        },
+        {
+          "question": "When is borrowing sensible?",
+          "options": [
+            "Before the first sale",
+            "For something that clearly earns more than the loan costs",
+            "When a friend suggests it",
+            "To pay old debts only"
+          ],
+          "correct_index": 1,
+          "explanation": "A loan must earn more than it costs."
+        },
+        {
+          "question": "Why check a fund's current status yourself?",
+          "options": [
+            "Rules and budgets change, and news reports can be incomplete",
+            "It is boring",
+            "Banks require it",
+            "Funds never change"
+          ],
+          "correct_index": 0,
+          "explanation": "Always confirm with the official source before relying on a fund."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fo-9-e1",
+          "title": "Interest on the Loan",
+          "prompt": "Loan 60000 at 10 percent interest. Return one column called interest.",
+          "hint_1": "60000 * 10 / 100.",
+          "hint_2": "SELECT 60000 * 10 / 100 AS interest",
+          "hint_3": "SELECT 60000 * 10 / 100 AS interest",
+          "solution": "SELECT 60000 * 10 / 100 AS interest",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-9-e2",
+          "title": "Total and Monthly",
+          "prompt": "Return one row with total (60000 + 6000) and monthly (that total divided by 6 months).",
+          "hint_1": "66000 / 6 for the monthly figure.",
+          "hint_2": "SELECT 60000 + 6000 AS total, (60000 + 6000) / 6 AS monthly",
+          "hint_3": "SELECT 60000 + 6000 AS total, (60000 + 6000) / 6 AS monthly",
+          "solution": "SELECT 60000 + 6000 AS total, (60000 + 6000) / 6 AS monthly",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-9-e3",
+          "title": "Can She Repay?",
+          "prompt": "Monthly repayment is 11000 and monthly contribution is 18 * 180. Return one row with repayment (11000), contribution (18 * 180) and gap (contribution minus repayment).",
+          "hint_1": "gap is negative when she cannot repay.",
+          "hint_2": "SELECT 11000 AS repayment, 18 * 180 AS contribution, 18 * 180 - 11000 AS gap",
+          "hint_3": "SELECT 11000 AS repayment, 18 * 180 AS contribution, 18 * 180 - 11000 AS gap",
+          "solution": "SELECT 11000 AS repayment, 18 * 180 AS contribution, 18 * 180 - 11000 AS gap",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fo-legal",
+      "title": "Registration, Tax and Contracts Basics",
+      "description": "The legal steps to run a small business in Kenya, written from dated sources, with the rule to always confirm today's figures.",
+      "level": "intermediate",
+      "prerequisites": [
+        "fo-funding"
+      ],
+      "estimated_min": 35,
+      "sort_order": 10,
+      "theory_md": "## Why this matters\nRunning without registration, a tax number or a written agreement works until the day a customer does not pay, a bank asks for papers, or KRA writes to you. A few steps early prevent big costs later.\n\n**This lesson is not legal or tax advice, and the figures below are as of November 2026.** They come from the sources named. Laws and fees change every year (the Finance Act changes tax rules most years). Confirm every figure with KRA, the Business Registration Service (BRS) or a licensed adviser before you act.\n\n## The first principle\nEvery rule answers one question: **who is allowed to trade, who owes tax, and who is bound by a promise.** Learn the question, then check the current answer.\n\n### 1. Registration (who you are)\n- A **business name** (sole proprietor or partnership) is registered online on eCitizen with the BRS. A dated guide (Lawzana, updated October 2026) gives the fee as **KES 950**, with a KRA PIN and ID needed for the application and an eCitizen charge that may be added. A **limited company** is a separate registration with its own fees and rules. Check the current fee on BRS.\n- Your **county** may require a single business permit to trade from premises. Fees depend on the county and type of business, so ask your county.\n\n### 2. Tax (what you owe)\n- You need a **KRA PIN** (free, from iTax).\n- **Turnover tax**: KRA's own paper \"Unpacking Turnover Tax\" (2023/24) says it is **3 percent of gross sales** for businesses with turnover above **KES 1 million and up to KES 25 million** a year, filed and paid by the **20th of the following month**. Rental income and professional fees are excluded. Some other websites quote different rates, so check kra.go.ke.\n- **VAT**: a July 2026 guide (SmartVAT Kenya) says registration is required once taxable turnover passes **KES 5 million** a year, at a standard rate of **16 percent**, and notes a proposed rise to KES 8 million that had not taken effect. Confirm on kra.go.ke.\n- **If you employ people**: see the hiring lesson.\n\n### 3. Contracts (what you promise)\nPut important agreements in writing: who does what, the price, the date, and what happens if someone does not deliver or pay. Keep a copy. A short clear agreement is better than a long unclear one.\n\n## A worked example\nWanjiru's sales for the year are KES 1.8 million, which is within the turnover tax range.\n\n- Turnover tax at 3 percent: `1,800,000 x 3 / 100 = KES 54,000` a year, or `4,500` a month on KES 150,000 monthly sales, paid by the 20th.\n- She keeps sales records so she can show gross sales.\n\n## Try it\n`SELECT 150000 * 3 / 100 AS monthly_tax`. The rate is stated in each question, because the law may change.\n\n## What you can and cannot claim\nYou cannot rely on this lesson for a filing. Use it to know what to ask and where to check.\n\n## Say it in your own words\nWhat are the three questions the law answers for a small business, and why must you check the figures yourself?\n\n## Do this in real life\nWrite down which of these you have: business name, KRA PIN, county permit, written agreements. For each missing item, write the official place you will check the current rules and fee.",
+      "quiz": [
+        {
+          "question": "Where do you check the current business name fee and steps?",
+          "options": [
+            "A friend's memory",
+            "The BRS on eCitizen or a licensed adviser",
+            "A social media post",
+            "An old blog"
+          ],
+          "correct_index": 1,
+          "explanation": "Fees and steps change, so use the official source."
+        },
+        {
+          "question": "As of November 2026, KRA's paper gives turnover tax as what share of gross sales?",
+          "options": [
+            "1 percent",
+            "3 percent",
+            "16 percent",
+            "25 percent"
+          ],
+          "correct_index": 1,
+          "explanation": "3 percent for turnover above KES 1 million and up to KES 25 million. Confirm on kra.go.ke."
+        },
+        {
+          "question": "Monthly gross sales of 150,000 at 3 percent turnover tax. What is the tax?",
+          "options": [
+            "KES 450",
+            "KES 4,500",
+            "KES 45,000",
+            "KES 5,000"
+          ],
+          "correct_index": 1,
+          "explanation": "150,000 x 3 / 100 = 4,500."
+        },
+        {
+          "question": "Why are contracts written down?",
+          "options": [
+            "It is fashionable",
+            "So everyone knows who does what, the price and the date",
+            "Because banks like paper",
+            "So they cannot be changed"
+          ],
+          "correct_index": 1,
+          "explanation": "A clear written promise prevents disputes."
+        },
+        {
+          "question": "Why does this lesson tell you to confirm every figure?",
+          "options": [
+            "It is not sure about anything",
+            "Rates and fees change often and one source may be wrong",
+            "Law never changes",
+            "To avoid teaching"
+          ],
+          "correct_index": 1,
+          "explanation": "Verify against the official source before acting."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fo-10-e1",
+          "title": "Monthly Turnover Tax",
+          "prompt": "Monthly gross sales are 150000 and the turnover tax rate given is 3 percent. Return one column called monthly_tax.",
+          "hint_1": "150000 * 3 / 100.",
+          "hint_2": "SELECT 150000 * 3 / 100 AS monthly_tax",
+          "hint_3": "SELECT 150000 * 3 / 100 AS monthly_tax",
+          "solution": "SELECT 150000 * 3 / 100 AS monthly_tax",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-10-e2",
+          "title": "Yearly Turnover Tax",
+          "prompt": "Yearly gross sales are 1800000 at the given 3 percent. Return one column called yearly_tax.",
+          "hint_1": "1800000 * 3 / 100.",
+          "hint_2": "SELECT 1800000 * 3 / 100 AS yearly_tax",
+          "hint_3": "SELECT 1800000 * 3 / 100 AS yearly_tax",
+          "solution": "SELECT 1800000 * 3 / 100 AS yearly_tax",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-10-e3",
+          "title": "Tax and What Is Left",
+          "prompt": "Return one row with sales (1800000), tax (3 percent of sales) and after_tax (sales minus tax).",
+          "hint_1": "Three columns from the same numbers.",
+          "hint_2": "SELECT 1800000 AS sales, 1800000 * 3 / 100 AS tax, 1800000 - 1800000 * 3 / 100 AS after_tax",
+          "hint_3": "SELECT 1800000 AS sales, 1800000 * 3 / 100 AS tax, 1800000 - 1800000 * 3 / 100 AS after_tax",
+          "solution": "SELECT 1800000 AS sales, 1800000 * 3 / 100 AS tax, 1800000 - 1800000 * 3 / 100 AS after_tax",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fo-team",
+      "title": "Hiring and the Real Cost of a Team",
+      "description": "What an employee really costs once statutory payments are added, and when to hire.",
+      "level": "intermediate",
+      "prerequisites": [
+        "fo-legal"
+      ],
+      "estimated_min": 30,
+      "sort_order": 11,
+      "theory_md": "## Why this matters\nA salary is not the cost. The employer also pays statutory contributions. New founders who forget this run out of cash in the first months after hiring.\n\n**Figures below are as of November 2026, from a payroll adviser's guide (FNJ & Associates, updated 30 October 2026) that I could not check against KRA, NSSF or SHA directly. Confirm with those bodies or a licensed accountant before running payroll.**\n\n## The first principle\n**Hire when the work is proven and the hire pays for themselves**, not because the business feels busy. Compare `what they cost` with `what they bring in or save`.\n\nWhat the guide reports for a monthly salary (employer side):\n- **NSSF**: employer pays 6 percent of pensionable pay (between KES 9,000 and KES 108,000), from 1 February 2026.\n- **Affordable Housing Levy**: employer pays 1.5 percent of gross pay, and the employee pays 1.5 percent.\n- **SHIF** (2.75 percent of gross, minimum KES 300) is deducted from the employee.\n- **PAYE** is deducted from the employee and paid to KRA. The monthly bands reported are 10 percent to KES 24,000, then 25 percent to KES 32,333, then 30 percent to KES 500,000, with a personal relief of KES 2,400.\n- Payments are due by the 9th of the following month.\n\n## A worked example\nWanjiru considers a part-time rider on KES 20,000 gross.\n\n- NSSF employer: `20,000 x 6 / 100 = 1,200`.\n- Housing levy employer: `20,000 x 15 / 1,000 = 300`.\n- Real cost: `20,000 + 1,200 + 300 = KES 21,500` a month.\n\nThe rider can serve 30 more shops, each giving 180 contribution, which is `30 x 180 = KES 5,400`. That does not cover KES 21,500, so she should not hire yet. A casual helper paid per delivery may be a better step; check the labour rules for casual work.\n\n## Try it\n`SELECT 20000 + 20000 * 6 / 100 + 20000 * 15 / 1000 AS real_cost`.\n\n## What you can and cannot claim\nTreat the rates as a starting point to check. Rates, caps and deadlines change with each Finance Act.\n\n## Say it in your own words\nWhy is a salary not the true cost of an employee, and when should you hire?\n\n## Do this in real life\nPick a job you might hire for. Write its salary, the extra employer costs, and the extra contribution or savings it would bring. Decide whether it pays for itself.",
+      "quiz": [
+        {
+          "question": "What is the true monthly cost of an employee?",
+          "options": [
+            "The salary only",
+            "Salary plus the employer's statutory payments",
+            "Half the salary",
+            "The salary minus tax"
+          ],
+          "correct_index": 1,
+          "explanation": "Employer contributions add to the salary."
+        },
+        {
+          "question": "Gross salary is 20,000. Employer NSSF at 6 percent is how much?",
+          "options": [
+            "KES 600",
+            "KES 1,200",
+            "KES 2,000",
+            "KES 120"
+          ],
+          "correct_index": 1,
+          "explanation": "20,000 x 6 / 100 = 1,200."
+        },
+        {
+          "question": "When should a founder hire?",
+          "options": [
+            "As soon as the business feels busy",
+            "When the work is proven and the hire earns or saves more than they cost",
+            "Never",
+            "Only relatives"
+          ],
+          "correct_index": 1,
+          "explanation": "A hire must pay for themselves."
+        },
+        {
+          "question": "Why does the lesson tell you to check the rates?",
+          "options": [
+            "They never change",
+            "They change with each Finance Act and this guide was not checked against official sources",
+            "To confuse you",
+            "Because of tax holidays"
+          ],
+          "correct_index": 1,
+          "explanation": "Confirm with KRA, NSSF and SHA or an accountant."
+        },
+        {
+          "question": "Salary 20,000 + 1,200 + 300 gives a cost of",
+          "options": [
+            "KES 21,500",
+            "KES 20,000",
+            "KES 22,000",
+            "KES 20,300"
+          ],
+          "correct_index": 0,
+          "explanation": "The sum is 21,500."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fo-11-e1",
+          "title": "Employer Cost",
+          "prompt": "Gross salary 20000, employer NSSF 6 percent and employer housing levy 1.5 percent (use 15 / 1000). Return one column called real_cost.",
+          "hint_1": "20000 + 20000 * 6 / 100 + 20000 * 15 / 1000.",
+          "hint_2": "SELECT 20000 + 20000 * 6 / 100 + 20000 * 15 / 1000 AS real_cost",
+          "hint_3": "SELECT 20000 + 20000 * 6 / 100 + 20000 * 15 / 1000 AS real_cost",
+          "solution": "SELECT 20000 + 20000 * 6 / 100 + 20000 * 15 / 1000 AS real_cost",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-11-e2",
+          "title": "What the Hire Brings",
+          "prompt": "30 more shops at a contribution of 180 each. Return one column called extra_contribution.",
+          "hint_1": "30 * 180.",
+          "hint_2": "SELECT 30 * 180 AS extra_contribution",
+          "hint_3": "SELECT 30 * 180 AS extra_contribution",
+          "solution": "SELECT 30 * 180 AS extra_contribution",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-11-e3",
+          "title": "Does the Hire Pay?",
+          "prompt": "Return one row with cost (21500), extra_contribution (30 * 180) and gap (extra_contribution minus cost).",
+          "hint_1": "A negative gap means the hire does not pay for themselves yet.",
+          "hint_2": "SELECT 21500 AS cost, 30 * 180 AS extra_contribution, 30 * 180 - 21500 AS gap",
+          "hint_3": "SELECT 21500 AS cost, 30 * 180 AS extra_contribution, 30 * 180 - 21500 AS gap",
+          "solution": "SELECT 21500 AS cost, 30 * 180 AS extra_contribution, 30 * 180 - 21500 AS gap",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "fo-iterate",
+      "title": "Measure, Decide, Iterate",
+      "description": "Run the business by a few weekly numbers, compare them, and make one change at a time.",
+      "level": "intermediate",
+      "prerequisites": [
+        "fo-team"
+      ],
+      "estimated_min": 30,
+      "sort_order": 12,
+      "theory_md": "## Why this matters\nFounders who feel their way through the business repeat mistakes. Founders who count each week can see what works and change one thing at a time.\n\n## The first principle\nA loop: **measure, decide, change one thing, measure again.**\n\n- Pick **three numbers** that tell you if the business is healthy: for example customers, contribution and cash.\n- Compare this week or month with the last one. The **change percent** is `(new - old) * 100.0 / old`.\n- Change **one thing** at a time (price, message, place). If you change five, you cannot tell which one worked.\n\n## A worked example\nWanjiru has 18 paying shops in October and 24 in November.\n\n- Change: `(24 - 18) * 100.0 / 18 = 33.3 percent` more shops.\n- Contribution per shop is 180, so contribution moved from `18 x 180 = 3,240` to `24 x 180 = 4,320`.\n- Break-even (from the unit economics lesson) is 34 shops. She is at 24, so she keeps going and adds one estate.\n\nShe changed only one thing, the visit schedule, so she knows that is what lifted the shops.\n\n## Try it\nOn the real shop, `shop_sales` has `branch` and `total`. Counting sales per branch is a first measure: `SELECT branch, COUNT(*) AS sales FROM shop_sales GROUP BY branch`.\n\n## What you can and cannot claim\nA change after one week could be luck. Repeat for a few weeks before you decide it works.\n\n## Say it in your own words\nWhy change only one thing at a time, and which three numbers would you track?\n\n## Do this in real life\nChoose your three numbers. Record them every week for four weeks. Change one thing in week three and write what moved.",
+      "quiz": [
+        {
+          "question": "What is the loop?",
+          "options": [
+            "Plan, plan, plan",
+            "Measure, decide, change one thing, measure again",
+            "Guess, spend, hope",
+            "Hire, build, sell"
+          ],
+          "correct_index": 1,
+          "explanation": "A steady loop of evidence and small changes."
+        },
+        {
+          "question": "Why change only one thing at a time?",
+          "options": [
+            "It is cheaper",
+            "You can tell which change caused the result",
+            "Customers dislike change",
+            "It is the law"
+          ],
+          "correct_index": 1,
+          "explanation": "Several changes hide the cause."
+        },
+        {
+          "question": "Shops went from 18 to 24. What is the change percent?",
+          "options": [
+            "6 percent",
+            "33.3 percent",
+            "25 percent",
+            "75 percent"
+          ],
+          "correct_index": 1,
+          "explanation": "(24 - 18) x 100 / 18 = 33.3."
+        },
+        {
+          "question": "Why repeat before deciding?",
+          "options": [
+            "One result can be luck",
+            "Because rules say so",
+            "To slow down",
+            "No reason"
+          ],
+          "correct_index": 0,
+          "explanation": "A single week can mislead."
+        },
+        {
+          "question": "Which three numbers fit a small business?",
+          "options": [
+            "Customers, contribution and cash",
+            "Followers, likes and shares",
+            "Colours, logos and names",
+            "Rent, fuel and tea"
+          ],
+          "correct_index": 0,
+          "explanation": "They show demand, earning and survival."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "fo-12-e1",
+          "title": "Growth in Shops",
+          "prompt": "Shops grew from 18 to 24. Return one column called change_percent (use 100.0).",
+          "hint_1": "(24 - 18) * 100.0 / 18.",
+          "hint_2": "SELECT (24 - 18) * 100.0 / 18 AS change_percent",
+          "hint_3": "SELECT (24 - 18) * 100.0 / 18 AS change_percent",
+          "solution": "SELECT (24 - 18) * 100.0 / 18 AS change_percent",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-12-e2",
+          "title": "Contribution Now",
+          "prompt": "24 shops at a contribution of 180 each, against 18 before. Return one row with before (18 * 180) and after (24 * 180).",
+          "hint_1": "Two columns, each a product.",
+          "hint_2": "SELECT 18 * 180 AS before, 24 * 180 AS after",
+          "hint_3": "SELECT 18 * 180 AS before, 24 * 180 AS after",
+          "solution": "SELECT 18 * 180 AS before, 24 * 180 AS after",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "fo-12-e3",
+          "title": "Sales per Branch",
+          "prompt": "From shop_sales, return branch and the number of sales as sales, one row per branch, ordered by branch.",
+          "hint_1": "GROUP BY branch with COUNT(*) and ORDER BY branch.",
+          "hint_2": "SELECT branch, COUNT(*) AS sales FROM shop_sales GROUP BY branch ORDER BY branch",
+          "hint_3": "SELECT branch, COUNT(*) AS sales FROM shop_sales GROUP BY branch ORDER BY branch",
+          "solution": "SELECT branch, COUNT(*) AS sales FROM shop_sales GROUP BY branch ORDER BY branch",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    }
+  ]
+}

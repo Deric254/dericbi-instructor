@@ -215,6 +215,47 @@ function runMigrations(): void {
     _db.run("INSERT INTO schema_migrations (version, description) VALUES (3, 'Add is_admin column, promote first user')")
     _db.run('COMMIT')
   }
+
+  // v4 — quiz results table (created by CREATE_TABLES) and the mastery flag on lessons. Every lesson that
+  // exists today keeps 0, so no existing lesson changes how it completes.
+  if (cur < 4) {
+    _db.run('BEGIN')
+    try {
+      _db.run("ALTER TABLE lessons ADD COLUMN mastery_required INTEGER NOT NULL DEFAULT 0")
+    } catch (e: any) {
+      if (!String(e.message).includes('duplicate column')) throw e
+    }
+    _db.run("INSERT INTO schema_migrations (version, description) VALUES (4, 'Add quiz_results and lessons.mastery_required')")
+    _db.run('COMMIT')
+  }
+
+  // v5 — placement_results (created by CREATE_TABLES). Nothing to alter; the version records that it exists.
+  if (cur < 5) {
+    _db.run('BEGIN')
+    _db.run("INSERT INTO schema_migrations (version, description) VALUES (5, 'Add placement_results')")
+    _db.run('COMMIT')
+  }
+
+  // v6 — review_items (created by CREATE_TABLES). Nothing to alter; the version records that it exists.
+  if (cur < 6) {
+    _db.run('BEGIN')
+    _db.run("INSERT INTO schema_migrations (version, description) VALUES (6, 'Add review_items')")
+    _db.run('COMMIT')
+  }
+
+  // v7 — explain_results (created by CREATE_TABLES). Nothing to alter; the version records that it exists.
+  if (cur < 7) {
+    _db.run('BEGIN')
+    _db.run("INSERT INTO schema_migrations (version, description) VALUES (7, 'Add explain_results')")
+    _db.run('COMMIT')
+  }
+
+  // v8 — field_tasks (created by CREATE_TABLES). Nothing to alter; the version records that it exists.
+  if (cur < 8) {
+    _db.run('BEGIN')
+    _db.run("INSERT INTO schema_migrations (version, description) VALUES (8, 'Add field_tasks')")
+    _db.run('COMMIT')
+  }
 }
 
 // ─────────────────────────────────────────────
