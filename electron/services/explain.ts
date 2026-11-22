@@ -132,9 +132,11 @@ async function markWithAi(userId: string, concept: Concept, answer: string): Pro
     + 'For each key idea decide whether the student shows they grasp it in their own words: paraphrase and synonyms count, and a reason, consequence or example makes it clear. '
     + 'Naming the topic, a bare keyword, or a flat restatement of a textbook line with no sign of grasp does not count. '
     + 'For each idea you say is covered you must give "quote": the exact words copied from the student text that show it. '
-    + 'Reply with JSON only, no other text: {"points":[{"covered":true,"quote":"..."}, ...]} with exactly one entry per idea, in order.'
+    + 'Reply with JSON only, no other text: {"points":[{"covered":true,"quote":"..."}, ...]} with exactly one entry per idea, in order. '
+    + 'Calibration (about a different topic): idea "a deadline needs slack". "I add a spare day because things always run late" is covered. "Deadlines matter a lot in projects" is not, and neither is a list of keywords. '
+    + 'When unsure, mark it not covered.'
   const message = `Question: ${concept.explain!.prompt}\nKey ideas:\n${points.map((p, i) => `${i + 1}. ${p.hint}`).join('\n')}\n<answer>\n${answer}\n</answer>`
-  const reply = await askOnce(userId, system, message)
+  const reply = await askOnce(userId, system, message, 25_000, 0)
   if (!reply) return null
   const none = points.map(() => false)
   let parsed: any

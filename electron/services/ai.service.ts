@@ -306,10 +306,10 @@ export async function chat(params: {
 }
 
 /**
- * One question to the learner's providers (first that answers wins), with nothing saved and no tutor persona. Used for marking
+ * One question to the learner's providers (first that answers wins; marking jobs pass temperature 0 so the same text gets the same verdict), with nothing saved and no tutor persona. Used for marking
  * jobs where the answer is data for the app. Returns null when no key is set or no provider answered; callers must carry on without it.
  */
-export async function askOnce(userId: string, systemPrompt: string, message: string, totalMs = 25_000): Promise<string | null> {
+export async function askOnce(userId: string, systemPrompt: string, message: string, totalMs = 25_000, temperature = 0.7): Promise<string | null> {
   const active = getActiveProvider(userId)
   if (!PROVIDERS[active]) return null
   const deadline = Date.now() + totalMs
@@ -321,8 +321,8 @@ export async function askOnce(userId: string, systemPrompt: string, message: str
     try {
       const text = await callWithModelRecovery(name, apiKey, (model) =>
         cfg.kind === 'gemini'
-          ? callGemini(apiKey, systemPrompt, [], message, model, remaining)
-          : callOpenAI(apiKey, systemPrompt, [], message, cfg.baseUrl, model, remaining), remaining)
+          ? callGemini(apiKey, systemPrompt, [], message, model, remaining, temperature)
+          : callOpenAI(apiKey, systemPrompt, [], message, cfg.baseUrl, model, remaining, temperature), remaining)
       if (text.trim()) return text
     } catch { /* try the next provider */ }
   }
@@ -528,7 +528,7 @@ async function callWithModelRecovery(provider: string, apiKey: string, call: (mo
   }
 }
 
-async function callGemini(apiKey: string, systemPrompt: string, history: ChatMessage[], userMessage: string, model: string, timeoutMs: number): Promise<string> {
+async function callGemini(apiKey: string, systemPrompt: string, history: ChatMessage[], userMessage: string, model: string, timeoutMs: number, temperature = 0.7): Promise<string> {
   const contents = [
     ...history.map(m => ({
       role: m.role === 'assistant' ? 'model' : 'user',
@@ -547,7 +547,7 @@ async function callGemini(apiKey: string, systemPrompt: string, history: ChatMes
       body: JSON.stringify({
         system_instruction: { parts: [{ text: systemPrompt }] },
         contents,
-        generationConfig: { maxOutputTokens: 1024, temperature: 0.7 },
+        generationConfig: { maxOutputTokens: 1024, temperature },
       }),
     },
     timeoutMs,
@@ -564,7 +564,7 @@ async function callGemini(apiKey: string, systemPrompt: string, history: ChatMes
   return data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
 }
 
-async function callOpenAI(apiKey: string, systemPrompt: string, history: ChatMessage[], userMessage: string, baseUrl: string, model: string, timeoutMs: number): Promise<string> {
+async function callOpenAI(apiKey: string, systemPrompt: string, history: ChatMessage[], userMessage: string, baseUrl: string, model: string, timeoutMs: number, temperature = 0.7): Promise<string> {
   const messages = [
     { role: 'system', content: systemPrompt },
     ...history.map(m => ({ role: m.role, content: m.content })),
@@ -576,7 +576,7 @@ async function callOpenAI(apiKey: string, systemPrompt: string, history: ChatMes
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model, messages, max_tokens: 1024, temperature: 0.7 }),
+      body: JSON.stringify({ model, messages, max_tokens: 1024, temperature }),
     },
     timeoutMs,
     'the AI provider',
