@@ -11,7 +11,7 @@ import { getDb } from '../db/database'
 import { recordQuiz, bestQuizPct, masteryGaps } from '../services/mastery'
 import { getPlacement, submitPlacement } from '../services/placement'
 import { enrollConcepts, getReview, answerReview } from '../services/review'
-import { getExplain, submitExplain, confirmExplain } from '../services/explain'
+import { getExplain, submitExplain, confirmExplain, aiUpgradeExplain, checkMarker } from '../services/explain'
 import { getFieldTask, saveFieldTask, deleteFieldTask, listFieldTasks } from '../services/fieldwork'
 import { safeHandle } from './safe-handle'
 import { registerLicenceHandlers } from './licence-handlers'
@@ -182,13 +182,23 @@ export function registerLessonHandlers() {
 
   safeHandle('explain:submit', async (_, { userId, lessonId, text }) => {
     const outcome = submitExplain(userId, lessonId, text)
-    return outcome ? { success: true, ...outcome } : { success: false }
+    if (!outcome) return { success: false }
+    // The word check can miss a good explanation in other words: with an AI key, a strict marker gets a second look (it can only add a pass).
+    if (!outcome.passed && !outcome.reason) {
+      try { const upgraded = await aiUpgradeExplain(userId, lessonId); if (upgraded) return { success: true, ...upgraded } } catch { /* the word check stands */ }
+    }
+    return { success: true, ...outcome }
   })
 
   safeHandle('fieldwork:get', async (_, { userId, lessonId }) => getFieldTask(userId, lessonId))
   safeHandle('fieldwork:list', async (_, userId: string) => listFieldTasks(userId))
   safeHandle('fieldwork:save', async (_, { userId, lessonId, did, learned }) => saveFieldTask(userId, lessonId, did, learned))
   safeHandle('fieldwork:delete', async (_, { userId, lessonId }) => ({ success: deleteFieldTask(userId, lessonId) }))
+
+  safeHandle('explain:selftest', async (_, userId: string) => {
+    const r = await checkMarker(userId)
+    return r ? { available: true, ...r } : { available: false }
+  })
 
   safeHandle('explain:confirm', async (_, { userId, lessonId }) => ({ success: confirmExplain(userId, lessonId) }))
 

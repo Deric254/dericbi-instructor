@@ -33,7 +33,6 @@
               "seller makes",
               "seller profit",
               "profit",
-              "makes money",
               "more than it cost",
               "more than they paid",
               "the difference",
@@ -244,7 +243,6 @@
             "any": [
               "they say",
               "told me",
-              "so that",
               "they want",
               "they wish",
               "they need",
@@ -343,7 +341,6 @@
               "cost",
               "price",
               "margin",
-              "make money",
               "expenses",
               "revenue"
             ]
@@ -691,11 +688,12 @@
             "hint": "It happens often",
             "any": [
               "often",
-              "every day",
               "daily",
               "regular",
               "frequent",
-              "repeat"
+              "repeat",
+              "every single day",
+              "all the time"
             ]
           },
           {
@@ -707,7 +705,12 @@
               "loses",
               "lose",
               "expens",
-              "time"
+              "wastes time",
+              "lose time",
+              "takes time",
+              "costs time",
+              "lost time",
+              "wasted time"
             ]
           },
           {
@@ -748,11 +751,12 @@
               "polite",
               "predict",
               "say yes",
-              "nice",
-              "kind",
               "guess",
-              "future",
-              "lie"
+              "being nice",
+              "too kind",
+              "just to be nice",
+              "to be kind",
+              "do not know the future"
             ]
           },
           {
@@ -802,12 +806,12 @@
             "any": [
               "population",
               "whole country",
-              "everyone",
               "big number",
               "guess",
-              "not real",
               "no evidence",
-              "tells you nothing"
+              "tells you nothing",
+              "not real people",
+              "no real people"
             ]
           },
           {
@@ -828,11 +832,12 @@
             "any": [
               "multiply",
               "price",
-              "times",
               "share",
               "percent",
               "pay",
-              "revenue"
+              "revenue",
+              "multiply by",
+              "times the"
             ]
           }
         ],
@@ -882,7 +887,6 @@
               "benefit",
               "afford",
               "willing to pay",
-              "gain",
               "what it is worth",
               "most a customer",
               "most a buyer"
@@ -945,8 +949,9 @@
               "per sale",
               "per unit",
               "stock",
-              "rises",
-              "goes up"
+              "goes up",
+              "rises with",
+              "goes up with"
             ]
           },
           {
@@ -1216,10 +1221,11 @@
             "any": [
               "tax",
               "kra",
-              "pin",
               "turnover",
               "vat",
-              "owe"
+              "owe",
+              "kra pin",
+              "a pin"
             ]
           },
           {
@@ -1284,13 +1290,15 @@
             "hint": "The hire must pay for themselves",
             "any": [
               "pay for",
-              "earn",
               "bring",
               "save",
               "afford",
               "worth",
               "cover",
-              "more than they cost"
+              "more than they cost",
+              "earn more",
+              "earns more",
+              "earn enough"
             ]
           }
         ],
@@ -1316,12 +1324,14 @@
             "hint": "Only one change shows the cause",
             "any": [
               "one thing",
-              "cause",
-              "which",
               "tell what",
-              "know what",
-              "single",
-              "separate"
+              "separate",
+              "the cause",
+              "what caused",
+              "which change",
+              "which one worked",
+              "single change",
+              "tell which"
             ]
           },
           {
@@ -1342,12 +1352,14 @@
             "any": [
               "measure",
               "repeat",
-              "again",
-              "weeks",
               "compare",
               "luck",
-              "over time",
-              "loop"
+              "loop",
+              "few weeks",
+              "several weeks",
+              "each week",
+              "every week",
+              "over several"
             ]
           }
         ],

@@ -60,6 +60,7 @@ declare global {
         get: (userId: string, lessonId: string) => Promise<any>
         submit: (userId: string, lessonId: string, text: string) => Promise<any>
         confirm: (userId: string, lessonId: string) => Promise<{ success: boolean }>
+        selfTest: (userId: string) => Promise<{ available: boolean; allOk?: boolean; results?: { label: string; expect: 'pass' | 'fail'; got: 'pass' | 'fail'; ok: boolean }[] }>
       }
       fieldwork: {
         get: (userId: string, lessonId: string) => Promise<any>

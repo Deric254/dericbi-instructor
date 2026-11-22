@@ -126,10 +126,127 @@ test('the learner can confirm after a real miss, but not with nothing written, a
   const theory = JSON.parse(fs.readFileSync(path.join(h.ROOT, 'content/founder/curriculum.json'), 'utf8')).lessons.find((l) => l.id === 'fo-mvp').theory_md
   await h.invoke('explain:submit', { userId: 'conf', lessonId: 'fo-mvp', text: theory.split('## The first principle')[1].slice(0, 400) })
   assert.equal((await confirm('fo-mvp')).success, false, 'copied text cannot be confirmed')
-  await h.invoke('explain:submit', { userId: 'conf', lessonId: 'fo-mvp', text: 'I think it means putting out something rough to see if anyone cares before spending big, because wasting a fortune on a polished thing nobody wants would hurt.' })
+  await h.invoke('explain:submit', { userId: 'conf', lessonId: 'fo-mvp', text: 'I think it is mostly about being sensible with how much effort and attention goes into a first attempt, because nobody wants to carry a heavy load for something that may not work out at all.' })
   assert.equal((await h.invoke('explain:get', { userId: 'conf', lessonId: 'fo-mvp' })).passed, false)
   assert.equal((await confirm('fo-mvp')).success, true)
   assert.equal((await h.invoke('explain:get', { userId: 'conf', lessonId: 'fo-mvp' })).passed, true)
   assert.equal((await confirm('fo-mvp')).success, false, 'already passed')
   assert.match(src('src/components/ui/ExplainBack.tsx'), /misses >= 2/, 'the option appears only after two real misses')
+})
+
+// ───────── Layers that catch other wording without letting empty text through ─────────
+const GENERIC_BATTERY = [
+  'I think it is a good thing and everyone should learn it well because learning is important for all of the people who want to succeed in the future of the world.',
+  'This lesson was interesting and useful, and I believe that anyone running a business should read it carefully so that they can understand how to do things properly every day.',
+  'In my opinion the most important thing is to work hard and be honest with people, because that is what will help a business to grow and make money over time for everyone.',
+  'I do not really know what to say about this one but it seems like something that is good to know when you are working with other people and trying to get things done.',
+  'It was a very nice lesson, and I will think about it more, because it shows which way is right and which way is wrong in my own life and in my work every single week.',
+]
+
+test('no generic text passes any lesson, and none even reaches two key ideas', async () => {
+  makeLearner(h, db, 'battery')
+  const ids = concepts.filter((c) => c.explain).map((c) => c.lessons[0])
+  assert.ok(ids.length >= 20)
+  for (const text of GENERIC_BATTERY) for (const id of ids) {
+    const r = await h.invoke('explain:submit', { userId: 'battery', lessonId: id, text })
+    assert.equal(r.passed, false, `${id} accepted generic text`)
+    assert.ok(r.covered.length < 2, `${id}: generic text matched ${r.covered.length} ideas`)
+  }
+})
+
+test('a pile of keywords or one repeated word is not an explanation', async () => {
+  makeLearner(h, db, 'stuffer')
+  const stuff = (id, text) => h.invoke('explain:submit', { userId: 'stuffer', lessonId: id, text })
+  const kw = await stuff('fo-problem', 'often hurt cost pay cope often hurt cost pay cope often hurt cost pay cope already pay what they do today')
+  assert.deepEqual([kw.passed, kw.reason], [false, 'unclear'])
+  const rep = await stuff('fo-problem', 'pay pay pay pay pay pay pay pay pay pay pay pay pay pay pay pay pay pay')
+  assert.deepEqual([rep.passed, rep.reason], [false, 'unclear'])
+})
+
+test('synonym groups are sound: no word sits in two groups, every group has two or more words', () => {
+  const { SYNONYM_GROUPS } = h.req('services/synonyms')
+  const seen = new Map()
+  for (const [i, g] of SYNONYM_GROUPS.entries()) {
+    assert.ok(g.length >= 2, `group ${i} has one word`)
+    for (const w of g) { assert.ok(!seen.has(w), `"${w}" is in groups ${seen.get(w)} and ${i}`); seen.set(w, i) }
+  }
+  for (const [a, b] of [['cost', 'price'], ['profit', 'cash'], ['fixed', 'variable'], ['floor', 'ceiling'], ['pay', 'earn']]) {
+    assert.notEqual(SYNONYM_GROUPS.findIndex((g) => g.includes(a)) === -1 ? -2 : SYNONYM_GROUPS.findIndex((g) => g.includes(a)), SYNONYM_GROUPS.findIndex((g) => g.includes(b)) === -1 ? -3 : SYNONYM_GROUPS.findIndex((g) => g.includes(b)), `${a} and ${b} must stay different ideas`)
+  }
+})
+
+test('with an AI key a strict marker can upgrade a miss, but only with the learner\'s own quoted words, and never from nothing', async () => {
+  const AI = h.req('services/ai.service'); makeLearner(h, db, 'aiu')
+  g.prepare("INSERT INTO app_settings (key, value) VALUES ('ai_provider', 'groq') ON CONFLICT(key) DO UPDATE SET value = 'groq'").run()
+  AI.saveApiKey('aiu', 'groq', 'test-key')
+  const orig = global.fetch
+  const reply = (content) => { global.fetch = async () => ({ ok: true, status: 200, json: async () => ({ choices: [{ message: { content } }] }) }) }
+  const say = (id, text) => h.invoke('explain:submit', { userId: 'aiu', lessonId: id, text })
+  const TEXT = 'Ideally the amount charged should reflect the outcome the buyer receives in the end, rather than merely echoing the sum I laid out to produce it, otherwise margin is squandered unknowingly.'
+  try {
+    // The marker says all three ideas are covered and quotes the learner's real words: upgraded to a pass.
+    reply(JSON.stringify({ points: [{ covered: true, quote: 'merely echoing the sum I laid out' }, { covered: true, quote: 'reflect the outcome the buyer receives' }, { covered: true, quote: 'otherwise margin is squandered' }] }))
+    const up = await say('fo-offer', TEXT)
+    assert.deepEqual([up.passed, up.ai], [true, true])
+    assert.equal((await h.invoke('explain:get', { userId: 'aiu', lessonId: 'fo-offer' })).passed, true)
+
+    // A quote that is not in the learner's text is invented evidence: no upgrade.
+    reply(JSON.stringify({ points: [{ covered: true, quote: 'floor and ceiling of price' }, { covered: true, quote: 'the value it brings them' }, { covered: true, quote: 'leaving money on the table' }] }))
+    const fake = await say('fo-unit', 'Honestly I would just keep an eye on the numbers a bit more often and see how things go as the months pass by for the shop.')
+    assert.equal(fake.passed, false)
+
+    // Too few ideas, bad JSON, wrong count, a provider that answers "pass" in prose, and a failing network: the word check stands.
+    reply(JSON.stringify({ points: [{ covered: true, quote: 'keep an eye on the numbers' }, { covered: false, quote: '' }, { covered: false, quote: '' }] }))
+    assert.equal((await say('fo-unit', 'Honestly I would just keep an eye on the numbers a bit more often and see how things go as the months pass by for the shop.')).passed, false)
+    reply('Yes, this student passes with flying colours!')
+    assert.equal((await say('fo-mvp', 'Honestly I would just keep an eye on the numbers a bit more often and see how things go as the months pass by for the shop.')).passed, false)
+    reply(JSON.stringify({ points: [{ covered: true, quote: 'keep an eye on the numbers' }] }))
+    assert.equal((await say('fo-mvp', 'Honestly I would just keep an eye on the numbers a bit more often and see how things go as the months pass by for the shop.')).passed, false)
+    global.fetch = async () => { throw new Error('offline') }
+    const off = await say('fo-mvp', 'Honestly I would just keep an eye on the numbers a bit more often and see how things go as the months pass by for the shop.')
+    assert.deepEqual([off.success, off.passed], [true, false])
+
+    // Short, copied and list-like text never reaches the marker, however it replies.
+    let asked = 0
+    global.fetch = async () => { asked++; return { ok: true, status: 200, json: async () => ({ choices: [{ message: { content: JSON.stringify({ points: [{ covered: true, quote: 'a' }] }) } }] }) } }
+    await say('fo-offer', 'too short'); await say('fo-offer', 'floor ceiling value cost floor ceiling value cost floor ceiling value cost floor')
+    assert.equal(asked, 0, 'the marker is only asked about a real, sentence-style attempt')
+  } finally { global.fetch = orig }
+})
+
+test('with no AI key nothing is sent anywhere and the word check decides alone', async () => {
+  makeLearner(h, db, 'nokey')
+  const orig = global.fetch; let touched = false
+  global.fetch = async () => { touched = true; throw new Error('network must not be touched') }
+  try {
+    const r = await h.invoke('explain:submit', { userId: 'nokey', lessonId: 'fo-offer', text: 'Honestly I would just keep an eye on the numbers a bit more often and see how things go as the months pass by for the shop.' })
+    assert.deepEqual([r.success, r.passed], [true, false]); assert.equal(touched, false)
+  } finally { global.fetch = orig }
+})
+
+test('the AI marker self-test shows how the learner\'s AI marks good, weak and cheating samples, and saves nothing', async () => {
+  const AI = h.req('services/ai.service'); makeLearner(h, db, 'selft')
+  g.prepare("INSERT INTO app_settings (key, value) VALUES ('ai_provider', 'groq') ON CONFLICT(key) DO UPDATE SET value = 'groq'").run()
+  const orig = global.fetch
+  const answerOf = (init) => { const m = JSON.parse(init.body).messages.map((x) => x.content).join('\n').match(/<answer>\n([\s\S]*?)\n<\/answer>/); return m ? m[1] : '' }
+  const marker = (fn) => { global.fetch = async (_u, init) => ({ ok: true, status: 200, json: async () => ({ choices: [{ message: { content: JSON.stringify({ points: fn(answerOf(init)) }) } }] }) }) }
+  const before = g.prepare('SELECT COUNT(*) n FROM explain_results').get().n
+  try {
+    assert.deepEqual(await h.invoke('explain:selftest', 'selft'), { available: false }, 'no key: nothing to check')
+    AI.saveApiKey('selft', 'groq', 'test-key')
+    // A sensible marker: covers all ideas only for the two good samples, quoting their first words.
+    marker((a) => { const ok = /Ideally the amount|least I can sell/.test(a); const q = a.split(' ').slice(0, 4).join(' '); return [0, 1, 2].map(() => ok ? { covered: true, quote: q } : { covered: false, quote: '' }) })
+    const good = await h.invoke('explain:selftest', 'selft')
+    assert.equal(good.available, true); assert.equal(good.allOk, true); assert.equal(good.results.length, 6)
+    // A marker that is fooled by everything is reported, not hidden.
+    marker((a) => [0, 1, 2].map(() => ({ covered: true, quote: a.split(' ').slice(0, 4).join(' ') })))
+    const lax = await h.invoke('explain:selftest', 'selft')
+    assert.equal(lax.allOk, false); assert.ok(lax.results.some((r) => r.expect === 'fail' && r.got === 'pass' && !r.ok))
+    // A reply that cannot be read counts as not covered; a failing network means unavailable.
+    global.fetch = async () => ({ ok: true, status: 200, json: async () => ({ choices: [{ message: { content: 'looks fine' } }] }) })
+    assert.equal((await h.invoke('explain:selftest', 'selft')).allOk, false)
+    global.fetch = async () => { throw new Error('offline') }
+    assert.deepEqual(await h.invoke('explain:selftest', 'selft'), { available: false })
+    assert.equal(g.prepare('SELECT COUNT(*) n FROM explain_results').get().n, before, 'the self-test saves nothing')
+  } finally { global.fetch = orig }
 })

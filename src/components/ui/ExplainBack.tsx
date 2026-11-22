@@ -3,7 +3,7 @@ import { CheckCircle, MessageSquare } from 'lucide-react'
 import { useAuthStore } from '../../store'
 import { reportApiError } from '../../lib/apiError'
 
-interface Outcome { passed: boolean; reason?: 'short' | 'copied'; covered: string[]; missing: string[] }
+interface Outcome { passed: boolean; reason?: 'short' | 'copied' | 'unclear'; covered: string[]; missing: string[] }
 
 /**
  * "Explain it back": the learner says the idea in their own words. The app checks that the key ideas are there (it cannot judge
@@ -58,12 +58,13 @@ export default function ExplainBack({ lessonId }: { lessonId: string }) {
         {passed && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--success)', marginLeft: 'auto' }}><CheckCircle size={12} /> Done</span>}
       </div>
       <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{prompt}</div>
-      <textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} aria-label="Your explanation" placeholder="Write it in your own words, as if to a friend."
+      <textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} aria-label="Your explanation" placeholder="Write it in your own words, as if to a friend. An example from your own life or work makes it stronger."
         style={{ width: '100%', resize: 'vertical', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--text-primary)', fontFamily: 'var(--font-sans)', fontSize: 12, padding: '8px 10px', outline: 'none' }} />
-      <button className="btn btn-secondary btn-sm" style={{ alignSelf: 'flex-start' }} disabled={busy || !text.trim()} onClick={check}>Check my explanation</button>
+      <button className="btn btn-secondary btn-sm" style={{ alignSelf: 'flex-start' }} disabled={busy || !text.trim()} onClick={check}>{busy ? 'Reading your explanation…' : 'Check my explanation'}</button>
       {outcome && (
         <div style={{ fontSize: 12, lineHeight: 1.6, color: outcome.passed ? 'var(--success)' : 'var(--text-secondary)' }}>
           {outcome.reason === 'short' && 'Say a little more: a few sentences, in your own words.'}
+          {outcome.reason === 'unclear' && 'Write it as sentences, as you would say it to a friend, not as a list of words.'}
           {outcome.reason === 'copied' && 'That is very close to the lesson text. Put it in your own words, as you would say it to a friend.'}
           {!outcome.reason && outcome.passed && 'Good: you covered the key ideas. This check looks for the ideas, not your understanding, so the tutor can read it with you if you want more.'}
           {!outcome.reason && !outcome.passed && (
@@ -75,7 +76,7 @@ export default function ExplainBack({ lessonId }: { lessonId: string }) {
       )}
       {!passed && misses >= 2 && outcome && !outcome.passed && !outcome.reason && (
         <div style={{ fontSize: 12, lineHeight: 1.6, color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <span>This check looks for particular words, so a good explanation in different words can be missed. Compare yours with the ideas above. If you cover them in your own way, you can go on. You can also use "Check my explanation" in the AI tutor for a fuller read.</span>
+          <span>This check looks for particular words, so a good explanation in different words can be missed. Compare yours with the ideas above. If you cover them in your own way, you can go on. You can also use "Check my explanation" in the AI tutor for a fuller read. With an AI key saved in Settings, your explanation is also read for meaning, in any wording.</span>
           <button className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start' }} disabled={busy} onClick={confirm}>I have compared it and I understand this</button>
         </div>
       )}

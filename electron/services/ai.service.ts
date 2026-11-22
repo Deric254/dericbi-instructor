@@ -305,6 +305,30 @@ export async function chat(params: {
   return { success: true, message: response, provider, conversationId }
 }
 
+/**
+ * One question to the learner's providers (first that answers wins), with nothing saved and no tutor persona. Used for marking
+ * jobs where the answer is data for the app. Returns null when no key is set or no provider answered; callers must carry on without it.
+ */
+export async function askOnce(userId: string, systemPrompt: string, message: string, totalMs = 25_000): Promise<string | null> {
+  const active = getActiveProvider(userId)
+  if (!PROVIDERS[active]) return null
+  const deadline = Date.now() + totalMs
+  for (const name of providerChain(userId, active)) {
+    const remaining = deadline - Date.now()
+    if (remaining < 3_000) break
+    const cfg = PROVIDERS[name]
+    const apiKey = getApiKey(userId, name) as string
+    try {
+      const text = await callWithModelRecovery(name, apiKey, (model) =>
+        cfg.kind === 'gemini'
+          ? callGemini(apiKey, systemPrompt, [], message, model, remaining)
+          : callOpenAI(apiKey, systemPrompt, [], message, cfg.baseUrl, model, remaining), remaining)
+      if (text.trim()) return text
+    } catch { /* try the next provider */ }
+  }
+  return null
+}
+
 // ─────────────────────────────────────────────
 // EXERCISE FEEDBACK
 // ─────────────────────────────────────────────

@@ -104,7 +104,7 @@ test('owner console can issue lifetime licences (checkbox + renew flag reach the
 
 // ── read vs write ──
 const READ = ['auth:login', 'auth:validate-session', 'auth:logout', 'auth:get-security-question', 'auth:reset-password',
-  'progress:dashboard', 'progress:skills', 'progress:skill-map', 'placement:get', 'review:due', 'explain:get', 'fieldwork:get', 'fieldwork:list', 'progress:rank', 'progress:memory', 'progress:achievements',
+  'progress:dashboard', 'progress:skills', 'progress:skill-map', 'placement:get', 'review:due', 'explain:get', 'explain:selftest', 'fieldwork:get', 'fieldwork:list', 'progress:rank', 'progress:memory', 'progress:achievements',
   'lessons:list', 'lessons:get', 'lessons:start', 'exercises:get', 'exercises:hint',
   'sql:history', 'sql:datasets', 'sql:close-sandbox', 'sql:schema', 'userdb:list', 'userdb:describe', 'userdb:export', 'progress:export', 'files:profile', 'ai:has-key', 'ai:get-provider', 'ai:usage',
   'settings:get', 'settings:get-all', 'app:get-version', 'projects:list', 'projects:get', 'portfolio:list',

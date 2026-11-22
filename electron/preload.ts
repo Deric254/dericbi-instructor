@@ -80,6 +80,7 @@ const api = {
     get: (userId: string, lessonId: string) => ipcRenderer.invoke('explain:get', { userId, lessonId }),
     submit: (userId: string, lessonId: string, text: string) => ipcRenderer.invoke('explain:submit', { userId, lessonId, text }),
     confirm: (userId: string, lessonId: string) => ipcRenderer.invoke('explain:confirm', { userId, lessonId }),
+    selfTest: (userId: string) => ipcRenderer.invoke('explain:selftest', userId),
   },
 
   // Real-world tasks

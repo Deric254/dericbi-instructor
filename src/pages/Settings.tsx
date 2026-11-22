@@ -45,6 +45,13 @@ export default function Settings() {
   const [profileForm, setProfileForm] = useState({ name: user?.name || '', experience_level: user?.experience_level || 'beginner' })
   const [savingProfile, setSavingProfile] = useState(false)
   const [appSettings, setAppSettings] = useState<Record<string, string>>({})
+  const [markerTest, setMarkerTest] = useState<null | 'running' | { available: boolean; allOk?: boolean; results?: { label: string; expect: string; got: string; ok: boolean }[] }>(null)
+  const runMarkerTest = async () => {
+    if (!user) return
+    setMarkerTest('running')
+    try { setMarkerTest(await window.api.explain.selfTest(user.id)) }
+    catch (err) { setMarkerTest(null); reportApiError('check how the AI marks explanations', err) }
+  }
 
   const PROVIDERS = [
     { id: 'gemini',      label: 'Google Gemini',  desc: 'Gemini Flash — best cost/speed balance. Recommended.',                                          link: 'https://aistudio.google.com/app/apikey' },
@@ -274,6 +281,29 @@ export default function Settings() {
               </div>
             </div>
           ))}
+          <div style={{ marginTop: 6, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Check how your AI marks explanations</div>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10, lineHeight: 1.6 }}>
+              Lessons ask learners to explain an idea in their own words. If a word check misses a good explanation, your AI gets a second look. This sends six sample answers (good, vague, one-idea, an attempt to trick it, keywords) to your AI to show how it marks them. Nothing is saved.
+            </p>
+            <button className="btn btn-secondary btn-sm" onClick={runMarkerTest} disabled={markerTest === 'running'}>
+              {markerTest === 'running' ? <><Loader size={12} className="animate-spin" /> Checking…</> : 'Check the AI marker'}
+            </button>
+            {markerTest && markerTest !== 'running' && (
+              markerTest.available ? (
+                <div style={{ marginTop: 10, fontSize: 12, lineHeight: 1.7 }}>
+                  <div style={{ fontWeight: 600, color: markerTest.allOk ? 'var(--success)' : 'var(--warning)' }}>
+                    {markerTest.allOk ? 'Your AI marked all six as expected.' : 'Your AI did not mark every sample as expected. A weaker model may be too strict or too lenient; learners can still use the "I have compared it" button.'}
+                  </div>
+                  <ul style={{ margin: '6px 0 0 18px', color: 'var(--text-secondary)' }}>
+                    {markerTest.results?.map((r) => <li key={r.label}>{r.ok ? '✓' : '✗'} {r.label}: should {r.expect}, it said {r.got}</li>)}
+                  </ul>
+                </div>
+              ) : (
+                <div style={{ marginTop: 10, fontSize: 12, color: 'var(--text-secondary)' }}>Your AI could not be reached. Add a key above and try again; the rest of the app works without it.</div>
+              )
+            )}
+          </div>
         </Section>
 
         {/* ── Profile ── */}
