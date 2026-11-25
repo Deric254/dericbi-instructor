@@ -8,6 +8,7 @@ import ErrorBoundary from '../ErrorBoundary'
 
 // Pages — all fully implemented
 import Dashboard from '../../pages/Dashboard'
+import Path from '../../pages/Path'
 import SqlAcademy from '../../pages/SqlAcademy'
 import PythonAcademy from '../../pages/PythonAcademy'
 import ExcelAcademy from '../../pages/ExcelAcademy'
@@ -27,6 +28,7 @@ import type { NavSection } from '../../types'
 
 const PAGES: Record<NavSection, React.ReactNode> = {
   dashboard:    <Dashboard />,
+  path:         <Path />,
   sql:          <SqlAcademy key="sql" />,
   python:       <PythonAcademy />,
   excel:        <ExcelAcademy />,
@@ -37,6 +39,7 @@ const PAGES: Record<NavSection, React.ReactNode> = {
   bizsolver:    <SqlAcademy key="bizsolver" course="bizsolver" />,
   foundations:  <SqlAcademy key="foundations" course="foundations" />,
   founder:      <SqlAcademy key="founder" course="founder" />,
+  aiml:         <SqlAcademy key="aiml" course="aiml" />,
   simulations:  <Simulations />,
   playground:   <DataPlayground />,
   datasets:     <Datasets />,

@@ -1,7 +1,7 @@
 // DericBI Instructor — Complete Database Schema
 // All DDL statements in migration order
 
-export const SCHEMA_VERSION = 8
+export const SCHEMA_VERSION = 9
 
 export const CREATE_TABLES = `
 
@@ -169,6 +169,22 @@ CREATE TABLE IF NOT EXISTS field_tasks (
   learned    TEXT NOT NULL,
   updated_at TEXT NOT NULL DEFAULT (datetime('now')),
   PRIMARY KEY (user_id, lesson_id)
+);
+
+-- ─────────────────────────────────────────────
+-- MASTER TRACK (gate evidence the learner wrote, and whether they follow the path strictly)
+-- ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS path_gates (
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  phase_id   TEXT NOT NULL,
+  evidence   TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, phase_id)
+);
+CREATE TABLE IF NOT EXISTS path_state (
+  user_id    TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  strict     INTEGER NOT NULL DEFAULT 0,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 -- ─────────────────────────────────────────────

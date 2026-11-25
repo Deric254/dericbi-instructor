@@ -182,6 +182,7 @@ function LessonCard({ lesson, onClick }: { lesson: Lesson; onClick: () => void }
     <button
       onClick={locked ? undefined : onClick}
       disabled={locked}
+      title={lesson.path_locked ? "Locked by your path: complete the phase you are in first" : undefined}
       style={{
         padding: '14px', borderRadius: 'var(--radius)', width: '100%', textAlign: 'left',
         border: `1px solid ${complete ? 'rgba(250,204,21,0.3)' : inProgress ? 'rgba(250,204,21,0.2)' : 'var(--border)'}`,

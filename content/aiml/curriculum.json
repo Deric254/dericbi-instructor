@@ -1,0 +1,1300 @@
+{
+  "module": "aiml",
+  "version": "1.0",
+  "lessons": [
+    {
+      "id": "ml-model",
+      "title": "What a Model Is: A Rule Learned From Data",
+      "description": "A model is a rule that turns what you know into a guess about what you do not, and you can only call it good if it beats the simplest guess.",
+      "level": "beginner",
+      "prerequisites": [],
+      "estimated_min": 30,
+      "sort_order": 1,
+      "theory_md": "## Why this matters\nMachine learning sounds like magic, so people trust it too easily or fear it. It is neither. A model is a rule that takes facts you have and gives a guess about something you do not. Once you see it that way, you can judge any model, from a spreadsheet formula to a large AI system, by the same question: is it better than a simple guess?\n\n## The first principle\n**A model is a rule for guessing, and it earns its place only by beating the simplest rule.**\n\nThe simplest rule is the **baseline**: always guess the average. If a clever model cannot beat \"always guess the average\", it has learned nothing useful, however advanced it sounds.\n\nTo compare, we need an error: how far each guess is from the truth. The **mean absolute error (MAE)** is the average distance between guess and truth, ignoring direction.\n\n## A worked example\nMwangi Trading sells 40 products. We want to guess each product's selling price.\n\n- **Baseline:** guess the average price, KES 1,359.17 for every product. The average miss is KES 1,027.09. That is a big miss, because a bag of nails and a ream of paper do not cost the same.\n- **A rule:** guess the price from the cost: `price = cost x 1.25`. The average miss falls to KES 74.04.\n\nThe rule is about 14 times better than the baseline. It earned its place. The rule is also something you can read and explain, which matters later.\n\n## Try it\nSQL can do all of this. `AVG(unit_price)` gives the baseline. `ABS(a - b)` is the distance between two numbers. Averaging those distances gives the MAE. Use `unit_price` and `unit_cost` in `shop_products`.\n\n## What you can and cannot claim\nYou can claim a rule is better than the baseline on these 40 products. You cannot yet claim it will work on new products, because we measured it on the same products we looked at. The next lesson fixes that.\n\n## Say it in your own words\nWhat is a model, what is the baseline, and why must a model beat the baseline?\n\n## Do this in real life\nPick one number in your own work that you guess today, such as next month's sales or the time a job takes. Write the simplest guess (the average of the last few months) and how far off it usually is. That is your baseline.",
+      "quiz": [
+        {
+          "question": "What is a model, in the plainest terms?",
+          "options": [
+            "A computer that thinks",
+            "A rule that turns facts you have into a guess about something you do not",
+            "A chart of past results",
+            "A database table"
+          ],
+          "correct_index": 1,
+          "explanation": "A model is a rule for guessing, whether it is a formula or a large AI system."
+        },
+        {
+          "question": "What is the baseline?",
+          "options": [
+            "The most advanced model available",
+            "The simplest guess, such as always predicting the average",
+            "The training data",
+            "The error of the best model"
+          ],
+          "correct_index": 1,
+          "explanation": "The baseline is the simple guess every model must beat."
+        },
+        {
+          "question": "A model's average miss is 1,200 and the baseline's average miss is 1,000. What does that tell you?",
+          "options": [
+            "The model is useful",
+            "The model is worse than the simplest guess",
+            "The model is almost perfect",
+            "The baseline is wrong"
+          ],
+          "correct_index": 1,
+          "explanation": "A model that misses by more than the baseline has learned nothing useful."
+        },
+        {
+          "question": "What does mean absolute error (MAE) measure?",
+          "options": [
+            "How many guesses were exactly right",
+            "The average distance between the guess and the truth, ignoring direction",
+            "The biggest single miss",
+            "How fast the model runs"
+          ],
+          "correct_index": 1,
+          "explanation": "MAE is the average size of the miss."
+        },
+        {
+          "question": "In the worked example, the cost x 1.25 rule has an MAE of 74.04 against a baseline of 1,027.09. Which claim is safe?",
+          "options": [
+            "It will work on every future product",
+            "It beats the baseline on these 40 products",
+            "It understands pricing",
+            "No baseline is needed"
+          ],
+          "correct_index": 1,
+          "explanation": "We only measured it on the products we looked at, so the safe claim is limited to those."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "ml-1-e1",
+          "title": "The Baseline Guess",
+          "prompt": "Return one row with one column called baseline: the average unit_price of all products, rounded to 2 decimals.",
+          "hint_1": "Use AVG(unit_price) on shop_products and ROUND it to 2 decimals.",
+          "hint_2": "ROUND(AVG(unit_price), 2) AS baseline",
+          "hint_3": "SELECT ROUND(AVG(unit_price), 2) AS baseline FROM shop_products",
+          "solution": "SELECT ROUND(AVG(unit_price), 2) AS baseline FROM shop_products",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-1-e2",
+          "title": "How Wrong Is the Baseline?",
+          "prompt": "If you guess the average price for every product, how far off are you on average? Return one column called baseline_mae, rounded to 2 decimals.",
+          "hint_1": "Take ABS(unit_price - the average price), then AVG of that. The average price can be a subquery: (SELECT AVG(unit_price) FROM shop_products).",
+          "hint_2": "AVG(ABS(unit_price - (SELECT AVG(unit_price) FROM shop_products)))",
+          "hint_3": "SELECT ROUND(AVG(ABS(unit_price - (SELECT AVG(unit_price) FROM shop_products))), 2) AS baseline_mae FROM shop_products",
+          "solution": "SELECT ROUND(AVG(ABS(unit_price - (SELECT AVG(unit_price) FROM shop_products))), 2) AS baseline_mae FROM shop_products",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-1-e3",
+          "title": "A Rule Beats the Baseline",
+          "prompt": "Try the rule price = cost x 1.25. Return one column called rule_mae: the average distance between the rule's guess and the real unit_price, rounded to 2 decimals.",
+          "hint_1": "The guess is unit_cost * 1.25. Compare it with unit_price using ABS, then AVG.",
+          "hint_2": "AVG(ABS(unit_price - unit_cost * 1.25))",
+          "hint_3": "SELECT ROUND(AVG(ABS(unit_price - unit_cost * 1.25)), 2) AS rule_mae FROM shop_products",
+          "solution": "SELECT ROUND(AVG(ABS(unit_price - unit_cost * 1.25)), 2) AS rule_mae FROM shop_products",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "ml-split",
+      "title": "Train and Test: Never Mark Your Own Homework",
+      "description": "A model must be judged on data it has never seen, so we keep part of the data aside before we learn anything.",
+      "level": "beginner",
+      "prerequisites": [
+        "ml-model"
+      ],
+      "estimated_min": 30,
+      "sort_order": 2,
+      "theory_md": "## Why this matters\nA student who sees the exam questions in advance scores full marks and has learned nothing. A model judged on the data it learned from can look perfect and fail the first day in real life. The fix is simple and it is the most important habit in machine learning.\n\n## The first principle\n**Split the data first. Learn from one part, judge on the other.**\n\n- **Training set:** the part the model learns from.\n- **Test set:** the part kept aside, used only once to measure how good the model really is.\n\nAnything you learn from, such as an average, must come from the training set only. If the test set leaks into the learning, the test no longer tells the truth. That mistake is called **leakage**.\n\n## A worked example\nWe split the 40 products by number: odd product numbers are training, even are test. That gives 20 and 20, and it is the same split every time.\n\n- The training average price is KES 1,103.65.\n- The test average price is higher, KES 1,614.70. The two halves are not the same.\n\nGuessing the training average for every test product misses by KES 1,178.03 on average. That is the honest baseline for this split. It is worse than the 1,027.09 we got before, because before we marked our own homework: the average was learned from the very products being scored.\n\n## Try it\nUse `product_id % 2 = 1` for training and `product_id % 2 = 0` for test. `%` gives the remainder after dividing, so an odd number leaves 1.\n\n## What you can and cannot claim\nA fixed split is fair and repeatable, but one split can be lucky or unlucky. Twenty test products is a small test. Treat the result as a first honest estimate, not a promise.\n\n## Say it in your own words\nWhy do we split the data before learning, and what is leakage?\n\n## Do this in real life\nTake a list of results from your own work, such as monthly sales. Decide a rule from the older months only, then check it on the recent months you did not use. Write whether it held up.",
+      "quiz": [
+        {
+          "question": "Why do we keep a test set aside?",
+          "options": [
+            "To make the model run faster",
+            "To judge the model on data it has never seen",
+            "To store extra data",
+            "To train the model twice"
+          ],
+          "correct_index": 1,
+          "explanation": "Judging on unseen data shows how the model behaves in real life."
+        },
+        {
+          "question": "Which of these is leakage?",
+          "options": [
+            "Learning the average from the training set only",
+            "Computing the average from all the data, then testing on part of it",
+            "Splitting by product number",
+            "Keeping a test set"
+          ],
+          "correct_index": 1,
+          "explanation": "The test products influenced the average, so the test is no longer honest."
+        },
+        {
+          "question": "Why was the honest baseline miss (1,178.03) larger than the earlier one (1,027.09)?",
+          "options": [
+            "The data was different",
+            "The earlier one used an average learned from the same products it was scored on",
+            "The test set was bigger",
+            "Rounding"
+          ],
+          "correct_index": 1,
+          "explanation": "Marking your own homework flatters the result."
+        },
+        {
+          "question": "What does product_id % 2 = 1 select?",
+          "options": [
+            "Even product numbers",
+            "Odd product numbers",
+            "The first product",
+            "Products with price 1"
+          ],
+          "correct_index": 1,
+          "explanation": "An odd number leaves a remainder of 1 when divided by 2."
+        },
+        {
+          "question": "You test a model on 20 products and it scores well. What is the safest conclusion?",
+          "options": [
+            "It will always work",
+            "It is a first honest estimate that a larger test would firm up",
+            "The training was wasted",
+            "The test set should be used for training"
+          ],
+          "correct_index": 1,
+          "explanation": "A small test gives a rough estimate, not a guarantee."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "ml-2-e1",
+          "title": "Make the Split",
+          "prompt": "Count the products in each part. Return two rows with columns part ('train' for odd product_id, 'test' for even) and products, ordered by part.",
+          "hint_1": "Use CASE WHEN product_id % 2 = 1 THEN 'train' ELSE 'test' END, then GROUP BY it and ORDER BY it.",
+          "hint_2": "CASE WHEN product_id % 2 = 1 THEN 'train' ELSE 'test' END AS part",
+          "hint_3": "SELECT CASE WHEN product_id % 2 = 1 THEN 'train' ELSE 'test' END AS part, COUNT(*) AS products FROM shop_products GROUP BY part ORDER BY part",
+          "solution": "SELECT CASE WHEN product_id % 2 = 1 THEN 'train' ELSE 'test' END AS part, COUNT(*) AS products FROM shop_products GROUP BY part ORDER BY part",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-2-e2",
+          "title": "Learn From Training Only",
+          "prompt": "Return one column called train_mean: the average unit_price of the training products (odd product_id), rounded to 2 decimals.",
+          "hint_1": "Filter with WHERE product_id % 2 = 1 before you average.",
+          "hint_2": "ROUND(AVG(unit_price), 2) AS train_mean FROM shop_products WHERE product_id % 2 = 1",
+          "hint_3": "SELECT ROUND(AVG(unit_price), 2) AS train_mean FROM shop_products WHERE product_id % 2 = 1",
+          "solution": "SELECT ROUND(AVG(unit_price), 2) AS train_mean FROM shop_products WHERE product_id % 2 = 1",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-2-e3",
+          "title": "The Honest Baseline",
+          "prompt": "Guess the training average for every test product (even product_id). Return one column called test_baseline_mae: the average miss, rounded to 2 decimals.",
+          "hint_1": "Score only the test rows (even ids), and use a subquery for the training average: (SELECT AVG(unit_price) FROM shop_products WHERE product_id % 2 = 1).",
+          "hint_2": "AVG(ABS(unit_price - (SELECT AVG(unit_price) FROM shop_products WHERE product_id % 2 = 1)))",
+          "hint_3": "SELECT ROUND(AVG(ABS(unit_price - (SELECT AVG(unit_price) FROM shop_products WHERE product_id % 2 = 1))), 2) AS test_baseline_mae FROM shop_products WHERE product_id % 2 = 0",
+          "solution": "SELECT ROUND(AVG(ABS(unit_price - (SELECT AVG(unit_price) FROM shop_products WHERE product_id % 2 = 1))), 2) AS test_baseline_mae FROM shop_products WHERE product_id % 2 = 0",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "ml-regress",
+      "title": "Fit a Line by Hand",
+      "description": "Linear regression finds the straight line that best predicts one number from another, and you can compute it with sums.",
+      "level": "intermediate",
+      "prerequisites": [
+        "ml-split"
+      ],
+      "estimated_min": 35,
+      "sort_order": 3,
+      "theory_md": "## Why this matters\nMany useful models are just a straight line. If you can build one by hand, you will never treat a library call as magic, and you will notice when it is wrong.\n\n## The first principle\n**The best line is the one that makes the squared misses smallest, and it comes from five sums.**\n\nFor a line `price = intercept + slope x cost`, take the training rows and compute:\n\n- `n`, the number of rows\n- `sum_x`, the sum of the costs\n- `sum_y`, the sum of the prices\n- `sum_xx`, the sum of each cost times itself\n- `sum_xy`, the sum of each cost times its price\n\nThen:\n\n`slope = (n x sum_xy - sum_x x sum_y) / (n x sum_xx - sum_x x sum_x)`\n\n`intercept = (sum_y - slope x sum_x) / n`\n\n## A worked example\nOn the 20 training products:\n\n- n = 20, sum_x = 17,610, sum_y = 22,073, sum_xx = 26,064,850, sum_xy = 32,486,805.\n- slope = 1.236: each extra KES 1 of cost adds about KES 1.24 to the price.\n- intercept = 15.33.\n\nSo the model is `price = 15.33 + 1.236 x cost`. The slope matches what the shop does: it adds about a quarter on top of cost, plus a little extra.\n\n## Try it\nWork in steps. First get the five sums with one query. Then put them in a `WITH` block and compute the slope. Multiply by `1.0` or use decimals so the division is not rounded down to whole numbers, which is what SQL does when both sides are whole numbers.\n\n## What you can and cannot claim\nThe line describes the relationship in the training products. It says nothing about why prices are set that way, and it may fail for products priced by a different rule, such as a promotion.\n\n## Say it in your own words\nWhat does the slope of a line tell you, and why do we compute it from the training data only?\n\n## Do this in real life\nPick two numbers from your work that move together, such as advertising spend and sales. Write down roughly how much one rises when the other rises by one unit. That is a slope, even if you never computed it.",
+      "quiz": [
+        {
+          "question": "What does a slope of 1.236 mean in price = 15.33 + 1.236 x cost?",
+          "options": [
+            "The price is always 1.236",
+            "Each extra KES 1 of cost adds about KES 1.24 to the price",
+            "The cost is 1.236 times the price",
+            "The model is 1.236% accurate"
+          ],
+          "correct_index": 1,
+          "explanation": "The slope is the change in the guess for each one-unit change in the input."
+        },
+        {
+          "question": "Which data do we use to compute the sums?",
+          "options": [
+            "All the data",
+            "The test set",
+            "The training set only",
+            "Whatever is easiest"
+          ],
+          "correct_index": 2,
+          "explanation": "Learning from the test set would be leakage."
+        },
+        {
+          "question": "What goes wrong if both sides of a division in SQL are whole numbers?",
+          "options": [
+            "Nothing",
+            "The result is rounded down to a whole number",
+            "The query fails",
+            "The result becomes negative"
+          ],
+          "correct_index": 1,
+          "explanation": "SQLite divides whole numbers as whole numbers, so multiply by 1.0 first."
+        },
+        {
+          "question": "What does the intercept represent?",
+          "options": [
+            "The slope times ten",
+            "The guess when the input is zero",
+            "The test error",
+            "The number of rows"
+          ],
+          "correct_index": 1,
+          "explanation": "The intercept is where the line starts."
+        },
+        {
+          "question": "A line fits the training products very well. What can you NOT conclude?",
+          "options": [
+            "The slope describes the training products",
+            "The shop prices at about cost plus a quarter",
+            "It explains why the shop chose those prices",
+            "It beats the baseline on the training set"
+          ],
+          "correct_index": 2,
+          "explanation": "A fitted line describes a pattern; it does not explain the reason for it."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "ml-3-e1",
+          "title": "The Five Sums",
+          "prompt": "Using only the training products (odd product_id), return one row with n, sum_x, sum_y, sum_xx and sum_xy, where x is unit_cost and y is unit_price.",
+          "hint_1": "COUNT(*) gives n. SUM(unit_cost), SUM(unit_price), SUM(unit_cost * unit_cost) and SUM(unit_cost * unit_price) give the rest.",
+          "hint_2": "COUNT(*) AS n, SUM(unit_cost) AS sum_x, SUM(unit_price) AS sum_y",
+          "hint_3": "SELECT COUNT(*) AS n, SUM(unit_cost) AS sum_x, SUM(unit_price) AS sum_y, SUM(unit_cost * unit_cost) AS sum_xx, SUM(unit_cost * unit_price) AS sum_xy FROM shop_products WHERE product_id % 2 = 1",
+          "solution": "SELECT COUNT(*) AS n, SUM(unit_cost) AS sum_x, SUM(unit_price) AS sum_y, SUM(unit_cost * unit_cost) AS sum_xx, SUM(unit_cost * unit_price) AS sum_xy FROM shop_products WHERE product_id % 2 = 1",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-3-e2",
+          "title": "The Slope",
+          "prompt": "From those sums, return one column called slope, rounded to 4 decimals, using slope = (n x sum_xy - sum_x x sum_y) / (n x sum_xx - sum_x x sum_x). Use the training products only.",
+          "hint_1": "Put the five sums in a WITH block called s, then SELECT the formula from s. Multiply the top by 1.0 so the division keeps decimals.",
+          "hint_2": "WITH s AS (SELECT COUNT(*) AS n, ... ) SELECT ROUND((n * sxy - sx * sy) * 1.0 / (n * sxx - sx * sx), 4) AS slope FROM s",
+          "hint_3": "WITH s AS (SELECT COUNT(*) AS n, SUM(unit_cost) AS sx, SUM(unit_price) AS sy, SUM(unit_cost * unit_cost) AS sxx, SUM(unit_cost * unit_price) AS sxy FROM shop_products WHERE product_id % 2 = 1) SELECT ROUND((n * sxy - sx * sy) * 1.0 / (n * sxx - sx * sx), 4) AS slope FROM s",
+          "solution": "WITH s AS (SELECT COUNT(*) AS n, SUM(unit_cost) AS sx, SUM(unit_price) AS sy, SUM(unit_cost * unit_cost) AS sxx, SUM(unit_cost * unit_price) AS sxy FROM shop_products WHERE product_id % 2 = 1) SELECT ROUND((n * sxy - sx * sy) * 1.0 / (n * sxx - sx * sx), 4) AS slope FROM s",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-3-e3",
+          "title": "The Whole Line",
+          "prompt": "Return one row with two columns: slope (4 decimals) and intercept (2 decimals), computed from the training products, where intercept = (sum_y - slope x sum_x) / n.",
+          "hint_1": "Compute the slope in one WITH block, then use it in the intercept in the final SELECT.",
+          "hint_2": "WITH s AS (...), b AS (SELECT n, sx, sy, slope ...) SELECT ROUND(slope, 4), ROUND((sy - slope * sx) / n, 2)",
+          "hint_3": "WITH s AS (SELECT COUNT(*) AS n, SUM(unit_cost) AS sx, SUM(unit_price) AS sy, SUM(unit_cost * unit_cost) AS sxx, SUM(unit_cost * unit_price) AS sxy FROM shop_products WHERE product_id % 2 = 1), b AS (SELECT n, sx, sy, (n * sxy - sx * sy) * 1.0 / (n * sxx - sx * sx) AS slope FROM s) SELECT ROUND(slope, 4) AS slope, ROUND((sy - slope * sx) / n, 2) AS intercept FROM b",
+          "solution": "WITH s AS (SELECT COUNT(*) AS n, SUM(unit_cost) AS sx, SUM(unit_price) AS sy, SUM(unit_cost * unit_cost) AS sxx, SUM(unit_cost * unit_price) AS sxy FROM shop_products WHERE product_id % 2 = 1), b AS (SELECT n, sx, sy, (n * sxy - sx * sy) * 1.0 / (n * sxx - sx * sx) AS slope FROM s) SELECT ROUND(slope, 4) AS slope, ROUND((sy - slope * sx) / n, 2) AS intercept FROM b",
+          "evaluation_mode": "exact",
+          "points": 20,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "ml-error",
+      "title": "Measure the Miss: MAE, MSE and the Worst Case",
+      "description": "Different error measures answer different questions, so choose the one that matches what a miss costs you.",
+      "level": "intermediate",
+      "prerequisites": [
+        "ml-regress"
+      ],
+      "estimated_min": 30,
+      "sort_order": 4,
+      "theory_md": "## Why this matters\n\"The model is 95 percent good\" means nothing until you say what a miss costs. A small miss on a cheap item and a huge miss on one expensive item are not the same problem.\n\n## The first principle\n**Pick the error measure that matches the cost of being wrong.**\n\n- **MAE** (mean absolute error): the average size of the miss. Easy to read: \"off by KES 100 on average.\"\n- **MSE** (mean squared error): the average of the squared miss. Squaring makes big misses count far more, so one terrible guess shows up.\n- **The worst case**: the single biggest miss. It matters when one failure is expensive.\n\nAlways compare against the baseline, on the test set.\n\n## A worked example\nOur line is `price = 15.33 + 1.236 x cost`. On the 20 test products:\n\n- MAE of the line: KES 103.79. The honest baseline MAE was 1,178.03.\n- MSE of the baseline: about 2,897,496. MSE of the line: about 30,985. The line is about 94 times better by this measure, so the big baseline misses disappear.\n- The worst single miss is Acaricide 1L, off by KES 548.29. The line suits most products, but not this one.\n\nThe worst case is a question to ask: why is this product different? It may have a special price rule, a typing mistake, or a real exception worth knowing.\n\n## Try it\nSquaring in SQL is `x * x`. Use the learned numbers from the last lesson inside the query: `15.33 + 1.236 * unit_cost`. Score only the test products (even `product_id`).\n\n## What you can and cannot claim\nA low average error does not mean no bad misses. Always look at the worst few cases before trusting a model.\n\n## Say it in your own words\nWhat is the difference between MAE and MSE, and why look at the worst miss?\n\n## Do this in real life\nTake any forecast you have made. Write the average miss, then the biggest miss, and say which one hurt you more.",
+      "quiz": [
+        {
+          "question": "Which measure punishes one very large miss the most?",
+          "options": [
+            "MAE",
+            "MSE",
+            "The count of products",
+            "The average price"
+          ],
+          "correct_index": 1,
+          "explanation": "Squaring makes large misses count far more."
+        },
+        {
+          "question": "Why score a model on the test set, not the training set?",
+          "options": [
+            "The training set is smaller",
+            "The test set shows how it behaves on data it has not seen",
+            "The test set has more columns",
+            "It is faster"
+          ],
+          "correct_index": 1,
+          "explanation": "Only unseen data shows real performance."
+        },
+        {
+          "question": "The line's MAE is 103.79 and its worst miss is 548.29. What should you do with the worst miss?",
+          "options": [
+            "Ignore it, the average is low",
+            "Investigate why that product is different",
+            "Delete the product",
+            "Raise the slope"
+          ],
+          "correct_index": 1,
+          "explanation": "A worst case can reveal a special rule, a mistake or a real exception."
+        },
+        {
+          "question": "MSE is 2,897,496 for the baseline and 30,985 for the line. What does that suggest?",
+          "options": [
+            "The line removes the big misses",
+            "The baseline is better",
+            "They are equal",
+            "MSE is broken"
+          ],
+          "correct_index": 0,
+          "explanation": "A huge drop in MSE means the large misses are gone."
+        },
+        {
+          "question": "When is the worst case the most important measure?",
+          "options": [
+            "When one failure is very expensive",
+            "Never",
+            "When you have a lot of data",
+            "When the model is a line"
+          ],
+          "correct_index": 0,
+          "explanation": "If one miss can cost a fortune, the average hides the danger."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "ml-4-e1",
+          "title": "Test MAE of the Line",
+          "prompt": "Use the line price = 15.33 + 1.236 x unit_cost on the test products (even product_id). Return one column called line_mae: the average miss, rounded to 2 decimals.",
+          "hint_1": "The guess is (15.33 + 1.236 * unit_cost). Use ABS(unit_price - guess), AVG it, and filter WHERE product_id % 2 = 0.",
+          "hint_2": "AVG(ABS(unit_price - (15.33 + 1.236 * unit_cost))) ... WHERE product_id % 2 = 0",
+          "hint_3": "SELECT ROUND(AVG(ABS(unit_price - (15.33 + 1.236 * unit_cost))), 2) AS line_mae FROM shop_products WHERE product_id % 2 = 0",
+          "solution": "SELECT ROUND(AVG(ABS(unit_price - (15.33 + 1.236 * unit_cost))), 2) AS line_mae FROM shop_products WHERE product_id % 2 = 0",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-4-e2",
+          "title": "Baseline Against the Line",
+          "prompt": "On the test products, return one row with baseline_mse (guessing 1103.65, the training average) and line_mse (the line from the lesson), each the average squared miss rounded to 0 decimals.",
+          "hint_1": "Squared miss is (unit_price - guess) * (unit_price - guess). Average it for each guess in the same SELECT.",
+          "hint_2": "ROUND(AVG((unit_price - 1103.65) * (unit_price - 1103.65)), 0) AS baseline_mse, ...",
+          "hint_3": "SELECT ROUND(AVG((unit_price - 1103.65) * (unit_price - 1103.65)), 0) AS baseline_mse, ROUND(AVG((unit_price - (15.33 + 1.236 * unit_cost)) * (unit_price - (15.33 + 1.236 * unit_cost))), 0) AS line_mse FROM shop_products WHERE product_id % 2 = 0",
+          "solution": "SELECT ROUND(AVG((unit_price - 1103.65) * (unit_price - 1103.65)), 0) AS baseline_mse, ROUND(AVG((unit_price - (15.33 + 1.236 * unit_cost)) * (unit_price - (15.33 + 1.236 * unit_cost))), 0) AS line_mse FROM shop_products WHERE product_id % 2 = 0",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-4-e3",
+          "title": "The Worst Miss",
+          "prompt": "Which test product does the line miss by the most? Return one row with the product name and its miss, called error, rounded to 2 decimals.",
+          "hint_1": "Compute ABS(unit_price - guess) as error, filter the even product_ids, ORDER BY error DESC and keep one row.",
+          "hint_2": "SELECT name, ROUND(ABS(unit_price - (15.33 + 1.236 * unit_cost)), 2) AS error ... ORDER BY error DESC LIMIT 1",
+          "hint_3": "SELECT name, ROUND(ABS(unit_price - (15.33 + 1.236 * unit_cost)), 2) AS error FROM shop_products WHERE product_id % 2 = 0 ORDER BY error DESC LIMIT 1",
+          "solution": "SELECT name, ROUND(ABS(unit_price - (15.33 + 1.236 * unit_cost)), 2) AS error FROM shop_products WHERE product_id % 2 = 0 ORDER BY error DESC LIMIT 1",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "ml-classify",
+      "title": "Classifying: Predicting a Category and Beating 'Always Paid'",
+      "description": "When the answer is a category, accuracy is the share right, and the baseline is always guessing the most common category.",
+      "level": "intermediate",
+      "prerequisites": [
+        "ml-error"
+      ],
+      "estimated_min": 30,
+      "sort_order": 5,
+      "theory_md": "## Why this matters\nMany real questions are yes or no: will this customer pay late, is this email spam, will this machine fail. Predicting a category is called **classification**. The danger is a number that sounds good and means nothing.\n\n## The first principle\n**Accuracy is the share of guesses that are right, and it must be compared with the baseline of always guessing the most common answer.**\n\nIf 72 out of 100 sales are paid on the spot, a model that says \"paid\" every time is already 72 percent accurate. A model that scores 70 percent is worse than doing nothing, even though 70 sounds high.\n\n## A worked example\nMwangi Trading made 2,046 sales in 2025: 1,480 paid at once and 566 sold on credit.\n\n- **Baseline:** always say \"paid\". Accuracy is 72.3 percent.\n- **A simple rule:** if the sale total is above KES 20,000, predict credit, otherwise paid. Accuracy is 65.6 percent.\n\nThe rule is worse than the baseline. Big sales are not a good signal for who will not pay. The result is useful: it tells you not to build a credit warning on the sale total alone.\n\n## Try it\nA condition in SQL is true (1) or false (0), so `SUM(payment_status = 'paid')` counts the paid sales. Multiply by `100.0` and divide by `COUNT(*)` for a percentage. A rule's right guesses are sales where `total > 20000` and the status is `credit`, or `total <= 20000` and the status is `paid`.\n\n## What you can and cannot claim\nYou can say the rule did not beat the baseline on these sales. You cannot say totals never help: a different split or a different signal might work, which is what the next lessons explore.\n\n## Say it in your own words\nWhat is the baseline for a yes or no question, and why can a model with high accuracy still be useless?\n\n## Do this in real life\nThink of a yes or no decision in your work, such as whether a customer will pay on time. Write how often the answer is yes. A rule must beat that number to be worth using.",
+      "quiz": [
+        {
+          "question": "What is the baseline for a classifier?",
+          "options": [
+            "A random guess",
+            "Always guessing the most common category",
+            "The most accurate model",
+            "Guessing the average"
+          ],
+          "correct_index": 1,
+          "explanation": "The simplest rule is to always pick the most common answer."
+        },
+        {
+          "question": "72.3 percent of sales are paid at once. A model has 70 percent accuracy. Is it useful?",
+          "options": [
+            "Yes, 70 is high",
+            "No, it is worse than always saying paid",
+            "Only on credit sales",
+            "Impossible to say"
+          ],
+          "correct_index": 1,
+          "explanation": "It does worse than a rule that never thinks."
+        },
+        {
+          "question": "In SQL, what does SUM(payment_status = 'paid') count?",
+          "options": [
+            "The number of columns",
+            "The number of paid rows",
+            "The total money paid",
+            "The number of statuses"
+          ],
+          "correct_index": 1,
+          "explanation": "A true condition counts as 1, so the sum counts the rows where it is true."
+        },
+        {
+          "question": "The 'total above 20,000 means credit' rule scored 65.6 percent against 72.3 percent. What follows?",
+          "options": [
+            "Use it",
+            "Sale total alone is not a good signal for credit risk",
+            "Totals are useless forever",
+            "Raise the threshold to 200,000"
+          ],
+          "correct_index": 1,
+          "explanation": "The rule failed on this data, which is a finding in itself."
+        },
+        {
+          "question": "Why multiply by 100.0 rather than 100 in the percentage?",
+          "options": [
+            "No reason",
+            "So the division keeps decimals instead of rounding down to a whole number",
+            "To change the sign",
+            "It is faster"
+          ],
+          "correct_index": 1,
+          "explanation": "Whole-number division in SQL drops the decimals."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "ml-5-e1",
+          "title": "The Two Outcomes",
+          "prompt": "Count the sales for each payment_status. Return payment_status and sales, ordered by payment_status.",
+          "hint_1": "GROUP BY payment_status and COUNT(*), then ORDER BY payment_status.",
+          "hint_2": "SELECT payment_status, COUNT(*) AS sales FROM shop_sales GROUP BY payment_status",
+          "hint_3": "SELECT payment_status, COUNT(*) AS sales FROM shop_sales GROUP BY payment_status ORDER BY payment_status",
+          "solution": "SELECT payment_status, COUNT(*) AS sales FROM shop_sales GROUP BY payment_status ORDER BY payment_status",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-5-e2",
+          "title": "The Baseline Accuracy",
+          "prompt": "If you always say 'paid', what share of sales do you get right? Return one column called accuracy_pct, rounded to 1 decimal.",
+          "hint_1": "SUM(payment_status = 'paid') counts the right guesses. Divide by COUNT(*) and multiply by 100.0.",
+          "hint_2": "ROUND(100.0 * SUM(payment_status = 'paid') / COUNT(*), 1) AS accuracy_pct",
+          "hint_3": "SELECT ROUND(100.0 * SUM(payment_status = 'paid') / COUNT(*), 1) AS accuracy_pct FROM shop_sales",
+          "solution": "SELECT ROUND(100.0 * SUM(payment_status = 'paid') / COUNT(*), 1) AS accuracy_pct FROM shop_sales",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-5-e3",
+          "title": "Does the Rule Beat It?",
+          "prompt": "The rule: total above 20000 means credit, otherwise paid. Return one column called accuracy_pct: the share of sales the rule gets right, rounded to 1 decimal.",
+          "hint_1": "A right guess is (total > 20000 AND payment_status = 'credit') OR (total <= 20000 AND payment_status = 'paid').",
+          "hint_2": "SUM((total > 20000 AND payment_status = 'credit') OR (total <= 20000 AND payment_status = 'paid'))",
+          "hint_3": "SELECT ROUND(100.0 * SUM((total > 20000 AND payment_status = 'credit') OR (total <= 20000 AND payment_status = 'paid')) / COUNT(*), 1) AS accuracy_pct FROM shop_sales",
+          "solution": "SELECT ROUND(100.0 * SUM((total > 20000 AND payment_status = 'credit') OR (total <= 20000 AND payment_status = 'paid')) / COUNT(*), 1) AS accuracy_pct FROM shop_sales",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "ml-metrics",
+      "title": "Precision, Recall and the Confusion Matrix",
+      "description": "Accuracy hides the mistakes that matter, so we count the four kinds of answer and ask two better questions.",
+      "level": "intermediate",
+      "prerequisites": [
+        "ml-classify"
+      ],
+      "estimated_min": 35,
+      "sort_order": 6,
+      "theory_md": "## Why this matters\nA model that warns about credit risk can fail in two ways: it can warn about a customer who would have paid (a false alarm), or it can stay silent about one who will not pay (a miss). The two failures cost different things, and one accuracy number hides both.\n\n## The first principle\n**Count the four outcomes, then ask: when it warns, how often is it right (precision), and of all the real cases, how many did it catch (recall)?**\n\nThe **confusion matrix** has four counts. Here a \"positive\" is a credit sale:\n\n- **True positive (tp):** warned, and it was credit.\n- **False positive (fp):** warned, but it was paid.\n- **False negative (fn):** stayed silent, but it was credit.\n- **True negative (tn):** stayed silent, and it was paid.\n\n`precision = tp / (tp + fp)` and `recall = tp / (tp + fn)`.\n\n## A worked example\nWith the rule \"total above 20,000 means credit\":\n\n- tp = 236, fp = 374, fn = 330, tn = 1,106.\n- Precision = 236 / 610 = 38.7 percent. Of the sales it warned about, fewer than 4 in 10 were credit.\n- Recall = 236 / 566 = 41.7 percent. It caught fewer than half of the credit sales.\n\nRaise the threshold to 40,000 and precision stays about the same (38.4 percent) while recall collapses to 5.8 percent. The warning gets rarer without getting more accurate. That tells you the total is a weak signal.\n\n## Try it\nCount each case with `SUM(condition)`. The positives the rule warns about are `total > 20000`. Divide counts with `100.0 *` to keep decimals.\n\n## What you can and cannot claim\nWhich of precision and recall matters more depends on cost: a missed fraud is worse than a false alarm for a bank, while too many false alarms makes staff ignore the system. The model cannot choose that for you.\n\n## Say it in your own words\nWhat are precision and recall, and why is accuracy alone not enough?\n\n## Do this in real life\nThink of an alert you get at work or home. Count how often it fires when nothing is wrong, and how often something goes wrong without it firing. That is precision and recall in daily life.",
+      "quiz": [
+        {
+          "question": "What is a false positive here?",
+          "options": [
+            "Warned, and it really was credit",
+            "Warned, but the sale was paid",
+            "Stayed silent, and it was paid",
+            "Stayed silent, but it was credit"
+          ],
+          "correct_index": 1,
+          "explanation": "A false positive is a false alarm."
+        },
+        {
+          "question": "What does recall measure?",
+          "options": [
+            "How often a warning is right",
+            "Of all real credit sales, how many the model caught",
+            "The total accuracy",
+            "The number of warnings"
+          ],
+          "correct_index": 1,
+          "explanation": "Recall is the share of real cases caught."
+        },
+        {
+          "question": "A rule warns on 610 sales and 236 were truly credit. What is its precision?",
+          "options": [
+            "236 out of 610 (about 38.7 percent)",
+            "236 out of 566",
+            "610 out of 2,046",
+            "About 72 percent"
+          ],
+          "correct_index": 0,
+          "explanation": "Precision is true positives divided by all warnings."
+        },
+        {
+          "question": "Raising the threshold to 40,000 kept precision near 38 percent and cut recall to 5.8 percent. What does it suggest?",
+          "options": [
+            "The model improved",
+            "The warning got rarer without getting more accurate",
+            "Totals perfectly predict credit",
+            "Precision is wrong"
+          ],
+          "correct_index": 1,
+          "explanation": "A stricter rule that is not more accurate just misses more."
+        },
+        {
+          "question": "When might you accept low precision to get high recall?",
+          "options": [
+            "When a missed case is much more costly than a false alarm",
+            "Never",
+            "When data is small",
+            "When you want fewer warnings"
+          ],
+          "correct_index": 0,
+          "explanation": "If missing a real case is expensive, false alarms are the price."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "ml-6-e1",
+          "title": "The Four Counts",
+          "prompt": "With the rule total > 20000 means credit, return one row with tp, fp, fn and tn: warned and credit, warned but paid, not warned but credit, not warned and paid.",
+          "hint_1": "Each count is SUM of a condition, such as SUM(total > 20000 AND payment_status = 'credit').",
+          "hint_2": "SUM(total > 20000 AND payment_status = 'credit') AS tp, ...",
+          "hint_3": "SELECT SUM(total > 20000 AND payment_status = 'credit') AS tp, SUM(total > 20000 AND payment_status = 'paid') AS fp, SUM(total <= 20000 AND payment_status = 'credit') AS fn, SUM(total <= 20000 AND payment_status = 'paid') AS tn FROM shop_sales",
+          "solution": "SELECT SUM(total > 20000 AND payment_status = 'credit') AS tp, SUM(total > 20000 AND payment_status = 'paid') AS fp, SUM(total <= 20000 AND payment_status = 'credit') AS fn, SUM(total <= 20000 AND payment_status = 'paid') AS tn FROM shop_sales",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-6-e2",
+          "title": "Precision and Recall",
+          "prompt": "For the same rule, return one row with precision_pct and recall_pct, each rounded to 1 decimal. Precision is tp divided by the sales it warned about; recall is tp divided by all credit sales.",
+          "hint_1": "Warned sales are SUM(total > 20000). All credit sales are SUM(payment_status = 'credit').",
+          "hint_2": "ROUND(100.0 * SUM(total > 20000 AND payment_status = 'credit') / SUM(total > 20000), 1) AS precision_pct",
+          "hint_3": "SELECT ROUND(100.0 * SUM(total > 20000 AND payment_status = 'credit') / SUM(total > 20000), 1) AS precision_pct, ROUND(100.0 * SUM(total > 20000 AND payment_status = 'credit') / SUM(payment_status = 'credit'), 1) AS recall_pct FROM shop_sales",
+          "solution": "SELECT ROUND(100.0 * SUM(total > 20000 AND payment_status = 'credit') / SUM(total > 20000), 1) AS precision_pct, ROUND(100.0 * SUM(total > 20000 AND payment_status = 'credit') / SUM(payment_status = 'credit'), 1) AS recall_pct FROM shop_sales",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-6-e3",
+          "title": "Move the Threshold",
+          "prompt": "Now use 40000 as the threshold. Return one row with precision_pct and recall_pct, each rounded to 1 decimal.",
+          "hint_1": "It is the same query as before with 40000 instead of 20000.",
+          "hint_2": "Replace 20000 with 40000 in both fractions.",
+          "hint_3": "SELECT ROUND(100.0 * SUM(total > 40000 AND payment_status = 'credit') / SUM(total > 40000), 1) AS precision_pct, ROUND(100.0 * SUM(total > 40000 AND payment_status = 'credit') / SUM(payment_status = 'credit'), 1) AS recall_pct FROM shop_sales",
+          "solution": "SELECT ROUND(100.0 * SUM(total > 40000 AND payment_status = 'credit') / SUM(total > 40000), 1) AS precision_pct, ROUND(100.0 * SUM(total > 40000 AND payment_status = 'credit') / SUM(payment_status = 'credit'), 1) AS recall_pct FROM shop_sales",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "ml-overfit",
+      "title": "Overfitting: Memorising Is Not Learning",
+      "description": "A model that copies its training data looks perfect there and fails on anything new.",
+      "level": "intermediate",
+      "prerequisites": [
+        "ml-metrics"
+      ],
+      "estimated_min": 35,
+      "sort_order": 7,
+      "theory_md": "## Why this matters\nA student who memorises last year's exam gets full marks on last year's paper and fails this year's. Models do the same. The more freedom a model has, the easier it is for it to memorise the noise in its training data and call that learning.\n\n## The first principle\n**A model that is much better on the data it learned from than on new data has memorised, not learned.**\n\nThe gap between the training score and the test score is the warning. A simple rule usually has a small gap. A model that memorises has a very large one.\n\nAn easy memoriser is the **nearest neighbour** rule: to guess a new sale's status, find the training sale with the closest total and copy its status.\n\n## A worked example\nWe take the first 400 sales: odd sale numbers train, even sale numbers test.\n\n- On its own training sales, the nearest-neighbour rule scores 98.5 percent. Each sale finds itself, so it is nearly always right. It looks brilliant.\n- On the unseen test sales it scores 65.0 percent.\n- The simple threshold rule (total above 20,000 means credit) scores 67.0 percent on the same test sales.\n- Always guessing \"paid\" scores 72.5 percent.\n\nThe memoriser has a gap of more than 30 points, and on new data it is worse than guessing \"paid\". Its training score was a lie.\n\n## Try it\nUse `sale_id <= 400` to keep the first 400 sales and `sale_id % 2` to split. Pair every test sale with every training sale, then number each test sale's pairs from the closest with `ROW_NUMBER() OVER (PARTITION BY q.sale_id ORDER BY ABS(tr.total - q.total), tr.sale_id)` and keep number 1. The second sort key, `sale_id`, settles ties the same way each time.\n\n## What you can and cannot claim\nA gap between training and test is evidence of memorising; a small gap does not prove the model is good, only that it is not memorising. You still compare with the baseline.\n\n## Say it in your own words\nWhat is overfitting, and how do you spot it?\n\n## Do this in real life\nThink of a habit that works only in one place, such as a trick that works with one supplier. Write down why it might fail with another. That is overfitting in daily life.",
+      "quiz": [
+        {
+          "question": "What is overfitting?",
+          "options": [
+            "A model that is too small",
+            "A model that memorises its training data and fails on new data",
+            "A model with too little data",
+            "A slow model"
+          ],
+          "correct_index": 1,
+          "explanation": "Overfitting is memorising noise instead of learning a pattern."
+        },
+        {
+          "question": "How do you spot it?",
+          "options": [
+            "By its training score alone",
+            "By a large gap between training and test scores",
+            "By its running time",
+            "By the number of columns"
+          ],
+          "correct_index": 1,
+          "explanation": "A big gap shows it has not generalised."
+        },
+        {
+          "question": "The nearest-neighbour rule scored 98.5 percent on training and 65.0 percent on test. What is the lesson?",
+          "options": [
+            "Trust the 98.5",
+            "The training score is misleading; the test score is the honest one",
+            "The test set is wrong",
+            "Use more training"
+          ],
+          "correct_index": 1,
+          "explanation": "Each training sale finds itself, so its training score means nothing."
+        },
+        {
+          "question": "Always guessing 'paid' scored 72.5 percent on the test half. What does the 65.0 percent show?",
+          "options": [
+            "The memoriser beats the baseline",
+            "The memoriser is worse than guessing",
+            "The baseline is wrong",
+            "Nothing"
+          ],
+          "correct_index": 1,
+          "explanation": "A model below the baseline has added nothing."
+        },
+        {
+          "question": "Why add sale_id as a second sort key when picking the nearest sale?",
+          "options": [
+            "To go faster",
+            "So ties are settled the same way every time",
+            "To change the result on purpose",
+            "It is required by SQL"
+          ],
+          "correct_index": 1,
+          "explanation": "Without it, equal distances could return different rows."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "ml-7-e1",
+          "title": "A Simple Rule on Unseen Sales",
+          "prompt": "Using only the first 400 sales (sale_id <= 400), take the test half (even sale_id) and score the rule 'total above 20000 means credit, otherwise paid'. Return one column called test_accuracy_pct, rounded to 1 decimal.",
+          "hint_1": "Filter WHERE sale_id <= 400 AND sale_id % 2 = 0, then average the right guesses as in the earlier lesson.",
+          "hint_2": "SUM((total > 20000 AND payment_status = 'credit') OR (total <= 20000 AND payment_status = 'paid'))",
+          "hint_3": "SELECT ROUND(100.0 * SUM((total > 20000 AND payment_status = 'credit') OR (total <= 20000 AND payment_status = 'paid')) / COUNT(*), 1) AS test_accuracy_pct FROM shop_sales WHERE sale_id <= 400 AND sale_id % 2 = 0",
+          "solution": "SELECT ROUND(100.0 * SUM((total > 20000 AND payment_status = 'credit') OR (total <= 20000 AND payment_status = 'paid')) / COUNT(*), 1) AS test_accuracy_pct FROM shop_sales WHERE sale_id <= 400 AND sale_id % 2 = 0",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-7-e2",
+          "title": "The Memoriser on Unseen Sales",
+          "prompt": "For each test sale (first 400 sales, even sale_id) copy the status of the training sale (odd sale_id, first 400) with the closest total. Break ties by the smaller sale_id. Return one column called test_accuracy_pct: the share it gets right, rounded to 1 decimal.",
+          "hint_1": "Build tr (training) and q (test) with WITH. Join them with FROM q, tr and add ROW_NUMBER() OVER (PARTITION BY q.sale_id ORDER BY ABS(tr.total - q.total), tr.sale_id) AS rn; keep rn = 1.",
+          "hint_2": "WITH tr AS (...), q AS (...), pairs AS (SELECT q.payment_status AS actual, tr.payment_status AS predicted, ROW_NUMBER() OVER (...) AS rn FROM q, tr) SELECT ROUND(100.0 * AVG(actual = predicted), 1) FROM pairs WHERE rn = 1",
+          "hint_3": "WITH tr AS (SELECT sale_id, total, payment_status FROM shop_sales WHERE sale_id <= 400 AND sale_id % 2 = 1), q AS (SELECT sale_id, total, payment_status FROM shop_sales WHERE sale_id <= 400 AND sale_id % 2 = 0), pairs AS (SELECT q.payment_status AS actual, tr.payment_status AS predicted, ROW_NUMBER() OVER (PARTITION BY q.sale_id ORDER BY ABS(tr.total - q.total), tr.sale_id) AS rn FROM q, tr) SELECT ROUND(100.0 * AVG(actual = predicted), 1) AS test_accuracy_pct FROM pairs WHERE rn = 1",
+          "solution": "WITH tr AS (SELECT sale_id, total, payment_status FROM shop_sales WHERE sale_id <= 400 AND sale_id % 2 = 1), q AS (SELECT sale_id, total, payment_status FROM shop_sales WHERE sale_id <= 400 AND sale_id % 2 = 0), pairs AS (SELECT q.payment_status AS actual, tr.payment_status AS predicted, ROW_NUMBER() OVER (PARTITION BY q.sale_id ORDER BY ABS(tr.total - q.total), tr.sale_id) AS rn FROM q, tr) SELECT ROUND(100.0 * AVG(actual = predicted), 1) AS test_accuracy_pct FROM pairs WHERE rn = 1",
+          "evaluation_mode": "exact",
+          "points": 25,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-7-e3",
+          "title": "The Memoriser on Its Own Homework",
+          "prompt": "Now score the same rule on the training sales themselves: for each training sale (first 400, odd sale_id) copy the status of the closest training sale, ties by the smaller sale_id. Return one column called train_accuracy_pct, rounded to 1 decimal.",
+          "hint_1": "It is the same query, but the sales being scored are the training sales, so each one can find itself.",
+          "hint_2": "Use q = odd sale_ids, the same as tr.",
+          "hint_3": "WITH tr AS (SELECT sale_id, total, payment_status FROM shop_sales WHERE sale_id <= 400 AND sale_id % 2 = 1), q AS (SELECT sale_id, total, payment_status FROM shop_sales WHERE sale_id <= 400 AND sale_id % 2 = 1), pairs AS (SELECT q.payment_status AS actual, tr.payment_status AS predicted, ROW_NUMBER() OVER (PARTITION BY q.sale_id ORDER BY ABS(tr.total - q.total), tr.sale_id) AS rn FROM q, tr) SELECT ROUND(100.0 * AVG(actual = predicted), 1) AS train_accuracy_pct FROM pairs WHERE rn = 1",
+          "solution": "WITH tr AS (SELECT sale_id, total, payment_status FROM shop_sales WHERE sale_id <= 400 AND sale_id % 2 = 1), q AS (SELECT sale_id, total, payment_status FROM shop_sales WHERE sale_id <= 400 AND sale_id % 2 = 1), pairs AS (SELECT q.payment_status AS actual, tr.payment_status AS predicted, ROW_NUMBER() OVER (PARTITION BY q.sale_id ORDER BY ABS(tr.total - q.total), tr.sale_id) AS rn FROM q, tr) SELECT ROUND(100.0 * AVG(actual = predicted), 1) AS train_accuracy_pct FROM pairs WHERE rn = 1",
+          "evaluation_mode": "exact",
+          "points": 20,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "ml-knn",
+      "title": "Nearest Neighbours: Predict From Similar Cases",
+      "description": "To predict something new, find the most similar cases you already know and average what happened to them.",
+      "level": "intermediate",
+      "prerequisites": [
+        "ml-overfit"
+      ],
+      "estimated_min": 30,
+      "sort_order": 8,
+      "theory_md": "## Why this matters\nPeople predict by comparison all the time: \"this house is like the one next door, so it should sell for about the same.\" The nearest-neighbours method does exactly that, and it needs no formula. It also shows how a model can be understood by looking at the cases behind each guess.\n\n## The first principle\n**Similar inputs tend to have similar outputs, so predict from the k closest known cases.**\n\nYou choose:\n\n- how to measure **distance** (here, the difference in cost), and\n- **k**, how many neighbours to use. A small k follows every wiggle; a large k smooths them out.\n\nAlways look for neighbours in the training set only.\n\n## A worked example\nWe want to predict the price of product 10, Nails 2kg, with cost KES 975. Its three nearest training neighbours by cost are:\n\n- Paint 4L, cost distance 5, price 1,245.\n- A4 paper ream, cost distance 150, price 1,089.\n- Cement 50kg, cost distance 235, price 1,006.\n\nThe prediction is the average of the three prices: KES 1,113.33. The real price is 1,316. The miss is KES 202.67. The line from lesson 3 would have guessed 1,220.43 for this product, a miss of 95.57. A neighbours method is simple and honest, but not always the best.\n\n## Try it\nDistance is `ABS(unit_cost - (SELECT unit_cost FROM shop_products WHERE product_id = 10))`. Keep only training products (`product_id % 2 = 1`), order by distance then by `product_id`, and `LIMIT 3`. Then average their prices.\n\n## What you can and cannot claim\nThe result depends on k, on how distance is measured and on which cases are in the training set. It cannot go beyond the cases it has seen: a product far from all the others gets a poor guess.\n\n## Say it in your own words\nHow does nearest neighbours predict, and what do the choices of distance and k change?\n\n## Do this in real life\nThink of a new job you are asked to quote. Find the three most similar jobs you have done and average what they cost. You have just used nearest neighbours.",
+      "quiz": [
+        {
+          "question": "How does nearest neighbours predict a value?",
+          "options": [
+            "It fits a straight line",
+            "It averages the values of the most similar known cases",
+            "It picks a random case",
+            "It uses the biggest value"
+          ],
+          "correct_index": 1,
+          "explanation": "It predicts from similar cases."
+        },
+        {
+          "question": "What does a larger k do?",
+          "options": [
+            "Follows every small wiggle",
+            "Smooths the prediction by averaging more cases",
+            "Removes the training set",
+            "Speeds up the SQL"
+          ],
+          "correct_index": 1,
+          "explanation": "More neighbours means a smoother, less noisy guess."
+        },
+        {
+          "question": "Why must neighbours come from the training set only?",
+          "options": [
+            "The test set is smaller",
+            "Otherwise a case could be its own neighbour and the test is not honest",
+            "SQL requires it",
+            "No reason"
+          ],
+          "correct_index": 1,
+          "explanation": "A case that finds itself makes the score meaningless."
+        },
+        {
+          "question": "The three neighbours of product 10 had prices 1,245, 1,089 and 1,006. What is the prediction?",
+          "options": [
+            "1,113.33",
+            "1,245",
+            "1,316",
+            "3,340"
+          ],
+          "correct_index": 0,
+          "explanation": "(1,245 + 1,089 + 1,006) / 3 = 1,113.33."
+        },
+        {
+          "question": "Which product would nearest neighbours predict worst?",
+          "options": [
+            "One very like many others",
+            "One far from every training product",
+            "A cheap one",
+            "One with a short name"
+          ],
+          "correct_index": 1,
+          "explanation": "With no close cases, there is nothing similar to learn from."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "ml-8-e1",
+          "title": "The Three Neighbours",
+          "prompt": "Find the 3 training products (odd product_id) whose unit_cost is closest to product 10's cost. Return product_id, name, unit_price and distance (the absolute cost difference), ordered by distance and then product_id.",
+          "hint_1": "distance is ABS(unit_cost - (SELECT unit_cost FROM shop_products WHERE product_id = 10)). Filter odd ids, ORDER BY distance, product_id and LIMIT 3.",
+          "hint_2": "SELECT product_id, name, unit_price, ABS(unit_cost - (SELECT ...)) AS distance FROM shop_products WHERE product_id % 2 = 1 ORDER BY distance, product_id LIMIT 3",
+          "hint_3": "SELECT product_id, name, unit_price, ABS(unit_cost - (SELECT unit_cost FROM shop_products WHERE product_id = 10)) AS distance FROM shop_products WHERE product_id % 2 = 1 ORDER BY distance, product_id LIMIT 3",
+          "solution": "SELECT product_id, name, unit_price, ABS(unit_cost - (SELECT unit_cost FROM shop_products WHERE product_id = 10)) AS distance FROM shop_products WHERE product_id % 2 = 1 ORDER BY distance, product_id LIMIT 3",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-8-e2",
+          "title": "The Prediction",
+          "prompt": "Predict product 10's price as the average price of those 3 neighbours. Return one column called predicted_price, rounded to 2 decimals.",
+          "hint_1": "Put the neighbour query in a WITH block named n and take AVG(unit_price) from it.",
+          "hint_2": "WITH n AS (...) SELECT ROUND(AVG(unit_price), 2) AS predicted_price FROM n",
+          "hint_3": "WITH n AS (SELECT product_id, name, unit_price, ABS(unit_cost - (SELECT unit_cost FROM shop_products WHERE product_id = 10)) AS distance FROM shop_products WHERE product_id % 2 = 1 ORDER BY distance, product_id LIMIT 3) SELECT ROUND(AVG(unit_price), 2) AS predicted_price FROM n",
+          "solution": "WITH n AS (SELECT product_id, name, unit_price, ABS(unit_cost - (SELECT unit_cost FROM shop_products WHERE product_id = 10)) AS distance FROM shop_products WHERE product_id % 2 = 1 ORDER BY distance, product_id LIMIT 3) SELECT ROUND(AVG(unit_price), 2) AS predicted_price FROM n",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-8-e3",
+          "title": "How Close Was It?",
+          "prompt": "Return one row with predicted_price, actual_price (product 10's real unit_price) and error (the absolute difference), the first and last rounded to 2 decimals.",
+          "hint_1": "Join the neighbour average to shop_products where product_id = 10, or use a CROSS JOIN with it.",
+          "hint_2": "WITH n AS (...) SELECT ROUND(AVG(n.unit_price), 2), p.unit_price, ... FROM n, shop_products p WHERE p.product_id = 10",
+          "hint_3": "WITH n AS (SELECT product_id, name, unit_price, ABS(unit_cost - (SELECT unit_cost FROM shop_products WHERE product_id = 10)) AS distance FROM shop_products WHERE product_id % 2 = 1 ORDER BY distance, product_id LIMIT 3) SELECT ROUND(AVG(n.unit_price), 2) AS predicted_price, p.unit_price AS actual_price, ROUND(ABS(AVG(n.unit_price) - p.unit_price), 2) AS error FROM n, shop_products p WHERE p.product_id = 10",
+          "solution": "WITH n AS (SELECT product_id, name, unit_price, ABS(unit_cost - (SELECT unit_cost FROM shop_products WHERE product_id = 10)) AS distance FROM shop_products WHERE product_id % 2 = 1 ORDER BY distance, product_id LIMIT 3) SELECT ROUND(AVG(n.unit_price), 2) AS predicted_price, p.unit_price AS actual_price, ROUND(ABS(AVG(n.unit_price) - p.unit_price), 2) AS error FROM n, shop_products p WHERE p.product_id = 10",
+          "evaluation_mode": "exact",
+          "points": 20,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "ml-features",
+      "title": "Features: What the Model Is Allowed to Know",
+      "description": "A model is only as good as the facts it is given, and some facts are only known after the answer, which makes them cheating.",
+      "level": "intermediate",
+      "prerequisites": [
+        "ml-knn"
+      ],
+      "estimated_min": 35,
+      "sort_order": 9,
+      "theory_md": "## Why this matters\nMost of the skill in practical machine learning is choosing what to feed the model, not which model to use. The facts you give it are called **features**. A good feature carries real signal. A bad one adds noise. The worst is a feature that secretly contains the answer.\n\n## The first principle\n**A feature is only allowed if you would know it at the moment you need the prediction.**\n\nUsing something you only learn afterwards is **leakage**, and it makes a model look brilliant in testing and useless in real life.\n\n## A worked example\nWe want to warn about credit sales before they are made. Look at what each feature tells us:\n\n- **Sale total:** weak, as the last lessons showed.\n- **Customer segment:** strong. Retail customers bought on credit in 3.9 percent of their sales, Institutions in 39.1 percent and Wholesale in 40.1 percent.\n- **Has the customer made a payment on this sale?** This looks powerful: every paid sale has a payment, and 137 credit sales have none. But you only know about payments after the sale. It is leakage, and a warning built on it would arrive too late.\n\nUsing the segment, we can ignore Retail customers (33.6 percent of sales) and watch the rest: that means watching 66.4 percent of sales while catching 95.2 percent of the credit sales. The feature does not make a perfect yes or no rule, but it tells you where to look.\n\n## Try it\nJoin `shop_sales` to `shop_customers` on `customer_id` to reach `segment`. For the leakage check use `NOT EXISTS (SELECT 1 FROM shop_payments p WHERE p.sale_id = s.sale_id)` to find sales with no payment row.\n\n## What you can and cannot claim\nA strong feature does not prove cause. Wholesale customers may buy on credit because of the terms the shop gave them, not because of who they are. Say \"is linked to\", not \"causes\".\n\n## Say it in your own words\nWhat is a feature, and what makes a feature leakage?\n\n## Do this in real life\nThink of a prediction you make at work. List what you know at the time you decide, and what you only learn later. Only the first list may be used.",
+      "quiz": [
+        {
+          "question": "What is a feature?",
+          "options": [
+            "The model's score",
+            "A fact the model is given to make its guess",
+            "A kind of error",
+            "The test set"
+          ],
+          "correct_index": 1,
+          "explanation": "Features are the inputs to the model."
+        },
+        {
+          "question": "Which is leakage when predicting credit risk before a sale?",
+          "options": [
+            "The customer segment",
+            "Whether a payment has been made on this sale",
+            "The branch",
+            "The sale date"
+          ],
+          "correct_index": 1,
+          "explanation": "You only know about payments after the sale."
+        },
+        {
+          "question": "Retail customers bought on credit in 3.9 percent of sales; Wholesale in 40.1 percent. What does this suggest?",
+          "options": [
+            "Segment is a useful feature",
+            "Segment is leakage",
+            "Segment causes credit",
+            "Segment is random"
+          ],
+          "correct_index": 0,
+          "explanation": "The big difference shows the feature carries real signal."
+        },
+        {
+          "question": "Watching only non-Retail customers means watching 66.4 percent of sales and catching 95.2 percent of credit sales. What does that show?",
+          "options": [
+            "The feature points you where to look",
+            "A perfect rule",
+            "That totals matter",
+            "Nothing"
+          ],
+          "correct_index": 0,
+          "explanation": "It narrows the search at a small cost."
+        },
+        {
+          "question": "Why say 'is linked to' rather than 'causes'?",
+          "options": [
+            "It is shorter",
+            "A pattern in data does not show why it happens",
+            "Causes are not real",
+            "SQL cannot show causes"
+          ],
+          "correct_index": 1,
+          "explanation": "A link can be due to terms, history or something else."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "ml-9-e1",
+          "title": "Credit by Segment",
+          "prompt": "For each customer segment return segment, sales (the number of sales) and credit_pct (the share of its sales on credit, rounded to 1 decimal), ordered by segment.",
+          "hint_1": "JOIN shop_sales s to shop_customers c ON c.customer_id = s.customer_id, then GROUP BY c.segment.",
+          "hint_2": "SELECT c.segment, COUNT(*) AS sales, ROUND(100.0 * SUM(s.payment_status = 'credit') / COUNT(*), 1) AS credit_pct",
+          "hint_3": "SELECT c.segment, COUNT(*) AS sales, ROUND(100.0 * SUM(s.payment_status = 'credit') / COUNT(*), 1) AS credit_pct FROM shop_sales s JOIN shop_customers c ON c.customer_id = s.customer_id GROUP BY c.segment ORDER BY c.segment",
+          "solution": "SELECT c.segment, COUNT(*) AS sales, ROUND(100.0 * SUM(s.payment_status = 'credit') / COUNT(*), 1) AS credit_pct FROM shop_sales s JOIN shop_customers c ON c.customer_id = s.customer_id GROUP BY c.segment ORDER BY c.segment",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-9-e2",
+          "title": "Where to Look",
+          "prompt": "Suppose you watch every sale to a non-Retail customer. Return one row with sales_to_watch_pct (the share of all sales you would watch) and credit_caught_pct (the share of all credit sales you would catch), each rounded to 1 decimal.",
+          "hint_1": "Join the segment, then use SUM(c.segment <> 'Retail') for watched sales and SUM(c.segment <> 'Retail' AND s.payment_status = 'credit') for caught credit sales.",
+          "hint_2": "ROUND(100.0 * SUM(c.segment <> 'Retail') / COUNT(*), 1) AS sales_to_watch_pct, ...",
+          "hint_3": "SELECT ROUND(100.0 * SUM(c.segment <> 'Retail') / COUNT(*), 1) AS sales_to_watch_pct, ROUND(100.0 * SUM(c.segment <> 'Retail' AND s.payment_status = 'credit') / SUM(s.payment_status = 'credit'), 1) AS credit_caught_pct FROM shop_sales s JOIN shop_customers c ON c.customer_id = s.customer_id",
+          "solution": "SELECT ROUND(100.0 * SUM(c.segment <> 'Retail') / COUNT(*), 1) AS sales_to_watch_pct, ROUND(100.0 * SUM(c.segment <> 'Retail' AND s.payment_status = 'credit') / SUM(s.payment_status = 'credit'), 1) AS credit_caught_pct FROM shop_sales s JOIN shop_customers c ON c.customer_id = s.customer_id",
+          "evaluation_mode": "exact",
+          "points": 20,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-9-e3",
+          "title": "Spot the Leak",
+          "prompt": "Return one row with credit_without_payment (credit sales with no payment row) and paid_without_payment (paid sales with no payment row).",
+          "hint_1": "NOT EXISTS (SELECT 1 FROM shop_payments p WHERE p.sale_id = s.sale_id) finds a sale with no payment. Use it inside SUM for each status.",
+          "hint_2": "SUM(payment_status = 'credit' AND NOT EXISTS (...)) AS credit_without_payment, ...",
+          "hint_3": "SELECT SUM(payment_status = 'credit' AND NOT EXISTS (SELECT 1 FROM shop_payments p WHERE p.sale_id = s.sale_id)) AS credit_without_payment, SUM(payment_status = 'paid' AND NOT EXISTS (SELECT 1 FROM shop_payments p WHERE p.sale_id = s.sale_id)) AS paid_without_payment FROM shop_sales s",
+          "solution": "SELECT SUM(payment_status = 'credit' AND NOT EXISTS (SELECT 1 FROM shop_payments p WHERE p.sale_id = s.sale_id)) AS credit_without_payment, SUM(payment_status = 'paid' AND NOT EXISTS (SELECT 1 FROM shop_payments p WHERE p.sale_id = s.sale_id)) AS paid_without_payment FROM shop_sales s",
+          "evaluation_mode": "exact",
+          "points": 20,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "ml-llm",
+      "title": "Language Models: What They Do, What They Cost and Where They Fail",
+      "description": "A language model predicts the next piece of text, so you can estimate its size and cost with arithmetic, and plan for its mistakes.",
+      "level": "intermediate",
+      "prerequisites": [
+        "ml-model"
+      ],
+      "estimated_min": 35,
+      "sort_order": 10,
+      "theory_md": "## Why this matters\nLarge language models (LLMs) now write, summarise and answer questions. People use them without knowing what they are doing or what they cost. A founder or analyst who can reason about them avoids two traps: believing every answer and being surprised by the bill.\n\n## The first principle\n**An LLM predicts the next piece of text from the text so far. It is built to sound right, not to be right.**\n\nThree working facts follow:\n\n- **Tokens:** models read and write in small pieces of text called tokens. A rough rule for English is about 4 characters per token. Providers charge by tokens, in and out.\n- **Context window:** the model can only consider a limited amount of text per request. Anything beyond it is not seen.\n- **Hallucination:** it can state false things confidently, because fluency is not truth. Anything that matters must be checked against a source.\n\n## A worked example\nWe want an assistant to answer questions about our 40 products by sending the product names with each question.\n\n- The 40 names total 526 characters, about 132 tokens by the 4-characters rule.\n- Add 50 tokens for the question and instructions: 182 tokens per call.\n- Suppose, as an example only, a provider charged 0.5 currency units per 1,000 tokens. One call costs 182 x 0.5 / 1,000 = 0.091.\n- At 300 questions a month that is 27.30, and the text easily fits a window of 8,000 tokens.\n\nThe rate here is invented for practice. Real prices and window sizes differ by provider and change often, so read your provider's current page before you plan.\n\n## Try it\n`LENGTH(name)` gives the characters in a name, and `SUM(LENGTH(name)) / 4.0` estimates tokens (use `4.0` so SQL keeps decimals). Multiply by the number of calls and the rate.\n\n## What you can and cannot claim\nThe 4-characters rule is an estimate, and it is worse for other languages and for code. A model's answer can look right and be wrong. You can claim a cost estimate and a size check. You cannot claim the answers are correct without checking them.\n\n## Say it in your own words\nWhat is a token, and why can an LLM be confident and wrong?\n\n## Do this in real life\nPick one question you often answer for customers. Write down what text the model would need, estimate its tokens, and say how you would check each answer.",
+      "quiz": [
+        {
+          "question": "What does a language model do at its core?",
+          "options": [
+            "Looks facts up in a database",
+            "Predicts the next piece of text from the text so far",
+            "Understands everything it writes",
+            "Runs a spreadsheet"
+          ],
+          "correct_index": 1,
+          "explanation": "It generates likely text, which is why it can be fluent and wrong."
+        },
+        {
+          "question": "What is a token?",
+          "options": [
+            "A password",
+            "A small piece of text that models read and providers charge for",
+            "A type of error",
+            "A training set"
+          ],
+          "correct_index": 1,
+          "explanation": "Providers price input and output by tokens."
+        },
+        {
+          "question": "The 40 product names are 526 characters. About how many tokens is that at 4 characters per token?",
+          "options": [
+            "About 132",
+            "About 2,104",
+            "About 13",
+            "About 526"
+          ],
+          "correct_index": 0,
+          "explanation": "526 / 4 is roughly 132."
+        },
+        {
+          "question": "Why is a hallucination dangerous?",
+          "options": [
+            "It is always obvious",
+            "It is stated as confidently as a correct answer",
+            "It only happens with long text",
+            "It costs more"
+          ],
+          "correct_index": 1,
+          "explanation": "Fluency is not truth, so important answers need checking."
+        },
+        {
+          "question": "Why should you check a provider's current page before planning costs?",
+          "options": [
+            "Prices and limits change and differ between providers",
+            "They never change",
+            "Every provider is identical",
+            "Tokens are free"
+          ],
+          "correct_index": 0,
+          "explanation": "The rate in the lesson is an invented example for practice."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "ml-10-e1",
+          "title": "Estimate the Tokens",
+          "prompt": "Estimate the tokens in all 40 product names, using 4 characters per token. Return one column called name_tokens: SUM(LENGTH(name)) divided by 4.0, rounded to 0 decimals.",
+          "hint_1": "LENGTH(name) counts characters. SUM them, divide by 4.0 and ROUND.",
+          "hint_2": "ROUND(SUM(LENGTH(name)) / 4.0) AS name_tokens FROM shop_products",
+          "hint_3": "SELECT ROUND(SUM(LENGTH(name)) / 4.0) AS name_tokens FROM shop_products",
+          "solution": "SELECT ROUND(SUM(LENGTH(name)) / 4.0) AS name_tokens FROM shop_products",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-10-e2",
+          "title": "Cost of One Call",
+          "prompt": "Each call sends the name tokens plus 50 more tokens, at an example rate of 0.5 per 1,000 tokens. Return one column called cost_per_call, rounded to 3 decimals.",
+          "hint_1": "Use the name_tokens estimate from before: (name_tokens + 50) * 0.5 / 1000.",
+          "hint_2": "ROUND((ROUND(SUM(LENGTH(name)) / 4.0) + 50) * 0.5 / 1000, 3) AS cost_per_call",
+          "hint_3": "SELECT ROUND((ROUND(SUM(LENGTH(name)) / 4.0) + 50) * 0.5 / 1000, 3) AS cost_per_call FROM shop_products",
+          "solution": "SELECT ROUND((ROUND(SUM(LENGTH(name)) / 4.0) + 50) * 0.5 / 1000, 3) AS cost_per_call FROM shop_products",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-10-e3",
+          "title": "The Monthly Bill",
+          "prompt": "For 300 calls a month return one row with monthly_cost (rounded to 2 decimals) and context_check: 'fits' if the tokens per call are at most 8000, otherwise 'too long'.",
+          "hint_1": "monthly_cost is 300 times the cost of one call. Use CASE WHEN tokens <= 8000 THEN 'fits' ELSE 'too long' END.",
+          "hint_2": "ROUND(300 * (...), 2) AS monthly_cost, CASE WHEN ... END AS context_check",
+          "hint_3": "SELECT ROUND(300 * (ROUND(SUM(LENGTH(name)) / 4.0) + 50) * 0.5 / 1000, 2) AS monthly_cost, CASE WHEN ROUND(SUM(LENGTH(name)) / 4.0) + 50 <= 8000 THEN 'fits' ELSE 'too long' END AS context_check FROM shop_products",
+          "solution": "SELECT ROUND(300 * (ROUND(SUM(LENGTH(name)) / 4.0) + 50) * 0.5 / 1000, 2) AS monthly_cost, CASE WHEN ROUND(SUM(LENGTH(name)) / 4.0) + 50 <= 8000 THEN 'fits' ELSE 'too long' END AS context_check FROM shop_products",
+          "evaluation_mode": "exact",
+          "points": 20,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "ml-rag",
+      "title": "Retrieval: Giving a Model the Right Facts",
+      "description": "Instead of trusting a model's memory, find the relevant documents first, show them to it, and measure how well the search works.",
+      "level": "advanced",
+      "prerequisites": [
+        "ml-llm"
+      ],
+      "estimated_min": 35,
+      "sort_order": 11,
+      "theory_md": "## Why this matters\nA language model does not know your business, and its memory can be wrong. The common fix is **retrieval-augmented generation (RAG)**: first search your own documents for the passages that matter, then give those passages to the model and ask it to answer from them. The answer is only as good as the search.\n\n## The first principle\n**Measure the search before you trust the answer.**\n\n- **Retrieval:** score each document against the question and keep the top k.\n- **Evaluation set:** a small list of questions with the documents that are truly relevant, written by a person.\n- **Recall at k:** of the truly relevant documents, how many are in the top k?\n\nIf retrieval fails, the model never sees the right facts, and it will fill the gap with a guess.\n\n## A worked example\nOur documents are the six findings in `shop_actions`. The question is \"Which problems involve a late or expensive supplier?\" We score each document with three keyword checks: the finding contains \"late\", the finding contains \"price\", the action contains \"supplier\".\n\n- Action 2 (Highland Agrovet delivers about a week late) scores 2.\n- Action 3 (Rift Valley Hardware raised its prices) scores 1.\n- The other four score 0.\n\nA person labelled actions 2 and 3 as the relevant ones. The top 2 by score are exactly 2 and 3, so recall at 2 is 100 percent.\n\nA keyword score is crude. It would miss a document that says \"delayed\" instead of \"late\". Real systems often compare meaning rather than words, but the evaluation habit is the same.\n\n## Try it\nA condition like `finding LIKE '%late%'` is 1 or 0, so you can add conditions together to make a score. Order by score descending, with `action_id` as the tie-breaker. A relevant list can be written in the query with `VALUES (2), (3)`.\n\n## What you can and cannot claim\nA good score on six documents and one question proves little. You can claim the search works for this question. A real evaluation set needs many questions, and it should be written before you tune the search.\n\n## Say it in your own words\nWhat is retrieval, and how do you know the search is working?\n\n## Do this in real life\nChoose five questions your customers or team ask often. For each, write which document or note holds the answer. That list is your first evaluation set.",
+      "quiz": [
+        {
+          "question": "What problem does retrieval solve?",
+          "options": [
+            "It makes the model faster",
+            "It gives the model relevant facts instead of relying on its memory",
+            "It removes tokens",
+            "It trains the model"
+          ],
+          "correct_index": 1,
+          "explanation": "Retrieval supplies the facts the model should answer from."
+        },
+        {
+          "question": "What is an evaluation set?",
+          "options": [
+            "The model's weights",
+            "Questions paired with the documents a person says are relevant",
+            "A list of errors",
+            "A chart"
+          ],
+          "correct_index": 1,
+          "explanation": "It is the answer key for the search."
+        },
+        {
+          "question": "Recall at 2 is 100 percent. What does it mean?",
+          "options": [
+            "Both relevant documents are in the top 2",
+            "The model is always right",
+            "Only 2 documents exist",
+            "The search is perfect for all questions"
+          ],
+          "correct_index": 0,
+          "explanation": "All relevant documents were retrieved in the top k for this question."
+        },
+        {
+          "question": "Why can a keyword score miss a good document?",
+          "options": [
+            "It cannot count",
+            "A document may say 'delayed' where you searched for 'late'",
+            "It is too fast",
+            "SQL cannot match text"
+          ],
+          "correct_index": 1,
+          "explanation": "Keywords match words, not meaning."
+        },
+        {
+          "question": "When should you write the evaluation set?",
+          "options": [
+            "After tuning the search, to match it",
+            "Before tuning, so the test is honest",
+            "Never",
+            "Only for large data"
+          ],
+          "correct_index": 1,
+          "explanation": "Writing it after tuning would repeat the leakage mistake."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "ml-11-e1",
+          "title": "Score the Documents",
+          "prompt": "Score each action with: finding contains 'late' (1 or 0) + finding contains 'price' (1 or 0) + action contains 'supplier' (1 or 0). Return action_id and score for all actions, ordered by score descending then action_id.",
+          "hint_1": "Use (finding LIKE '%late%') + (finding LIKE '%price%') + (action LIKE '%supplier%') AS score from shop_actions.",
+          "hint_2": "SELECT action_id, (finding LIKE '%late%') + (finding LIKE '%price%') + (action LIKE '%supplier%') AS score FROM shop_actions ORDER BY score DESC, action_id",
+          "hint_3": "SELECT action_id, (finding LIKE '%late%') + (finding LIKE '%price%') + (action LIKE '%supplier%') AS score FROM shop_actions ORDER BY score DESC, action_id",
+          "solution": "SELECT action_id, (finding LIKE '%late%') + (finding LIKE '%price%') + (action LIKE '%supplier%') AS score FROM shop_actions ORDER BY score DESC, action_id",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-11-e2",
+          "title": "The Best Match",
+          "prompt": "Return one column called finding: the finding of the action with the highest score, ties broken by the smaller action_id.",
+          "hint_1": "Order by the same score expression descending, then action_id, and keep one row.",
+          "hint_2": "SELECT finding FROM shop_actions ORDER BY (score expression) DESC, action_id LIMIT 1",
+          "hint_3": "SELECT finding FROM shop_actions ORDER BY (finding LIKE '%late%') + (finding LIKE '%price%') + (action LIKE '%supplier%') DESC, action_id LIMIT 1",
+          "solution": "SELECT finding FROM shop_actions ORDER BY (finding LIKE '%late%') + (finding LIKE '%price%') + (action LIKE '%supplier%') DESC, action_id LIMIT 1",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-11-e3",
+          "title": "Recall at 2",
+          "prompt": "A person says actions 2 and 3 are the relevant ones. Take the top 2 actions by score (ties by action_id). Return one column called recall_at_2_pct: the share of the relevant actions found in the top 2, as a percentage rounded to 0 decimals.",
+          "hint_1": "Make a top CTE with the top 2 action_ids and a rel CTE with VALUES (2), (3). Count how many top ids are in rel and divide by how many are in rel.",
+          "hint_2": "WITH top AS (SELECT action_id ... LIMIT 2), rel(action_id) AS (VALUES (2), (3)) SELECT ROUND(100.0 * ... / ...)",
+          "hint_3": "WITH top AS (SELECT action_id FROM shop_actions ORDER BY (finding LIKE '%late%') + (finding LIKE '%price%') + (action LIKE '%supplier%') DESC, action_id LIMIT 2), rel(action_id) AS (VALUES (2), (3)) SELECT ROUND(100.0 * (SELECT COUNT(*) FROM top WHERE action_id IN (SELECT action_id FROM rel)) / (SELECT COUNT(*) FROM rel), 0) AS recall_at_2_pct",
+          "solution": "WITH top AS (SELECT action_id FROM shop_actions ORDER BY (finding LIKE '%late%') + (finding LIKE '%price%') + (action LIKE '%supplier%') DESC, action_id LIMIT 2), rel(action_id) AS (VALUES (2), (3)) SELECT ROUND(100.0 * (SELECT COUNT(*) FROM top WHERE action_id IN (SELECT action_id FROM rel)) / (SELECT COUNT(*) FROM rel), 0) AS recall_at_2_pct",
+          "evaluation_mode": "exact",
+          "points": 25,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "ml-ops",
+      "title": "Keeping a Model Honest After Launch",
+      "description": "A model that worked yesterday can quietly stop working, so you watch the data it sees and decide in advance what triggers a check.",
+      "level": "advanced",
+      "prerequisites": [
+        "ml-rag"
+      ],
+      "estimated_min": 35,
+      "sort_order": 12,
+      "theory_md": "## Why this matters\nBuilding a model is the start, not the end. The world changes: customers change, prices change, a supplier changes. A model trained on last year's behaviour can drift into being wrong without any error message. Operating a model, often called **MLOps**, is mostly about noticing that early and cheaply.\n\n## The first principle\n**Decide in advance what you will watch, what counts as a problem, and what you will do about it.**\n\nYou watch three kinds of thing:\n\n- **The data it sees:** has the mix of customers, sizes or categories changed? This is **drift**.\n- **The results it gives:** has accuracy or error moved?\n- **The practical costs:** how much it costs per call and how long it takes.\n\nYou also keep **versions**: which model, which data and which settings produced each answer, so a surprising result can be traced.\n\n## A worked example\nWe watch the credit share of sales by quarter in 2025:\n\n- Quarter 1: 26.7 percent. Quarter 2: 30.9. Quarter 3: 28.5. Quarter 4: 24.9.\n- The first half averaged 28.8 percent, which we take as the normal level when the model was set up.\n- We set a rule: check if a quarter is more than 3 points away from normal.\n\nQuarters 1 to 3 are within the rule. Quarter 4 is 3.9 points below, so it is flagged for a check. A flag is not an error. It says \"look here\": maybe a stricter credit policy was introduced, maybe the customer mix changed. A person looks at the cause before retraining anything.\n\n## Try it\nQuarter number from a date: `(CAST(strftime('%m', sale_date) AS INTEGER) + 2) / 3`. The normal level is the credit share of quarters 1 and 2 together. Compare each quarter with it using `ABS(...) > 3`.\n\n## What you can and cannot claim\nA drift flag shows that something changed, not that the model is wrong. A quiet dashboard does not prove the model is right: you need real outcomes to check accuracy. Choose the threshold before you look, or you will fit it to what you see.\n\n## Say it in your own words\nWhat is drift, and what should you decide before a model goes live?\n\n## Do this in real life\nPick one number you check at work every month. Write the normal range, what size of change makes you look closer, and who you tell. That is a monitoring plan.",
+      "quiz": [
+        {
+          "question": "What is drift?",
+          "options": [
+            "A slow computer",
+            "A change in the data or behaviour the model sees compared with when it was set up",
+            "A type of error measure",
+            "A copy of the model"
+          ],
+          "correct_index": 1,
+          "explanation": "Drift means the world has moved from what the model was built on."
+        },
+        {
+          "question": "Quarter 4 credit share is 3.9 points below normal and the rule flags changes over 3 points. What does a flag mean?",
+          "options": [
+            "The model is broken",
+            "A person should look for the cause",
+            "Retrain immediately",
+            "Ignore it"
+          ],
+          "correct_index": 1,
+          "explanation": "A flag says look here; it does not diagnose."
+        },
+        {
+          "question": "Why keep versions of the model, data and settings?",
+          "options": [
+            "To save disk space",
+            "To trace a surprising result back to what produced it",
+            "Because SQL needs it",
+            "To make it faster"
+          ],
+          "correct_index": 1,
+          "explanation": "Without versions you cannot explain a change."
+        },
+        {
+          "question": "When should you choose the alert threshold?",
+          "options": [
+            "After seeing the results, to fit them",
+            "Before looking, so it is not tuned to what you see",
+            "Never",
+            "Only after a failure"
+          ],
+          "correct_index": 1,
+          "explanation": "Choosing it afterwards repeats the leakage mistake."
+        },
+        {
+          "question": "The dashboard shows no drift. What can you conclude?",
+          "options": [
+            "The model is accurate",
+            "The inputs look like before; accuracy still needs real outcomes to check",
+            "The model can be deleted",
+            "The data is perfect"
+          ],
+          "correct_index": 1,
+          "explanation": "No drift in the inputs says nothing about whether the guesses are right."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "ml-12-e1",
+          "title": "Credit Share by Quarter",
+          "prompt": "Return quarter (1 to 4 from the sale_date), sales (the number of sales) and credit_pct (the share on credit, rounded to 1 decimal), ordered by quarter.",
+          "hint_1": "Quarter is (CAST(strftime('%m', sale_date) AS INTEGER) + 2) / 3. Group by it.",
+          "hint_2": "SELECT (CAST(strftime('%m', sale_date) AS INTEGER) + 2) / 3 AS quarter, COUNT(*) ... GROUP BY quarter",
+          "hint_3": "SELECT (CAST(strftime('%m', sale_date) AS INTEGER) + 2) / 3 AS quarter, COUNT(*) AS sales, ROUND(100.0 * SUM(payment_status = 'credit') / COUNT(*), 1) AS credit_pct FROM shop_sales GROUP BY quarter ORDER BY quarter",
+          "solution": "SELECT (CAST(strftime('%m', sale_date) AS INTEGER) + 2) / 3 AS quarter, COUNT(*) AS sales, ROUND(100.0 * SUM(payment_status = 'credit') / COUNT(*), 1) AS credit_pct FROM shop_sales GROUP BY quarter ORDER BY quarter",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-12-e2",
+          "title": "Average Sale by Quarter",
+          "prompt": "Return quarter and avg_sale (the average sale total, rounded to 0 decimals), ordered by quarter.",
+          "hint_1": "Use the same quarter expression and ROUND(AVG(total), 0).",
+          "hint_2": "SELECT quarter expression AS quarter, ROUND(AVG(total), 0) AS avg_sale FROM shop_sales GROUP BY quarter",
+          "hint_3": "SELECT (CAST(strftime('%m', sale_date) AS INTEGER) + 2) / 3 AS quarter, ROUND(AVG(total), 0) AS avg_sale FROM shop_sales GROUP BY quarter ORDER BY quarter",
+          "solution": "SELECT (CAST(strftime('%m', sale_date) AS INTEGER) + 2) / 3 AS quarter, ROUND(AVG(total), 0) AS avg_sale FROM shop_sales GROUP BY quarter ORDER BY quarter",
+          "evaluation_mode": "exact",
+          "points": 10,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "ml-12-e3",
+          "title": "Raise the Flag",
+          "prompt": "Treat the credit share of quarters 1 and 2 together as normal. For each quarter return quarter, credit_pct (1 decimal) and status: 'check' if the quarter's credit share is more than 3 points from normal, otherwise 'ok'. Order by quarter.",
+          "hint_1": "Compute the normal level in one CTE (quarters 1 and 2), the quarterly share in another, join them with a comma, and use CASE WHEN ABS(pct - base) > 3.",
+          "hint_2": "WITH h AS (...), q AS (...) SELECT quarter, ROUND(pct, 1) AS credit_pct, CASE WHEN ABS(pct - base) > 3 THEN 'check' ELSE 'ok' END AS status FROM q, h",
+          "hint_3": "WITH h AS (SELECT 100.0 * SUM(payment_status = 'credit') / COUNT(*) AS base FROM shop_sales WHERE (CAST(strftime('%m', sale_date) AS INTEGER) + 2) / 3 <= 2), q AS (SELECT (CAST(strftime('%m', sale_date) AS INTEGER) + 2) / 3 AS quarter, 100.0 * SUM(payment_status = 'credit') / COUNT(*) AS pct FROM shop_sales GROUP BY quarter) SELECT quarter, ROUND(pct, 1) AS credit_pct, CASE WHEN ABS(pct - base) > 3 THEN 'check' ELSE 'ok' END AS status FROM q, h ORDER BY quarter",
+          "solution": "WITH h AS (SELECT 100.0 * SUM(payment_status = 'credit') / COUNT(*) AS base FROM shop_sales WHERE (CAST(strftime('%m', sale_date) AS INTEGER) + 2) / 3 <= 2), q AS (SELECT (CAST(strftime('%m', sale_date) AS INTEGER) + 2) / 3 AS quarter, 100.0 * SUM(payment_status = 'credit') / COUNT(*) AS pct FROM shop_sales GROUP BY quarter) SELECT quarter, ROUND(pct, 1) AS credit_pct, CASE WHEN ABS(pct - base) > 3 THEN 'check' ELSE 'ok' END AS status FROM q, h ORDER BY quarter",
+          "evaluation_mode": "exact",
+          "points": 25,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    }
+  ]
+}

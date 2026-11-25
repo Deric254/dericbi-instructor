@@ -59,6 +59,22 @@ export interface DashboardStats {
   plan?: LearningPlan
 }
 
+export type PathSide = 'tech' | 'business' | 'bridge'
+export interface PathSideScore { required: number; done: number; quiz_avg: number | null; score: number | null; ready: boolean }
+export type PathItem =
+  | { kind: 'lesson'; id: string; title: string; module: string; side: PathSide; optional: boolean; status: string; done: boolean; best: number | null }
+  | { kind: 'planned'; id: string; title: string; summary: string; side: PathSide; optional: boolean }
+export interface PathPhase {
+  id: string; index: number; title: string; weeks: string; focus: string; project: string | null; gate: string
+  gate_evidence: string; gate_saved_at: string | null; items: PathItem[]; tech: PathSideScore; business: PathSideScore; complete: boolean; open: boolean
+}
+export interface PathData {
+  title: string; pass_pct: number; gate_min_words: number; strict: boolean; phases: PathPhase[]
+  current_phase: string | null; weaker: 'tech' | 'business' | null
+  next: { lesson_id: string; title: string; module: string; side: PathSide; reason: string } | null
+  later: string[]
+}
+
 export interface LearningPlan {
   next: { lesson_id: string; title: string; module: string; status: 'in_progress' | 'available' | 'new' } | null
   streak_days: number
@@ -77,7 +93,7 @@ export interface RecentActivity {
 // LESSONS
 // ─────────────────────────────────────────────
 
-export type LessonModule = 'sql' | 'excel' | 'python' | 'powerbi' | 'statistics' | 'business' | 'dataeng' | 'bizsolver' | 'foundations' | 'founder' | 'simulation'
+export type LessonModule = 'sql' | 'excel' | 'python' | 'powerbi' | 'statistics' | 'business' | 'dataeng' | 'bizsolver' | 'foundations' | 'founder' | 'aiml' | 'simulation'
 export type LessonLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert'
 export type LessonStatus = 'locked' | 'available' | 'in_progress' | 'complete'
 
@@ -93,6 +109,7 @@ export interface Lesson {
   quiz?: string  // raw JSON string: {question, options, correct_index, explanation}[] — parse before use
   sort_order: number
   user_status: LessonStatus
+  path_locked?: number  // 1 when the learner's strict master track holds this lesson back
   completed_at?: string
   time_spent_s?: number
 }
@@ -204,6 +221,7 @@ export interface Achievement {
 export type NavSection =
   | 'owner'
   | 'dashboard'
+  | 'path'
   | 'sql'
   | 'excel'
   | 'python'
@@ -214,6 +232,7 @@ export type NavSection =
   | 'bizsolver'
   | 'foundations'
   | 'founder'
+  | 'aiml'
   | 'simulations'
   | 'playground'
   | 'datasets'

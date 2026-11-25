@@ -1,0 +1,834 @@
+{
+ "version": "1.0",
+ "title": "A–Z Programme: Business Intelligence and Data Engineering",
+ "source": "Prepared for Deric, 24 November 2026",
+ "pass_pct": 80,
+ "gate_min_words": 15,
+ "sides": {
+  "foundations": "business",
+  "founder": "business",
+  "business": "business",
+  "bizsolver": "bridge",
+  "sql": "tech",
+  "excel": "tech",
+  "python": "tech",
+  "powerbi": "tech",
+  "statistics": "tech",
+  "dataeng": "tech",
+  "aiml": "tech"
+ },
+ "phases": [
+  {
+   "id": "p0",
+   "title": "Workbench and orientation",
+   "weeks": "1–2",
+   "focus": "Set up your workbench, learn Git and the command line.",
+   "project": null,
+   "gate": "a bi-lab repository on GitHub with a README and a daily commit habit.",
+   "items": [
+    {
+     "planned": "lab-setup",
+     "side": "tech",
+     "summary": "VS Code, Python and venv, Git, PostgreSQL, DBeaver, folder and naming conventions, secrets in .env."
+    },
+    {
+     "planned": "cli-linux",
+     "side": "tech",
+     "summary": "command line in bash and PowerShell, WSL, files, permissions, processes, cron and Task Scheduler, SSH basics."
+    },
+    {
+     "planned": "git-github",
+     "side": "tech",
+     "summary": "commit, branch, merge, pull request, .gitignore, never committing secrets, a simple CI workflow."
+    },
+    {
+     "lesson": "fd-value"
+    },
+    {
+     "lesson": "fd-tables"
+    },
+    {
+     "lesson": "fd-profit"
+    },
+    {
+     "planned": "econ-decisions",
+     "side": "business",
+     "summary": "Opportunity cost, marginal thinking and incentives: how decisions are really made."
+    }
+   ]
+  },
+  {
+   "id": "p1",
+   "title": "Python for data",
+   "weeks": "3–10",
+   "focus": "Python for data work, from basics to tested scripts.",
+   "project": "Milestone M1, your first milestone: read sales from Excel and CSV (10,000 records), find missing values and duplicates, calculate revenue and gross profit, list the five most profitable products, save clean data to a database, generate a report. Explain every line.",
+   "gate": "M1 passes the reliability checks that apply (tests, secrets, README), and you explain it unaided.",
+   "items": [
+    {
+     "lesson": "py-basics"
+    },
+    {
+     "planned": "py-errors-files",
+     "side": "tech",
+     "summary": "try, except, raise, debugging, logging, with open, pathlib; reading and writing CSV, JSON, XML and Excel with openpyxl."
+    },
+    {
+     "planned": "py-structures-modules",
+     "side": "tech",
+     "summary": "lists, dictionaries, tuples and sets in depth, comprehensions, modules, pip, requirements.txt."
+    },
+    {
+     "planned": "py-oop",
+     "side": "tech",
+     "summary": "classes and dataclasses; build a SalesRecord validator."
+    },
+    {
+     "lesson": "py-pandas-intro"
+    },
+    {
+     "lesson": "py-cleaning"
+    },
+    {
+     "lesson": "py-groupby"
+    },
+    {
+     "lesson": "py-merging"
+    },
+    {
+     "lesson": "py-eda"
+    },
+    {
+     "lesson": "python-visualisation"
+    },
+    {
+     "lesson": "python-automation"
+    },
+    {
+     "planned": "py-testing",
+     "side": "tech",
+     "summary": "pytest, type hints, clean and reusable code."
+    },
+    {
+     "lesson": "fd-cash"
+    },
+    {
+     "lesson": "fd-numbers"
+    },
+    {
+     "lesson": "fd-customers"
+    }
+   ]
+  },
+  {
+   "id": "p2",
+   "title": "SQL and database engineering",
+   "weeks": "11–18",
+   "focus": "SQL from querying to database engineering.",
+   "project": "Project 1 begins, the Retail Intelligence System foundation: build the retail database (customers, products, suppliers, purchases, sales, expenses) in PostgreSQL with constraints, three roles, seeded with 10,000+ rows. Re-point M1 to load into it. Query for the most profitable products and customers.",
+   "gate": "the database passes the reliability checks 1, 2, 4 and 6.",
+   "items": [
+    {
+     "lesson": "sql-select"
+    },
+    {
+     "lesson": "sql-where"
+    },
+    {
+     "lesson": "sql-orderby"
+    },
+    {
+     "lesson": "sql-groupby"
+    },
+    {
+     "lesson": "sql-having"
+    },
+    {
+     "lesson": "sql-case"
+    },
+    {
+     "planned": "sql-ddl-keys",
+     "side": "tech",
+     "summary": "CREATE TABLE, data types, primary and foreign keys, UNIQUE, CHECK, NOT NULL."
+    },
+    {
+     "planned": "sql-dml-safe",
+     "side": "tech",
+     "summary": "INSERT, UPDATE, DELETE, safe changes, upsert."
+    },
+    {
+     "lesson": "sql-joins"
+    },
+    {
+     "lesson": "sql-subqueries"
+    },
+    {
+     "lesson": "sql-cte"
+    },
+    {
+     "lesson": "sql-window"
+    },
+    {
+     "planned": "sql-design",
+     "side": "tech",
+     "summary": "normalisation 1NF to 3NF; design the retail schema."
+    },
+    {
+     "planned": "sql-transactions-acid",
+     "side": "tech",
+     "summary": "BEGIN, COMMIT, ROLLBACK, atomicity, isolation levels, locks, deadlocks, write-ahead logging."
+    },
+    {
+     "planned": "sql-indexes-plans",
+     "side": "tech",
+     "summary": "B-tree indexes, EXPLAIN ANALYZE, when an index hurts."
+    },
+    {
+     "planned": "sql-views-routines",
+     "side": "tech",
+     "summary": "views, materialised views, functions, stored procedures, triggers."
+    },
+    {
+     "planned": "sql-security-rbac",
+     "side": "tech",
+     "summary": "roles, GRANT and REVOKE, least privilege, row-level security in PostgreSQL, SQL injection, backup and restore drill."
+    },
+    {
+     "planned": "sql-dialects",
+     "side": "tech",
+     "summary": "PostgreSQL versus SQL Server versus SQLite."
+    },
+    {
+     "lesson": "fd-price"
+    },
+    {
+     "lesson": "fd-first-principles"
+    },
+    {
+     "planned": "acc-double-entry",
+     "side": "business",
+     "summary": "Ledgers, debits and credits, the trial balance: the business twin of transactions."
+    }
+   ]
+  },
+  {
+   "id": "p3",
+   "title": "Data acquisition",
+   "weeks": "19–26",
+   "focus": "Collect data from APIs and the web, legally and on a schedule.",
+   "project": "Project 2, the Market Intelligence Engine: scrape permitted public prices, add one API source, store history in PostgreSQL, compare price changes over time on a schedule.",
+   "gate": "unattended runs for seven days with logs, no duplicates after reruns, and a written statement of what you are allowed to collect.",
+   "items": [
+    {
+     "planned": "net-http",
+     "side": "tech",
+     "summary": "how the internet works, DNS, HTTP and HTTPS, status codes, headers, browser developer tools."
+    },
+    {
+     "planned": "api-rest",
+     "side": "tech",
+     "summary": "GET, POST, PUT, DELETE, the requests library, JSON, API keys, OAuth 2 fundamentals, pagination, rate limits, retry with backoff, webhooks."
+    },
+    {
+     "planned": "api-to-postgres",
+     "side": "tech",
+     "summary": "psycopg or SQLAlchemy, idempotent upserts, pull 10,000 records from a public API into PostgreSQL."
+    },
+    {
+     "planned": "web-html-dom",
+     "side": "tech",
+     "summary": "HTML and CSS, the DOM, selectors, BeautifulSoup."
+    },
+    {
+     "planned": "web-dynamic",
+     "side": "tech",
+     "summary": "Playwright for dynamic pages, Scrapy, pagination, throttling."
+    },
+    {
+     "planned": "web-ethics-law",
+     "side": "tech",
+     "summary": "robots.txt, site terms, copyright, privacy, Kenya Data Protection Act 2019, collecting only authorised data."
+    },
+    {
+     "planned": "schedule-jobs",
+     "side": "tech",
+     "summary": "cron or Task Scheduler, logging, failure alerts."
+    },
+    {
+     "planned": "mkt-segments-funnel",
+     "side": "business",
+     "summary": "Segmentation, funnels and channels."
+    },
+    {
+     "planned": "ind-retail-pharmacy",
+     "side": "business",
+     "summary": "How retail and pharmacy businesses make money."
+    }
+   ]
+  },
+  {
+   "id": "p4",
+   "title": "Data engineering and architecture",
+   "weeks": "27–36",
+   "focus": "Pipelines, warehouses and the architecture behind them.",
+   "project": "Project 3, the Automated Data Warehouse: pull from three kinds of source (an export from one of your own systems, files, an API), transform, and load a star schema in PostgreSQL on a schedule, with data-quality tests and a reconciliation report.",
+   "gate": "all eight reliability checks pass, a failed run alerts you, and a rerun after failure leaves no duplicates.",
+   "items": [
+    {
+     "lesson": "de-foundations"
+    },
+    {
+     "lesson": "de-profiling"
+    },
+    {
+     "lesson": "bp-audit"
+    },
+    {
+     "lesson": "de-cleaning"
+    },
+    {
+     "lesson": "de-dedup"
+    },
+    {
+     "lesson": "de-integrity"
+    },
+    {
+     "lesson": "de-incremental"
+    },
+    {
+     "lesson": "de-pipelines-etl"
+    },
+    {
+     "lesson": "de-python-pipelines"
+    },
+    {
+     "planned": "de-postgres-pipeline-lab",
+     "side": "tech",
+     "summary": "staging, clean and mart layers in PostgreSQL, fed from files and an API."
+    },
+    {
+     "planned": "de-formats",
+     "side": "tech",
+     "summary": "Parquet, multi-sheet Excel, XML, fixed-width files, tables inside PDFs."
+    },
+    {
+     "planned": "de-docker-basics",
+     "side": "tech",
+     "summary": "containers for a repeatable PostgreSQL and repeatable pipelines."
+    },
+    {
+     "lesson": "de-modeling"
+    },
+    {
+     "lesson": "de-warehouse"
+    },
+    {
+     "planned": "de-scd-lab",
+     "side": "tech",
+     "summary": "slowly changing dimensions built and tested in PostgreSQL."
+    },
+    {
+     "lesson": "de-trends"
+    },
+    {
+     "lesson": "de-orchestration"
+    },
+    {
+     "planned": "de-airflow-lab",
+     "side": "tech",
+     "summary": "a real scheduler with retries, SLAs and failure alerts running your pipeline."
+    },
+    {
+     "lesson": "de-streaming"
+    },
+    {
+     "lesson": "de-testing"
+    },
+    {
+     "planned": "de-dq-tools",
+     "side": "tech",
+     "summary": "data-quality checks as code, freshness and reconciliation reports."
+    },
+    {
+     "lesson": "de-observability"
+    },
+    {
+     "planned": "de-duckdb-elt",
+     "side": "tech",
+     "summary": "DuckDB and ELT, analysing large files without a server."
+    },
+    {
+     "planned": "de-cloud-tour",
+     "side": "tech",
+     "summary": "lakehouse ideas, Microsoft Fabric and Databricks free tiers, cloud storage basics."
+    },
+    {
+     "lesson": "bp-model"
+    },
+    {
+     "lesson": "bp-connect"
+    },
+    {
+     "lesson": "bp-unify"
+    },
+    {
+     "planned": "ops-supply-chain",
+     "side": "business",
+     "summary": "Flow, lead time and bottlenecks."
+    },
+    {
+     "planned": "proc-supplier-mgmt",
+     "side": "business",
+     "summary": "Buying, supplier terms and negotiation."
+    }
+   ]
+  },
+  {
+   "id": "p5",
+   "title": "Analytical modelling and BI",
+   "weeks": "37–44",
+   "focus": "Model the data and build decision-ready BI.",
+   "project": "Project 1 delivered, the Retail Intelligence System: sales, expenses, inventory and profitability from the warehouse, with a purchasing view and two security roles.",
+   "gate": "a branch manager sees only their own branch, every total reconciles to the database exactly, and each KPI has one written definition.",
+   "items": [
+    {
+     "lesson": "excel-basics"
+    },
+    {
+     "lesson": "excel-lookup"
+    },
+    {
+     "lesson": "excel-text-date"
+    },
+    {
+     "lesson": "excel-pivots"
+    },
+    {
+     "lesson": "excel-if-logic"
+    },
+    {
+     "lesson": "excel-charts"
+    },
+    {
+     "lesson": "excel-tables"
+    },
+    {
+     "lesson": "excel-powerquery"
+    },
+    {
+     "lesson": "excel-dashboard"
+    },
+    {
+     "lesson": "powerbi-intro"
+    },
+    {
+     "lesson": "powerbi-powerquery"
+    },
+    {
+     "lesson": "powerbi-dax"
+    },
+    {
+     "lesson": "powerbi-datamodel"
+    },
+    {
+     "planned": "bi-date-time-intel",
+     "side": "tech",
+     "summary": "the date dimension and time intelligence lab: year to date, same period last year, rolling averages."
+    },
+    {
+     "planned": "bi-semantic-layer",
+     "side": "tech",
+     "summary": "every KPI defined once, in writing and in one measure, so two reports can never disagree."
+    },
+    {
+     "lesson": "powerbi-visuals"
+    },
+    {
+     "lesson": "powerbi-design"
+    },
+    {
+     "lesson": "powerbi-dax-advanced"
+    },
+    {
+     "lesson": "powerbi-rls"
+    },
+    {
+     "planned": "bi-postgres-refresh",
+     "side": "tech",
+     "summary": "Power BI on PostgreSQL, incremental refresh, scheduled refresh, a read-only reporting role."
+    },
+    {
+     "lesson": "powerbi-performance"
+    },
+    {
+     "lesson": "powerbi-publish"
+    },
+    {
+     "planned": "bi-decision-dashboard",
+     "side": "tech",
+     "summary": "a dashboard that answers four questions in order: what happened, why, where, what should management do."
+    },
+    {
+     "planned": "acc-costing",
+     "side": "business",
+     "summary": "Fixed and variable cost, marginal and absorption costing, job costing."
+    }
+   ]
+  },
+  {
+   "id": "p6",
+   "title": "Statistics, finance and business knowledge",
+   "weeks": "45–54",
+   "focus": "Statistics, forecasting and the money side of a business.",
+   "project": null,
+   "gate": "from the Project 1 data, test one business hypothesis with the right statistical test, build a 12-month forecast and score it against held-back actuals, compute customer lifetime value and a working-capital view, and write one page that a non-technical manager can act on.",
+   "items": [
+    {
+     "lesson": "business-thinking-intro"
+    },
+    {
+     "lesson": "business-metrics"
+    },
+    {
+     "lesson": "stat-descriptive"
+    },
+    {
+     "lesson": "stats-probability"
+    },
+    {
+     "lesson": "stats-confidence-intervals"
+    },
+    {
+     "lesson": "stats-hypothesis"
+    },
+    {
+     "lesson": "python-stats"
+    },
+    {
+     "lesson": "stats-chisquare"
+    },
+    {
+     "lesson": "stat-correlation"
+    },
+    {
+     "lesson": "stats-regression"
+    },
+    {
+     "lesson": "stats-anova"
+    },
+    {
+     "lesson": "stats-abtesting"
+    },
+    {
+     "lesson": "stats-timeseries"
+    },
+    {
+     "lesson": "ml-model"
+    },
+    {
+     "lesson": "ml-split"
+    },
+    {
+     "lesson": "ml-regress"
+    },
+    {
+     "lesson": "ml-error"
+    },
+    {
+     "planned": "an-practical-forecasting",
+     "side": "bridge",
+     "summary": "naive and seasonal baselines, moving averages, trend and seasonality, backtesting, error measures, stating the uncertainty. No machine learning needed."
+    },
+    {
+     "planned": "an-root-cause-methods",
+     "side": "bridge",
+     "summary": "driver trees, five whys, Pareto, cohort analysis, variance bridges."
+    },
+    {
+     "planned": "fin-statements",
+     "side": "business",
+     "summary": "profit and loss, balance sheet, cash flow statement, working capital, cash conversion cycle."
+    },
+    {
+     "lesson": "excel-financial"
+    },
+    {
+     "lesson": "business-financial-modelling"
+    },
+    {
+     "lesson": "business-unit-economics"
+    },
+    {
+     "lesson": "business-market-analysis"
+    },
+    {
+     "planned": "fin-inventory-math",
+     "side": "business",
+     "summary": "turnover, reorder point, safety stock, ABC classification, the cost of holding stock."
+    },
+    {
+     "planned": "fin-clv-cac-cohort",
+     "side": "business",
+     "summary": "customer lifetime value, acquisition cost, retention cohorts."
+    },
+    {
+     "planned": "fin-pricing-elasticity",
+     "side": "business",
+     "summary": "pricing strategy, discount effects, price elasticity from your own sales data."
+    },
+    {
+     "planned": "fin-budget-forecast-variance",
+     "side": "business",
+     "summary": "budgeting, rolling forecasts, variance analysis."
+    },
+    {
+     "lesson": "business-kpi"
+    },
+    {
+     "planned": "biz-kenya-data",
+     "side": "business",
+     "summary": "M-Pesa statements, till and paybill data, KRA eTIMS invoices, VAT, and cash-heavy informal retail records."
+    },
+    {
+     "planned": "hr-workforce-costs",
+     "side": "business",
+     "summary": "Payroll cost and productivity; Kenyan statutory items are checked against current sources."
+    },
+    {
+     "planned": "strat-competition",
+     "side": "business",
+     "summary": "Five forces and positioning."
+    }
+   ]
+  },
+  {
+   "id": "p7",
+   "title": "Diagnose, solve and prove",
+   "weeks": "55–66",
+   "focus": "Frame the problem, find every issue, design SMART solutions and prove they worked.",
+   "project": "Project 4, the Full Business Diagnostic: on a real business that has agreed, run the whole loop. Frame, interview, audit, extract, clean, model, scan against the issue library, rank findings by money, and deliver at least three SMART recommendations, each with a measurement plan.",
+   "gate": "the owner could run each measurement without you, and you defend every number and recommendation out loud without notes.",
+   "items": [
+    {
+     "planned": "biz-problem-framing",
+     "side": "business",
+     "summary": "turn \"sales are down\" into a testable question: the decision at stake, who is affected, hypotheses, what would settle it, and the data needed."
+    },
+    {
+     "planned": "biz-requirements-interviews",
+     "side": "business",
+     "summary": "interviewing business owners, separating symptoms from causes, and writing a data request list."
+    },
+    {
+     "planned": "an-issue-library",
+     "side": "bridge",
+     "summary": "a checklist of potential issues by business function (sales, pricing, margin, stock, purchasing, suppliers, cash, receivables, expenses, staff, customers, controls, data quality), each with the data needed, the test to run, and the typical fix. This is how you find every issue, not only the obvious one."
+    },
+    {
+     "lesson": "bp-stock"
+    },
+    {
+     "lesson": "bp-margins"
+    },
+    {
+     "lesson": "bp-cash"
+    },
+    {
+     "planned": "an-leakage-fraud",
+     "side": "bridge",
+     "summary": "refunds, voids, discount abuse, stock shrinkage, duplicate payments, segregation of duties. Findings are leads to investigate, never accusations."
+    },
+    {
+     "lesson": "bp-investigate"
+    },
+    {
+     "lesson": "business-storytelling"
+    },
+    {
+     "lesson": "business-presentations"
+    },
+    {
+     "planned": "sol-smart-design",
+     "side": "bridge",
+     "summary": "turn each finding into an action that is Specific, Measurable, Achievable, Relevant and Time-bound, with an owner, a cost, an expected gain, a risk, and a priority by value and effort."
+    },
+    {
+     "planned": "sol-impact-measurement",
+     "side": "bridge",
+     "summary": "baseline, target, leading and lagging indicators, before-and-after or comparison-group design, a tracking sheet, a review at 30, 60 and 90 days, and return on investment."
+    },
+    {
+     "lesson": "business-project-analytics"
+    },
+    {
+     "lesson": "business-change-management"
+    },
+    {
+     "planned": "risk-controls-audit",
+     "side": "business",
+     "summary": "Internal controls, segregation of duties and the audit trail."
+    },
+    {
+     "planned": "ind-manufacturing",
+     "side": "business",
+     "summary": "How manufacturing businesses make money."
+    },
+    {
+     "planned": "ind-health-services",
+     "side": "business",
+     "summary": "How health services make money."
+    },
+    {
+     "planned": "com-executive-writing",
+     "side": "business",
+     "summary": "The one-page memo that leads with the answer."
+    }
+   ]
+  },
+  {
+   "id": "p8",
+   "title": "AI as a working tool",
+   "weeks": "67–70",
+   "focus": "AI as a working tool: it proposes, you verify.",
+   "project": null,
+   "gate": "take one earlier analysis, use AI to speed up one stage, show how you verified its output, and record the time saved.",
+   "items": [
+    {
+     "lesson": "ml-llm"
+    },
+    {
+     "lesson": "ml-rag"
+    },
+    {
+     "planned": "ai-analyst-toolkit",
+     "side": "tech",
+     "summary": "prompting for analysis, getting help with SQL, Python and DAX by describing the schema rather than sharing the data, asking AI to explain code you then rewrite yourself."
+    },
+    {
+     "planned": "ai-verify-privacy",
+     "side": "tech",
+     "summary": "checking AI output against known answers, never sending patient, customer or personal data to an AI tool, Kenya Data Protection Act 2019, using approved tools only."
+    },
+    {
+     "planned": "ai-reporting-automation",
+     "side": "tech",
+     "summary": "turning verified numbers into a draft narrative with a fixed template and a human sign-off."
+    },
+    {
+     "lesson": "de-llm-ops",
+     "optional": true
+    }
+   ]
+  },
+  {
+   "id": "p9",
+   "title": "Operate, secure and deliver",
+   "weeks": "71–84",
+   "focus": "Operate, secure and deliver, and run it as a business.",
+   "project": "Project 5, the Management Intelligence System: warehouse, dashboards, scheduled refresh, alerts and a decision log for one business. Project 6, Business Decision Intelligence: a real engagement taken from diagnosis to SMART recommendations, then measured at 30, 60 and 90 days against the baseline.",
+   "gate": "Final exam, the unstoppable test: given an unfamiliar business whose data sits in three sources, deliver in four weeks a framing document, a warehouse, a dashboard, three SMART recommendations with measurement plans and a runbook, with all eight reliability checks passing.",
+   "items": [
+    {
+     "lesson": "de-governance"
+    },
+    {
+     "lesson": "bp-monitor"
+    },
+    {
+     "lesson": "bp-scale"
+    },
+    {
+     "lesson": "de-system-design"
+    },
+    {
+     "planned": "con-scoping-delivery",
+     "side": "business",
+     "summary": "scoping an engagement, a statement of work, pricing, change requests, handover and support."
+    },
+    {
+     "planned": "con-documentation-runbooks",
+     "side": "business",
+     "summary": "data dictionary, KPI definitions, runbook and handover pack, so a client can run what you built."
+    },
+    {
+     "lesson": "bp-capstone"
+    },
+    {
+     "lesson": "de-capstone"
+    },
+    {
+     "planned": "con-portfolio-casestudies",
+     "side": "business",
+     "summary": "case studies with measured results, built with the app's portfolio export."
+    },
+    {
+     "lesson": "fo-problem"
+    },
+    {
+     "lesson": "fo-interviews"
+    },
+    {
+     "lesson": "fo-market"
+    },
+    {
+     "lesson": "fo-offer"
+    },
+    {
+     "lesson": "fo-unit"
+    },
+    {
+     "lesson": "fo-runway"
+    },
+    {
+     "lesson": "fo-sale"
+    },
+    {
+     "lesson": "fo-mvp"
+    },
+    {
+     "lesson": "fo-funding"
+    },
+    {
+     "lesson": "fo-legal"
+    },
+    {
+     "lesson": "fo-team"
+    },
+    {
+     "lesson": "fo-iterate"
+    },
+    {
+     "planned": "ind-agribusiness-services",
+     "side": "business",
+     "summary": "How agribusiness and services make money."
+    }
+   ]
+  }
+ ],
+ "later": [
+  {
+   "lesson": "python-ml-intro"
+  },
+  {
+   "lesson": "ml-classify"
+  },
+  {
+   "lesson": "ml-metrics"
+  },
+  {
+   "lesson": "ml-overfit"
+  },
+  {
+   "lesson": "ml-knn"
+  },
+  {
+   "lesson": "ml-features"
+  },
+  {
+   "lesson": "ml-ops"
+  },
+  {
+   "lesson": "de-ai-features"
+  }
+ ]
+}

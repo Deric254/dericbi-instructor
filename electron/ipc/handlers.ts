@@ -13,6 +13,7 @@ import { getPlacement, submitPlacement } from '../services/placement'
 import { enrollConcepts, getReview, answerReview } from '../services/review'
 import { getExplain, submitExplain, confirmExplain, aiUpgradeExplain, checkMarker } from '../services/explain'
 import { getFieldTask, saveFieldTask, deleteFieldTask, listFieldTasks } from '../services/fieldwork'
+import { getPath, saveGate, setStrict, pathLocked } from '../services/path'
 import { safeHandle } from './safe-handle'
 import { registerLicenceHandlers } from './licence-handlers'
 import { v4 as uuidv4 } from 'uuid'
@@ -135,7 +136,11 @@ export function registerLessonHandlers() {
     }
 
     query += ' ORDER BY l.module, l.sort_order'
-    return db.prepare(query).all(...params)
+    const rows = db.prepare(query).all(...params) as any[]
+    // A learner who follows the master track strictly cannot open lessons from a phase after their open one: they show as locked, as any lesson still waiting for its prerequisites does.
+    const held = pathLocked(userId)
+    if (held.size === 0) return rows
+    return rows.map((r) => (held.has(r.id) ? { ...r, user_status: 'locked', path_locked: 1 } : r))
   })
 
   safeHandle('lessons:get', async (_, { userId, lessonId }) => {
@@ -194,6 +199,10 @@ export function registerLessonHandlers() {
   safeHandle('fieldwork:list', async (_, userId: string) => listFieldTasks(userId))
   safeHandle('fieldwork:save', async (_, { userId, lessonId, did, learned }) => saveFieldTask(userId, lessonId, did, learned))
   safeHandle('fieldwork:delete', async (_, { userId, lessonId }) => ({ success: deleteFieldTask(userId, lessonId) }))
+
+  safeHandle('path:get', async (_, userId: string) => getPath(userId))
+  safeHandle('path:gate', async (_, { userId, phaseId, evidence }) => saveGate(userId, phaseId, evidence))
+  safeHandle('path:strict', async (_, { userId, on }) => { setStrict(userId, on === true); return { success: true } })
 
   safeHandle('explain:selftest', async (_, userId: string) => {
     const r = await checkMarker(userId)

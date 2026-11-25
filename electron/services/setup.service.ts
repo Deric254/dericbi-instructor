@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { DATAENG_DATASETS, generateDataEngDatasets } from './dataeng.datasets'
 import { SHOP_DATASETS, generateShopDatasets } from './shop.datasets'
 
-const SETUP_VERSION = 11 // increment to force re-seed on app update
+const SETUP_VERSION = 12 // increment to force re-seed on app update
 
 // Bump when the generated CSV *contents* change shape, so installs that already have older
 // CSVs on disk get them regenerated (generateDatasets() otherwise skips files that exist).
@@ -271,6 +271,7 @@ function seedAllCurricula(): void {
   const curricula = [
     { file: 'foundations/curriculum.json', type: 'sql_query'   },
     { file: 'founder/curriculum.json',     type: 'sql_query'   },
+    { file: 'aiml/curriculum.json',        type: 'sql_query'   },
     { file: 'sql/curriculum.json',        type: 'sql_query'   },
     { file: 'python/curriculum.json',     type: 'python_code' },
     { file: 'statistics/curriculum.json', type: 'python_code' },
@@ -431,6 +432,8 @@ function seedAchievements(): void {
     ['ach_fd_done',         'First Principles',      'Completed the Start Here track',                   'trophy',      '{"type":"lesson_complete","lesson_id":"fd-first-principles"}',                 300, 'epic'],
     ['ach_fo_first',        'First Founder Step',    'Solved your first Founder Track exercise',         'rocket',      '{"type":"exercise_complete","skill":"founder","count":1,"distinct":true}',     20,  'common'],
     ['ach_fo_done',         'Ready to Start',        'Completed the Founder Track',                      'trophy',      '{"type":"lesson_complete","lesson_id":"fo-iterate"}',                      500, 'epic'],
+    ['ach_ml_first',        'First Model Step',      'Solved your first AI & ML Track exercise',         'brain',       '{"type":"exercise_complete","skill":"aiml","count":1,"distinct":true}',        20,  'common'],
+    ['ach_ml_done',         'Honest With Models',    'Completed the AI & ML Track',                      'trophy',      '{"type":"lesson_complete","lesson_id":"ml-ops"}',                          500, 'epic'],
     ['ach_consultant_rank', 'Analytics Consultant',  'Achieved Analytics Consultant rank',               'briefcase',   '{"type":"rank","rank":"analytics_consultant"}',             1000, 'legendary'],
   ]
 

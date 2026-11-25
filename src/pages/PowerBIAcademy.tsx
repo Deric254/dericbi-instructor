@@ -148,7 +148,7 @@ function LessonCard({ lesson, color, onClick }: { lesson: any; color: string; on
   const locked = lesson.user_status === 'locked'
   const complete = lesson.user_status === 'complete'
   return (
-    <button onClick={locked ? undefined : onClick} disabled={locked} style={{ padding: '14px', borderRadius: 'var(--radius)', border: `1px solid ${complete ? color + '40' : 'var(--border)'}`, background: complete ? color + '08' : 'var(--bg-surface)', opacity: locked ? 0.45 : 1, cursor: locked ? 'not-allowed' : 'pointer', textAlign: 'left', transition: 'all var(--transition)', width: '100%' }}>
+    <button onClick={locked ? undefined : onClick} disabled={locked} title={lesson.path_locked ? "Locked by your path: complete the phase you are in first" : undefined} style={{ padding: '14px', borderRadius: 'var(--radius)', border: `1px solid ${complete ? color + '40' : 'var(--border)'}`, background: complete ? color + '08' : 'var(--bg-surface)', opacity: locked ? 0.45 : 1, cursor: locked ? 'not-allowed' : 'pointer', textAlign: 'left', transition: 'all var(--transition)', width: '100%' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
         <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{lesson.title}</span>
         {complete ? <CheckCircle size={14} color={color} /> : locked ? <Lock size={13} color="var(--text-muted)" /> : <ChevronRight size={14} color="var(--text-muted)" />}

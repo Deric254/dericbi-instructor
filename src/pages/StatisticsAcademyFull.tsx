@@ -101,7 +101,7 @@ export function StatisticsAcademy() {
                 await window.api.lessons.start(user!.id, lesson.id)
                 setActiveLesson(data)
               }}
-              disabled={lesson.user_status === 'locked'}
+              disabled={lesson.user_status === 'locked'} title={lesson.path_locked ? 'Locked by your path: complete the phase you are in first' : undefined}
               style={{ padding: '14px', borderRadius: 'var(--radius)', border: `1px solid ${lesson.user_status === 'complete' ? 'rgba(167,139,250,0.4)' : 'var(--border)'}`, background: lesson.user_status === 'complete' ? 'rgba(167,139,250,0.06)' : 'var(--bg-surface)', opacity: lesson.user_status === 'locked' ? 0.45 : 1, cursor: lesson.user_status === 'locked' ? 'not-allowed' : 'pointer', textAlign: 'left', width: '100%', transition: 'all var(--transition)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                   <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)' }}>{lesson.title}</span>

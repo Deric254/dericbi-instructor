@@ -1,6 +1,8 @@
 // Extends the global Window interface with the IPC bridge
 // exposed by Electron's preload script
 
+import type { PathData } from './index'
+
 declare global {
   interface Window {
     api: {
@@ -61,6 +63,11 @@ declare global {
         submit: (userId: string, lessonId: string, text: string) => Promise<any>
         confirm: (userId: string, lessonId: string) => Promise<{ success: boolean }>
         selfTest: (userId: string) => Promise<{ available: boolean; allOk?: boolean; results?: { label: string; expect: 'pass' | 'fail'; got: 'pass' | 'fail'; ok: boolean }[] }>
+      }
+      path: {
+        get: (userId: string) => Promise<PathData | null>
+        gate: (userId: string, phaseId: string, evidence: string) => Promise<{ success: boolean; reason?: 'unavailable' | 'locked' | 'invalid' | 'short' }>
+        setStrict: (userId: string, on: boolean) => Promise<{ success: boolean }>
       }
       fieldwork: {
         get: (userId: string, lessonId: string) => Promise<any>

@@ -1365,6 +1365,723 @@
         ],
         "need": 2
       }
+    },
+    {
+      "id": "model",
+      "name": "Model and baseline",
+      "definition": "A model is a rule that turns facts you have into a guess about something you do not, and it is only useful if it beats the simplest guess, the baseline.",
+      "depends_on": [
+        "metric"
+      ],
+      "lessons": [
+        "ml-model"
+      ],
+      "explain": {
+        "prompt": "What is a model, what is the baseline, and why must a model beat the baseline?",
+        "points": [
+          {
+            "hint": "A model is a rule that turns known facts into a guess",
+            "any": [
+              "rule",
+              "formula",
+              "turns facts",
+              "prediction",
+              "predict",
+              "uses what we know",
+              "a guess about"
+            ]
+          },
+          {
+            "hint": "The baseline is the simplest guess, such as always the average",
+            "any": [
+              "baseline",
+              "simplest guess",
+              "simple guess",
+              "always guess",
+              "most common answer",
+              "always the average",
+              "always predict"
+            ]
+          },
+          {
+            "hint": "A model that cannot beat the baseline has learned nothing useful",
+            "any": [
+              "beat the",
+              "better than the",
+              "worse than the",
+              "no better than",
+              "learned nothing",
+              "nothing useful",
+              "not worth using",
+              "outperform"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "train-test",
+      "name": "Train and test",
+      "definition": "The data is split first: the model learns from the training set and is judged on the unseen test set, and anything from the test set leaking into learning makes the result dishonest.",
+      "depends_on": [
+        "model"
+      ],
+      "lessons": [
+        "ml-split"
+      ],
+      "explain": {
+        "prompt": "Why do we split data into a training set and a test set, and what is leakage?",
+        "points": [
+          {
+            "hint": "Learn from the training set, judge on the test set",
+            "any": [
+              "training set",
+              "train set",
+              "test set",
+              "kept aside",
+              "held back",
+              "hold back",
+              "set aside",
+              "training data",
+              "keep some data"
+            ]
+          },
+          {
+            "hint": "The test must use data the model has never seen so it is honest",
+            "any": [
+              "never seen",
+              "not seen",
+              "unseen",
+              "new data",
+              "real life",
+              "honest",
+              "marking your own homework",
+              "seen the answers",
+              "seen the exam"
+            ]
+          },
+          {
+            "hint": "Leakage is when test information influences the learning",
+            "any": [
+              "leak",
+              "leakage",
+              "peek",
+              "peeked",
+              "cheating",
+              "contaminate",
+              "test data influenced",
+              "information from the test",
+              "used the test"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "regression",
+      "name": "Fitting a line",
+      "definition": "A fitted line predicts one number from another; its slope is how much the guess changes per unit of input, and it is computed from the training data only.",
+      "depends_on": [
+        "train-test",
+        "aggregate"
+      ],
+      "lessons": [
+        "ml-regress"
+      ],
+      "explain": {
+        "prompt": "What does the slope of a fitted line tell you, and why do we compute it from the training data only?",
+        "points": [
+          {
+            "hint": "The slope is how much the guess changes for each extra unit of input",
+            "any": [
+              "slope",
+              "each extra",
+              "each additional",
+              "per unit",
+              "one more unit",
+              "for every extra",
+              "steepness",
+              "how much the price",
+              "how much the guess"
+            ]
+          },
+          {
+            "hint": "The line is the best fit through the data, found from sums",
+            "any": [
+              "best line",
+              "line of best fit",
+              "best fit",
+              "straight line",
+              "intercept",
+              "least squares",
+              "fitted line"
+            ]
+          },
+          {
+            "hint": "Using the test data would be leakage so only training data is used",
+            "any": [
+              "training data only",
+              "only the training",
+              "only from the training",
+              "not the test",
+              "leak",
+              "leakage",
+              "unseen",
+              "honest"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "error-measures",
+      "name": "Error measures",
+      "definition": "MAE is the average size of the miss, MSE squares the misses so large ones count far more, and the worst single miss shows an exception worth investigating.",
+      "depends_on": [
+        "regression"
+      ],
+      "lessons": [
+        "ml-error"
+      ],
+      "explain": {
+        "prompt": "What is the difference between MAE and MSE, and why look at the worst miss?",
+        "points": [
+          {
+            "hint": "MAE is the average size of the miss",
+            "any": [
+              "mean absolute",
+              "absolute error",
+              "average miss",
+              "average size",
+              "average distance",
+              "typical miss",
+              "on average it is off",
+              "off by"
+            ]
+          },
+          {
+            "hint": "MSE squares the misses so big misses count much more",
+            "any": [
+              "squared",
+              "squaring",
+              "square the",
+              "big misses",
+              "large misses",
+              "punish",
+              "penalise",
+              "penalize",
+              "one big miss",
+              "one large miss"
+            ]
+          },
+          {
+            "hint": "The worst miss shows an exception or an expensive failure",
+            "any": [
+              "worst miss",
+              "worst case",
+              "biggest miss",
+              "largest miss",
+              "outlier",
+              "exception",
+              "one failure",
+              "special case",
+              "hides"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "classification",
+      "name": "Classification and accuracy",
+      "definition": "Predicting a category is classification; accuracy is the share right and it must beat the baseline of always guessing the most common category.",
+      "depends_on": [
+        "train-test",
+        "metric"
+      ],
+      "lessons": [
+        "ml-classify"
+      ],
+      "explain": {
+        "prompt": "What is the baseline for a yes or no prediction, and why can a model with high accuracy still be useless?",
+        "points": [
+          {
+            "hint": "The baseline always guesses the most common answer",
+            "any": [
+              "most common",
+              "majority",
+              "always guess",
+              "always say",
+              "always predict",
+              "always paid",
+              "same answer every time"
+            ]
+          },
+          {
+            "hint": "Accuracy is the share of guesses that are right",
+            "any": [
+              "accuracy",
+              "share that are right",
+              "percentage right",
+              "percent correct",
+              "share of correct",
+              "proportion correct",
+              "gets right"
+            ]
+          },
+          {
+            "hint": "High accuracy is useless if the baseline is already that high",
+            "any": [
+              "already that high",
+              "already that accurate",
+              "worse than always",
+              "worse than guessing",
+              "no better than",
+              "beat the baseline",
+              "beat that",
+              "rare",
+              "imbalanced",
+              "imbalance",
+              "mostly the same"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "precision-recall",
+      "name": "Precision and recall",
+      "definition": "Precision is how often a warning is right and recall is how many real cases it catches; they count the false alarms and the misses that one accuracy number hides.",
+      "depends_on": [
+        "classification"
+      ],
+      "lessons": [
+        "ml-metrics"
+      ],
+      "explain": {
+        "prompt": "What are precision and recall, and why is accuracy alone not enough?",
+        "points": [
+          {
+            "hint": "Precision is how often a warning is right",
+            "any": [
+              "precision",
+              "when it warns",
+              "when it says yes",
+              "of the warnings",
+              "of those it flagged",
+              "of the ones it flagged",
+              "false alarm",
+              "false alarms",
+              "false positive"
+            ]
+          },
+          {
+            "hint": "Recall is how many of the real cases it catches",
+            "any": [
+              "recall",
+              "caught",
+              "catches",
+              "catch the",
+              "of all the real",
+              "of all the actual",
+              "missed cases",
+              "misses real",
+              "false negative",
+              "how many real"
+            ]
+          },
+          {
+            "hint": "Accuracy hides the two kinds of mistake, which cost different amounts",
+            "any": [
+              "hides",
+              "hide the",
+              "different costs",
+              "costs differ",
+              "two kinds",
+              "two ways",
+              "trade-off",
+              "tradeoff",
+              "trade off",
+              "cost of a miss",
+              "cost of a false",
+              "one number"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "overfitting",
+      "name": "Overfitting",
+      "definition": "A model that is far better on its training data than on new data has memorised noise instead of learning a pattern.",
+      "depends_on": [
+        "train-test",
+        "error-measures"
+      ],
+      "lessons": [
+        "ml-overfit"
+      ],
+      "explain": {
+        "prompt": "What is overfitting and how do you spot it?",
+        "points": [
+          {
+            "hint": "The model memorises the training data and its noise instead of learning",
+            "any": [
+              "memoris",
+              "memoriz",
+              "by heart",
+              "copies the training",
+              "too closely",
+              "its noise",
+              "instead of learning",
+              "not learning",
+              "learned the training"
+            ]
+          },
+          {
+            "hint": "You spot it by a big gap between the training score and the test score",
+            "any": [
+              "gap",
+              "training score",
+              "test score",
+              "great on training",
+              "good on training",
+              "perfect on training",
+              "better on training",
+              "worse on test",
+              "difference between training"
+            ]
+          },
+          {
+            "hint": "It fails on new data it has not seen",
+            "any": [
+              "new data",
+              "unseen",
+              "never seen",
+              "real life",
+              "fails on",
+              "generalise",
+              "generalize",
+              "generalis"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "nearest-neighbours",
+      "name": "Nearest neighbours",
+      "definition": "Nearest neighbours predicts a new case from the average of the k most similar known cases; the distance measure and the size of k shape the result.",
+      "depends_on": [
+        "error-measures"
+      ],
+      "lessons": [
+        "ml-knn"
+      ],
+      "explain": {
+        "prompt": "How does nearest neighbours predict, and what do the distance measure and k change?",
+        "points": [
+          {
+            "hint": "It finds the most similar known cases",
+            "any": [
+              "similar",
+              "closest",
+              "nearest",
+              "most alike",
+              "neighbours",
+              "neighbors",
+              "comparable cases",
+              "like it"
+            ]
+          },
+          {
+            "hint": "It averages what happened to those cases",
+            "any": [
+              "average of",
+              "takes the average",
+              "mean of",
+              "copy the",
+              "majority vote",
+              "vote of"
+            ]
+          },
+          {
+            "hint": "The size of k and how distance is measured change the result",
+            "any": [
+              "value of k",
+              "size of k",
+              "larger k",
+              "bigger k",
+              "small k",
+              "smaller k",
+              "how many neighbours",
+              "how many neighbors",
+              "smoother",
+              "smooth out",
+              "how distance is measured",
+              "what counts as close"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "features",
+      "name": "Features and leakage",
+      "definition": "Features are the facts a model is given; a feature is only allowed if you would know it when you need the prediction, otherwise it leaks the answer.",
+      "depends_on": [
+        "classification",
+        "join"
+      ],
+      "lessons": [
+        "ml-features"
+      ],
+      "explain": {
+        "prompt": "What is a feature, and what makes a feature leakage?",
+        "points": [
+          {
+            "hint": "A feature is a fact or input the model is given",
+            "any": [
+              "input",
+              "inputs",
+              "given to the model",
+              "what the model is given",
+              "column",
+              "variable",
+              "a fact the model",
+              "facts the model",
+              "signal"
+            ]
+          },
+          {
+            "hint": "Leakage is using something only known after the answer",
+            "any": [
+              "only known after",
+              "only learn afterwards",
+              "only know afterwards",
+              "not known at the time",
+              "not available at the time",
+              "at prediction time",
+              "contains the answer",
+              "gives away the answer",
+              "secretly",
+              "after the sale",
+              "after the event",
+              "know afterwards",
+              "learn afterwards",
+              "after the fact"
+            ]
+          },
+          {
+            "hint": "It looks brilliant in testing but fails in real use",
+            "any": [
+              "looks brilliant",
+              "looks great",
+              "fails in real",
+              "useless in real",
+              "too good",
+              "cheating",
+              "cheat",
+              "too late",
+              "real life",
+              "real world"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "language-model",
+      "name": "Language models",
+      "definition": "A language model predicts the next piece of text, works in tokens that providers charge for, and can state false things confidently, so important answers are checked.",
+      "depends_on": [
+        "model"
+      ],
+      "lessons": [
+        "ml-llm"
+      ],
+      "explain": {
+        "prompt": "What does a language model do, what is a token, and why can it be confident and wrong?",
+        "points": [
+          {
+            "hint": "It predicts the next piece of text",
+            "any": [
+              "predicts the next",
+              "next word",
+              "next token",
+              "next piece",
+              "likely text",
+              "most likely text",
+              "predicts text",
+              "generates text",
+              "guesses the next"
+            ]
+          },
+          {
+            "hint": "A token is a small piece of text that is counted and charged for",
+            "any": [
+              "token",
+              "tokens",
+              "piece of text",
+              "pieces of text",
+              "chunk of text",
+              "charged by",
+              "priced by",
+              "per token"
+            ]
+          },
+          {
+            "hint": "It can sound right and be wrong, so answers are checked",
+            "any": [
+              "hallucinat",
+              "sounds right",
+              "sounds convincing",
+              "sounds confident",
+              "fluent",
+              "fluency",
+              "not truth",
+              "not the truth",
+              "made up",
+              "makes things up",
+              "invents",
+              "plausible",
+              "confidently wrong",
+              "confident but wrong"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "retrieval",
+      "name": "Retrieval and evaluation",
+      "definition": "Retrieval searches your own documents for the passages that matter and gives them to the model; an evaluation set of questions with known relevant documents measures how well the search works.",
+      "depends_on": [
+        "language-model"
+      ],
+      "lessons": [
+        "ml-rag"
+      ],
+      "explain": {
+        "prompt": "What is retrieval, and how do you know the search is working?",
+        "points": [
+          {
+            "hint": "Retrieval finds the relevant documents for a question",
+            "any": [
+              "retrieval",
+              "retrieve",
+              "relevant document",
+              "relevant passage",
+              "find the right",
+              "look up",
+              "fetch the",
+              "top k",
+              "search your own"
+            ]
+          },
+          {
+            "hint": "The found text is given to the model so it answers from it, not its memory",
+            "any": [
+              "give the model",
+              "show the model",
+              "given to the model",
+              "before the model answers",
+              "answer from",
+              "own documents",
+              "instead of its memory",
+              "not its memory",
+              "instead of memory",
+              "ground"
+            ]
+          },
+          {
+            "hint": "An evaluation set and recall measure the search",
+            "any": [
+              "evaluation set",
+              "test questions",
+              "answer key",
+              "recall",
+              "labelled",
+              "labeled",
+              "measure the search",
+              "check the search",
+              "list of questions",
+              "known questions"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "drift",
+      "name": "Drift and monitoring",
+      "definition": "Drift is the data or behaviour moving away from what the model was built on; you decide in advance what to watch, what size of change triggers a check and who acts.",
+      "depends_on": [
+        "monitor",
+        "precision-recall"
+      ],
+      "lessons": [
+        "ml-ops"
+      ],
+      "explain": {
+        "prompt": "What is drift, and what should you decide before a model goes live?",
+        "points": [
+          {
+            "hint": "Drift is the data changing from what the model was built on",
+            "any": [
+              "drift",
+              "change in the data",
+              "data changes",
+              "world changes",
+              "changed since",
+              "customers change",
+              "moved away from",
+              "different from when",
+              "no longer like"
+            ]
+          },
+          {
+            "hint": "Set a threshold that triggers a check",
+            "any": [
+              "threshold",
+              "alert",
+              "what counts as a problem",
+              "flag",
+              "normal range",
+              "trigger",
+              "how big a change",
+              "when to check"
+            ]
+          },
+          {
+            "hint": "Decide in advance what to watch, who acts and keep versions",
+            "any": [
+              "in advance",
+              "beforehand",
+              "before it goes live",
+              "before launch",
+              "who looks",
+              "who checks",
+              "who we tell",
+              "who to tell",
+              "versions",
+              "version of the model"
+            ]
+          }
+        ],
+        "need": 2
+      }
     }
   ]
 }

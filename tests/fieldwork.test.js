@@ -17,7 +17,7 @@ test('a lesson that sets a task returns it from its own text; a lesson without o
   const t = await h.invoke('fieldwork:get', { userId: 'ann', lessonId: 'fo-interviews' })
   assert.match(t.task, /Interview five people who have the problem/)
   assert.deepEqual([t.did, t.learned, t.saved, t.updated_at], ['', '', false, null])
-  assert.equal(await h.invoke('fieldwork:get', { userId: 'ann', lessonId: 'sql-select' }), null, 'only Start Here and Founder lessons set tasks')
+  assert.equal(await h.invoke('fieldwork:get', { userId: 'ann', lessonId: 'sql-select' }), null, 'only Start Here, Founder and AI & ML lessons set tasks')
   assert.equal(await h.invoke('fieldwork:get', { userId: 'ann', lessonId: 'no-such-lesson' }), null)
   for (const id of ['fd-value', 'fd-first-principles', 'fo-problem', 'fo-iterate']) assert.ok(await h.invoke('fieldwork:get', { userId: 'ann', lessonId: id }), id)
 })

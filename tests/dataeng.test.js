@@ -123,9 +123,13 @@ test('the course is a full path: the new lessons are chained in order, finish at
   const ids = lessons.map((l) => l.id)
   for (const id of ['de-pipelines-etl', 'de-warehouse', 'de-orchestration', 'de-streaming', 'de-testing', 'de-python-pipelines', 'de-system-design']) assert.ok(ids.includes(id), id)
   assert.equal(ids[ids.length - 1], 'de-capstone')
+  assert.equal(ids.indexOf('de-python-pipelines'), ids.indexOf('de-pipelines-etl') + 1, 'Python pipelines follows the ETL lesson')
+  assert.ok(ids.indexOf('de-governance') < ids.indexOf('de-system-design') && lessons.find((l) => l.id === 'de-governance').prerequisites[0] === 'de-observability')
   lessons.forEach((l, i) => {
     assert.equal(l.sort_order, i + 1)
-    assert.deepEqual(l.prerequisites, i ? [lessons[i - 1].id] : [])
+    // A straight chain, with the programme's two re-chains: Python pipelines follows the ETL lesson, and governance follows observability so the optional AI lessons never block it.
+    const expected = l.id === 'de-ai-features' || l.id === 'de-governance' ? ['de-observability'] : i ? [lessons[i - 1].id] : []
+    assert.deepEqual(l.prerequisites, expected, l.id)
     assert.ok(l.theory_md.length > 800 && l.quiz.length >= 3 && l.exercises.length >= 3, l.id)
   })
   assert.equal(new Set(exercises().map((e) => e.id)).size, exercises().length, 'exercise ids are unique')

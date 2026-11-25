@@ -51,6 +51,10 @@ const COURSES = {
     module: 'founder', title: 'Founder Track', tint: 'rgba(251,146,60,0.15)', icon: <Rocket size={16} />,
     subtitle: 'Find a real problem, test an offer, run the numbers and start, with real figures and real-world tasks', myDatabases: false, skillMap: false, placement: false, color: 'var(--fo-color)',
   },
+  aiml: {
+    module: 'aiml', title: 'AI & ML Track', tint: 'rgba(217,70,239,0.15)', icon: <Brain size={16} />,
+    subtitle: 'How models learn, how to judge them honestly, and how language models and retrieval work, on real shop data', myDatabases: false, skillMap: false, placement: false, color: 'var(--ml-color)',
+  },
   bizsolver: {
     module: 'bizsolver', title: 'Business Problem Solver', tint: 'rgba(20,184,166,0.15)', icon: <Target size={16} />,
     subtitle: 'Find the money, explain the problem, recommend and measure — on a real trading business', myDatabases: false, skillMap: true, placement: false, color: 'var(--bp-color)',
@@ -231,6 +235,7 @@ function LessonCard({ lesson, onClick }: { lesson: Lesson; onClick: () => void }
     <button
       onClick={locked ? undefined : onClick}
       disabled={locked}
+      title={lesson.path_locked ? "Locked by your path: complete the phase you are in first" : undefined}
       style={{
         padding: '14px',
         borderRadius: 'var(--radius)',
@@ -562,10 +567,10 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
             <div style={{
               marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 5,
               fontSize: 11, color: 'var(--sql-color)', fontWeight: 500,
-              padding: '3px 9px', borderRadius: /^(bp|fd|fo)-/.test(String(exercise.id)) && !isPython ? 'var(--radius)' : 'var(--radius-full)', // thirteen table names wrap onto several lines
+              padding: '3px 9px', borderRadius: /^(bp|fd|fo|ml)-/.test(String(exercise.id)) && !isPython ? 'var(--radius)' : 'var(--radius-full)', // thirteen table names wrap onto several lines
               background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.3)',
             }}>
-              <Database size={11} /> {isPython ? 'Python practical: Run tests your code with hidden checks' : <>Tables ready: {String(exercise.id).startsWith('de-') ? DATAENG_TABLES : /^(bp|fd|fo)-/.test(String(exercise.id)) ? SHOP_TABLES : 'patients, billing'}</>}
+              <Database size={11} /> {isPython ? 'Python practical: Run tests your code with hidden checks' : <>Tables ready: {String(exercise.id).startsWith('de-') ? DATAENG_TABLES : /^(bp|fd|fo|ml)-/.test(String(exercise.id)) ? SHOP_TABLES : 'patients, billing'}</>}
             </div>
           )}
           {hint && (

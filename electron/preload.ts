@@ -84,6 +84,11 @@ const api = {
   },
 
   // Real-world tasks
+  path: {
+    get: (userId: string) => ipcRenderer.invoke('path:get', userId),
+    gate: (userId: string, phaseId: string, evidence: string) => ipcRenderer.invoke('path:gate', { userId, phaseId, evidence }),
+    setStrict: (userId: string, on: boolean) => ipcRenderer.invoke('path:strict', { userId, on }),
+  },
   fieldwork: {
     get: (userId: string, lessonId: string) => ipcRenderer.invoke('fieldwork:get', { userId, lessonId }),
     list: (userId: string) => ipcRenderer.invoke('fieldwork:list', userId),

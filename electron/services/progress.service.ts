@@ -327,7 +327,7 @@ export interface LearningPlan {
   review: { exercise_id: string; title: string; lesson_title: string; module: string }[]
 }
 
-const MODULE_ORDER = ['sql', 'excel', 'python', 'powerbi', 'statistics', 'business', 'dataeng', 'bizsolver', 'foundations', 'founder', 'simulation']
+const MODULE_ORDER = ['sql', 'excel', 'python', 'powerbi', 'statistics', 'business', 'dataeng', 'bizsolver', 'foundations', 'founder', 'aiml', 'simulation']
 const moduleRank = (m: string) => { const i = MODULE_ORDER.indexOf(m); return i === -1 ? MODULE_ORDER.length : i }
 
 const dayKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`

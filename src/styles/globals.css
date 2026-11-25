@@ -39,6 +39,7 @@
   --bp-color:       #14b8a6;    /* teal — Business Problem Solver */
   --fd-color:       #a3e635;    /* lime — Start Here */
   --fo-color:       #fb923c;    /* orange — Founder Track */
+  --ml-color:       #d946ef;    /* fuchsia — AI & ML Track */
 
   /* Status */
   --success:        #22c55e;
@@ -134,6 +135,7 @@
   --bp-color:       #0f766e;
   --fd-color:       #3f6212;
   --fo-color:       #9a3412;
+  --ml-color:       #a21caf;
 
   --success:        #15803d;
   --success-dim:    rgba(22, 163, 74, 0.12);

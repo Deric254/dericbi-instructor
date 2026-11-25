@@ -8,7 +8,7 @@ const HEADING = '## Do this in real life'
 /** The task a lesson sets, taken from its own "Do this in real life" section (null when the lesson sets none). */
 function taskOf(lessonId: string): { title: string; module: string; task: string } | null {
   const row = getDb().prepare('SELECT title, module, theory_md FROM lessons WHERE id = ?').get(lessonId) as { title: string; module: string; theory_md: string } | undefined
-  if (!row || (row.module !== 'foundations' && row.module !== 'founder')) return null
+  if (!row || (row.module !== 'foundations' && row.module !== 'founder' && row.module !== 'aiml')) return null
   const at = (row.theory_md ?? '').indexOf(HEADING)
   if (at === -1) return null
   const task = row.theory_md.slice(at + HEADING.length).split('\n## ')[0].trim()
