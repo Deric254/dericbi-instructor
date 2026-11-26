@@ -40,6 +40,7 @@ const PAGES: Record<NavSection, React.ReactNode> = {
   foundations:  <SqlAcademy key="foundations" course="foundations" />,
   founder:      <SqlAcademy key="founder" course="founder" />,
   aiml:         <SqlAcademy key="aiml" course="aiml" />,
+  techfirst:    <SqlAcademy key="techfirst" course="techfirst" />,
   simulations:  <Simulations />,
   playground:   <DataPlayground />,
   datasets:     <Datasets />,

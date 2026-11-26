@@ -164,6 +164,6 @@ test('the academy is wired into every place a course lives, and the other academ
   assert.match(src('src/pages/SqlAcademy.tsx'), /foundations: \{[\s\S]*?skillMap: false/)
   assert.match(src('electron/services/sql.service.ts'), /startsWith\('ex_fd-'\)/)
   assert.match(src('electron/services/setup.service.ts'), /foundations\/curriculum\.json/)
-  assert.match(src('electron/services/ai.service.ts'), /Start Here academy/)
+  assert.match(h.req('services/tutor').appDescription(), /Start Here \(8 lessons/)
   assert.match(src('src/styles/globals.css'), /--fd-color:\s+#a3e635/)
 })

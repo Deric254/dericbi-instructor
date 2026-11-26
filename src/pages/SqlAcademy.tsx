@@ -6,6 +6,7 @@ import {
   Clock, BookOpen, Lightbulb, X, Loader, AlertCircle,
   ChevronDown, RotateCcw, HelpCircle, MessageSquare, Star,
   Brain, Workflow, Target, Compass, Rocket,
+  Cpu,
 } from 'lucide-react'
 import { useAuthStore, useUIStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
@@ -54,6 +55,10 @@ const COURSES = {
   aiml: {
     module: 'aiml', title: 'AI & ML Track', tint: 'rgba(217,70,239,0.15)', icon: <Brain size={16} />,
     subtitle: 'How models learn, how to judge them honestly, and how language models and retrieval work, on real shop data', myDatabases: false, skillMap: false, placement: false, color: 'var(--ml-color)',
+  },
+  techfirst: {
+    module: 'techfirst', title: 'Technology First Principles', tint: 'rgba(56,189,248,0.15)', icon: <Cpu size={16} />,
+    subtitle: 'What data, files, tables, programs, databases, networks and trust really are, and how to debug, before any tool', myDatabases: false, skillMap: false, placement: false, color: 'var(--tf-color)',
   },
   bizsolver: {
     module: 'bizsolver', title: 'Business Problem Solver', tint: 'rgba(20,184,166,0.15)', icon: <Target size={16} />,
@@ -567,10 +572,10 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
             <div style={{
               marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 5,
               fontSize: 11, color: 'var(--sql-color)', fontWeight: 500,
-              padding: '3px 9px', borderRadius: /^(bp|fd|fo|ml)-/.test(String(exercise.id)) && !isPython ? 'var(--radius)' : 'var(--radius-full)', // thirteen table names wrap onto several lines
+              padding: '3px 9px', borderRadius: /^(bp|fd|fo|ml|tf)-/.test(String(exercise.id)) && !isPython ? 'var(--radius)' : 'var(--radius-full)', // thirteen table names wrap onto several lines
               background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.3)',
             }}>
-              <Database size={11} /> {isPython ? 'Python practical: Run tests your code with hidden checks' : <>Tables ready: {String(exercise.id).startsWith('de-') ? DATAENG_TABLES : /^(bp|fd|fo|ml)-/.test(String(exercise.id)) ? SHOP_TABLES : 'patients, billing'}</>}
+              <Database size={11} /> {isPython ? 'Python practical: Run tests your code with hidden checks' : <>Tables ready: {String(exercise.id).startsWith('de-') ? DATAENG_TABLES : /^(bp|fd|fo|ml|tf)-/.test(String(exercise.id)) ? SHOP_TABLES : 'patients, billing'}</>}
             </div>
           )}
           {hint && (

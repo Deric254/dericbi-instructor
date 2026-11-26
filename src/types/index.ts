@@ -62,11 +62,29 @@ export interface DashboardStats {
 export type PathSide = 'tech' | 'business' | 'bridge'
 export interface PathSideScore { required: number; done: number; quiz_avg: number | null; score: number | null; ready: boolean }
 export type PathItem =
-  | { kind: 'lesson'; id: string; title: string; module: string; side: PathSide; optional: boolean; status: string; done: boolean; best: number | null }
+  | { kind: 'lesson'; id: string; title: string; module: string; side: PathSide; optional: boolean; status: string; done: boolean; best: number | null; provisional: boolean; light: 'green' | 'amber' | 'red' | null }
   | { kind: 'planned'; id: string; title: string; summary: string; side: PathSide; optional: boolean }
 export interface PathPhase {
   id: string; index: number; title: string; weeks: string; focus: string; project: string | null; gate: string
   gate_evidence: string; gate_saved_at: string | null; items: PathItem[]; tech: PathSideScore; business: PathSideScore; complete: boolean; open: boolean
+}
+export interface EvidenceEntry {
+  id: string; kind: 'case' | 'history' | 'quote'; title: string; text: string; takeaway: string; concepts: string[]
+  who?: string; work?: string; source: { publisher: string; title: string; url: string }; checked: string
+}
+export interface TutorModeInfo { id: string; label: string; primary: boolean; ask: string | null; needs_input: boolean }
+export interface TutorCheck { results: Array<{ id: string; why: string; ok: boolean; reason: string }>; allOk: boolean; ran: number }
+export interface JumpGap { kind: 'concept' | 'lesson'; id: string; name: string; definition: string }
+export interface JumpCheck {
+  lesson_id: string; title: string; status: string; light: 'green' | 'amber' | 'red'; held: boolean
+  gaps: JumpGap[]; questions: Array<{ ref: string; question: string; options: string[] }>
+}
+export type JumpResult =
+  | { success: false; reason: 'unknown' | 'invalid' | 'held' }
+  | { success: true; started: boolean; passed: boolean; provisional: boolean; correct?: number; total?: number }
+export interface LadderData {
+  levels: Array<{ level: number; name: string; meaning: string; available: boolean }>
+  concepts: Array<{ id: string; name: string; level: number }>
 }
 export interface PathData {
   title: string; pass_pct: number; gate_min_words: number; strict: boolean; phases: PathPhase[]
@@ -93,7 +111,7 @@ export interface RecentActivity {
 // LESSONS
 // ─────────────────────────────────────────────
 
-export type LessonModule = 'sql' | 'excel' | 'python' | 'powerbi' | 'statistics' | 'business' | 'dataeng' | 'bizsolver' | 'foundations' | 'founder' | 'aiml' | 'simulation'
+export type LessonModule = 'sql' | 'excel' | 'python' | 'powerbi' | 'statistics' | 'business' | 'dataeng' | 'bizsolver' | 'foundations' | 'founder' | 'aiml' | 'techfirst' | 'simulation'
 export type LessonLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert'
 export type LessonStatus = 'locked' | 'available' | 'in_progress' | 'complete'
 
@@ -233,6 +251,7 @@ export type NavSection =
   | 'foundations'
   | 'founder'
   | 'aiml'
+  | 'techfirst'
   | 'simulations'
   | 'playground'
   | 'datasets'

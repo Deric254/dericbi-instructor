@@ -263,6 +263,13 @@ function runMigrations(): void {
     _db.run("INSERT INTO schema_migrations (version, description) VALUES (9, 'Add path_gates and path_state')")
     _db.run('COMMIT')
   }
+
+  // v10 — jump_passes and provisional (created by CREATE_TABLES). Nothing to alter; the version records that they exist.
+  if (cur < 10) {
+    _db.run('BEGIN')
+    _db.run("INSERT INTO schema_migrations (version, description) VALUES (10, 'Add jump_passes and provisional')")
+    _db.run('COMMIT')
+  }
 }
 
 // ─────────────────────────────────────────────

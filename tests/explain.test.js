@@ -98,7 +98,9 @@ test('explaining it back is part of the mastery rule, and lessons without one ar
 
 test('the panel, the explain box and the channels are wired', () => {
   const panel = src('src/components/ui/InstructorPanel.tsx')
-  for (const label of ['Explain simpler', 'Ask me', 'Check my explanation']) assert.ok(panel.includes(label), label)
+  const modes = JSON.parse(require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'content/path/tutor.json'), 'utf8')).modes
+  for (const label of ['Explain simpler', 'Ask me', 'Check my explanation']) assert.ok(modes.some((m) => m.label === label), label)
+  assert.match(panel, /window\.api\.tutor\.modes\(\)/)
   assert.match(panel, /context\.type === 'lesson' \|\| context\.type === 'exercise'\) && apiKeyOk/)
   assert.match(src('src/pages/SqlAcademy.tsx'), /<ExplainBack lessonId=\{lesson\.id\} \/>/)
   assert.match(src('electron/preload.ts'), /'explain:get'/); assert.match(src('electron/preload.ts'), /'explain:submit'/)

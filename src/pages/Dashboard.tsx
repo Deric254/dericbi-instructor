@@ -4,6 +4,7 @@ import {
   Award, ChevronRight, Database, FileSpreadsheet,
   Terminal, BarChart3, Briefcase, Users, FlaskConical,
   Table2, FolderOpen, Trophy, Sparkles, Workflow, Target, Compass, Rocket, Brain,
+  Cpu,
 } from 'lucide-react'
 import { useAuthStore, useUIStore } from '../store'
 import type { DashboardStats, SkillRating, NavSection } from '../types'
@@ -44,6 +45,7 @@ const JOURNEY: JourneyGroup[] = [
     items: [
       { id: 'foundations', label: 'Start Here', desc: 'From zero: value, money, customers, price and how to think from first principles.', icon: <Compass size={16} />, color: 'var(--fd-color)' },
       { id: 'founder', label: 'Founder Track', desc: 'Find a real problem, test an offer, run the numbers and start: twelve lessons for new founders.', icon: <Rocket size={16} />, color: 'var(--fo-color)' },
+      { id: 'techfirst', label: 'Technology First Principles', desc: 'What data, files, tables, programs, databases, networks and trust really are, and how to debug: eight short lessons before any tool.', icon: <Cpu size={16} />, color: 'var(--tf-color)' },
       { id: 'aiml', label: 'AI & ML Track', desc: 'How models learn, how to judge them, and how language models and retrieval really work: twelve lessons on real data.', icon: <Brain size={16} />, color: 'var(--ml-color)' },
       { id: 'sql',        label: 'SQL',        desc: 'Query real databases — SELECT, joins, subqueries.',     icon: <Database size={16} />,       color: 'var(--sql-color)' },
       { id: 'excel',      label: 'Excel',      desc: 'Formulas, PivotTables, and dashboards.',                  icon: <FileSpreadsheet size={16} />, color: 'var(--excel-color)' },

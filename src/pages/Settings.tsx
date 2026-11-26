@@ -4,7 +4,7 @@ import {
   Key, User, Info, RefreshCw, Cpu, ShieldQuestion, Lock,
 } from 'lucide-react'
 import { useAuthStore, useUIStore, notify } from '../store'
-import type { LicenceState } from '../types'
+import type { LicenceState, TutorCheck } from '../types'
 import { reportApiError } from '../lib/apiError'
 import { resetAllLayouts } from '../lib/splitLayout'
 import PayPlans from '../components/ui/PayWindow'
@@ -51,6 +51,14 @@ export default function Settings() {
     setMarkerTest('running')
     try { setMarkerTest(await window.api.explain.selfTest(user.id)) }
     catch (err) { setMarkerTest(null); reportApiError('check how the AI marks explanations', err) }
+  }
+
+  const [tutorTest, setTutorTest] = useState<null | 'running' | 'unreachable' | TutorCheck>(null)
+  const runTutorTest = async () => {
+    if (!user) return
+    setTutorTest('running')
+    try { setTutorTest((await window.api.tutor.selfTest(user.id)) ?? 'unreachable') }
+    catch (err) { setTutorTest(null); reportApiError('check the tutor', err) }
   }
 
   const PROVIDERS = [
@@ -302,6 +310,26 @@ export default function Settings() {
               ) : (
                 <div style={{ marginTop: 10, fontSize: 12, color: 'var(--text-secondary)' }}>Your AI could not be reached. Add a key above and try again; the rest of the app works without it.</div>
               )
+            )}
+          </div>
+          <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Check that your tutor keeps its rules</div>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10, lineHeight: 1.6 }}>
+              This asks your tutor a few fixed questions and checks it does not hand over graded answers, invent cases, quote dated tax figures as current, make up numbers from your data, or ignore client privacy. It uses your AI key and takes a minute or two. A language model can vary from one try to the next, so treat a miss as a reason to look, not as proof.
+            </p>
+            <button className="btn btn-secondary btn-sm" onClick={runTutorTest} disabled={tutorTest === 'running'}>
+              {tutorTest === 'running' ? <><Loader size={12} className="animate-spin" /> Asking…</> : 'Check the tutor'}
+            </button>
+            {tutorTest === 'unreachable' && <div style={{ marginTop: 10, fontSize: 12, color: 'var(--text-secondary)' }}>Your AI could not be reached. Add a key above and try again; the rest of the app works without it.</div>}
+            {tutorTest && tutorTest !== 'running' && tutorTest !== 'unreachable' && (
+              <div style={{ marginTop: 10, fontSize: 12, lineHeight: 1.7 }}>
+                <div style={{ fontWeight: 600, color: tutorTest.allOk ? 'var(--success)' : 'var(--warning)' }}>
+                  {tutorTest.allOk ? `Your tutor kept its rules on all ${tutorTest.ran} questions.` : 'Your tutor slipped on at least one question. A weaker model may ignore the rules; try a stronger one in the list above.'}
+                </div>
+                <ul style={{ margin: '6px 0 0 18px', color: 'var(--text-secondary)' }}>
+                  {tutorTest.results.map((r) => <li key={r.id}>{r.ok ? '✓' : '✗'} It {r.why}{r.ok ? '' : `: ${r.reason}`}</li>)}
+                </ul>
+              </div>
             )}
           </div>
         </Section>

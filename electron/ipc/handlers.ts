@@ -13,7 +13,12 @@ import { getPlacement, submitPlacement } from '../services/placement'
 import { enrollConcepts, getReview, answerReview } from '../services/review'
 import { getExplain, submitExplain, confirmExplain, aiUpgradeExplain, checkMarker } from '../services/explain'
 import { getFieldTask, saveFieldTask, deleteFieldTask, listFieldTasks } from '../services/fieldwork'
-import { getPath, saveGate, setStrict, pathLocked } from '../services/path'
+import { getPath, saveGate, setStrict, pathLocked, loadTrack } from '../services/path'
+import { jumpCheck, jumpGo, startLesson } from '../services/jump'
+import { conceptLevels, loadLadder } from '../services/ladder'
+import { loadEvidence } from '../services/evidence'
+import { publicModes } from '../services/tutor'
+import { checkTutor } from '../services/tutor-check'
 import { safeHandle } from './safe-handle'
 import { registerLicenceHandlers } from './licence-handlers'
 import { v4 as uuidv4 } from 'uuid'
@@ -164,22 +169,7 @@ export function registerLessonHandlers() {
   })
 
   safeHandle('lessons:start', async (_, { userId, lessonId }) => {
-    const existing = db.prepare(`
-      SELECT * FROM lesson_progress WHERE user_id = ? AND lesson_id = ?
-    `).get(userId, lessonId) as any
-
-    if (!existing) {
-      db.prepare(`
-        INSERT INTO lesson_progress (id, user_id, lesson_id, status, started_at)
-        VALUES (?, ?, ?, 'in_progress', datetime('now'))
-      `).run(uuidv4(), userId, lessonId)
-    } else if (existing.status === 'available' || existing.status === 'locked') {
-      db.prepare(`
-        UPDATE lesson_progress SET status = 'in_progress', started_at = datetime('now')
-        WHERE user_id = ? AND lesson_id = ?
-      `).run(userId, lessonId)
-    }
-
+    startLesson(userId, lessonId)
     return { success: true }
   })
 
@@ -203,6 +193,23 @@ export function registerLessonHandlers() {
   safeHandle('path:get', async (_, userId: string) => getPath(userId))
   safeHandle('path:gate', async (_, { userId, phaseId, evidence }) => saveGate(userId, phaseId, evidence))
   safeHandle('path:strict', async (_, { userId, on }) => { setStrict(userId, on === true); return { success: true } })
+  // Guided jumping: any lesson may be opened. A learner on the strict path still cannot open lessons of phases after the open one.
+  safeHandle('path:jump', async (_, { userId, lessonId }) => {
+    const c = jumpCheck(userId, lessonId)
+    return c ? { ...c, held: pathLocked(userId).has(lessonId) } : null
+  })
+  safeHandle('path:jump-go', async (_, { userId, lessonId, answers, go }) => {
+    if (pathLocked(userId).has(lessonId)) return { success: false, reason: 'held' }
+    return jumpGo(userId, lessonId, answers, go)
+  })
+  safeHandle('tutor:modes', async () => publicModes())
+  safeHandle('tutor:selftest', async (_, userId: string) => checkTutor(userId))
+  safeHandle('evidence:list', async () => loadEvidence())
+  safeHandle('ladder:get', async (_, userId: string) => {
+    const phaseOf = new Map<string, string>()
+    for (const p of loadTrack()?.phases ?? []) for (const i of p.items) if (i.lesson) phaseOf.set(i.lesson, p.id)
+    return { levels: loadLadder() ?? [], concepts: conceptLevels(userId, phaseOf) }
+  })
 
   safeHandle('explain:selftest', async (_, userId: string) => {
     const r = await checkMarker(userId)

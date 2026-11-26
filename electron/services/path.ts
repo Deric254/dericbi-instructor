@@ -1,6 +1,8 @@
 import fs from 'fs'
 import { getDb } from '../db/database'
 import { getContentPath } from './setup.service'
+import { gapsFor, lightOf, provisionalOpen, type Light } from './jump'
+import { loadConcepts } from './concepts'
 
 /**
  * The master track: one learning order across every academy, in phases that each end with a gate. Everything about it lives in
@@ -72,6 +74,9 @@ export function getPath(userId: string, track: Track | null = loadTrack()) {
   const gates = new Map((db.prepare('SELECT phase_id, evidence, updated_at FROM path_gates WHERE user_id = ?').all(userId) as Array<{ phase_id: string; evidence: string; updated_at: string }>).map((g) => [g.phase_id, g]))
   const allIds = track.phases.flatMap((p) => p.items.map((i) => i.lesson).filter((x): x is string => !!x))
   const rows = lessonRows(userId, allIds)
+  // A lesson opened before the ideas it rests on were in place is provisional: it does not count toward a phase until they are.
+  const provisional = provisionalOpen(userId)
+  const concepts = loadConcepts()
 
   let openSeen = false
   const phases = track.phases.map((p, idx) => {
@@ -79,7 +84,9 @@ export function getPath(userId: string, track: Track | null = loadTrack()) {
       if (it.lesson && rows.has(it.lesson)) {
         const r = rows.get(it.lesson)!
         const side = sideOfModule(track, r.module)
-        return { kind: 'lesson' as const, id: it.lesson, title: r.title, module: r.module, side, optional: !!it.optional, status: r.status, done: r.status === 'complete', best: r.best }
+        const started = r.status === 'complete' || r.status === 'in_progress'
+        const light: Light | null = started ? null : lightOf(gapsFor(userId, it.lesson, concepts))
+        return { kind: 'lesson' as const, id: it.lesson, title: r.title, module: r.module, side, optional: !!it.optional, status: r.status, done: r.status === 'complete' && !provisional.has(it.lesson), best: r.best, provisional: provisional.has(it.lesson), light }
       }
       // Not a lesson the app has: either still to be written (planned) or removed since. It never blocks anything.
       const side: Side = SIDES.includes(it.side as Side) ? (it.side as Side) : 'tech'

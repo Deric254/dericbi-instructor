@@ -1,7 +1,7 @@
 // Extends the global Window interface with the IPC bridge
 // exposed by Electron's preload script
 
-import type { PathData } from './index'
+import type { PathData, JumpCheck, JumpResult, LadderData, EvidenceEntry, TutorModeInfo, TutorCheck } from './index'
 
 declare global {
   interface Window {
@@ -68,6 +68,18 @@ declare global {
         get: (userId: string) => Promise<PathData | null>
         gate: (userId: string, phaseId: string, evidence: string) => Promise<{ success: boolean; reason?: 'unavailable' | 'locked' | 'invalid' | 'short' }>
         setStrict: (userId: string, on: boolean) => Promise<{ success: boolean }>
+        jump: (userId: string, lessonId: string) => Promise<JumpCheck | null>
+        jumpGo: (userId: string, lessonId: string, answers?: Array<{ ref: string; choice: number }>, go?: boolean) => Promise<JumpResult>
+      }
+      tutor: {
+        modes: () => Promise<TutorModeInfo[]>
+        selfTest: (userId: string) => Promise<TutorCheck | null>
+      }
+      evidence: {
+        list: () => Promise<EvidenceEntry[]>
+      }
+      ladder: {
+        get: (userId: string) => Promise<LadderData>
       }
       fieldwork: {
         get: (userId: string, lessonId: string) => Promise<any>

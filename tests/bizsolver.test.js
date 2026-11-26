@@ -95,7 +95,7 @@ test('Business Problem Solver sandboxes are separate from the hospital and Data 
 test('the practice tables are listed for the playground and the AI tutor', () => {
   const rows = db.getDb().prepare("SELECT table_name FROM bundled_datasets WHERE domain = 'bizsolver' ORDER BY table_name").all().map((r) => r.table_name)
   assert.deepEqual(rows, ['shop_actions', 'shop_bank', 'shop_batches', 'shop_customers', 'shop_expenses', 'shop_payments', 'shop_products', 'shop_purchases', 'shop_refunds', 'shop_sale_items', 'shop_sales', 'shop_supplier_invoices', 'shop_suppliers'])
-  assert.match(src('electron/services/ai.service.ts'), /Business Problem Solver academy[\s\S]*shop_sales/)
+  assert.match(h.req('services/tutor').appDescription(), /Business Problem Solver academy[\s\S]*shop_sales/)
   const tables = src('src/pages/SqlAcademy.tsx').match(/SHOP_TABLES = '([^']+)'/)[1].split(', ')
   assert.deepEqual([...tables].sort(), rows, 'the tables chip lists exactly the practice tables')
 })
@@ -250,7 +250,7 @@ test('the academy is wired into every place a course lives, and the Skill map ta
   assert.equal((page.match(/skillMap: true/g) || []).length, 1, 'only the Business Problem Solver has the Skill map')
   assert.match(page, /view === 'skills' && cfg\.skillMap/)
   assert.match(src('electron/services/sql.service.ts'), /startsWith\('ex_bp-'\)/)
-  assert.match(src('electron/services/progress.service.ts'), /'dataeng', 'bizsolver', 'foundations', 'founder', 'aiml', 'simulation'/)
+  assert.match(src('electron/services/progress.service.ts'), /'dataeng', 'bizsolver', 'foundations', 'founder', 'aiml', 'techfirst', 'simulation'/)
 })
 
 test('Business Problem Solver achievements are earned by real work: distinct exercises, Python practicals, and the capstone', async () => {

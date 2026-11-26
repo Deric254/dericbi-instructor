@@ -168,7 +168,7 @@ test('the academy is wired into every place a course lives, and the other academ
   assert.match(src('src/pages/SqlAcademy.tsx'), /founder: \{[\s\S]*?placement: false/)
   assert.match(src('electron/services/sql.service.ts'), /startsWith\('ex_fo-'\)/)
   assert.match(src('electron/services/setup.service.ts'), /founder\/curriculum\.json/)
-  assert.match(src('electron/services/ai.service.ts'), /Founder Track/)
+  assert.match(h.req('services/tutor').appDescription(), /Founder Track \(12 lessons[\s\S]*never state them as current law/)
   assert.match(src('src/styles/globals.css'), /--fo-color:\s+#fb923c/)
   assert.match(src('src/styles/globals.css'), /--fo-color:\s+#9a3412/)
   assert.match(src('src/pages/SqlAcademy.tsx'), /foundations: \{[\s\S]*?placement: true/)

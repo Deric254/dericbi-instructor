@@ -54,8 +54,8 @@ test('schema: quiz_results exists, the mastery flag defaults to 0 and only the S
   const col = g.prepare("SELECT dflt_value FROM pragma_table_info('lessons') WHERE name = 'mastery_required'").get()
   assert.equal(col.dflt_value, '0')
   const gated = g.prepare('SELECT module FROM lessons WHERE mastery_required <> 0').all().map((r) => r.module)
-  assert.ok(gated.length > 0 && gated.every((m) => m === 'foundations' || m === 'founder' || m === 'aiml'), 'mastery applies to Start Here, the Founder Track and the AI & ML Track only')
-  assert.equal(g.prepare('SELECT MAX(version) v FROM schema_migrations').get().v, 9)
+  assert.ok(gated.length > 0 && gated.every((m) => m === 'foundations' || m === 'founder' || m === 'aiml' || m === 'techfirst'), 'mastery applies to Start Here, the Founder Track, the AI & ML Track and Technology First Principles only')
+  assert.equal(g.prepare('SELECT MAX(version) v FROM schema_migrations').get().v, 10)
 })
 
 const quizOf = (id) => JSON.parse(g.prepare('SELECT quiz FROM lessons WHERE id = ?').get(id).quiz)

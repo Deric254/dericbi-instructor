@@ -6,6 +6,7 @@ import {
 import { useAuthStore } from '../../store'
 import { useInstructor } from '../../hooks/useInstructor'
 import type { InstructorContext } from '../../hooks/useInstructor'
+import type { TutorModeInfo } from '../../types'
 import { reportApiError } from '../../lib/apiError'
 
 interface Props {
@@ -29,7 +30,9 @@ export default function InstructorPanel({
   const { user } = useAuthStore()
   const { messages, loading, error, unavailable, sendMessage, clearConversation } = useInstructor(context)
   const [input, setInput] = useState('')
-  const [checkMode, setCheckMode] = useState(false)
+  // Tutor modes come from content/path/tutor.json. A mode that needs the learner's own text waits here until they send it.
+  const [modes, setModes] = useState<TutorModeInfo[]>([])
+  const [pendingMode, setPendingMode] = useState<string | null>(null)
   const [collapsed, setCollapsed] = useState(compact)
   const [apiKeyOk, setApiKeyOk] = useState<boolean | null>(null)
   const [checkingKey, setCheckingKey] = useState(true)
@@ -101,13 +104,16 @@ export default function InstructorPanel({
     const text = input.trim()
     if (!text || loading) return
     setInput('')
-    const mode = checkMode ? 'check' : undefined
-    setCheckMode(false)
+    const mode = pendingMode ?? undefined
+    setPendingMode(null)
     await sendMessage(text, mode ? { ...context, mode } : context)
   }
 
   // Tutor modes, offered while the learner is on a lesson or exercise. Each only changes how the tutor answers.
-  const askMode = (mode: 'simpler' | 'ask', text: string) => { if (!loading) sendMessage(text, { ...context, mode }) }
+  const askMode = (mode: string, text: string) => { if (!loading) sendMessage(text, { ...context, mode }) }
+  const pickMode = (m: TutorModeInfo) => { if (m.needs_input || !m.ask) { setPendingMode(m.id); inputRef.current?.focus() } else askMode(m.id, m.ask) }
+  useEffect(() => { let on = true; window.api.tutor.modes().then((m) => { if (on) setModes(m) }).catch(() => { if (on) setModes([]) }); return () => { on = false } }, [])
+  const pending = modes.find((m) => m.id === pendingMode)
 
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -317,9 +323,19 @@ export default function InstructorPanel({
         {(context.type === 'lesson' || context.type === 'exercise') && apiKeyOk && (
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8, alignItems: 'center' }}>
             {context.type === 'exercise' && <button className="btn btn-ghost btn-sm" disabled={loading} onClick={() => sendMessage('Look at what I have written so far and give me one nudge on what to try next, without giving the answer.', context)}>Look at my work</button>}
-            <button className="btn btn-ghost btn-sm" disabled={loading} onClick={() => askMode('simpler', 'Explain this more simply, with an everyday example.')}>Explain simpler</button>
-            <button className="btn btn-ghost btn-sm" disabled={loading} onClick={() => askMode('ask', 'Ask me a question to test whether I understand this.')}>Ask me</button>
-            <button className="btn btn-ghost btn-sm" disabled={loading} aria-pressed={checkMode} onClick={() => { setCheckMode(true); inputRef.current?.focus() }}>Check my explanation</button>
+            {modes.filter((m) => m.primary).map((m) => (
+              <button key={m.id} className="btn btn-ghost btn-sm" disabled={loading} aria-pressed={pendingMode === m.id} onClick={() => pickMode(m)}>{m.label}</button>
+            ))}
+            {modes.some((m) => !m.primary) && (
+              <details style={{ display: 'inline-block' }}>
+                <summary className="btn btn-ghost btn-sm" style={{ listStyle: 'none', cursor: 'pointer' }}>More ways to learn</summary>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 6 }}>
+                  {modes.filter((m) => !m.primary).map((m) => (
+                    <button key={m.id} className="btn btn-ghost btn-sm" disabled={loading} aria-pressed={pendingMode === m.id} onClick={() => pickMode(m)}>{m.label}</button>
+                  ))}
+                </div>
+              </details>
+            )}
             {context.type === 'exercise' && stuck && (
               <label style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, color: 'var(--text-muted)', cursor: 'pointer' }} title="Off by default: each reply uses your AI tokens">
                 <input type="checkbox" checked={autoRescue} onChange={(e) => toggleAuto(e.target.checked)} /> Step in when I'm stuck
@@ -333,7 +349,7 @@ export default function InstructorPanel({
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKey}
-            placeholder={checkMode ? 'Write your explanation in your own words, then press Enter' : 'Ask the instructor anything…'}
+            placeholder={pendingMode === 'check' ? 'Write your explanation in your own words, then press Enter' : pending ? `Write your text for "${pending.label}", then press Enter` : 'Ask the instructor anything…'}
             disabled={loading || checkingKey}
             style={{
               flex: 1,

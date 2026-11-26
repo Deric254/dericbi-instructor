@@ -88,6 +88,18 @@ const api = {
     get: (userId: string) => ipcRenderer.invoke('path:get', userId),
     gate: (userId: string, phaseId: string, evidence: string) => ipcRenderer.invoke('path:gate', { userId, phaseId, evidence }),
     setStrict: (userId: string, on: boolean) => ipcRenderer.invoke('path:strict', { userId, on }),
+    jump: (userId: string, lessonId: string) => ipcRenderer.invoke('path:jump', { userId, lessonId }),
+    jumpGo: (userId: string, lessonId: string, answers?: Array<{ ref: string; choice: number }>, go?: boolean) => ipcRenderer.invoke('path:jump-go', { userId, lessonId, answers, go }),
+  },
+  tutor: {
+    modes: () => ipcRenderer.invoke('tutor:modes'),
+    selfTest: (userId: string) => ipcRenderer.invoke('tutor:selftest', userId),
+  },
+  evidence: {
+    list: () => ipcRenderer.invoke('evidence:list'),
+  },
+  ladder: {
+    get: (userId: string) => ipcRenderer.invoke('ladder:get', userId),
   },
   fieldwork: {
     get: (userId: string, lessonId: string) => ipcRenderer.invoke('fieldwork:get', { userId, lessonId }),

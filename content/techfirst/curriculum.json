@@ -1,0 +1,868 @@
+{
+  "module": "techfirst",
+  "version": "1.0",
+  "lessons": [
+    {
+      "id": "tf-data",
+      "title": "What Data Is: Bits, Text, Numbers and Dates",
+      "description": "Before any query or code: what a piece of data is, why it has a type, and why the type changes the answer.",
+      "level": "beginner",
+      "prerequisites": [],
+      "estimated_min": 25,
+      "sort_order": 1,
+      "theory_md": "## Hook\nA shop owner sorts a list of order numbers and finds **10** sitting above **9**. Nothing is broken. The computer is reading the values as the wrong kind of thing. By the end of this lesson you will know what a computer thinks each value *is*, and why that decides every answer it gives you.\n\n## Predict\nBefore you read on, commit to a guess: if you sort the text values 10 and 9 from smallest to largest, which comes first, and why?\n\n## Plain words\nA computer stores everything as **bits**, switches that are on or off. On their own bits mean nothing. A **type** tells the computer how to read them: as a whole number, a decimal, a piece of text, or a date. The type decides what you may do with the value and what the answer will be.\n\n- A **number** is compared by its value.\n- **Text** is compared one character at a time, like a dictionary.\n- A **date** looks like text but is really a point on a timeline, so two dates can be subtracted.\n\n## Diagram\n```diagram\n{\"title\": \"From bits to a usable value\", \"nodes\": [{\"id\": \"bits\", \"label\": \"Bits: on and off\", \"side\": \"tech\"}, {\"id\": \"type\", \"label\": \"The type says how to read them\", \"side\": \"tech\"}, {\"id\": \"num\", \"label\": \"Number: compared by value\", \"side\": \"tech\"}, {\"id\": \"txt\", \"label\": \"Text: compared like a dictionary\", \"side\": \"tech\"}, {\"id\": \"dat\", \"label\": \"Date: a point on a timeline\", \"side\": \"tech\"}, {\"id\": \"use\", \"label\": \"What you may calculate with it\", \"side\": \"bridge\"}], \"edges\": [[\"bits\", \"type\"], [\"type\", \"num\"], [\"type\", \"txt\"], [\"type\", \"dat\"], [\"num\", \"use\"], [\"txt\", \"use\"], [\"dat\", \"use\"]]}\n```\n\n## Worked example\nLook at three values that all look alike on a screen: `1`, `1.5` and `'1'`. The first is a whole number, the second a decimal, the third is the *text* character one. Now compare `10` with `9`.\n\n- As numbers, 10 is bigger than 9.\n- As text, `'1'` comes before `'9'`, so `'10'` sorts *before* `'9'`.\n\nSame digits, opposite answer, because the type was different. A date is another case: `2023-09-12` is a count of days, so you can find how many days lie between two dates. Be careful with what you claim: a column that looks numeric may be stored as text on purpose. A phone number such as `0712345678` loses its leading zero if it is stored as a number.\n\n## Case\n```evidence\ncase-mars-orbiter\n```\nThe numbers in that case were correct. What went wrong was what each side believed the numbers *were*. The same mistake, at a smaller size, is a column of amounts read as text.\n\n## Bridge\n**Technology side:** the type decides how a value sorts, compares and calculates, so you check the type of a column before you trust a result. **Business side:** every figure in a report needs its meaning attached, such as the currency, the unit and the period. A total of 500 means nothing until you know whether it is shillings, thousands of shillings or units sold.\n\n## Try it\nDo the three practicals below. The first asks the database for the type of three values, the second compares text with numbers, and the third turns two dates into a number of days.\n\n## Say it back\nExplain in two or three sentences why `'10'` sorts before `'9'` as text but after it as a number, and what a type is. Use your own words: the app checks that the right ideas are there.\n\n## Use it\nOpen any spreadsheet you use. Pick one column of numbers and one of dates. Check whether the program treats each as a number or as text, for example by trying to add them up or sort them. Write down one column that was stored as the wrong type, and say what unit each figure is in.\n",
+      "quiz": [
+        {
+          "question": "What does a data type tell the computer?",
+          "options": [
+            "How to read the stored bits and what you may do with the value",
+            "How fast the value was typed",
+            "Who owns the value",
+            "How many people have seen it"
+          ],
+          "correct_index": 0,
+          "explanation": "The same bits can mean a number, text or a date. The type is the instruction for how to read them."
+        },
+        {
+          "question": "Why does the text '10' sort before the text '9'?",
+          "options": [
+            "Text is compared character by character, and '1' comes before '9'",
+            "Ten is smaller than nine",
+            "Because the computer made a mistake",
+            "Text is always sorted backwards"
+          ],
+          "correct_index": 0,
+          "explanation": "Text compares one character at a time like a dictionary. Numbers compare by value."
+        },
+        {
+          "question": "A date such as 2023-09-12 can be used to calculate how many days passed because it is really:",
+          "options": [
+            "A count of days, so two dates can be subtracted",
+            "A picture",
+            "A random code",
+            "A word with no meaning"
+          ],
+          "correct_index": 0,
+          "explanation": "Databases treat a date as a point on a timeline, so the difference between two dates is a number of days."
+        },
+        {
+          "question": "A phone number such as 0712345678 is best stored as text. Why?",
+          "options": [
+            "Stored as a number it would lose the leading zero, and you never add phone numbers",
+            "Because numbers are not allowed in phone numbers",
+            "Because text is faster",
+            "Because phone numbers are secret"
+          ],
+          "correct_index": 0,
+          "explanation": "Ask what you will do with the value. You never add or average phone numbers, and the leading zero matters."
+        },
+        {
+          "question": "Which is the most dangerous assumption about data types?",
+          "options": [
+            "That a column is a number because it looks like one",
+            "That bits are on or off",
+            "That dates have a year",
+            "That text can contain digits"
+          ],
+          "correct_index": 0,
+          "explanation": "Values that look like numbers are often stored as text. Check the type, do not guess it."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "tf-1-e1",
+          "title": "Three Kinds of Value",
+          "prompt": "Return one row with three columns: whole (the type of the value 1), decimal (the type of 1.5) and text_kind (the type of the text '1'). Use typeof().",
+          "hint_1": "typeof(1) returns the storage type of a value. Name each result with AS.",
+          "hint_2": "SELECT typeof(1) AS whole, typeof(1.5) AS decimal, typeof('1') AS text_kind",
+          "hint_3": "SELECT typeof(1) AS whole, typeof(1.5) AS decimal, typeof('1') AS text_kind",
+          "solution": "SELECT typeof(1) AS whole, typeof(1.5) AS decimal, typeof('1') AS text_kind",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-1-e2",
+          "title": "Text Sorts Like a Dictionary",
+          "prompt": "Return one row with two columns: as_text (is the text '10' smaller than the text '9'?) and as_numbers (is the number 10 smaller than the number 9?). A comparison returns 1 for true and 0 for false.",
+          "hint_1": "Write '10' < '9' for the text and 10 < 9 for the numbers. Name them with AS.",
+          "hint_2": "SELECT '10' < '9' AS as_text, 10 < 9 AS as_numbers",
+          "hint_3": "SELECT '10' < '9' AS as_text, 10 < 9 AS as_numbers",
+          "solution": "SELECT '10' < '9' AS as_text, 10 < 9 AS as_numbers",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-1-e3",
+          "title": "A Date Is a Count of Days",
+          "prompt": "Customer 1 joined on the date stored in shop_customers. How many whole days is that before 2025-12-31? Return one column called days.",
+          "hint_1": "julianday() turns a date into a number of days. Subtract, then CAST(... AS INTEGER).",
+          "hint_2": "SELECT CAST(julianday('2025-12-31') - julianday(joined_date) AS INTEGER) AS days FROM shop_customers WHERE customer_id = 1",
+          "hint_3": "SELECT CAST(julianday('2025-12-31') - julianday(joined_date) AS INTEGER) AS days FROM shop_customers WHERE customer_id = 1",
+          "solution": "SELECT CAST(julianday('2025-12-31') - julianday(joined_date) AS INTEGER) AS days FROM shop_customers WHERE customer_id = 1",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "tf-files",
+      "title": "CSV, Excel and JSON: One Table, Three Ways of Writing It",
+      "description": "The same table can be written as plain text lines, as a workbook, or as labelled records. Learn to see through the format to the table.",
+      "level": "beginner",
+      "prerequisites": [
+        "tf-data"
+      ],
+      "estimated_min": 25,
+      "sort_order": 2,
+      "theory_md": "## Why this matters\nData reaches you as a file or a message, never as an idea. If you can only work with one format you are stuck the moment a bank, a school or a website sends another. Seeing the same table inside every format removes that fear.\n\n## The first principle\nA format is only a **way of writing down a table**. **CSV** writes one row per line with commas between the values. **Excel** keeps the same grid in a workbook with formatting and formulas. **JSON** writes each row as a labelled record, `{\"name\": \"Maize flour 2kg\", \"price\": 432}`, so each value carries its column name.\n\n## A worked example\nTake one product: id 1, Maize flour 2kg, price 432.\n\n- As **CSV** it is the line `1,Maize flour 2kg,432`.\n- In **Excel** it is a row with three cells.\n- As **JSON** it is `{\"name\":\"Maize flour 2kg\",\"price\":432}`.\n\nThe content is identical. The trade-offs differ: CSV is small and every tool reads it, but it has no types, so `432` is only text until something decides otherwise. JSON keeps labels and nesting but is bulkier. A name containing a comma, such as `Salt, fine`, breaks a naive CSV line unless it is wrapped in quotes.\n\n## Try it\nPull a value out of a JSON record, build a JSON record from a table row, and write a table row as a CSV line. Doing all three shows that the table is the same each time.\n\n## What you can and cannot claim\nYou can say the three formats hold the same rows and columns. You cannot assume a CSV tells you the types or that every tool agrees on the separator. Some use semicolons because the comma is their decimal mark, so always open the file and look.\n\n## Say it in your own words\nExplain how one product row looks as CSV and as JSON, and what each format gives you that the other does not.\n\n## Do this in real life\nExport any sheet you own as CSV and open the file in a plain text editor such as Notepad. Find one value that has a comma or a leading zero and check what happened to it.",
+      "quiz": [
+        {
+          "question": "A CSV file is best described as:",
+          "options": [
+            "Plain text with one row per line and values separated by commas",
+            "A picture of a table",
+            "A database server",
+            "A program"
+          ],
+          "correct_index": 0,
+          "explanation": "CSV is just text. Each line is a row and commas separate the columns."
+        },
+        {
+          "question": "What does JSON give each value that CSV does not?",
+          "options": [
+            "The name of its column",
+            "A password",
+            "A guarantee that it is correct",
+            "A smaller file size"
+          ],
+          "correct_index": 0,
+          "explanation": "A JSON record labels every value, so it explains itself. That makes it bigger than CSV."
+        },
+        {
+          "question": "A product called 'Salt, fine' is written in a CSV line. What could go wrong?",
+          "options": [
+            "The comma inside the name splits it into two columns unless it is wrapped in quotes",
+            "Nothing, commas are always ignored",
+            "The file becomes JSON",
+            "The price is deleted"
+          ],
+          "correct_index": 0,
+          "explanation": "The comma is the separator. A value that contains one must be quoted or the columns shift."
+        },
+        {
+          "question": "Two files hold the same rows, one as CSV and one as Excel. What is true?",
+          "options": [
+            "They are the same table written in different formats",
+            "They must hold different data",
+            "Only the Excel one is a real table",
+            "Only the CSV is a real table"
+          ],
+          "correct_index": 0,
+          "explanation": "Format is the way of writing. The table underneath is the same."
+        },
+        {
+          "question": "A CSV arrives with semicolons between the values. What should you do?",
+          "options": [
+            "Open it, see the separator and tell the tool to use it",
+            "Throw it away",
+            "Add commas by hand to every row",
+            "Assume it is JSON"
+          ],
+          "correct_index": 0,
+          "explanation": "Some regions use a comma as the decimal mark, so files use semicolons. Always look at the file before loading it."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "tf-2-e1",
+          "title": "Read a Value From a Record",
+          "prompt": "Here is a JSON record: {\"name\":\"Maize flour 2kg\",\"price\":432}. Return its price as one column called price. Use json_extract with the path '$.price'.",
+          "hint_1": "json_extract(record, '$.price') reads one labelled value from a JSON text.",
+          "hint_2": "SELECT json_extract('{\"name\":\"Maize flour 2kg\",\"price\":432}', '$.price') AS price",
+          "hint_3": "SELECT json_extract('{\"name\":\"Maize flour 2kg\",\"price\":432}', '$.price') AS price",
+          "solution": "SELECT json_extract('{\"name\":\"Maize flour 2kg\",\"price\":432}', '$.price') AS price",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-2-e2",
+          "title": "Write a Row as JSON",
+          "prompt": "For product 1 in shop_products return one column called record: a JSON object with the keys 'name' and 'price' (price is unit_price). Use json_object.",
+          "hint_1": "json_object('name', name, 'price', unit_price) builds the record from a row.",
+          "hint_2": "SELECT json_object('name', name, 'price', unit_price) AS record FROM shop_products WHERE product_id = 1",
+          "hint_3": "SELECT json_object('name', name, 'price', unit_price) AS record FROM shop_products WHERE product_id = 1",
+          "solution": "SELECT json_object('name', name, 'price', unit_price) AS record FROM shop_products WHERE product_id = 1",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-2-e3",
+          "title": "Write a Row as a CSV Line",
+          "prompt": "For product 1 return one column called csv_line holding product_id, name and unit_price joined with commas, for example 1,Name,price. Use the || operator.",
+          "hint_1": "Join the pieces with || and put ',' between them.",
+          "hint_2": "SELECT product_id || ',' || name || ',' || unit_price AS csv_line FROM shop_products WHERE product_id = 1",
+          "hint_3": "SELECT product_id || ',' || name || ',' || unit_price AS csv_line FROM shop_products WHERE product_id = 1",
+          "solution": "SELECT product_id || ',' || name || ',' || unit_price AS csv_line FROM shop_products WHERE product_id = 1",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "tf-tables",
+      "title": "Rows, Columns and Keys: The Table Is the Universal Shape",
+      "description": "Almost all business data is a table. Learn what a row, a column and a key are and why a key must be unique.",
+      "level": "beginner",
+      "prerequisites": [
+        "tf-files"
+      ],
+      "estimated_min": 25,
+      "sort_order": 3,
+      "theory_md": "## Why this matters\nSpreadsheets, databases, dashboards and reports are all built from tables. If you can read a table, you can find your way into any of them. If you cannot, every tool looks like a different, confusing world.\n\n## The first principle\nA **table** is a grid. Each **row** is one thing (one customer, one sale). Each **column** is one fact about every row (the town, the date). A **key** is a column whose value is different for every row, so it can point to exactly one row. **A key is how tables are connected to each other.**\n\n## A worked example\nThe shop has a customers table and a sales table. The customers table has 150 rows and a `customer_id` column. Every one of the 150 ids is different, so `customer_id` is a good key. Counting the rows and counting the distinct ids give the same number, 150.\n\nEach sale row carries a `customer_id` too. That value is a pointer back to the customer. Follow the pointer for customer 3 and you find Mercy Mission School, which appears on 113 sales. One table gave you the thing, the other gave you the history, and the key joined them.\n\n## Try it\nCount rows, test that a key has no duplicates, and follow a key from one table to another.\n\n## What you can and cannot claim\nYou can say a column is a valid key only if you checked that no value repeats and none is missing. You cannot treat a name as a key. Two customers can share a name, and a name can change.\n\n## Say it in your own words\nExplain what a row, a column and a key are, and why a name is a poor key.\n\n## Do this in real life\nPick a list you keep, such as stock or members. Decide which column could be the key. Check there are no repeats, for example with a COUNTIF or by sorting. If there are repeats, write what you would add to make each row unique.",
+      "quiz": [
+        {
+          "question": "In a customers table, what is one row?",
+          "options": [
+            "One customer",
+            "One fact about all customers",
+            "The whole table",
+            "One database"
+          ],
+          "correct_index": 0,
+          "explanation": "A row is one thing. A column is one fact about every thing."
+        },
+        {
+          "question": "What makes a good key?",
+          "options": [
+            "A value that is different for every row",
+            "A value that is easy to remember",
+            "A person's name",
+            "The first column of the table"
+          ],
+          "correct_index": 0,
+          "explanation": "A key must identify exactly one row, so no value may repeat."
+        },
+        {
+          "question": "Why is a customer's name a poor key?",
+          "options": [
+            "Two customers can share a name and a name can change",
+            "Names are too long",
+            "Names are secret",
+            "Databases cannot store names"
+          ],
+          "correct_index": 0,
+          "explanation": "A key must be unique and stable. Names are neither, so we use an id."
+        },
+        {
+          "question": "A sale row holds customer_id 3. What is that value for?",
+          "options": [
+            "It points to one row in the customers table",
+            "It is the sale total",
+            "It is a password",
+            "It is the date"
+          ],
+          "correct_index": 0,
+          "explanation": "Keys connect tables. The sale's customer_id leads to the customer's row."
+        },
+        {
+          "question": "The count of rows is 150 but the count of distinct ids is 148. What does that tell you?",
+          "options": [
+            "Two ids are repeated, so it cannot be used as a key until fixed",
+            "Everything is fine",
+            "Two rows are empty tables",
+            "The table has 148 columns"
+          ],
+          "correct_index": 0,
+          "explanation": "If distinct is lower than the row count, some values repeat. That breaks the key."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "tf-3-e1",
+          "title": "How Many Rows",
+          "prompt": "How many rows are in shop_customers? Return one column called customers.",
+          "hint_1": "COUNT(*) counts rows.",
+          "hint_2": "SELECT COUNT(*) AS customers FROM shop_customers",
+          "hint_3": "SELECT COUNT(*) AS customers FROM shop_customers",
+          "solution": "SELECT COUNT(*) AS customers FROM shop_customers",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-3-e2",
+          "title": "Is the Key Unique",
+          "prompt": "Check customer_id as a key: return one column called duplicate_keys holding the number of rows minus the number of distinct customer_id values.",
+          "hint_1": "COUNT(*) minus COUNT(DISTINCT customer_id). Zero means every key is different.",
+          "hint_2": "SELECT COUNT(*) - COUNT(DISTINCT customer_id) AS duplicate_keys FROM shop_customers",
+          "hint_3": "SELECT COUNT(*) - COUNT(DISTINCT customer_id) AS duplicate_keys FROM shop_customers",
+          "solution": "SELECT COUNT(*) - COUNT(DISTINCT customer_id) AS duplicate_keys FROM shop_customers",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-3-e3",
+          "title": "Follow the Key",
+          "prompt": "Follow customer_id from shop_sales to shop_customers. For customer 3 return the customer's name and how many sales they have, as columns name and sales.",
+          "hint_1": "JOIN the tables ON the key, filter customer_id = 3, then GROUP BY the name.",
+          "hint_2": "SELECT c.name, COUNT(*) AS sales FROM shop_sales s JOIN shop_customers c ON c.customer_id = s.customer_id WHERE c.customer_id = 3 GROUP BY c.name",
+          "hint_3": "SELECT c.name, COUNT(*) AS sales FROM shop_sales s JOIN shop_customers c ON c.customer_id = s.customer_id WHERE c.customer_id = 3 GROUP BY c.name",
+          "solution": "SELECT c.name, COUNT(*) AS sales FROM shop_sales s JOIN shop_customers c ON c.customer_id = s.customer_id WHERE c.customer_id = 3 GROUP BY c.name",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "tf-instructions",
+      "title": "A Program Is Input, Steps and Output",
+      "description": "Variables, conditions and loops in plain words, before you meet any language.",
+      "level": "beginner",
+      "prerequisites": [
+        "tf-tables"
+      ],
+      "estimated_min": 25,
+      "sort_order": 4,
+      "theory_md": "## Why this matters\nCode looks like a foreign language until you see that every program, in every language, is the same three parts. Once you can see those parts, new languages become new spellings of an idea you already hold.\n\n## The first principle\nA **program** takes **input**, follows **steps**, and produces **output**. The steps are made from three tools: a **variable** is a named box holding a value, a **condition** chooses between two paths (if this, do that, otherwise do the other), and a **loop** repeats a step for every item in a list.\n\n## A worked example\nA shopkeeper has a rule: if stock of an item is below 30, reorder it. As a program: the *input* is the stock number, the *condition* is `stock < 30`, and the *output* is the word `reorder` or `ok`. For stock 25 the answer is `reorder`.\n\nNow do it for every product on the shelf. That is a *loop*: take each item in turn, apply the same condition, collect the answers. A database does the looping for you. `GROUP BY segment` means: for each segment, count its customers. You describe the steps; the machine repeats them.\n\n## Try it\nWrite a condition on one value, count the rows that satisfy a condition, and repeat a count for every group.\n\n## What you can and cannot claim\nYou can say that a program is a clear list of steps a machine can follow without guessing. You cannot say a program is right because it runs. It does exactly what it was told, including the wrong thing.\n\n## Say it in your own words\nExplain a program in terms of input, steps and output, and give one example each of a condition and a loop from daily life.\n\n## Do this in real life\nWrite the steps you follow to open your shop or office as a numbered list a stranger could follow. Mark one place that is a condition (if this, then that) and one that repeats (for each). That is a program.",
+      "quiz": [
+        {
+          "question": "Which three parts make up every program?",
+          "options": [
+            "Input, steps and output",
+            "Screen, keyboard and mouse",
+            "Hardware, software and cables",
+            "Name, date and price"
+          ],
+          "correct_index": 0,
+          "explanation": "Whatever the language, a program takes input, follows steps and gives output."
+        },
+        {
+          "question": "What is a variable?",
+          "options": [
+            "A named box that holds a value",
+            "A mistake in the code",
+            "A type of loop",
+            "A kind of file"
+          ],
+          "correct_index": 0,
+          "explanation": "A variable names a value so later steps can use it and change it."
+        },
+        {
+          "question": "What does a condition do?",
+          "options": [
+            "Chooses between two paths depending on whether something is true",
+            "Repeats a step",
+            "Stores a file",
+            "Draws a chart"
+          ],
+          "correct_index": 0,
+          "explanation": "If the test is true one path runs, otherwise the other."
+        },
+        {
+          "question": "What does a loop do?",
+          "options": [
+            "Repeats the same steps for each item",
+            "Stops the program",
+            "Hides an error",
+            "Sorts the data"
+          ],
+          "correct_index": 0,
+          "explanation": "A loop applies the same steps to every item in a list."
+        },
+        {
+          "question": "A program ran without any error message. What can you conclude?",
+          "options": [
+            "Only that it ran. It may still do the wrong thing",
+            "That its answer is correct",
+            "That the data is correct",
+            "That it is fast"
+          ],
+          "correct_index": 0,
+          "explanation": "Machines follow instructions exactly, including wrong ones. Always check the output against something you know."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "tf-4-e1",
+          "title": "A Condition on One Value",
+          "prompt": "Stock of an item is 25. If stock is below 30 the action is 'reorder', otherwise 'ok'. Return one column called action using CASE.",
+          "hint_1": "CASE WHEN 25 < 30 THEN 'reorder' ELSE 'ok' END",
+          "hint_2": "SELECT CASE WHEN 25 < 30 THEN 'reorder' ELSE 'ok' END AS action",
+          "hint_3": "SELECT CASE WHEN 25 < 30 THEN 'reorder' ELSE 'ok' END AS action",
+          "solution": "SELECT CASE WHEN 25 < 30 THEN 'reorder' ELSE 'ok' END AS action",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-4-e2",
+          "title": "Count What Meets a Condition",
+          "prompt": "How many sales in shop_sales have a total of 20000 or more? Return one column called large_sales.",
+          "hint_1": "Filter with WHERE total >= 20000 and COUNT(*).",
+          "hint_2": "SELECT COUNT(*) AS large_sales FROM shop_sales WHERE total >= 20000",
+          "hint_3": "SELECT COUNT(*) AS large_sales FROM shop_sales WHERE total >= 20000",
+          "solution": "SELECT COUNT(*) AS large_sales FROM shop_sales WHERE total >= 20000",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-4-e3",
+          "title": "Repeat for Every Group",
+          "prompt": "For each customer segment return the segment and how many customers it has (column customers), largest first.",
+          "hint_1": "GROUP BY segment repeats the count for every segment. ORDER BY customers DESC.",
+          "hint_2": "SELECT segment, COUNT(*) AS customers FROM shop_customers GROUP BY segment ORDER BY customers DESC",
+          "hint_3": "SELECT segment, COUNT(*) AS customers FROM shop_customers GROUP BY segment ORDER BY customers DESC",
+          "solution": "SELECT segment, COUNT(*) AS customers FROM shop_customers GROUP BY segment ORDER BY customers DESC",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "tf-databases",
+      "title": "Why Databases Exist: Shared, Safe and Fast",
+      "description": "A spreadsheet is enough until many people write at once. See what a database adds and what a transaction means.",
+      "level": "beginner",
+      "prerequisites": [
+        "tf-instructions"
+      ],
+      "estimated_min": 25,
+      "sort_order": 5,
+      "theory_md": "## Why this matters\nYou will be tempted to keep everything in spreadsheets, and for one person that is fine. Knowing exactly where spreadsheets stop working tells you when a database is worth its cost, and stops you from adopting one for the wrong reason.\n\n## The first principle\nA database exists to make data **shared** (many people use one copy), **safe** (rules stop bad data and a failure does not lose it) and **fast** (it finds one row among millions without reading them all). A **transaction** is a group of changes that either **all happen or none happen**.\n\n## A worked example\nA customer buys goods on credit. Two things must change: a sale is recorded and the stock goes down. If the power fails between them, you have a sale with no stock movement, or the reverse. A transaction wraps both changes so that either both are saved or neither is. That is what 'safe' means.\n\nThe shop database shows the result of that discipline. All 2,046 sales have a total that matches the sum of their items, so there are 0 mismatches. A database can enforce that, and a spreadsheet cannot stop someone typing over a total.\n\n## Try it\nCount what many people share, test that two figures that must agree do agree, and check a total against the payments behind it.\n\n## What you can and cannot claim\nYou can say a database enforces rules you set and keeps data consistent. You cannot say it makes the data true. It protects what you told it to protect. A wrong number entered correctly is still wrong.\n\n## Say it in your own words\nExplain shared, safe and fast, and what a transaction is, in your own words and with one example.\n\n## Do this in real life\nThink of one file you and a colleague both edit. Write down one thing that has gone wrong, for example two copies or overwritten work. Say which of shared, safe or fast a database would fix.",
+      "quiz": [
+        {
+          "question": "What is a transaction?",
+          "options": [
+            "A group of changes that either all happen or none happen",
+            "A payment to a supplier",
+            "A fast query",
+            "A copy of a table"
+          ],
+          "correct_index": 0,
+          "explanation": "The point is that half-finished changes never remain."
+        },
+        {
+          "question": "Which problem does 'shared' solve?",
+          "options": [
+            "Many people using one up-to-date copy",
+            "Slow typing",
+            "Spelling mistakes",
+            "Colourful reports"
+          ],
+          "correct_index": 0,
+          "explanation": "Without sharing, people keep their own copies and the copies disagree."
+        },
+        {
+          "question": "The power fails after a sale is recorded but before the stock is reduced. Without a transaction, what happens?",
+          "options": [
+            "The data is left inconsistent",
+            "Nothing, the computer repairs it",
+            "The sale is deleted from the bank",
+            "The stock goes up"
+          ],
+          "correct_index": 0,
+          "explanation": "Only a transaction guarantees both changes happen together or not at all."
+        },
+        {
+          "question": "A database holds a wrong price that was typed correctly. What does the database do about it?",
+          "options": [
+            "Nothing, it protects the rules you set, not the truth of what you enter",
+            "It corrects the price",
+            "It deletes the row",
+            "It warns the customer"
+          ],
+          "correct_index": 0,
+          "explanation": "A database enforces consistency. People are still responsible for the truth of the data."
+        },
+        {
+          "question": "When is a spreadsheet usually enough?",
+          "options": [
+            "One person, modest data, nothing depends on it being exactly right at all times",
+            "Always",
+            "Never",
+            "Only for charts"
+          ],
+          "correct_index": 0,
+          "explanation": "Databases earn their cost when many people write, rules matter or data is large."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "tf-5-e1",
+          "title": "One Copy Everyone Shares",
+          "prompt": "How many different customers have bought something, according to shop_sales? Return one column called buyers.",
+          "hint_1": "COUNT(DISTINCT customer_id).",
+          "hint_2": "SELECT COUNT(DISTINCT customer_id) AS buyers FROM shop_sales",
+          "hint_3": "SELECT COUNT(DISTINCT customer_id) AS buyers FROM shop_sales",
+          "solution": "SELECT COUNT(DISTINCT customer_id) AS buyers FROM shop_sales",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-5-e2",
+          "title": "Two Figures That Must Agree",
+          "prompt": "A sale's total should equal the sum of qty * unit_price of its items in shop_sale_items. How many sales differ by more than 0.01? Return one column called mismatched.",
+          "hint_1": "Compare s.total with a subquery that sums qty * unit_price for the same sale_id, with ABS(...) > 0.01.",
+          "hint_2": "SELECT COUNT(*) AS mismatched FROM shop_sales s WHERE ABS(s.total - (SELECT SUM(i.qty * i.unit_price) FROM shop_sale_items i WHERE i.sale_id = s.sale_id)) > 0.01",
+          "hint_3": "SELECT COUNT(*) AS mismatched FROM shop_sales s WHERE ABS(s.total - (SELECT SUM(i.qty * i.unit_price) FROM shop_sale_items i WHERE i.sale_id = s.sale_id)) > 0.01",
+          "solution": "SELECT COUNT(*) AS mismatched FROM shop_sales s WHERE ABS(s.total - (SELECT SUM(i.qty * i.unit_price) FROM shop_sale_items i WHERE i.sale_id = s.sale_id)) > 0.01",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-5-e3",
+          "title": "Money Received for One Sale",
+          "prompt": "How much money has been received in shop_payments for sale 1? Return one column called received.",
+          "hint_1": "SUM(amount) with WHERE sale_id = 1.",
+          "hint_2": "SELECT SUM(amount) AS received FROM shop_payments WHERE sale_id = 1",
+          "hint_3": "SELECT SUM(amount) AS received FROM shop_payments WHERE sale_id = 1",
+          "solution": "SELECT SUM(amount) AS received FROM shop_payments WHERE sale_id = 1",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "tf-networks",
+      "title": "How Computers Talk: Client, Server, Request, Response",
+      "description": "Every app, API and dashboard that uses the internet follows one conversation pattern.",
+      "level": "beginner",
+      "prerequisites": [
+        "tf-databases"
+      ],
+      "estimated_min": 25,
+      "sort_order": 6,
+      "theory_md": "## Why this matters\nData is rarely on your own machine. It lives on a server and your tool asks for it. When a Power BI refresh fails or an API returns an error, the conversation pattern tells you where to look.\n\n## The first principle\nA **client** (your browser or script) sends a **request** to a **server**. The server sends back a **response**: a **status code** that says what happened, and usually the data. **Everything on the web is this one exchange, repeated.**\n\n## A worked example\nA script asks `https://api.shop.co.ke/products?id=7`. Read it from the left: `https` is the protocol, `api.shop.co.ke` is the **host**, the server's address, `/products` is the **path**, the thing wanted, and `?id=7` is a **parameter**, which one.\n\nThe server answers with a code. A code starting with **2** means success (200 is OK). Starting with **4** means the request was wrong (404 is 'not found'). Starting with **5** means the server failed. Knowing this, a 404 sends you to check the address, while a 500 sends you to the server owner.\n\n## Try it\nTake the host out of an address, read what a status code means, and see that a request is an ordinary question to a table.\n\n## What you can and cannot claim\nYou can say an error code points to which side to investigate. You cannot say a 200 response means the data is correct. It means the server answered.\n\n## Say it in your own words\nExplain what a client, a server, a request and a response are, and what a 404 and a 500 each tell you.\n\n## Do this in real life\nOpen a website, then change one letter of its address to get a 404 page. Say which side was wrong. Then write the host, path and parameter of one address you use at work.",
+      "quiz": [
+        {
+          "question": "What is a client?",
+          "options": [
+            "The program that sends a request, such as a browser or a script",
+            "The computer that holds the data",
+            "A type of file",
+            "A password"
+          ],
+          "correct_index": 0,
+          "explanation": "The client asks. The server answers."
+        },
+        {
+          "question": "A response with code 404 means:",
+          "options": [
+            "The request asked for something the server could not find",
+            "The server crashed",
+            "Everything is fine",
+            "The password is wrong"
+          ],
+          "correct_index": 0,
+          "explanation": "4xx codes mean the request was at fault. 404 is 'not found'."
+        },
+        {
+          "question": "A response with a code starting with 5 means:",
+          "options": [
+            "The server failed",
+            "You typed the address wrongly",
+            "Success",
+            "The file is a CSV"
+          ],
+          "correct_index": 0,
+          "explanation": "5xx codes are server errors, so the owner of the server must fix them."
+        },
+        {
+          "question": "In https://api.shop.co.ke/products?id=7 which part is the host?",
+          "options": [
+            "api.shop.co.ke",
+            "/products",
+            "id=7",
+            "https"
+          ],
+          "correct_index": 0,
+          "explanation": "The host is the server's address. The path says what, the parameter says which."
+        },
+        {
+          "question": "A response comes back with status 200. What can you conclude?",
+          "options": [
+            "The server answered successfully, but the data still has to be checked",
+            "The data is correct",
+            "The server is safe",
+            "Nothing was returned"
+          ],
+          "correct_index": 0,
+          "explanation": "200 means the exchange worked. It says nothing about whether the contents are right."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "tf-6-e1",
+          "title": "Find the Host",
+          "prompt": "From the address https://api.shop.co.ke/products?id=7 return only the host, api.shop.co.ke, as one column called host. The host starts at character 9 and ends before the next /. Use substr and instr.",
+          "hint_1": "Take the text from position 9, then cut it before the first '/'.",
+          "hint_2": "SELECT substr(substr('https://api.shop.co.ke/products?id=7', 9), 1, instr(substr('https://api.shop.co.ke/products?id=7', 9), '/') - 1) AS host",
+          "hint_3": "SELECT substr(substr('https://api.shop.co.ke/products?id=7', 9), 1, instr(substr('https://api.shop.co.ke/products?id=7', 9), '/') - 1) AS host",
+          "solution": "SELECT substr(substr('https://api.shop.co.ke/products?id=7', 9), 1, instr(substr('https://api.shop.co.ke/products?id=7', 9), '/') - 1) AS host",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-6-e2",
+          "title": "Read a Status Code",
+          "prompt": "A response arrives with status 404. Return one column called meaning: 'ok' if the code is 200 to 299, 'your request was wrong' if 400 to 499, otherwise 'server problem'. Use CASE with BETWEEN.",
+          "hint_1": "CASE WHEN 404 BETWEEN 200 AND 299 THEN ... WHEN 404 BETWEEN 400 AND 499 THEN ... ELSE ... END",
+          "hint_2": "SELECT CASE WHEN 404 BETWEEN 200 AND 299 THEN 'ok' WHEN 404 BETWEEN 400 AND 499 THEN 'your request was wrong' ELSE 'server problem' END AS meaning",
+          "hint_3": "SELECT CASE WHEN 404 BETWEEN 200 AND 299 THEN 'ok' WHEN 404 BETWEEN 400 AND 499 THEN 'your request was wrong' ELSE 'server problem' END AS meaning",
+          "solution": "SELECT CASE WHEN 404 BETWEEN 200 AND 299 THEN 'ok' WHEN 404 BETWEEN 400 AND 499 THEN 'your request was wrong' ELSE 'server problem' END AS meaning",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-6-e3",
+          "title": "A Request Is a Question to a Table",
+          "prompt": "The request ?id=7 asks for one product. Return the name and unit_price of product 7 from shop_products.",
+          "hint_1": "SELECT name, unit_price ... WHERE product_id = 7.",
+          "hint_2": "SELECT name, unit_price FROM shop_products WHERE product_id = 7",
+          "hint_3": "SELECT name, unit_price FROM shop_products WHERE product_id = 7",
+          "solution": "SELECT name, unit_price FROM shop_products WHERE product_id = 7",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "tf-trust",
+      "title": "Who May Do What: Permissions, Passwords and Backups",
+      "description": "Data that anyone can read, change or lose is a liability. Learn the three habits that protect it.",
+      "level": "beginner",
+      "prerequisites": [
+        "tf-networks"
+      ],
+      "estimated_min": 25,
+      "sort_order": 7,
+      "theory_md": "## Why this matters\nPeople trust you with their records, whether they are a school's fees or a clinic's patients. One leaked file or one lost drive ends that trust, and in Kenya the Data Protection Act expects you to take care. Protection is a habit you build from the first day.\n\n## The first principle\nThree habits. **Least privilege**: each person gets only the access the job needs, nothing more. **Strong secrets**: passwords are long, unique and kept in a password manager, never in a file you share. **Backups**: a copy kept elsewhere, and **tested by restoring it once**, because an untested backup is a hope, not a backup.\n\n## A worked example\nA shop owner wants an assistant to see how many customers each town has. The assistant does not need customer names. So give them the counts per town, not the table. The names stay with people who need them. If a name must appear in a report, show only the first letter and stars, for example `K***`.\n\nNow the backup. The shop has 2,046 sales and 1,909 payments. After a restore, check those two numbers. If the restored copy shows fewer, the backup was incomplete, and you found out on a calm day, not on the worst one.\n\n## Try it\nMask a name, share counts instead of identities, and compare row counts the way you would after a restore.\n\n## What you can and cannot claim\nYou can say least privilege and tested backups reduce risk. You cannot say any system is secure. Security lowers the chance and the damage, it never removes them.\n\n## Say it in your own words\nExplain least privilege and why a backup must be tested by restoring it.\n\n## Do this in real life\nFind where you keep one important password. If it is in a file or a message, move it to a password manager. Then copy one important file to a second place and open the copy to prove it works.",
+      "quiz": [
+        {
+          "question": "What does least privilege mean?",
+          "options": [
+            "Each person gets only the access their job needs",
+            "Everyone gets full access to save time",
+            "Only the owner may log in",
+            "Passwords are never changed"
+          ],
+          "correct_index": 0,
+          "explanation": "Less access means less that can leak or be damaged by mistake."
+        },
+        {
+          "question": "An assistant needs to know how many customers live in each town. What is the safest data to give?",
+          "options": [
+            "Counts per town without names",
+            "The full customer table",
+            "The owner's password",
+            "A copy of the database file"
+          ],
+          "correct_index": 0,
+          "explanation": "Give the answer the job needs, not the raw records."
+        },
+        {
+          "question": "Why must a backup be tested by restoring it?",
+          "options": [
+            "An untested backup may be empty, incomplete or unreadable, and you only find out when you need it",
+            "Restoring makes it bigger",
+            "Backups expire",
+            "It is a legal rule everywhere"
+          ],
+          "correct_index": 0,
+          "explanation": "A restore proves the copy works. Until then it is a hope."
+        },
+        {
+          "question": "Where should passwords be kept?",
+          "options": [
+            "In a password manager, long and unique",
+            "In a shared spreadsheet",
+            "On a sticky note on the screen",
+            "In an email to yourself"
+          ],
+          "correct_index": 0,
+          "explanation": "Unique passwords in a manager mean one leak cannot open everything."
+        },
+        {
+          "question": "A colleague says the system is now fully secure. What is the best reply?",
+          "options": [
+            "Security lowers risk, it never removes it, so keep checking and keep backups",
+            "Great, nothing more to do",
+            "Then backups are unnecessary",
+            "Then permissions are unnecessary"
+          ],
+          "correct_index": 0,
+          "explanation": "No system is perfectly secure. Good habits limit the chance and the damage."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "tf-7-e1",
+          "title": "Mask a Name",
+          "prompt": "For customer 1 return one column called masked: the first letter of the name followed by three stars, for example K***. Use substr and ||.",
+          "hint_1": "substr(name, 1, 1) gives the first letter. Add '***' with ||.",
+          "hint_2": "SELECT substr(name, 1, 1) || '***' AS masked FROM shop_customers WHERE customer_id = 1",
+          "hint_3": "SELECT substr(name, 1, 1) || '***' AS masked FROM shop_customers WHERE customer_id = 1",
+          "solution": "SELECT substr(name, 1, 1) || '***' AS masked FROM shop_customers WHERE customer_id = 1",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-7-e2",
+          "title": "Counts, Not Identities",
+          "prompt": "Return the three towns with the most customers and how many customers each has (column customers), most first. Break ties by town name, A to Z. Do not return names.",
+          "hint_1": "GROUP BY town, ORDER BY customers DESC, town, LIMIT 3.",
+          "hint_2": "SELECT town, COUNT(*) AS customers FROM shop_customers GROUP BY town ORDER BY customers DESC, town LIMIT 3",
+          "hint_3": "SELECT town, COUNT(*) AS customers FROM shop_customers GROUP BY town ORDER BY customers DESC, town LIMIT 3",
+          "solution": "SELECT town, COUNT(*) AS customers FROM shop_customers GROUP BY town ORDER BY customers DESC, town LIMIT 3",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-7-e3",
+          "title": "Compare Counts After a Restore",
+          "prompt": "Return one row with two columns: sales (the number of rows in shop_sales) and payments (the number of rows in shop_payments), the check you would run after restoring a backup.",
+          "hint_1": "Two scalar subqueries in one SELECT.",
+          "hint_2": "SELECT (SELECT COUNT(*) FROM shop_sales) AS sales, (SELECT COUNT(*) FROM shop_payments) AS payments",
+          "hint_3": "SELECT (SELECT COUNT(*) FROM shop_sales) AS sales, (SELECT COUNT(*) FROM shop_payments) AS payments",
+          "solution": "SELECT (SELECT COUNT(*) FROM shop_sales) AS sales, (SELECT COUNT(*) FROM shop_payments) AS payments",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "tf-first-principles",
+      "title": "Debugging Is the Scientific Method",
+      "description": "Break a technical problem into testable parts. Guess, test, narrow down: the method behind every fix.",
+      "level": "beginner",
+      "prerequisites": [
+        "tf-trust"
+      ],
+      "estimated_min": 25,
+      "sort_order": 8,
+      "theory_md": "## Hook\n```evidence\nquote-feynman-fooling\n```\nEvery lab you do will go wrong at some point, and so will every system you build. People who cope do not guess harder. They work in a method, and the method begins with not fooling yourself.\n\n## Predict\nBefore you read on: a report shows that many credit sales were never paid. What is the first thing you would check, and what could you check that might prove your first idea wrong?\n\n## Plain words\nDebugging is the **scientific method** applied to a fault. State what you **expected**, state what **happened**, form one **hypothesis**, run one **test** that could prove it wrong, then act on the result. Change **one thing at a time**, otherwise you cannot know which change did what.\n\n## Diagram\n```diagram\n{\"title\": \"The debugging loop\", \"nodes\": [{\"id\": \"exp\", \"label\": \"What I expected\", \"side\": \"bridge\"}, {\"id\": \"obs\", \"label\": \"What actually happened\", \"side\": \"tech\"}, {\"id\": \"hyp\", \"label\": \"One hypothesis\", \"side\": \"tech\"}, {\"id\": \"test\", \"label\": \"One test that could prove it wrong\", \"side\": \"tech\"}, {\"id\": \"res\", \"label\": \"Result: kept or removed\", \"side\": \"tech\"}], \"edges\": [[\"exp\", \"obs\"], [\"obs\", \"hyp\"], [\"hyp\", \"test\"], [\"test\", \"res\"], [\"res\", \"hyp\", \"next guess\"]]}\n```\n\n## Worked example\nThe shop owner asks why money is owed. Expected: credit sales are paid within weeks. Seen: 566 of the 2,046 sales are on credit. Hypothesis: some credit sales have **no payment at all**. Test: count credit sales with no payment row. Result: 137, so the hypothesis is supported.\n\nSecond hypothesis, to rule out a data fault: some sales marked *paid* also have no payment row. Test it. Result: 0, so that idea is ruled out. Each test either supports an idea or removes it, and the list of possible causes gets shorter. Supported is not proven, and you cannot say you know the cause if you changed several things at once.\n\n## Case\n```evidence\ncase-aws-s3-2017\n```\nNotice how the account is written: what was intended, what the input was, what that caused, and when service returned to normal. That is the same expected-and-happened structure you use for your own faults.\n\n## Bridge\n**Technology side:** debugging is a loop you run on code, queries and pipelines, one change and one test at a time. **Business side:** the same loop finds why a number in a board report is wrong, why a customer left, or why a launch missed its target. In both, the cheapest test comes first.\n\n## Try it\nDo the three practicals below: measure the size of the problem, test the main hypothesis, then rule out a rival one.\n\n## Say it back\nExplain the steps of debugging as the scientific method, and why you change only one thing at a time. Use your own words: the app checks that the right ideas are there.\n\n## Use it\nNext time a formula, query or script fails, write down what you expected and what happened before you touch anything. Then change one thing and re-run. Notice how much faster it goes.\n",
+      "quiz": [
+        {
+          "question": "What is the first step when something is wrong?",
+          "options": [
+            "State what you expected and what actually happened",
+            "Change several things quickly",
+            "Restart the computer and hope",
+            "Ask someone else to fix it"
+          ],
+          "correct_index": 0,
+          "explanation": "A clear gap between expected and seen turns a vague problem into a testable one."
+        },
+        {
+          "question": "Why change only one thing at a time?",
+          "options": [
+            "Otherwise you cannot tell which change had which effect",
+            "It is a rule of Excel",
+            "Changes are expensive",
+            "The computer can only handle one"
+          ],
+          "correct_index": 0,
+          "explanation": "Changing one thing keeps cause and effect readable."
+        },
+        {
+          "question": "What makes a good test of a hypothesis?",
+          "options": [
+            "It could have shown the hypothesis to be wrong",
+            "It always confirms what you believe",
+            "It takes a long time",
+            "It uses the most data"
+          ],
+          "correct_index": 0,
+          "explanation": "A test that cannot fail teaches nothing."
+        },
+        {
+          "question": "A test supports your hypothesis. What may you say?",
+          "options": [
+            "The hypothesis is supported, not proven",
+            "It is proven forever",
+            "The system is bug free",
+            "No more tests are needed"
+          ],
+          "correct_index": 0,
+          "explanation": "Support is not proof. Another test could still change the picture."
+        },
+        {
+          "question": "Why test a rival hypothesis, such as 'paid sales missing payments'?",
+          "options": [
+            "To rule out other causes so the real one is clearer",
+            "To make the work longer",
+            "To hide the first result",
+            "Because the first test failed"
+          ],
+          "correct_index": 0,
+          "explanation": "Removing alternatives narrows the list of possible causes."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "tf-8-e1",
+          "title": "Measure the Problem",
+          "prompt": "How many sales in shop_sales are on credit (payment_status = 'credit')? Return one column called credit_sales.",
+          "hint_1": "COUNT(*) with WHERE payment_status = 'credit'.",
+          "hint_2": "SELECT COUNT(*) AS credit_sales FROM shop_sales WHERE payment_status = 'credit'",
+          "hint_3": "SELECT COUNT(*) AS credit_sales FROM shop_sales WHERE payment_status = 'credit'",
+          "solution": "SELECT COUNT(*) AS credit_sales FROM shop_sales WHERE payment_status = 'credit'",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-8-e2",
+          "title": "Test the Hypothesis",
+          "prompt": "Hypothesis: some credit sales have no payment at all. How many credit sales have no row in shop_payments? Return one column called unpaid_credit.",
+          "hint_1": "WHERE payment_status = 'credit' AND NOT EXISTS (a payment with the same sale_id).",
+          "hint_2": "SELECT COUNT(*) AS unpaid_credit FROM shop_sales s WHERE s.payment_status = 'credit' AND NOT EXISTS (SELECT 1 FROM shop_payments p WHERE p.sale_id = s.sale_id)",
+          "hint_3": "SELECT COUNT(*) AS unpaid_credit FROM shop_sales s WHERE s.payment_status = 'credit' AND NOT EXISTS (SELECT 1 FROM shop_payments p WHERE p.sale_id = s.sale_id)",
+          "solution": "SELECT COUNT(*) AS unpaid_credit FROM shop_sales s WHERE s.payment_status = 'credit' AND NOT EXISTS (SELECT 1 FROM shop_payments p WHERE p.sale_id = s.sale_id)",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-8-e3",
+          "title": "Rule Out the Rival",
+          "prompt": "Rival hypothesis: some sales marked 'paid' have no payment row. How many are there? Return one column called paid_without_payment.",
+          "hint_1": "The same test, but with payment_status = 'paid'.",
+          "hint_2": "SELECT COUNT(*) AS paid_without_payment FROM shop_sales s WHERE s.payment_status = 'paid' AND NOT EXISTS (SELECT 1 FROM shop_payments p WHERE p.sale_id = s.sale_id)",
+          "hint_3": "SELECT COUNT(*) AS paid_without_payment FROM shop_sales s WHERE s.payment_status = 'paid' AND NOT EXISTS (SELECT 1 FROM shop_payments p WHERE p.sale_id = s.sale_id)",
+          "solution": "SELECT COUNT(*) AS paid_without_payment FROM shop_sales s WHERE s.payment_status = 'paid' AND NOT EXISTS (SELECT 1 FROM shop_payments p WHERE p.sale_id = s.sale_id)",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    }
+  ]
+}

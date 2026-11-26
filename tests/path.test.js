@@ -68,7 +68,8 @@ test('the order matters: within an academy the track follows the lessons, the pr
 test('a new learner starts in phase 0 with the first Start Here lesson, nothing locked, and the path is off by default', async () => {
   const d = await h.invoke('path:get', 'ann')
   assert.equal(d.current_phase, 'p0'); assert.equal(d.strict, false); assert.equal(d.next.lesson_id, 'fd-value')
-  assert.equal(d.phases[0].tech.score, null, 'phase 0 has no technology lessons yet, so it is not scored')
+  assert.equal(d.phases[0].tech.score, 0, 'phase 0 now has Technology First Principles lessons, so the technology side is scored from the first day')
+  assert.equal(d.phases[0].tech.required, 3)
   assert.equal(d.phases[0].business.required, 3)
   const list = await h.invoke('lessons:list', { userId: 'ann', module: 'sql' })
   assert.ok(list.every((l) => !l.path_locked))

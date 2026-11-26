@@ -1,7 +1,7 @@
 // DericBI Instructor — Complete Database Schema
 // All DDL statements in migration order
 
-export const SCHEMA_VERSION = 9
+export const SCHEMA_VERSION = 10
 
 export const CREATE_TABLES = `
 
@@ -185,6 +185,22 @@ CREATE TABLE IF NOT EXISTS path_state (
   user_id    TEXT PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   strict     INTEGER NOT NULL DEFAULT 0,
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- Guided jumping: ideas a learner proved with a short check, and lessons opened before the ideas they rest on were in place.
+CREATE TABLE IF NOT EXISTS jump_passes (
+  user_id   TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  kind      TEXT NOT NULL,
+  ref       TEXT NOT NULL,
+  passed_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, kind, ref)
+);
+CREATE TABLE IF NOT EXISTS provisional (
+  user_id    TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  lesson_id  TEXT NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+  gaps       TEXT NOT NULL DEFAULT '[]',
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, lesson_id)
 );
 
 -- ─────────────────────────────────────────────

@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "title": "Integrated lesson blueprint",
+  "note": "A lesson whose theory has the first heading below is an integrated lesson and must follow every step, in this order. Existing lessons are not changed until they are rewritten to this shape.",
+  "steps": [
+    { "id": "hook", "heading": "Hook", "purpose": "A real situation or question that makes the idea matter before it is explained." },
+    { "id": "predict", "heading": "Predict", "purpose": "The learner commits to a guess first. It ends with a question." },
+    { "id": "plain", "heading": "Plain words", "purpose": "The idea in everyday words, with its terms defined." },
+    { "id": "diagram", "heading": "Diagram", "purpose": "One picture of how the idea fits together, drawn from the shared visual grammar." },
+    { "id": "worked", "heading": "Worked example", "purpose": "One example worked through with real figures." },
+    { "id": "case", "heading": "Case", "purpose": "A real case or moment from history, from the evidence library, with its source." },
+    { "id": "bridge", "heading": "Bridge", "purpose": "What the idea means for the technology side and for the business side." },
+    { "id": "try", "heading": "Try it", "purpose": "Points to the practicals." },
+    { "id": "say", "heading": "Say it back", "purpose": "The learner explains it in their own words." },
+    { "id": "use", "heading": "Use it", "purpose": "One thing to do with real data or real work this week." }
+  ],
+  "max_quotes_per_lesson": 1
+}

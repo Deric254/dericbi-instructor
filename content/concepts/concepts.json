@@ -2082,6 +2082,456 @@
         ],
         "need": 2
       }
+    },
+    {
+      "id": "data-types",
+      "name": "Data and types",
+      "definition": "Everything is stored as bits; a type tells the computer how to read them as a number, text or date, and the type decides what you can do and how values sort.",
+      "depends_on": [],
+      "lessons": [
+        "tf-data"
+      ],
+      "explain": {
+        "prompt": "What is a data type, and why does it matter that 10 and 9 can sort differently?",
+        "points": [
+          {
+            "hint": "A type says how the stored bits are read (number, text, date)",
+            "any": [
+              "type",
+              "number",
+              "text",
+              "date",
+              "whole number",
+              "decimal",
+              "read the"
+            ]
+          },
+          {
+            "hint": "Text sorts character by character, numbers by value, so the order differs",
+            "any": [
+              "character by character",
+              "dictionary",
+              "as text",
+              "as a number",
+              "as numbers",
+              "by value",
+              "sorts before",
+              "alphabetical"
+            ]
+          },
+          {
+            "hint": "The type decides what you can calculate, so check it rather than assume",
+            "any": [
+              "check the type",
+              "what you can do",
+              "cannot add",
+              "calculate",
+              "subtract",
+              "leading zero",
+              "looks like a number",
+              "assume"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "file-formats",
+      "name": "Files and formats",
+      "definition": "CSV, Excel and JSON are three ways of writing the same table: lines of values, a workbook grid, or labelled records.",
+      "depends_on": [
+        "data-types"
+      ],
+      "lessons": [
+        "tf-files"
+      ],
+      "explain": {
+        "prompt": "How can one table be written as CSV and as JSON, and what does each give you?",
+        "points": [
+          {
+            "hint": "CSV is one row per line with values separated by commas",
+            "any": [
+              "csv",
+              "comma",
+              "one line per row",
+              "line for each row",
+              "separated",
+              "plain text"
+            ]
+          },
+          {
+            "hint": "JSON writes each row as a record with the column name beside each value",
+            "any": [
+              "json",
+              "record",
+              "label",
+              "key and value",
+              "name of the column",
+              "column name",
+              "labelled",
+              "labeled"
+            ]
+          },
+          {
+            "hint": "They hold the same table, but formats differ in types, size and quoting",
+            "any": [
+              "same table",
+              "same data",
+              "same rows",
+              "same thing",
+              "quote",
+              "no types",
+              "bigger",
+              "bulkier",
+              "separator",
+              "semicolon"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "tables-keys",
+      "name": "Tables and keys",
+      "definition": "A table is rows (one thing each) and columns (one fact each); a key is a column that is different for every row and links tables.",
+      "depends_on": [
+        "data-types"
+      ],
+      "lessons": [
+        "tf-tables"
+      ],
+      "explain": {
+        "prompt": "What are a row, a column and a key, and why is a name a poor key?",
+        "points": [
+          {
+            "hint": "A row is one thing and a column is one fact about every thing",
+            "any": [
+              "row is one",
+              "one customer",
+              "one record",
+              "column is",
+              "a fact",
+              "same fact",
+              "one thing",
+              "each row",
+              "each column"
+            ]
+          },
+          {
+            "hint": "A key is a value that is different for every row and identifies it",
+            "any": [
+              "key",
+              "unique",
+              "different for every",
+              "identif",
+              "no two",
+              "never repeat",
+              "id ",
+              "no repeat",
+              "single row"
+            ]
+          },
+          {
+            "hint": "Names repeat or change, so an id is used and keys connect tables",
+            "any": [
+              "two people",
+              "same name",
+              "share a name",
+              "can change",
+              "change their name",
+              "connect",
+              "link",
+              "point to",
+              "join",
+              "refer"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "program-steps",
+      "name": "Input, steps and output",
+      "definition": "A program takes input, follows steps and gives output; its steps are made from variables, conditions and loops.",
+      "depends_on": [
+        "data-types"
+      ],
+      "lessons": [
+        "tf-instructions"
+      ],
+      "explain": {
+        "prompt": "What are the parts of a program, and what do a condition and a loop do?",
+        "points": [
+          {
+            "hint": "A program is input, steps and output",
+            "any": [
+              "input",
+              "output",
+              "steps",
+              "takes in",
+              "gives back",
+              "produces",
+              "instructions"
+            ]
+          },
+          {
+            "hint": "A condition chooses between paths depending on whether something is true",
+            "any": [
+              "condition",
+              "if ",
+              "otherwise",
+              "else",
+              "choose",
+              "decide",
+              "true or false",
+              "depending"
+            ]
+          },
+          {
+            "hint": "A loop repeats the same steps for each item",
+            "any": [
+              "loop",
+              "repeat",
+              "each item",
+              "every item",
+              "for each",
+              "again and again",
+              "over and over",
+              "every row"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "database-purpose",
+      "name": "Why databases exist",
+      "definition": "A database makes data shared, safe and fast; a transaction is a group of changes that all happen or none happen.",
+      "depends_on": [
+        "tables-keys"
+      ],
+      "lessons": [
+        "tf-databases"
+      ],
+      "explain": {
+        "prompt": "Why do databases exist, and what is a transaction?",
+        "points": [
+          {
+            "hint": "Shared, many people use one copy",
+            "any": [
+              "shared",
+              "share",
+              "one copy",
+              "same copy",
+              "many people",
+              "everyone sees",
+              "at the same time"
+            ]
+          },
+          {
+            "hint": "Safe: rules stop bad data and a failure does not lose it",
+            "any": [
+              "safe",
+              "rules",
+              "consistent",
+              "not lose",
+              "protect",
+              "power fail",
+              "crash",
+              "enforce"
+            ]
+          },
+          {
+            "hint": "A transaction is all changes together or none",
+            "any": [
+              "transaction",
+              "all or nothing",
+              "all happen",
+              "none happen",
+              "both",
+              "together or",
+              "either all",
+              "undone",
+              "rolled back",
+              "roll back"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "client-server",
+      "name": "Client, server, request, response",
+      "definition": "A client sends a request to a server, which returns a response with a status code and usually data.",
+      "depends_on": [
+        "file-formats"
+      ],
+      "lessons": [
+        "tf-networks"
+      ],
+      "explain": {
+        "prompt": "Explain client, server, request and response, and what a 404 and a 500 mean.",
+        "points": [
+          {
+            "hint": "A client sends a request and a server sends a response",
+            "any": [
+              "client",
+              "server",
+              "request",
+              "response",
+              "asks",
+              "answers",
+              "browser"
+            ]
+          },
+          {
+            "hint": "A 4xx code such as 404 means the request was wrong or not found",
+            "any": [
+              "404",
+              "not found",
+              "4xx",
+              "your request",
+              "wrong address",
+              "request was wrong",
+              "client error",
+              "bad request"
+            ]
+          },
+          {
+            "hint": "A 5xx code such as 500 means the server failed",
+            "any": [
+              "500",
+              "5xx",
+              "server failed",
+              "server error",
+              "server problem",
+              "server is broken",
+              "fault on the server",
+              "server crashed"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "access-control",
+      "name": "Permissions, passwords and backups",
+      "definition": "Give each person only the access the job needs, protect secrets, and keep a backup that you have tested by restoring it.",
+      "depends_on": [
+        "database-purpose"
+      ],
+      "lessons": [
+        "tf-trust"
+      ],
+      "explain": {
+        "prompt": "What is least privilege, and why must a backup be tested?",
+        "points": [
+          {
+            "hint": "Least privilege means only the access the job needs",
+            "any": [
+              "least privilege",
+              "only the access",
+              "only what",
+              "need to know",
+              "nothing more",
+              "minimum access",
+              "only needs",
+              "only what they need"
+            ]
+          },
+          {
+            "hint": "Backups must be restored to prove they work",
+            "any": [
+              "restore",
+              "restored",
+              "test the backup",
+              "tested",
+              "prove",
+              "try to open",
+              "check the backup",
+              "works when"
+            ]
+          },
+          {
+            "hint": "Protect secrets with strong unique passwords and a manager, and security lowers risk but never removes it",
+            "any": [
+              "password",
+              "manager",
+              "unique",
+              "long",
+              "secret",
+              "lowers risk",
+              "reduce risk",
+              "never removes",
+              "not perfect",
+              "cannot be fully"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "debugging-method",
+      "name": "Debugging as the scientific method",
+      "definition": "State what you expected and what happened, form one hypothesis, run one test that could prove it wrong, and change one thing at a time.",
+      "depends_on": [
+        "program-steps"
+      ],
+      "lessons": [
+        "tf-first-principles"
+      ],
+      "explain": {
+        "prompt": "How is debugging like the scientific method, and why change one thing at a time?",
+        "points": [
+          {
+            "hint": "State what you expected and what actually happened",
+            "any": [
+              "expected",
+              "what happened",
+              "what i saw",
+              "what actually",
+              "gap between",
+              "observe",
+              "observation",
+              "symptom"
+            ]
+          },
+          {
+            "hint": "Form a hypothesis and run a test that could prove it wrong",
+            "any": [
+              "hypothesis",
+              "guess",
+              "test",
+              "prove it wrong",
+              "could fail",
+              "experiment",
+              "rule out",
+              "narrow"
+            ]
+          },
+          {
+            "hint": "Change one thing at a time so cause and effect stay clear",
+            "any": [
+              "one thing at a time",
+              "one change",
+              "single change",
+              "one at a time",
+              "which change",
+              "cause and effect",
+              "otherwise you cannot",
+              "not know which"
+            ]
+          }
+        ],
+        "need": 2
+      }
     }
   ]
 }

@@ -3,10 +3,12 @@ import { Route, Play, CheckCircle, Circle, Lock, Hourglass, ShieldCheck, Chevron
 import { useAuthStore, useUIStore, notify } from '../store'
 import { reportApiError } from '../lib/apiError'
 import { PageLoader, PageError } from '../components/ui/PageState'
-import type { PathData, PathPhase, PathItem, PathSide, NavSection } from '../types'
+import type { PathData, PathPhase, PathItem, PathSide, NavSection, JumpCheck, LadderData } from '../types'
 
 const SIDE_LABEL: Record<PathSide, string> = { tech: 'Technology', business: 'Business', bridge: 'Both' }
 const SIDE_COLOR: Record<PathSide, string> = { tech: 'var(--sql-color)', business: 'var(--business-color)', bridge: 'var(--bp-color)' }
+const LIGHT_COLOR = { green: 'var(--success)', amber: 'var(--warning)', red: 'var(--error)' } as const
+const LIGHT_LABEL = { green: 'Ready: nothing missing', amber: 'One idea missing', red: 'Several ideas missing' } as const
 const sectionOf = (module: string): NavSection => (module === 'simulation' ? 'simulations' : module as NavSection)
 
 function Bar({ label, color, score, required, done, avg, behind }: { label: string; color: string; score: number | null; required: number; done: number; avg: number | null; behind: boolean }) {
@@ -39,10 +41,12 @@ function Item({ it, onOpen }: { it: PathItem; onOpen: (module: string, id: strin
         {planned ? (
           <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}><code>{it.id}</code> <span style={{ color: 'var(--text-muted)' }}>· coming</span></div>
         ) : (
-          <button className="btn btn-ghost btn-sm" style={{ padding: 0, textAlign: 'left', color: 'var(--text-primary)' }} disabled={held} onClick={() => onOpen((it as Extract<PathItem, { kind: 'lesson' }>).module, it.id)}>{it.title}</button>
+          <button className="btn btn-ghost btn-sm" style={{ padding: 0, textAlign: 'left', color: 'var(--text-primary)' }} onClick={() => onOpen((it as Extract<PathItem, { kind: 'lesson' }>).module, it.id)}>{it.title}</button>
         )}
+        {it.kind === 'lesson' && it.provisional && <div style={{ fontSize: 11, color: 'var(--warning)' }}>Provisional: it counts once the ideas it rests on are in place.</div>}
         {planned && it.summary && <div style={{ fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.5 }}>{it.summary}</div>}
       </div>
+      {it.kind === 'lesson' && it.light && <span title={LIGHT_LABEL[it.light]} aria-label={LIGHT_LABEL[it.light]} style={{ width: 9, height: 9, borderRadius: '50%', background: LIGHT_COLOR[it.light], marginTop: 5, flexShrink: 0 }} />}
       <span style={{ fontSize: 10, color: SIDE_COLOR[it.side], whiteSpace: 'nowrap' }}>{SIDE_LABEL[it.side]}{it.optional ? ' · optional' : ''}</span>
     </div>
   )
@@ -90,6 +94,82 @@ function Phase({ p, data, expanded, toggle, onOpen, onGate }: { p: PathPhase; da
   )
 }
 
+/** The readiness check for a lesson opened out of order: what is missing, a short check, a bridge, or "go anyway" as provisional. */
+function JumpPanel({ check, onClose, onSubmit }: { check: JumpCheck; onClose: () => void; onSubmit: (answers: Array<{ ref: string; choice: number }>, go: boolean) => Promise<{ passed: boolean; correct?: number; total?: number } | null> }) {
+  const [picked, setPicked] = useState<Record<string, number>>({})
+  const [busy, setBusy] = useState(false)
+  const [miss, setMiss] = useState<{ correct: number; total: number } | null>(null)
+  const complete = check.questions.length > 0 && check.questions.every((q) => picked[q.ref] !== undefined)
+  const send = async (go: boolean, withAnswers: boolean) => {
+    setBusy(true)
+    try {
+      const r = await onSubmit(withAnswers ? check.questions.map((q) => ({ ref: q.ref, choice: picked[q.ref] })) : [], go)
+      if (r && !r.passed && r.total !== undefined) setMiss({ correct: r.correct ?? 0, total: r.total })
+    } finally { setBusy(false) }
+  }
+  return (
+    <div className="card" role="region" aria-label={`Readiness check for ${check.title}`} style={{ marginBottom: 12, borderColor: LIGHT_COLOR[check.light] }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ width: 10, height: 10, borderRadius: '50%', background: LIGHT_COLOR[check.light] }} />
+        <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 14 }}>{check.title}</div>
+        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{LIGHT_LABEL[check.light]}</span>
+        <button className="btn btn-ghost btn-sm" style={{ marginLeft: 'auto' }} onClick={onClose}>Close</button>
+      </div>
+      {check.held ? (
+        <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, marginTop: 8 }}>You are following the path strictly, so this lesson opens when the phase you are in is complete. You can turn strict mode off above.</div>
+      ) : check.gaps.length === 0 ? (
+        <button className="btn btn-primary btn-sm" style={{ marginTop: 8 }} disabled={busy} onClick={() => send(false, false)}>Open the lesson</button>
+      ) : (
+        <>
+          <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, marginTop: 8 }}>This lesson builds on {check.gaps.length === 1 ? 'an idea' : 'ideas'} you have not shown yet:</div>
+          <ul style={{ margin: '6px 0 8px 18px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+            {check.gaps.map((g) => <li key={`${g.kind}-${g.id}`}><strong style={{ color: 'var(--text-primary)' }}>{g.name}</strong>{g.definition ? `: ${g.definition}` : ''}</li>)}
+          </ul>
+          {check.questions.length > 0 && (
+            <>
+              <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>Answer {check.questions.length === 1 ? 'this question' : `these ${check.questions.length} questions`} to open it without a mark</div>
+              {check.questions.map((q, qi) => (
+                <fieldset key={q.ref} style={{ border: 'none', padding: 0, margin: '0 0 8px' }}>
+                  <legend style={{ fontSize: 12, color: 'var(--text-primary)', marginBottom: 3 }}>{qi + 1}. {q.question}</legend>
+                  {q.options.map((o, oi) => (
+                    <label key={oi} style={{ display: 'flex', gap: 6, fontSize: 12, color: 'var(--text-secondary)', padding: '2px 0' }}>
+                      <input type="radio" name={`jump-${q.ref}`} checked={picked[q.ref] === oi} onChange={() => setPicked((x) => ({ ...x, [q.ref]: oi }))} /> {o}
+                    </label>
+                  ))}
+                </fieldset>
+              ))}
+            </>
+          )}
+          {miss && <div style={{ fontSize: 12, color: 'var(--warning)', marginBottom: 6 }}>{miss.correct} of {miss.total} right. Read the ideas above, then try again, or go on anyway.</div>}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {check.questions.length > 0 && <button className="btn btn-primary btn-sm" disabled={busy || !complete} onClick={() => send(false, true)}>Check me</button>}
+            <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => send(true, complete)}>Go anyway (provisional)</button>
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>A provisional lesson opens now but does not count toward your phase until those ideas are in place.</div>
+        </>
+      )}
+    </div>
+  )
+}
+
+/** The mastery ladder: how deeply each idea is held, worked out from the work done. */
+function Ladder({ data }: { data: LadderData }) {
+  const [show, setShow] = useState(false)
+  const counts = data.levels.map((l) => ({ ...l, n: data.concepts.filter((c) => c.level === l.level).length }))
+  const none = data.concepts.filter((c) => c.level === 0).length
+  return (
+    <div className="card" style={{ marginTop: 12 }}>
+      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Mastery ladder: {data.concepts.length} ideas</div>
+      <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+        <div>Not started: {none}</div>
+        {counts.map((l) => <div key={l.level} style={{ opacity: l.available ? 1 : 0.6 }}>Level {l.level}, {l.name}: {l.available ? l.n : 'not yet available'}<span style={{ color: 'var(--text-muted)' }}> · {l.meaning}</span></div>)}
+      </div>
+      <button className="btn btn-ghost btn-sm" style={{ padding: 0, marginTop: 6 }} aria-expanded={show} onClick={() => setShow((s) => !s)}>{show ? 'Hide the ideas' : 'Show every idea'}</button>
+      {show && <ul style={{ margin: '6px 0 0 18px', fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6 }}>{data.concepts.map((c) => <li key={c.id}>{c.name}: level {c.level}</li>)}</ul>}
+    </div>
+  )
+}
+
 /** Your Path: the master track across every academy, with the Technology and Business scores, the gate for each phase and what to learn next. */
 export default function Path() {
   const { user } = useAuthStore()
@@ -97,11 +177,14 @@ export default function Path() {
   const [data, setData] = useState<PathData | null>(null)
   const [state, setState] = useState<'loading' | 'ready' | 'error' | 'none'>('loading')
   const [open, setOpen] = useState<Record<string, boolean>>({})
+  const [jump, setJump] = useState<{ check: JumpCheck; module: string } | null>(null)
+  const [ladder, setLadder] = useState<LadderData | null>(null)
 
   const load = useCallback(async () => {
     if (!user) return
     try {
       const d = await window.api.path.get(user.id)
+      window.api.ladder.get(user.id).then(setLadder).catch(() => setLadder(null))
       if (!d) { setState('none'); return }
       setData(d); setState('ready')
       setOpen((o) => (Object.keys(o).length ? o : { [d.current_phase ?? d.phases[d.phases.length - 1].id]: true }))
@@ -110,6 +193,26 @@ export default function Path() {
   useEffect(() => { load() }, [load])
 
   const openLesson = (module: string, id: string) => { setPendingLesson(id); setActiveSection(sectionOf(module)) }
+  // A lesson already begun or finished opens straight away. Any other lesson gets the readiness check first (guided jumping).
+  const pick = async (module: string, id: string) => {
+    if (!user) return
+    const it = data?.phases.flatMap((p) => p.items).find((i) => i.kind === 'lesson' && i.id === id)
+    if (it && it.kind === 'lesson' && (it.status === 'in_progress' || it.status === 'complete')) { openLesson(module, id); return }
+    try {
+      const check = await window.api.path.jump(user.id, id)
+      if (!check) { notify.info('Not available', 'That lesson is not in this install.'); return }
+      setJump({ check, module })
+    } catch (err) { reportApiError('check your readiness', err) }
+  }
+  const submitJump = async (answers: Array<{ ref: string; choice: number }>, go: boolean) => {
+    if (!user || !jump) return null
+    try {
+      const r = await window.api.path.jumpGo(user.id, jump.check.lesson_id, answers.length ? answers : undefined, go)
+      if (!r.success) { notify.info('Could not open it', r.reason === 'held' ? 'Your strict path keeps it closed for now.' : 'Please try again.'); return null }
+      if (r.started) { const m = jump.module, id = jump.check.lesson_id; setJump(null); await load(); openLesson(m, id) }
+      return r
+    } catch (err) { reportApiError('open the lesson', err); return null }
+  }
   const saveGate = async (phaseId: string, text: string) => {
     if (!user) return
     try {
@@ -156,7 +259,11 @@ export default function Path() {
         </label>
       </div>
 
-      {data.phases.map((p) => <Phase key={p.id} p={p} data={data} expanded={!!open[p.id]} toggle={() => setOpen((o) => ({ ...o, [p.id]: !o[p.id] }))} onOpen={openLesson} onGate={saveGate} />)}
+      {jump && <JumpPanel key={jump.check.lesson_id} check={jump.check} onClose={() => setJump(null)} onSubmit={submitJump} />}
+
+      {data.phases.map((p) => <Phase key={p.id} p={p} data={data} expanded={!!open[p.id]} toggle={() => setOpen((o) => ({ ...o, [p.id]: !o[p.id] }))} onOpen={pick} onGate={saveGate} />)}
+
+      {ladder && ladder.concepts.length > 0 && <Ladder data={ladder} />}
 
       {data.later.length > 0 && <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6, marginTop: 8 }}>Optional later track, never required and never locked: {data.later.join(', ')}.</div>}
     </div>

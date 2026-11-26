@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { DATAENG_DATASETS, generateDataEngDatasets } from './dataeng.datasets'
 import { SHOP_DATASETS, generateShopDatasets } from './shop.datasets'
 
-const SETUP_VERSION = 12 // increment to force re-seed on app update
+const SETUP_VERSION = 13 // increment to force re-seed on app update
 
 // Bump when the generated CSV *contents* change shape, so installs that already have older
 // CSVs on disk get them regenerated (generateDatasets() otherwise skips files that exist).
@@ -272,6 +272,7 @@ function seedAllCurricula(): void {
     { file: 'foundations/curriculum.json', type: 'sql_query'   },
     { file: 'founder/curriculum.json',     type: 'sql_query'   },
     { file: 'aiml/curriculum.json',        type: 'sql_query'   },
+    { file: 'techfirst/curriculum.json',   type: 'sql_query'   },
     { file: 'sql/curriculum.json',        type: 'sql_query'   },
     { file: 'python/curriculum.json',     type: 'python_code' },
     { file: 'statistics/curriculum.json', type: 'python_code' },

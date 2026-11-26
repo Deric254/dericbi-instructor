@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "title": "Mastery ladder",
+  "levels": [
+    { "level": 1, "name": "Understand", "meaning": "You explained the idea in your own words and it held up.", "available": true },
+    { "level": 2, "name": "Apply", "meaning": "You passed every practical of a lesson that teaches it.", "available": true },
+    { "level": 3, "name": "Use in real work", "meaning": "You used it outside the app and wrote down what you did and learned.", "available": true },
+    { "level": 4, "name": "Build", "meaning": "You finished a phase gate whose lessons teach it, with the evidence in your own words.", "available": true },
+    { "level": 5, "name": "Teach and defend", "meaning": "You taught it back to the tutor and defended it under questions.", "available": false }
+  ]
+}

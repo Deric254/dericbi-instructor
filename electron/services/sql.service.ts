@@ -338,7 +338,7 @@ async function ensureDataEngDatasetsLoaded(sandboxId: string): Promise<void> {
   }
 }
 
-/** Business Problem Solver and Start Here exercises (ids "bp-...", "fd-...", "fo-..." and "ml-...") practise on the trading-business tables (shop_...). */
+/** Business Problem Solver and Start Here exercises (ids "bp-...", "fd-...", "fo-...", "ml-..." and "tf-...") practise on the trading-business tables (shop_...). */
 async function ensureShopDatasetsLoaded(sandboxId: string): Promise<void> {
   const sandbox = await getSandbox(sandboxId)
   const have = new Set<string>((sandbox.exec(`SELECT name FROM sqlite_master WHERE type='table'`)[0]?.values ?? []).map((v: any[]) => String(v[0])))
@@ -353,7 +353,7 @@ async function ensureShopDatasetsLoaded(sandboxId: string): Promise<void> {
 async function ensureDefaultDatasetsLoaded(sandboxId: string): Promise<void> {
   if (!sandboxId.startsWith('ex_')) return // only auto-load for exercise sandboxes
   if (sandboxId.startsWith('ex_de-')) return ensureDataEngDatasetsLoaded(sandboxId)
-  if (sandboxId.startsWith('ex_bp-') || sandboxId.startsWith('ex_fd-') || sandboxId.startsWith('ex_fo-') || sandboxId.startsWith('ex_ml-')) return ensureShopDatasetsLoaded(sandboxId)
+  if (sandboxId.startsWith('ex_bp-') || sandboxId.startsWith('ex_fd-') || sandboxId.startsWith('ex_fo-') || sandboxId.startsWith('ex_ml-') || sandboxId.startsWith('ex_tf-')) return ensureShopDatasetsLoaded(sandboxId)
 
   const sandbox = await getSandbox(sandboxId)
 

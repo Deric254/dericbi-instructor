@@ -2,8 +2,8 @@ import React from 'react'
 import { Play, Flame, RotateCcw } from 'lucide-react'
 import type { LearningPlan as Plan, NavSection } from '../../types'
 
-const LABEL: Record<string, string> = { sql: 'SQL', excel: 'Excel', python: 'Python', powerbi: 'Power BI', statistics: 'Statistics', business: 'Business', dataeng: 'Data Engineering', bizsolver: 'Business Problem Solver', foundations: 'Start Here', founder: 'Founder Track', aiml: 'AI & ML Track', simulation: 'Simulations' }
-const COLOR: Record<string, string> = { sql: 'var(--sql-color)', excel: 'var(--excel-color)', python: 'var(--python-color)', powerbi: 'var(--powerbi-color)', statistics: 'var(--stats-color)', business: 'var(--business-color)', dataeng: 'var(--de-color)', bizsolver: 'var(--bp-color)', foundations: 'var(--fd-color)', founder: 'var(--fo-color)', aiml: 'var(--ml-color)' }
+const LABEL: Record<string, string> = { sql: 'SQL', excel: 'Excel', python: 'Python', powerbi: 'Power BI', statistics: 'Statistics', business: 'Business', dataeng: 'Data Engineering', bizsolver: 'Business Problem Solver', foundations: 'Start Here', founder: 'Founder Track', aiml: 'AI & ML Track', techfirst: 'Technology First Principles', simulation: 'Simulations' }
+const COLOR: Record<string, string> = { sql: 'var(--sql-color)', excel: 'var(--excel-color)', python: 'var(--python-color)', powerbi: 'var(--powerbi-color)', statistics: 'var(--stats-color)', business: 'var(--business-color)', dataeng: 'var(--de-color)', bizsolver: 'var(--bp-color)', foundations: 'var(--fd-color)', founder: 'var(--fo-color)', aiml: 'var(--ml-color)', techfirst: 'var(--tf-color)' }
 const SECTION = (module: string): NavSection => (module === 'simulation' ? 'simulations' : module as NavSection)
 
 /** Where to go next: continue point, streak, progress in each academy, and exercises worth another go. */
