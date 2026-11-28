@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Route, Play, CheckCircle, Circle, Lock, Hourglass, ShieldCheck, ChevronDown, ChevronRight } from 'lucide-react'
 import { useAuthStore, useUIStore, notify } from '../store'
 import { reportApiError } from '../lib/apiError'
 import { PageLoader, PageError } from '../components/ui/PageState'
+import LessonTheory from '../components/ui/LessonTheory'
 import type { PathData, PathPhase, PathItem, PathSide, NavSection, JumpCheck, LadderData } from '../types'
 
 const SIDE_LABEL: Record<PathSide, string> = { tech: 'Technology', business: 'Business', bridge: 'Both' }
@@ -94,6 +95,29 @@ function Phase({ p, data, expanded, toggle, onOpen, onGate }: { p: PathPhase; da
   )
 }
 
+/** Explore: read a lesson's text without starting it. Nothing is recorded, so it never counts toward the path and a strict path does not mind. */
+function Explore({ lessonId }: { lessonId: string }) {
+  const { user } = useAuthStore()
+  const [text, setText] = useState<string | null>(null)
+  const [open, setOpen] = useState(false)
+  const [failed, setFailed] = useState(false)
+  const toggle = async () => {
+    if (open) { setOpen(false); return }
+    setOpen(true)
+    if (text !== null || !user) return
+    try { const l = await window.api.lessons.get(user.id, lessonId); if (l?.lesson) setText(String(l.lesson.theory_md ?? '')); else setFailed(true) } catch { setFailed(true) }
+  }
+  return (
+    <div style={{ marginTop: 10 }}>
+      <button className="btn btn-ghost btn-sm" aria-expanded={open} onClick={toggle}>{open ? 'Hide the reading' : 'Just read it first'}</button>
+      <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 8 }}>Reading only: it does not start the lesson or count toward your path.</span>
+      {open && (failed ? <div style={{ fontSize: 12, color: 'var(--warning)', marginTop: 6 }}>Could not load the reading. Please try again.</div>
+        : text === null ? <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>Loading…</div>
+        : <div style={{ marginTop: 8, maxHeight: 420, overflow: 'auto', borderTop: '1px solid var(--border)', paddingTop: 8 }}><LessonTheory markdown={text} /></div>)}
+    </div>
+  )
+}
+
 /** The readiness check for a lesson opened out of order: what is missing, a short check, a bridge, or "go anyway" as provisional. */
 function JumpPanel({ check, onClose, onSubmit }: { check: JumpCheck; onClose: () => void; onSubmit: (answers: Array<{ ref: string; choice: number }>, go: boolean) => Promise<{ passed: boolean; correct?: number; total?: number } | null> }) {
   const [picked, setPicked] = useState<Record<string, number>>({})
@@ -148,6 +172,7 @@ function JumpPanel({ check, onClose, onSubmit }: { check: JumpCheck; onClose: ()
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>A provisional lesson opens now but does not count toward your phase until those ideas are in place.</div>
         </>
       )}
+      <Explore key={check.lesson_id} lessonId={check.lesson_id} />
     </div>
   )
 }

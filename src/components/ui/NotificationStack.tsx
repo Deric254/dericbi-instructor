@@ -1,4 +1,3 @@
-import React, { useEffect } from 'react'
 import { CheckCircle, XCircle, Info, AlertTriangle, X, Trophy } from 'lucide-react'
 import { useNotificationStore } from '../../store'
 

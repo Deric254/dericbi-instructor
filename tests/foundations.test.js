@@ -40,7 +40,7 @@ test('the academy is its own module of 8 lessons and does not change the others'
   const g = db.getDb()
   const count = (m) => g.prepare('SELECT COUNT(*) c FROM lessons WHERE module = ?').get(m).c
   assert.equal(count('foundations'), 8)
-  assert.equal(count('sql'), 10); assert.equal(count('dataeng'), 20); assert.equal(count('bizsolver'), 11)
+  assert.equal(count('sql'), 10); assert.equal(count('dataeng'), 21); assert.equal(count('bizsolver'), 11)
   assert.equal(g.prepare("SELECT DISTINCT exercise_type t FROM exercises WHERE lesson_id LIKE 'fd-%'").all().map((r) => r.t).join(), 'sql_query')
   assert.equal(g.prepare("SELECT COUNT(*) c FROM lessons WHERE module = 'foundations' AND mastery_required = 1").get().c, 8)
 })

@@ -38,6 +38,15 @@ export const useAuthStore = create<AuthStore>()(
 // UI STORE
 // ─────────────────────────────────────────────
 
+/** What the learner is working on right now in an academy that has no tutor panel of its own, so the floating tutor can see it. */
+export interface WorkHint {
+  section: NavSection
+  context: { code?: string; error?: string }
+  stuck: { key: string; wrong: number }
+  /** The question offered as one click when there is an error to look at. */
+  prompt?: string
+}
+
 interface UIStore {
   activeSection: NavSection
   sidebarCollapsed: boolean
@@ -46,6 +55,8 @@ interface UIStore {
   isOwner: boolean
   /** A lesson the next academy page should open as soon as it has loaded (never saved between launches). */
   pendingLessonId: string | null
+  work: WorkHint | null
+  setWork: (work: WorkHint | null) => void
   setActiveSection: (section: NavSection) => void
   setPendingLesson: (lessonId: string | null) => void
   toggleSidebar: () => void
@@ -65,6 +76,8 @@ export const useUIStore = create<UIStore>()(
       theme: 'dark',
       isOwner: false,
       pendingLessonId: null,
+      work: null,
+      setWork: (work) => set({ work }),
       setActiveSection: (activeSection) => set({ activeSection }),
       setPendingLesson: (pendingLessonId) => set({ pendingLessonId }),
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),

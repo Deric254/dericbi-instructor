@@ -1,4 +1,3 @@
-import React from 'react'
 import { X } from 'lucide-react'
 import { useUIStore } from '../../store'
 import InstructorPanel from './InstructorPanel'
@@ -28,11 +27,14 @@ const SECTION_CONTEXT: Partial<Record<NavSection, InstructorContext>> = {
 }
 
 export default function GlobalInstructor() {
-  const { activeSection, instructorOpen, setInstructorOpen } = useUIStore()
+  const { activeSection, instructorOpen, setInstructorOpen, work } = useUIStore()
 
   if (!instructorOpen || SECTIONS_WITH_OWN_INSTRUCTOR.has(activeSection)) return null
 
-  const context: InstructorContext = SECTION_CONTEXT[activeSection] ?? { type: 'general' }
+  const base: InstructorContext = SECTION_CONTEXT[activeSection] ?? { type: 'general' }
+  // What the learner is running right now (their code and the error it gave), so "I am stuck" is about their real attempt.
+  const here = work && work.section === activeSection ? work : null
+  const context: InstructorContext = here ? { ...base, ...here.context } : base
 
   return (
     <div style={{
@@ -66,7 +68,7 @@ export default function GlobalInstructor() {
       >
         <X size={12} />
       </button>
-      <InstructorPanel context={context} />
+      <InstructorPanel context={context} stuck={here?.stuck} initialPrompt={here?.context.error ? here.prompt : undefined} />
     </div>
   )
 }

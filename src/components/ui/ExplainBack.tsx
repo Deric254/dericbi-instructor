@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { CheckCircle, MessageSquare } from 'lucide-react'
 import { useAuthStore } from '../../store'
 import { reportApiError } from '../../lib/apiError'

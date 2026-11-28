@@ -2,9 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { HyperFormula } from 'hyperformula'
 import {
   FileSpreadsheet, BookOpen, Play, CheckCircle, ChevronRight,
-  RefreshCw, Info, Lightbulb, AlertCircle,
-} from 'lucide-react'
-import { useAuthStore, notify } from '../store'
+  AlertCircle} from 'lucide-react'
+import { useAuthStore, useUIStore, notify } from '../store'
 import { usePendingLesson } from '../hooks/usePendingLesson'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
@@ -240,6 +239,8 @@ function SpreadsheetEnv() {
   const [formulaResult, setFormulaResult] = useState<string | null>(null)
   const [formulaInput, setFormulaInput] = useState('')
   const [formulaError, setFormulaError] = useState<string | null>(null)
+  const [wrong, setWrong] = useState(0)
+  const setWork = useUIStore((s) => s.setWork)
   const hfRef = useRef<HyperFormula | null>(null)
   const sheetIdRef = useRef<number>(0)
 
@@ -306,6 +307,10 @@ function SpreadsheetEnv() {
     }
   }
 
+  // Let the floating tutor see this formula and its error, and offer help after repeated failures.
+  useEffect(() => { setWork({ section: 'excel', context: { code: formulaInput, error: formulaError ?? undefined }, stuck: { key: 'excel-formula', wrong }, prompt: 'My formula gave an error. Help me understand what it means and what to check, without writing the finished formula for me.' }) }, [formulaInput, formulaError, wrong, setWork])
+  useEffect(() => () => setWork(null), [setWork])
+
   const evaluateFormula = () => {
     if (!formulaInput.trim()) return
     setFormulaError(null)
@@ -323,13 +328,14 @@ function SpreadsheetEnv() {
       const result = hfRef.current.getCellValue({ sheet: sheetIdRef.current, row: 99, col: 0 })
 
       if (result instanceof Error) {
-        setFormulaError(result.message)
+        setFormulaError(result.message); setWrong((n) => n + 1)
       } else {
+        setWrong(0)
         const display = result === null ? '(empty)' : typeof result === 'number' ? formatNumber(result) : String(result)
         setFormulaResult(display)
       }
     } catch (err: any) {
-      setFormulaError(err.message)
+      setFormulaError(err.message); setWrong((n) => n + 1)
     }
   }
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 /** Rows drawn straight away; the rest are one click away. Keeps a 10,000-row result instant instead of freezing the window. */
 export const FIRST_ROWS = 300

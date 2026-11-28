@@ -226,7 +226,7 @@
       ],
       "estimated_min": 25,
       "sort_order": 3,
-      "theory_md": "## Why this matters\nSpreadsheets, databases, dashboards and reports are all built from tables. If you can read a table, you can find your way into any of them. If you cannot, every tool looks like a different, confusing world.\n\n## The first principle\nA **table** is a grid. Each **row** is one thing (one customer, one sale). Each **column** is one fact about every row (the town, the date). A **key** is a column whose value is different for every row, so it can point to exactly one row. **A key is how tables are connected to each other.**\n\n## A worked example\nThe shop has a customers table and a sales table. The customers table has 150 rows and a `customer_id` column. Every one of the 150 ids is different, so `customer_id` is a good key. Counting the rows and counting the distinct ids give the same number, 150.\n\nEach sale row carries a `customer_id` too. That value is a pointer back to the customer. Follow the pointer for customer 3 and you find Mercy Mission School, which appears on 113 sales. One table gave you the thing, the other gave you the history, and the key joined them.\n\n## Try it\nCount rows, test that a key has no duplicates, and follow a key from one table to another.\n\n## What you can and cannot claim\nYou can say a column is a valid key only if you checked that no value repeats and none is missing. You cannot treat a name as a key. Two customers can share a name, and a name can change.\n\n## Say it in your own words\nExplain what a row, a column and a key are, and why a name is a poor key.\n\n## Do this in real life\nPick a list you keep, such as stock or members. Decide which column could be the key. Check there are no repeats, for example with a COUNTIF or by sorting. If there are repeats, write what you would add to make each row unique.",
+      "theory_md": "## Hook\nImagine you search a customer list for \"Mercy Mission School\" and find two rows with that name. Which one owns the 113 sales? Nothing in the name can tell you. By the end of this lesson you will know what makes a row findable for certain, and why every table you meet is built around it.\n\n## Predict\nBefore you read on, commit to a guess: if two customers can share a name, what would you need in each row so that a sale can point to exactly one of them?\n\n## Plain words\nA **table** is a grid. Each **row** is one thing, such as one customer or one sale. Each **column** is one fact held about every row. A **key** is a column whose value is different in every row, so it points to exactly one row. Tables are joined to each other through keys: a sale holds a customer's key, and following it takes you to that customer.\n\n- A **row** is one thing.\n- A **column** is one fact about every row.\n- A **key** is a value that is never repeated and never missing.\n\n## Diagram\n```diagram\n{\"title\": \"How a key joins two tables\", \"nodes\": [{\"id\": \"cust\", \"label\": \"Customers: one row per customer\", \"side\": \"tech\"}, {\"id\": \"key\", \"label\": \"customer_id: different in every row\", \"side\": \"tech\"}, {\"id\": \"sale\", \"label\": \"Sales: each row holds a customer_id\", \"side\": \"tech\"}, {\"id\": \"join\", \"label\": \"Follow the key from sale to customer\", \"side\": \"bridge\"}, {\"id\": \"ans\", \"label\": \"One customer and all their sales\", \"side\": \"business\"}], \"edges\": [[\"cust\", \"key\"], [\"sale\", \"key\"], [\"key\", \"join\"], [\"join\", \"ans\"]]}\n```\n\n## Worked example\nThe shop has a customers table of 150 rows. Counting the rows gives 150, and counting the distinct `customer_id` values also gives 150, so no id repeats and `customer_id` can be trusted as a key. Each sale row carries a `customer_id` as a pointer back. Follow the pointer for customer 3 and you reach Mercy Mission School, which appears on 113 sales.\n\nBe careful with what you claim. A column is a key only if you checked that nothing repeats and nothing is missing. A name is a poor key: two customers can share one, and a name can change.\n\n## Case\n```evidence\ncase-reinhart-rogoff\n```\nRows that are left out of a table change every answer calculated from it, and nobody can see that without going back to the rows. That is why tables and keys matter: they let anyone repeat the count.\n\n## Bridge\n**Technology side:** a table is a grid of rows and columns, and the key is what joins one table to another. **Business side:** a report is only as good as the rows behind it. Ask which rows are in the figure, who is left out, and how you would know.\n\n## Try it\nDo the three practicals below. The first counts the rows, the second tests that the key has no duplicates, and the third follows a key from one table to another.\n\n## Say it back\nExplain in two or three sentences what a row, a column and a key are, and why a name makes a poor key. Use your own words: the app checks that the right ideas are there.\n\n## Use it\nPick a list you keep, such as stock or members. Decide which column could be the key. Check that no value repeats, for example by sorting or using a COUNTIF. If there are repeats, write what you would add to make each row unique, and say which rows a total on that list might be leaving out.\n",
       "quiz": [
         {
           "question": "In a customers table, what is one row?",
@@ -857,6 +857,114 @@
           "hint_2": "SELECT COUNT(*) AS paid_without_payment FROM shop_sales s WHERE s.payment_status = 'paid' AND NOT EXISTS (SELECT 1 FROM shop_payments p WHERE p.sale_id = s.sale_id)",
           "hint_3": "SELECT COUNT(*) AS paid_without_payment FROM shop_sales s WHERE s.payment_status = 'paid' AND NOT EXISTS (SELECT 1 FROM shop_payments p WHERE p.sale_id = s.sale_id)",
           "solution": "SELECT COUNT(*) AS paid_without_payment FROM shop_sales s WHERE s.payment_status = 'paid' AND NOT EXISTS (SELECT 1 FROM shop_payments p WHERE p.sale_id = s.sale_id)",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        }
+      ],
+      "mastery_required": true
+    },
+    {
+      "id": "tf-messy",
+      "title": "Audit a Messy Source",
+      "description": "Apply everything so far to data you did not build: count, suspect, test, and only then clean.",
+      "level": "beginner",
+      "prerequisites": [
+        "tf-first-principles"
+      ],
+      "estimated_min": 30,
+      "sort_order": 9,
+      "theory_md": "## Hook\nA supplier statement is typed into a spreadsheet by hand. It has 100 lines, and the same supplier shows up under **24 different spellings**. Add it up as it stands and the total is wrong before you have done anything clever. By the end of this lesson you will audit a source you did not build, and know what to measure before you touch a single cell.\n\n## Predict\nBefore you read on, commit to a guess: if you force every name to lower case and trim stray spaces, will the 24 spellings collapse to the real number of suppliers, and if not, what else could be going on?\n\n## Plain words\nA source you did not build can be wrong in ways you cannot see by looking. The method is the one from the last lesson. **Measure** the size of the problem, **suspect** one cause, **test** it with something that could fail, and only then **clean a copy**. Two faults turn up again and again: one thing written many ways, and one thing entered more than once.\n\n- **Many spellings** make one supplier look like several, so totals per supplier come out split.\n- **Repeat entries** make a total larger than the truth.\n- A fix is only trusted after you **count again** and the numbers behave.\n\n## Diagram\n```diagram\n{\"title\": \"Audit before you clean\", \"nodes\": [{\"id\": \"m\", \"label\": \"Measure: rows and distinct values\", \"side\": \"tech\"}, {\"id\": \"s\", \"label\": \"Suspect one cause\", \"side\": \"tech\"}, {\"id\": \"t\", \"label\": \"Test it with something that can fail\", \"side\": \"tech\"}, {\"id\": \"c\", \"label\": \"Clean a copy, keep the original\", \"side\": \"bridge\"}, {\"id\": \"r\", \"label\": \"Count again, report the money effect\", \"side\": \"business\"}], \"edges\": [[\"m\", \"s\"], [\"s\", \"t\"], [\"t\", \"c\"], [\"c\", \"r\"]]}\n```\n\n## Worked example\nCount the distinct supplier names in the statement table and you get 24. Your first suspect is capital letters, so test it: force lower case and trim spaces, then count again. You get **21**. The hypothesis explained only three of the differences. The rest are other writings of the same name, such as a missing full stop or the word LIMITED written in place of LTD, so a rival cause is at work.\n\nNow look for repeats. Four invoice numbers appear twice, each time with the same supplier and the same amount. Counting every row, the statements total 26,222,815. Counting each invoice number once, they total 24,720,060. The repeats overstate the total by 1,502,755. Be careful with what you claim: the evidence says the entries look repeated, and a person who knows the business still has to confirm it before anything is removed.\n\n## Case\n```evidence\ncase-reinhart-rogoff\n```\nRows that are left out, or counted wrongly, change every figure built on them. The same discipline applies in both directions: know exactly which rows are in the number.\n\n## Bridge\n**Technology side:** count distinct values, test the obvious cause, and keep the original untouched while you clean a copy. **Business side:** translate every fault into money. Four repeated invoices sound small, and 1.5 million shillings does not.\n\n## Try it\nDo the three practicals below. The first counts the spellings, the second tests whether capital letters explain them, and the third prices the repeated invoices.\n\n## Say it back\nExplain in two or three sentences how you would audit a messy source before cleaning it, and why you count again afterwards. Use your own words: the app checks that the right ideas are there.\n\n## Use it\nTake one real list you did not build, such as a supplier list, a stock sheet or a customer list. Count the rows and the distinct names. Pick one suspect cause, test it, and write down how many rows it explains and how many it does not. Do not change the original.\n",
+      "quiz": [
+        {
+          "question": "You are handed a spreadsheet someone else typed. What comes first?",
+          "options": [
+            "Measure it: count rows and distinct values",
+            "Delete anything that looks odd",
+            "Start the final report",
+            "Fix the first mistake you see"
+          ],
+          "correct_index": 0,
+          "explanation": "You cannot judge a problem you have not measured."
+        },
+        {
+          "question": "A supplier appears under 24 spellings. After forcing lower case there are still 21. What does this show?",
+          "options": [
+            "Capitalisation was only part of the cause",
+            "The data is now clean",
+            "There are exactly 21 suppliers",
+            "The count was wrong"
+          ],
+          "correct_index": 0,
+          "explanation": "A rival explanation was tested and only partly accounted for the problem."
+        },
+        {
+          "question": "An invoice number appears twice with the same supplier and the same amount. What is the safest reading?",
+          "options": [
+            "The same invoice was entered twice, so a total of all rows overstates it",
+            "Two different invoices",
+            "A rounding difference",
+            "A system fault in the database"
+          ],
+          "correct_index": 0,
+          "explanation": "Same number, supplier and amount points to a repeat entry. Check before you remove anything."
+        },
+        {
+          "question": "Why count the effect of a duplicate in money, not only in rows?",
+          "options": [
+            "The business decision depends on the amount it distorts",
+            "Money is easier to count",
+            "Rows cannot be counted",
+            "It makes the query longer"
+          ],
+          "correct_index": 0,
+          "explanation": "A repeat that is small in rows can still be large in money."
+        },
+        {
+          "question": "When should you change or delete the source data?",
+          "options": [
+            "After you have measured the problem and kept the original",
+            "Immediately, to save time",
+            "Never read it first",
+            "Only if the file is large"
+          ],
+          "correct_index": 0,
+          "explanation": "Measure, test, then clean a copy, so the original can always be checked."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "tf-9-e1",
+          "title": "Count the Spellings",
+          "prompt": "How many different spellings of a supplier name are in shop_supplier_invoices? Return one column called spellings.",
+          "hint_1": "COUNT(DISTINCT supplier_name).",
+          "hint_2": "SELECT COUNT(DISTINCT supplier_name) AS spellings FROM shop_supplier_invoices",
+          "hint_3": "SELECT COUNT(DISTINCT supplier_name) AS spellings FROM shop_supplier_invoices",
+          "solution": "SELECT COUNT(DISTINCT supplier_name) AS spellings FROM shop_supplier_invoices",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-9-e2",
+          "title": "Test the Obvious Cause",
+          "prompt": "Hypothesis: the spellings differ only by capital letters and spaces. Count the distinct names after LOWER and TRIM. Return one column called after_case_fix.",
+          "hint_1": "Wrap supplier_name in LOWER(TRIM(...)) inside the COUNT(DISTINCT ...).",
+          "hint_2": "SELECT COUNT(DISTINCT LOWER(TRIM(supplier_name))) AS after_case_fix FROM shop_supplier_invoices",
+          "hint_3": "SELECT COUNT(DISTINCT LOWER(TRIM(supplier_name))) AS after_case_fix FROM shop_supplier_invoices",
+          "solution": "SELECT COUNT(DISTINCT LOWER(TRIM(supplier_name))) AS after_case_fix FROM shop_supplier_invoices",
+          "evaluation_mode": "exact",
+          "points": 15,
+          "exercise_type": "sql_query"
+        },
+        {
+          "id": "tf-9-e3",
+          "title": "Price the Repeats",
+          "prompt": "Some invoice numbers are entered twice with the same amount. How much more is the total of all rows than the total counting each invoice_no once? Return one column called overstated.",
+          "hint_1": "Total of all rows, minus the total of one amount per invoice_no (GROUP BY invoice_no with MAX(amount)).",
+          "hint_2": "SELECT SUM(amount) - (SELECT SUM(a) FROM (SELECT MAX(amount) AS a FROM shop_supplier_invoices GROUP BY invoice_no)) AS overstated FROM shop_supplier_invoices",
+          "hint_3": "SELECT SUM(amount) - (SELECT SUM(a) FROM (SELECT MAX(amount) AS a FROM shop_supplier_invoices GROUP BY invoice_no)) AS overstated FROM shop_supplier_invoices",
+          "solution": "SELECT SUM(amount) - (SELECT SUM(a) FROM (SELECT MAX(amount) AS a FROM shop_supplier_invoices GROUP BY invoice_no)) AS overstated FROM shop_supplier_invoices",
           "evaluation_mode": "exact",
           "points": 15,
           "exercise_type": "sql_query"

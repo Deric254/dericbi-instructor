@@ -53,6 +53,9 @@ jobs:
       - name: Type-check the interface
         run: npm run typecheck
 
+      - name: Lint for real mistakes
+        run: npm run lint
+
   python-packages:
     name: Python playground (pandas, numpy, matplotlib)
     runs-on: ubuntu-latest

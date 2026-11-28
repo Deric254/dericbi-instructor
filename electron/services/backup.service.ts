@@ -26,6 +26,27 @@ export function exportProgress(userId: string): ProgressBackup {
   return { format: BACKUP_FORMAT, version: BACKUP_VERSION, exported_at: new Date().toISOString(), tables }
 }
 
+/** When the app gently reminds a learner to save their progress: once they have real work to lose, and then every so often. */
+export const BACKUP_REMINDER = { min_lessons_complete: 3, every_days: 14 } as const
+const savedKey = (userId: string) => `progress_saved_${userId}`
+
+/** Remember that this learner just saved a backup. */
+export function noteSaved(userId: string, now = new Date()): void {
+  getDb().prepare('INSERT INTO app_settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value').run(savedKey(userId), now.toISOString())
+}
+
+/** Has this learner enough work that losing it would hurt, and have they saved lately? `due` is true when a reminder is worth showing. */
+export function backupStatus(userId: string, now = new Date()): { lessons_complete: number; last_saved: string | null; days_since: number | null; due: boolean } {
+  const db = getDb()
+  const lessons_complete = (db.prepare("SELECT COUNT(*) c FROM lesson_progress WHERE user_id = ? AND status = 'complete'").get(userId) as { c: number }).c
+  const row = db.prepare('SELECT value FROM app_settings WHERE key = ?').get(savedKey(userId)) as { value: string } | undefined
+  const t = row ? Date.parse(row.value) : NaN
+  const last_saved = Number.isNaN(t) ? null : new Date(t).toISOString()
+  const days_since = last_saved === null ? null : Math.max(0, Math.floor((now.getTime() - t) / 86_400_000))
+  const due = lessons_complete >= BACKUP_REMINDER.min_lessons_complete && (days_since === null || days_since >= BACKUP_REMINDER.every_days)
+  return { lessons_complete, last_saved, days_since, due }
+}
+
 export interface ImportResult { success: boolean; error?: string; added?: number; skipped?: number }
 
 /**

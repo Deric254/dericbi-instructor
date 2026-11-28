@@ -31,7 +31,7 @@ test('the academy is its own module with 11 lessons and does not change the othe
   const count = (m) => g.prepare('SELECT COUNT(*) c FROM lessons WHERE module = ?').get(m).c
   assert.equal(count('bizsolver'), 11)
   assert.equal(count('sql'), 10)
-  assert.equal(count('dataeng'), 20)
+  assert.equal(count('dataeng'), 21)
   assert.equal(g.prepare("SELECT DISTINCT exercise_type t FROM exercises WHERE lesson_id LIKE 'bp-%'").all().map((r) => r.t).sort().join(), 'python_code,sql_query')
   assert.equal(g.prepare("SELECT COUNT(*) c FROM skill_ratings WHERE skill = 'bizsolver'").get().c, 0)
 })
@@ -117,7 +117,7 @@ test('a student upgrading from the previous version: the academy opens at lesson
   assert.notEqual(bp[0].user_status, 'locked', 'lesson 1 must be open')
   assert.ok(bp.slice(1).every((l) => l.user_status === 'locked' || !l.user_status), 'the rest wait for their prerequisites')
   assert.equal((await list('sql')).find((l) => l.id === 'sql-select').user_status, 'complete', 'old progress untouched')
-  assert.equal((await list('dataeng')).length, 20)
+  assert.equal((await list('dataeng')).length, 21)
 
   await app.invoke('lessons:start', { userId: 'old', lessonId: 'bp-audit' })
   assert.equal((await app.invoke('lessons:complete', { userId: 'old', lessonId: 'bp-audit', timeSpentS: 60 })).success, true)

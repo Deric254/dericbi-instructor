@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import {
-  BookOpen, Download, Trash2, Plus, FileText,
-  Loader, CheckCircle,
-  ExternalLink, Star, Brain, ChevronRight, Footprints,
-} from 'lucide-react'
+  BookOpen, Trash2, Plus, FileText,
+  Loader, Footprints} from 'lucide-react'
 import { useAuthStore, notify } from '../store'
 import { PageError } from '../components/ui/PageState'
 import { reportApiError } from '../lib/apiError'

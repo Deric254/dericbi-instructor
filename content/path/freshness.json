@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "note": "Figures the lessons quote that change with the law or the market. Each entry's text must appear word for word in its lesson. 'as_of' is the date of the source the lesson used, and a figure is due for a re-check once it is older than 'review_every_days'. 'confirmed' stays false until someone has checked the figure against the official body and recorded the date in 'confirmed_on'.",
+  "review_every_days": 120,
+  "facts": [
+    {
+      "id": "business-name-fee",
+      "lesson": "fo-legal",
+      "text": "**KES 950**",
+      "source": "Lawzana guide on business name registration, updated October 2026",
+      "as_of": "2026-10-31",
+      "official": "Business Registration Service (eCitizen)",
+      "official_url": "https://brs.go.ke",
+      "confirmed": false,
+      "confirmed_on": null
+    },
+    {
+      "id": "turnover-tax-rate",
+      "lesson": "fo-legal",
+      "text": "**3 percent of gross sales**",
+      "source": "KRA, Unpacking Turnover Tax (2023/24)",
+      "as_of": "2024-06-30",
+      "official": "Kenya Revenue Authority",
+      "official_url": "https://www.kra.go.ke",
+      "confirmed": false,
+      "confirmed_on": null
+    },
+    {
+      "id": "vat-threshold",
+      "lesson": "fo-legal",
+      "text": "**KES 5 million**",
+      "source": "SmartVAT Kenya guide, July 2026",
+      "as_of": "2026-07-31",
+      "official": "Kenya Revenue Authority",
+      "official_url": "https://www.kra.go.ke",
+      "confirmed": false,
+      "confirmed_on": null
+    },
+    {
+      "id": "vat-rate",
+      "lesson": "fo-legal",
+      "text": "**16 percent**",
+      "source": "SmartVAT Kenya guide, July 2026",
+      "as_of": "2026-07-31",
+      "official": "Kenya Revenue Authority",
+      "official_url": "https://www.kra.go.ke",
+      "confirmed": false,
+      "confirmed_on": null
+    },
+    {
+      "id": "nssf-employer",
+      "lesson": "fo-team",
+      "text": "employer pays 6 percent of pensionable pay (between KES 9,000 and KES 108,000)",
+      "source": "FNJ & Associates payroll guide, updated 30 October 2026",
+      "as_of": "2026-10-30",
+      "official": "National Social Security Fund",
+      "official_url": "https://www.nssf.or.ke",
+      "confirmed": false,
+      "confirmed_on": null
+    },
+    {
+      "id": "housing-levy",
+      "lesson": "fo-team",
+      "text": "employer pays 1.5 percent of gross pay",
+      "source": "FNJ & Associates payroll guide, updated 30 October 2026",
+      "as_of": "2026-10-30",
+      "official": "Kenya Revenue Authority",
+      "official_url": "https://www.kra.go.ke",
+      "confirmed": false,
+      "confirmed_on": null
+    },
+    {
+      "id": "shif",
+      "lesson": "fo-team",
+      "text": "2.75 percent of gross, minimum KES 300",
+      "source": "FNJ & Associates payroll guide, updated 30 October 2026",
+      "as_of": "2026-10-30",
+      "official": "Social Health Authority",
+      "official_url": "https://sha.go.ke",
+      "confirmed": false,
+      "confirmed_on": null
+    },
+    {
+      "id": "paye-bands",
+      "lesson": "fo-team",
+      "text": "10 percent to KES 24,000, then 25 percent to KES 32,333, then 30 percent to KES 500,000, with a personal relief of KES 2,400",
+      "source": "FNJ & Associates payroll guide, updated 30 October 2026",
+      "as_of": "2026-10-30",
+      "official": "Kenya Revenue Authority",
+      "official_url": "https://www.kra.go.ke",
+      "confirmed": false,
+      "confirmed_on": null
+    }
+  ]
+}

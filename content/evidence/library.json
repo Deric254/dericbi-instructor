@@ -8,8 +8,14 @@
       "title": "Mars Climate Orbiter, 1999: right numbers, wrong units",
       "text": "On 23 September 1999 NASA lost the Mars Climate Orbiter as it went into orbit around Mars. The navigation software on the ground worked in English units and calculated thrust in pound-force. The other software expected metric values in newtons. The figures were off by a factor of 4.45, so the spacecraft's path was miscalculated and it passed about 57 km above Mars, too low to survive.",
       "takeaway": "A number is only half a fact. Its unit and its type are the other half, and nothing inside the number warns you when they differ.",
-      "concepts": ["data-types"],
-      "source": { "publisher": "NASA Office of Safety and Mission Assurance", "title": "The Mars Climate Orbiter Mishap (safety message, 2009)", "url": "https://sma.nasa.gov/docs/default-source/safety-messages/safetymessage-2009-08-01-themarsclimateorbitermishap.pdf" },
+      "concepts": [
+        "data-types"
+      ],
+      "source": {
+        "publisher": "NASA Office of Safety and Mission Assurance",
+        "title": "The Mars Climate Orbiter Mishap (safety message, 2009)",
+        "url": "https://sma.nasa.gov/docs/default-source/safety-messages/safetymessage-2009-08-01-themarsclimateorbitermishap.pdf"
+      },
       "checked": "2026-11-26"
     },
     {
@@ -18,8 +24,14 @@
       "title": "Amazon S3, 2017: one wrong input in one command",
       "text": "On the morning of 28 February 2017, at 9:37 AM PST, an authorised member of the Amazon S3 team used an established playbook to run a command meant to remove a small number of servers. One of the inputs was entered incorrectly and a larger set of servers was removed than intended. S3 in the US-EAST-1 region was operating normally again at 1:54 PM PST.",
       "takeaway": "The cause was one input to one command. Small single steps are easier to check, and a command that can do large damage needs a guard.",
-      "concepts": ["debugging-method"],
-      "source": { "publisher": "Amazon Web Services", "title": "Summary of the Amazon S3 Service Disruption in the Northern Virginia (US-EAST-1) Region", "url": "https://aws.amazon.com/message/41926" },
+      "concepts": [
+        "debugging-method"
+      ],
+      "source": {
+        "publisher": "Amazon Web Services",
+        "title": "Summary of the Amazon S3 Service Disruption in the Northern Virginia (US-EAST-1) Region",
+        "url": "https://aws.amazon.com/message/41926"
+      },
       "checked": "2026-11-26"
     },
     {
@@ -30,8 +42,15 @@
       "who": "Richard P. Feynman",
       "work": "Cargo Cult Science, Caltech commencement address, 1974",
       "takeaway": "Your own first guess is the likeliest thing to mislead you, so test it before you trust it.",
-      "concepts": ["debugging-method", "first-principles"],
-      "source": { "publisher": "Caltech Library (Engineering & Science)", "title": "Cargo Cult Science", "url": "https://calteches.library.caltech.edu/51/2/CargoCult.htm" },
+      "concepts": [
+        "debugging-method",
+        "first-principles"
+      ],
+      "source": {
+        "publisher": "Caltech Library (Engineering & Science)",
+        "title": "Cargo Cult Science",
+        "url": "https://calteches.library.caltech.edu/51/2/CargoCult.htm"
+      },
       "checked": "2026-11-26"
     },
     {
@@ -40,8 +59,17 @@
       "title": "A published result re-run and corrected, 2013",
       "text": "In April 2013 Herndon, Ash and Pollin published a critique of a study by Reinhart and Rogoff on public debt and growth. They reported coding errors, selective exclusion of available data and unconventional weighting of summary statistics. For countries with public debt above 90 percent of GDP, they found average real GDP growth of 2.2 percent, not the -0.1 percent that had been published.",
       "takeaway": "The error was found because someone repeated the analysis step by step. Work that can be re-run can be checked and corrected, and that is what code gives you.",
-      "concepts": ["table", "filter"],
-      "source": { "publisher": "Political Economy Research Institute, UMass Amherst", "title": "Does High Public Debt Consistently Stifle Economic Growth? A Critique of Reinhart and Rogoff", "url": "https://peri.umass.edu/publication/does-high-public-debt-consistently-stifle-economic-growth-a-critique-of-reinhart-and-rogoff/" },
+      "concepts": [
+        "table",
+        "filter",
+        "tables-keys",
+        "audit-messy-source"
+      ],
+      "source": {
+        "publisher": "Political Economy Research Institute, UMass Amherst",
+        "title": "Does High Public Debt Consistently Stifle Economic Growth? A Critique of Reinhart and Rogoff",
+        "url": "https://peri.umass.edu/publication/does-high-public-debt-consistently-stifle-economic-growth-a-critique-of-reinhart-and-rogoff/"
+      },
       "checked": "2026-11-26"
     }
   ]

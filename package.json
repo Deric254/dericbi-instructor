@@ -1,7 +1,7 @@
 {
   "name": "dericbi-instructor",
-  "version": "1.4.32",
-  "description": "DericBI Instructor — Personal Analytics Mentor and Training Platform",
+  "version": "1.4.25",
+  "description": "DericBI Instructor \u2014 Personal Analytics Mentor and Training Platform",
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "concurrently -n VITE,ELECTRON -c cyan,yellow \"npm run dev:vite\" \"npm run dev:electron\"",
@@ -15,7 +15,8 @@
     "verify:packaging": "node scripts/verify-packaged-deps.js",
     "verify:licence": "node scripts/check-owner-key.js",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "npm run build:electron && node scripts/run-tests.js"
+    "test": "npm run build:electron && node scripts/run-tests.js",
+    "lint": "eslint src electron --max-warnings 20"
   },
   "keywords": [],
   "author": "Deric",
@@ -34,8 +35,12 @@
     "cross-env": "^7.0.3",
     "electron": "^31.0.0",
     "electron-builder": "^24.13.3",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "globals": "^17.14.0",
     "pyodide": "0.26.1",
     "typescript": "^5.4.5",
+    "typescript-eslint": "^8.74.0",
     "vite": "^5.3.1",
     "wait-on": "^7.2.0"
   },
@@ -65,7 +70,7 @@
   "build": {
     "appId": "com.deric.dericbi-instructor",
     "productName": "DericBI Instructor",
-    "copyright": "Copyright © 2025 Deric",
+    "copyright": "Copyright \u00a9 2025 Deric",
     "directories": {
       "output": "release",
       "buildResources": "assets"

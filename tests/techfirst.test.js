@@ -1,5 +1,5 @@
 'use strict'
-// Technology First Principles: eight short lessons that give the technology side the same footing Start Here gives the business side.
+// Technology First Principles: nine short lessons that give the technology side the same footing Start Here gives the business side.
 // Every model answer must be accepted by the real grader, wrong answers rejected, the figures the lessons quote must match what the
 // answers produce, a learner must really pass quiz, practicals and explain-back before a lesson completes, every concept the lessons
 // teach exists in the concept map, the master track places them beside the business lessons, and the other academies stay undisturbed.
@@ -10,7 +10,7 @@ const path = require('node:path')
 const { bootWithIpc } = require('./helpers/ipc')
 const { makeUser, makeLearner, src } = require('./helpers/harness')
 
-const IDS = ['tf-data', 'tf-files', 'tf-tables', 'tf-instructions', 'tf-databases', 'tf-networks', 'tf-trust', 'tf-first-principles']
+const IDS = ['tf-data', 'tf-files', 'tf-tables', 'tf-instructions', 'tf-databases', 'tf-networks', 'tf-trust', 'tf-first-principles', 'tf-messy']
 const EXPLAIN = {
   'tf-data': 'A type tells the computer how to read the stored bits as a number, text or a date, and text sorts character by character like a dictionary so 10 can come before 9, which is why I check the type.',
   'tf-files': 'The same table can be written as CSV, one row per line with commas between the values, or as JSON where each row is a record with the column name beside every value, but it is still the same table.',
@@ -19,6 +19,7 @@ const EXPLAIN = {
   'tf-databases': 'A database is shared so many people use one copy, safe because rules protect the data, and a transaction means a group of changes either all happen together or none of them happen.',
   'tf-networks': 'A client sends a request to a server and the server sends back a response, and a 404 means the request was wrong or the thing was not found while a 500 means the server itself failed.',
   'tf-trust': 'Least privilege means each person gets only the access the job needs, and a backup has to be tested by restoring it because otherwise I only hope it works when the day comes.',
+  'tf-messy': 'First I measure the source by counting rows and distinct values, then I suspect one cause and test it, I clean only a copy so the original stays, and afterwards I count again and say what the fault cost in money.',
   'tf-first-principles': 'I write down what I expected and what actually happened, form one hypothesis and run a test that could prove it wrong, and I change only one thing at a time so I know which change caused the effect.',
 }
 const WRONG = {
@@ -46,6 +47,9 @@ const WRONG = {
   'tf-8-e1': "SELECT COUNT(*) AS credit_sales FROM shop_sales",
   'tf-8-e2': "SELECT COUNT(*) AS unpaid_credit FROM shop_sales WHERE payment_status = 'credit'",
   'tf-8-e3': "SELECT 5 AS paid_without_payment",
+  'tf-9-e1': "SELECT 8 AS spellings",
+  'tf-9-e2': "SELECT 24 AS after_case_fix",
+  'tf-9-e3': "SELECT 0 AS overstated",
 }
 const h = bootWithIpc({ prefix: 'dbi-techfirst' })
 let db, sql, lessons
@@ -63,12 +67,12 @@ const run = async (id, query) => {
 }
 const grade = (id, user, solution) => sql.validateSQLAnswer({ sandboxId: `ex_${id}_u`, userQuery: user, solutionQuery: solution, evaluationMode: 'exact' })
 
-test('the academy is its own module of 8 gated lessons and does not change the others', () => {
+test('the academy is its own module of 9 gated lessons and does not change the others', () => {
   const g = db.getDb()
   const count = (m) => g.prepare('SELECT COUNT(*) c FROM lessons WHERE module = ?').get(m).c
-  assert.equal(count('techfirst'), 8)
+  assert.equal(count('techfirst'), 9)
   assert.equal(count('foundations'), 8); assert.equal(count('founder'), 12); assert.equal(count('aiml'), 12); assert.equal(count('sql'), 10)
-  assert.equal(g.prepare("SELECT COUNT(*) c FROM lessons WHERE module = 'techfirst' AND mastery_required = 1").get().c, 8)
+  assert.equal(g.prepare("SELECT COUNT(*) c FROM lessons WHERE module = 'techfirst' AND mastery_required = 1").get().c, 9)
 })
 
 test('a straight path: each lesson needs the one before, has the whole template, 5 quiz questions and 3 graded practicals', () => {
@@ -114,6 +118,8 @@ test('the figures the lessons quote are the figures the answers produce', async 
   assert.deepEqual(await one('tf-7-e3'), { sales: 2046, payments: 1909 }); assert.ok(theory['tf-trust'].includes('2,046 sales and 1,909 payments'))
   assert.deepEqual(await one('tf-8-e1'), { credit_sales: 566 }); assert.deepEqual(await one('tf-8-e2'), { unpaid_credit: 137 }); assert.deepEqual(await one('tf-8-e3'), { paid_without_payment: 0 })
   assert.ok(theory['tf-first-principles'].includes('566') && theory['tf-first-principles'].includes('137'))
+  assert.deepEqual(await one('tf-9-e1'), { spellings: 24 }); assert.deepEqual(await one('tf-9-e2'), { after_case_fix: 21 }); assert.deepEqual(await one('tf-9-e3'), { overstated: 1502755 })
+  for (const n of ['24 different spellings', '**21**', '26,222,815', '24,720,060', '1,502,755']) assert.ok(theory['tf-messy'].includes(n), n)
 })
 
 test('every concept the lessons teach exists in the concept map, with a rubric an honest explanation passes', () => {
@@ -126,13 +132,13 @@ test('every concept the lessons teach exists in the concept map, with a rubric a
   }
 })
 
-test('the master track places the eight lessons beside the business lessons, on the technology side', () => {
+test('the master track places the nine lessons beside the business lessons, on the technology side', () => {
   const t = JSON.parse(fs.readFileSync(path.join(h.ROOT, 'content/path/master-track.json'), 'utf8'))
   assert.equal(t.sides.techfirst, 'tech')
-  const order = t.phases.slice(0, 2).flatMap((p) => p.items.map((i) => i.lesson).filter(Boolean))
+  const order = t.phases.slice(0, 3).flatMap((p) => p.items.map((i) => i.lesson).filter(Boolean))
   assert.deepEqual(order.filter((x) => x.startsWith('tf-')), IDS)
   const fd = order.filter((x) => x.startsWith('fd-')); assert.ok(fd.length >= 6)
-  // alternation: a technology lesson never follows another more than twice in a row inside the two phases
+  // alternation: a technology lesson never follows another more than twice in a row inside the first three phases
   let run = 0
   for (const id of order) { run = id.startsWith('tf-') ? run + 1 : 0; assert.ok(run <= 2, `three technology lessons in a row at ${id}`) }
 })

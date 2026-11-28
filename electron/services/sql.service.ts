@@ -6,7 +6,7 @@ import { ensureDatasetFiles } from './setup.service'
 import { DATAENG_DATASETS } from './dataeng.datasets'
 import { SHOP_DATASETS } from './shop.datasets'
 import { friendlySqlError, describeSchema } from './sql.friendly'
-import { runIsolated, IsolateTimeout, IsolateMemory, IsolateUnavailable, isolateLimits } from './sql.isolate'
+import { runIsolated, IsolateTimeout, IsolateMemory, IsolateUnavailable } from './sql.isolate'
 import Papa from 'papaparse'
 import * as XLSX from 'xlsx'
 
@@ -475,7 +475,7 @@ export async function validateSQLAnswer(params: {
     // (the sandbox pool is in-memory and doesn't survive a restart).
     await ensureDefaultDatasetsLoaded(params.sandboxId)
 
-    const sandbox = await getSandbox(params.sandboxId)
+    await getSandbox(params.sandboxId)
 
     const runQuery = async (q: string): Promise<{ columns: string[]; rows: any[] }> => {
       const { sets: res } = await runBounded(params.sandboxId, q, { maxRows: 100_000 })

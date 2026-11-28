@@ -1,4 +1,3 @@
-import React from 'react'
 import { parseDiagram, layoutDiagram, type DiagramSide } from '../../lib/diagram'
 
 const COLOR: Record<DiagramSide, string> = { tech: 'var(--sql-color)', business: 'var(--business-color)', bridge: 'var(--bp-color)' }

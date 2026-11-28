@@ -1,3 +1,4 @@
+import { freshnessReport, type FreshItem } from './freshness'
 import fs from 'fs'
 import { getDb } from '../db/database'
 import { getContentPath } from './setup.service'
@@ -74,7 +75,19 @@ export function appDescription(cfg: TutorConfig | null = loadTutorConfig()): str
   const path = track
     ? `\nThe learner's route is "Your Path": ${track.phases.map((p) => `${p.title}`).join(', then ')}. Each phase ends with a gate. Progress is scored separately for the Technology side and the Business side, and the next lesson favours whichever is weaker. A learner may open any lesson: a short readiness check shows what they would be missing, and a lesson opened early is provisional until those ideas are in place.`
     : ''
-  return `DericBI Instructor is a hands-on learning platform with ${total} lessons in these academies:\n${lines.join('\n')}${path}\n\nBeyond lessons, the app also has a SQL Playground (free-form querying against any dataset), Simulations (role-played analyst scenarios), a Datasets page (bundled and user-imported files), Projects and a Portfolio (deliverables the student builds), review of ideas that are due, and a progress dashboard. Suggest the right place in the app when it would help.`
+  return `DericBI Instructor is a hands-on learning platform with ${total} lessons in these academies:\n${lines.join('\n')}${path}${datedFigures()}\n\nBeyond lessons, the app also has a SQL Playground (free-form querying against any dataset), Simulations (role-played analyst scenarios), a Datasets page (bundled and user-imported files), Projects and a Portfolio (deliverables the student builds), review of ideas that are due, and a progress dashboard. Suggest the right place in the app when it would help.`
+}
+
+/** The lessons that quote dated figures, with how old each source is and who to check with, taken from content/path/freshness.json. */
+function datedFigures(): string {
+  try {
+    const r = freshnessReport()
+    if (!r.items.length) return ''
+    const byLesson = new Map<string, FreshItem[]>()
+    for (const i of r.items) byLesson.set(i.lesson_title, [...(byLesson.get(i.lesson_title) ?? []), i])
+    const parts = [...byLesson].map(([t, xs]) => `"${t}" (sources dated ${xs.map((x) => x.as_of).sort()[0]} or later; check with ${[...new Set(xs.map((x) => x.official))].join(', ')})`)
+    return `\nSome lessons quote dated legal or tax figures, and none has been confirmed with the official body: ${parts.join('; ')}.${r.due ? ` ${r.due} of these figures are now past their re-check date, so say so if the learner relies on them.` : ''}`
+  } catch { return '' }
 }
 
 const clip = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + '…' : s)

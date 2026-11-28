@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Briefcase, ChevronRight, Lock, CheckCircle, Brain,
   Send, Loader, Star, TrendingUp, Target,
-  FileText, MessageSquare, BarChart2, Users, Info,
-} from 'lucide-react'
+  FileText, MessageSquare, BarChart2, Users} from 'lucide-react'
 import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
 import LessonTheory from '../components/ui/LessonTheory'

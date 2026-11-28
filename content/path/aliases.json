@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "note": "Some academies use two prefixes for their lesson ids (statistics: stat- and stats-, python: py- and python-). A learner, a link or a future lesson may use either spelling. If an id is not found as written, the other prefixes in its group are tried. Nothing is renamed, so no progress is ever at risk.",
+  "prefix_groups": [
+    ["stat", "stats"],
+    ["py", "python"]
+  ]
+}

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { CheckCircle, Circle, Lock, Trophy } from 'lucide-react'
 import { useAuthStore } from '../../store'
 import { PageError } from './PageState'

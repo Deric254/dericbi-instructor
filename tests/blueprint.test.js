@@ -48,7 +48,7 @@ test('every integrated lesson follows the blueprint exactly, in order, with a re
     assert.ok(quotes.length <= blueprint.max_quotes_per_lesson, `${l.id}: too many quotes`)
     quotes.forEach((id) => assert.ok(blocks(sec['Hook'], 'evidence').includes(id), `${l.id}: a quote belongs in the Hook`))
   }
-  assert.ok(['tf-data', 'tf-first-principles', 'py-pandas-intro'].every((id) => integrated.some((l) => l.id === id)))
+  assert.ok(['tf-data', 'tf-tables', 'tf-first-principles', 'tf-messy', 'py-pandas-intro'].every((id) => integrated.some((l) => l.id === id)))
 })
 
 test('no lesson anywhere points at a diagram that cannot be drawn or an entry that is not in the library', () => {

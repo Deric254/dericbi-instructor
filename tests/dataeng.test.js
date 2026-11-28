@@ -22,7 +22,7 @@ const grade = (id, user, solution) => sql.validateSQLAnswer({ sandboxId: `ex_${i
 
 test('the course is seeded as its own module with 20 lessons and does not add a skill or change the others', () => {
   const g = db.getDb()
-  assert.equal(g.prepare("SELECT COUNT(*) c FROM lessons WHERE module = 'dataeng'").get().c, 20)
+  assert.equal(g.prepare("SELECT COUNT(*) c FROM lessons WHERE module = 'dataeng'").get().c, 21)
   assert.equal(g.prepare("SELECT COUNT(*) c FROM lessons WHERE module = 'sql'").get().c, 10)
   assert.equal(g.prepare("SELECT DISTINCT exercise_type t FROM exercises WHERE lesson_id LIKE 'de-%'").all().map((r) => r.t).sort().join(), 'python_code,sql_query')
   assert.equal(g.prepare("SELECT COUNT(*) c FROM skill_ratings WHERE skill = 'dataeng'").get().c, 0)
@@ -78,7 +78,7 @@ test('a student upgrading from the previous version: Data Engineering opens at l
 
   const list = (m) => app.invoke('lessons:list', { userId: 'old', module: m })
   const de = await list('dataeng')
-  assert.equal(de.length, 20)
+  assert.equal(de.length, 21)
   assert.equal(de[0].id, 'de-foundations')
   assert.notEqual(de[0].user_status, 'locked', 'lesson 1 must be open')
   assert.ok(de.slice(1).every((l) => l.user_status === 'locked' || !l.user_status), 'the rest wait for their prerequisites')

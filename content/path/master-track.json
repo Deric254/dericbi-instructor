@@ -230,6 +230,9 @@
           "lesson": "fd-first-principles"
         },
         {
+          "lesson": "tf-messy"
+        },
+        {
           "planned": "acc-double-entry",
           "side": "business",
           "summary": "Ledgers, debits and credits, the trial balance: the business twin of transactions."
@@ -764,6 +767,9 @@
         },
         {
           "lesson": "de-system-design"
+        },
+        {
+          "lesson": "de-scale"
         },
         {
           "planned": "con-scoping-delivery",

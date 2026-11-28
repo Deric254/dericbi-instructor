@@ -98,6 +98,9 @@ const api = {
   evidence: {
     list: () => ipcRenderer.invoke('evidence:list'),
   },
+  freshness: {
+    report: () => ipcRenderer.invoke('freshness:report'),
+  },
   ladder: {
     get: (userId: string) => ipcRenderer.invoke('ladder:get', userId),
   },
@@ -181,6 +184,7 @@ const api = {
   progress_backup: {
     export: (userId: string) => ipcRenderer.invoke('progress:export', { userId }),
     import: (userId: string) => ipcRenderer.invoke('progress:import', { userId }),
+    status: (userId: string) => ipcRenderer.invoke('progress:backup-status', { userId }),
   },
 
   // Settings

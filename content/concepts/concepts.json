@@ -2532,6 +2532,108 @@
         ],
         "need": 2
       }
+    },
+    {
+      "id": "audit-messy-source",
+      "name": "Auditing a messy source",
+      "definition": "Measure a source you did not build, test one suspected cause at a time, clean a copy not the original, and report the effect in money.",
+      "depends_on": [
+        "debugging-method",
+        "tables-keys"
+      ],
+      "lessons": [
+        "tf-messy"
+      ],
+      "explain": {
+        "prompt": "How would you audit a messy source before cleaning it, and why count again afterwards?",
+        "points": [
+          {
+            "hint": "Measure first: count rows and distinct values",
+            "any": [
+              "measure",
+              "distinct",
+              "how many rows",
+              "count the",
+              "count rows",
+              "size of the problem"
+            ]
+          },
+          {
+            "hint": "Test a suspected cause, and clean a copy so the original is kept",
+            "any": [
+              "suspect",
+              "hypothesis",
+              "rival",
+              "could fail",
+              "one cause",
+              "test it",
+              "clean a copy",
+              "the original",
+              "keep the original"
+            ]
+          },
+          {
+            "hint": "Count again afterwards, and say what the problem cost",
+            "any": [
+              "count again",
+              "re-count",
+              "recount",
+              "check again",
+              "what it cost",
+              "cost in money",
+              "in shillings",
+              "money effect"
+            ]
+          }
+        ],
+        "need": 2
+      }
+    },
+    {
+      "id": "scale-cost",
+      "name": "Cost at scale",
+      "definition": "Work grows with the rows a query reads. Partitions, summary tables and incremental loads keep that number small as data grows.",
+      "depends_on": [],
+      "lessons": [
+        "de-scale"
+      ],
+      "explain": {
+        "prompt": "Why does a query's cost depend on the rows it reads, and how can you keep that number small as data grows?",
+        "points": [
+          {
+            "hint": "Cost follows the number of rows read",
+            "any": [
+              "rows it reads",
+              "rows read",
+              "reads every row",
+              "full scan",
+              "scan every",
+              "number of rows"
+            ]
+          },
+          {
+            "hint": "Partitions let a query skip the parts it does not need",
+            "any": [
+              "partition",
+              "skip the",
+              "only that day",
+              "only the day",
+              "prune"
+            ]
+          },
+          {
+            "hint": "Summary tables or incremental loads read less",
+            "any": [
+              "summary",
+              "pre-aggregat",
+              "incremental",
+              "only the new",
+              "only new rows"
+            ]
+          }
+        ],
+        "need": 2
+      }
     }
   ]
 }

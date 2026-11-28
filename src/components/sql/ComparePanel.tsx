@@ -1,4 +1,3 @@
-import React from 'react'
 
 /** What the grader sends back for a wrong answer: both results (first rows) and which rows have no partner. */
 export interface Comparison {

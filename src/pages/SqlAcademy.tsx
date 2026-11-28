@@ -4,10 +4,9 @@ import '@/lib/monacoLocal'
 import {
   Database, Play, ChevronRight, Lock, CheckCircle, Circle,
   Clock, BookOpen, Lightbulb, X, Loader, AlertCircle,
-  ChevronDown, RotateCcw, HelpCircle, MessageSquare, Star,
+  RotateCcw, Star,
   Brain, Workflow, Target, Compass, Rocket,
-  Cpu,
-} from 'lucide-react'
+  Cpu} from 'lucide-react'
 import { useAuthStore, useUIStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
 import { SplitPane, AsideSplit } from '../components/ui/SplitPane'
@@ -150,7 +149,7 @@ export default function SqlAcademy({ course = 'sql' }: { course?: keyof typeof C
       {/* Content */}
       <div style={{ flex: 1, overflow: 'hidden' }}>
         {view === 'lessons' && (
-          <LessonList lessons={lessons} loading={loading} onOpen={openLesson}
+          <LessonList lessons={lessons} loading={loading} loadError={loadError} onRetry={loadLessons} onOpen={openLesson}
             top={cfg.placement ? <PlacementBanner onStart={() => setView('placement')} /> : undefined} />
         )}
         {view === 'lesson' && activeLessonId && (
@@ -187,10 +186,11 @@ export default function SqlAcademy({ course = 'sql' }: { course?: keyof typeof C
 // LESSON LIST
 // ─────────────────────────────────────────────
 
-function LessonList({ lessons, loading, onOpen, top }: {
-  lessons: Lesson[]; loading: boolean; onOpen: (id: string) => void; top?: React.ReactNode
+function LessonList({ lessons, loading, loadError, onRetry, onOpen, top }: {
+  lessons: Lesson[]; loading: boolean; loadError: boolean; onRetry: () => void; onOpen: (id: string) => void; top?: React.ReactNode
 }) {
   if (loading) return <CenteredSpinner />
+  if (loadError) return <PageError message="Couldn't load the lessons." onRetry={onRetry} />
 
   const grouped = groupByLevel(lessons)
 
@@ -433,7 +433,6 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
   const [hintsUsed, setHintsUsed] = useState(0)
   const [hint, setHint] = useState<string | null>(null)
   const [running, setRunning] = useState(false)
-  const [correct, setCorrect] = useState<boolean | null>(null)
   // Wrong attempts in a row on this exercise: lets the tutor offer help (or step in, if the student chose that) when they are stuck.
   const [wrong, setWrong] = useState(0)
   // What the student's query actually returns, shown under the editor (SELECT-style queries only).
@@ -456,7 +455,6 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
     setFeedback(null)
     setHint(null)
     setHintsUsed(0)
-    setCorrect(null)
     setWrong(0)
     setOutput(null)
   }, [exercise?.id])
@@ -500,7 +498,6 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
       })
 
       setResult(res.validation)
-      setCorrect(res.validation.correct)
       setWrong((w) => (res.validation.correct ? 0 : w + 1))
       if (lessonModule === 'sql') refreshSqlSchema(user.id, sandboxId.current)
 
@@ -531,7 +528,7 @@ function ExerciseSolver({ exercise, lessonModule, onNext }: {
 
   // Starting over also restores the practice tables, in case a query (e.g. DROP TABLE) changed them.
   const resetExercise = async () => {
-    setCode(exercise?.python_starter ?? ''); setResult(null); setFeedback(null); setOutput(null); setPyOutput(null); setCorrect(null)
+    setCode(exercise?.python_starter ?? ''); setResult(null); setFeedback(null); setOutput(null); setPyOutput(null)
     try { await window.api.sql.closeSandbox(sandboxId.current) } catch (err) { console.error('[reset exercise]', err) }
     if (lessonModule === 'sql') refreshSqlSchema(user?.id, sandboxId.current)
   }

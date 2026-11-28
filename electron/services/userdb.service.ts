@@ -54,6 +54,7 @@ export function validateName(raw: unknown): { ok: boolean; name: string; error: 
   const name = typeof raw === 'string' ? raw.trim().replace(/\s+/g, ' ') : ''
   if (!name) return { ok: false, name: '', error: 'Give your database a name.' }
   if (name.length > 60) return { ok: false, name: '', error: 'Database names can be up to 60 characters.' }
+  // eslint-disable-next-line no-control-regex -- control characters are exactly what a database name must not contain
   if (/[\u0000-\u001f<>]/.test(name)) return { ok: false, name: '', error: 'That name contains characters that are not allowed.' }
   return { ok: true, name, error: '' }
 }

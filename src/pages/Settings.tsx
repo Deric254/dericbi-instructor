@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import FreshnessCard from '../components/ui/FreshnessCard'
 import {
   Eye, EyeOff, Save, CheckCircle, Loader, LogOut,
   Key, User, Info, RefreshCw, Cpu, ShieldQuestion, Lock,
@@ -331,6 +332,13 @@ export default function Settings() {
                 </ul>
               </div>
             )}
+          </div>
+          <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--border)' }}>
+            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Dated figures in the lessons</div>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8, lineHeight: 1.6 }}>
+              Tax and legal figures change. These are the ones the lessons quote, with their source, their age and who to check them with.
+            </p>
+            <FreshnessCard />
           </div>
         </Section>
 

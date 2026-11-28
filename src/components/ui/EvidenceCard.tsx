@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { BookOpen, Quote, ExternalLink } from 'lucide-react'
 import type { EvidenceEntry } from '../../types'
 

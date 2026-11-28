@@ -161,7 +161,6 @@ function LoginForm({ onRegister, onForgot }: { onRegister: () => void; onForgot:
 function RegisterForm({ onBack, onSuccess }: { onBack: () => void; onSuccess: (data: any) => void }) {
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '' })
   const [showPw, setShowPw] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, [k]: e.target.value }))
 
@@ -199,7 +198,7 @@ function RegisterForm({ onBack, onSuccess }: { onBack: () => void; onSuccess: (d
         {error && <ErrorMsg message={error} />}
         <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
           <button type="button" className="btn btn-ghost" onClick={onBack}><ArrowLeft size={13} /> Back</button>
-          <button type="submit" className="btn btn-primary" disabled={loading} style={{ flex: 1, justifyContent: 'center' }}>
+          <button type="submit" className="btn btn-primary" style={{ flex: 1, justifyContent: 'center' }}>
             Continue <ArrowRight size={14} />
           </button>
         </div>

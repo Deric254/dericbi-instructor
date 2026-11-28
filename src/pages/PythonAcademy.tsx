@@ -3,10 +3,8 @@ import Editor from '@monaco-editor/react'
 import '@/lib/monacoLocal'
 import {
   Terminal, Play, BookOpen, RotateCcw, Loader, CheckCircle,
-  AlertCircle, Lightbulb, ChevronRight, Download, Star,
-  Cpu, Zap,
-} from 'lucide-react'
-import { useAuthStore, notify } from '../store'
+  ChevronRight, Cpu} from 'lucide-react'
+import { useAuthStore, useUIStore, notify } from '../store'
 import { usePendingLesson } from '../hooks/usePendingLesson'
 import LessonTheory from '../components/ui/LessonTheory'
 import LessonQuiz from '../components/ui/LessonQuiz'
@@ -238,16 +236,22 @@ const STARTER_SNIPPETS = [
 
 function PythonPlayground({ contextLessonId }: { contextLessonId?: string }) {
   const editorTheme = useEditorTheme()
-  const { user } = useAuthStore()
   const { status, loadRuntime, runCode } = usePyodide('import pandas, numpy, matplotlib')
   const [code, setCode] = useState(STARTER_SNIPPETS[0].code)
   const [output, setOutput] = useState<{ text: string; type: 'output' | 'error' | 'info' }[]>([])
   const [activeSnippet, setActiveSnippet] = useState(0)
+  const [wrong, setWrong] = useState(0)
+  const [lastError, setLastError] = useState<string | undefined>(undefined)
+  const setWork = useUIStore((s) => s.setWork)
   const outputRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     loadRuntime()
   }, [])
+
+  // Let the floating tutor see this code and its error, and offer help after repeated failures.
+  useEffect(() => { setWork({ section: 'python', context: { code, error: lastError }, stuck: { key: 'python-playground', wrong }, prompt: 'My code gave an error. Help me understand what it means and where to look, without writing the finished code for me.' }) }, [code, lastError, wrong, setWork])
+  useEffect(() => () => setWork(null), [setWork])
 
   useEffect(() => {
     if (outputRef.current) {
@@ -263,6 +267,8 @@ function PythonPlayground({ contextLessonId }: { contextLessonId?: string }) {
 
     const result = await runCode(code)
 
+    setWrong((n) => (result.error ? n + 1 : 0))
+    setLastError(result.error || undefined)
     if (result.error) {
       setOutput(prev => [...prev, { text: result.error!, type: 'error' }])
     } else {
@@ -270,11 +276,6 @@ function PythonPlayground({ contextLessonId }: { contextLessonId?: string }) {
       setOutput(prev => [...prev, { text: out, type: 'output' }])
     }
     setOutput(prev => [...prev, { text: `Executed in ${result.exec_ms}ms`, type: 'info' }])
-
-    // Save to history
-    if (user) {
-      // IPC call to log python history would go here
-    }
   }
 
   const loadSnippet = (idx: number) => {

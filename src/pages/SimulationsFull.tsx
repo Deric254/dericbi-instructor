@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   Users, Play, CheckCircle, ArrowLeft, Brain,
   ChevronRight, Star, Flag, Loader, Info,

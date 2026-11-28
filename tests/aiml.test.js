@@ -45,7 +45,7 @@ test('the track is its own module of 12 gated lessons and does not change the ot
   const g = db.getDb()
   const count = (m) => g.prepare('SELECT COUNT(*) c FROM lessons WHERE module = ?').get(m).c
   assert.equal(count('aiml'), 12)
-  assert.equal(count('foundations'), 8); assert.equal(count('founder'), 12); assert.equal(count('sql'), 10); assert.equal(count('dataeng'), 20); assert.equal(count('bizsolver'), 11)
+  assert.equal(count('foundations'), 8); assert.equal(count('founder'), 12); assert.equal(count('sql'), 10); assert.equal(count('dataeng'), 21); assert.equal(count('bizsolver'), 11)
   assert.equal(g.prepare("SELECT COUNT(*) c FROM lessons WHERE module = 'aiml' AND mastery_required = 1").get().c, 12)
 })
 

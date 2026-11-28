@@ -73,6 +73,11 @@ export interface EvidenceEntry {
   who?: string; work?: string; source: { publisher: string; title: string; url: string }; checked: string
 }
 export interface TutorModeInfo { id: string; label: string; primary: boolean; ask: string | null; needs_input: boolean }
+export interface FreshnessItem {
+  id: string; lesson: string; lesson_title: string; text: string; source: string; as_of: string; official: string; official_url: string
+  confirmed: boolean; confirmed_on: string | null; age_days: number; due: boolean
+}
+export interface FreshnessReport { review_every_days: number; items: FreshnessItem[]; due: number }
 export interface TutorCheck { results: Array<{ id: string; why: string; ok: boolean; reason: string }>; allOk: boolean; ran: number }
 export interface JumpGap { kind: 'concept' | 'lesson'; id: string; name: string; definition: string }
 export interface JumpCheck {
@@ -278,7 +283,7 @@ export interface LicenceState {
   lifetime?: boolean
 }
 
-export type OwnerResult<T extends object = {}> = ({ success: true } & T) | { success: false; error: string; cancelled?: boolean }
+export type OwnerResult<T extends object = object> = ({ success: true } & T) | { success: false; error: string; cancelled?: boolean }
 
 export type CustomerStatus = 'none' | 'active' | 'expiring' | 'expired'
 

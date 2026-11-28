@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { BarChart3, BookOpen, Lock, CheckCircle, ChevronRight, Clock, Info, Brain, ExternalLink } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { BarChart3, Lock, CheckCircle, ChevronRight, Info, Brain} from 'lucide-react'
 import { useAuthStore, notify } from '../store'
 import InstructorPanel from '../components/ui/InstructorPanel'
 import { usePendingLesson } from '../hooks/usePendingLesson'
@@ -13,19 +13,16 @@ import type { Lesson } from '../types'
 export default function PowerBIAcademy() {
   const [lessons, setLessons] = useState<Lesson[]>([])
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null)
-  const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
   const [showInstructor, setShowInstructor] = useState(false)
   const { user } = useAuthStore()
 
   const loadLessons = () => {
     if (!user) return
-    setLoading(true)
     setLoadError(false)
     window.api.lessons.list(user.id, 'powerbi')
       .then((d: any) => setLessons(d))
       .catch((err) => { reportApiError('load Power BI lessons', err); setLoadError(true) })
-      .finally(() => setLoading(false))
   }
 
   useEffect(loadLessons, [user])

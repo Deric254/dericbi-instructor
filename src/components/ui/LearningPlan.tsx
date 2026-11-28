@@ -1,4 +1,3 @@
-import React from 'react'
 import { Play, Flame, RotateCcw } from 'lucide-react'
 import type { LearningPlan as Plan, NavSection } from '../../types'
 

@@ -2261,15 +2261,119 @@
       ]
     },
     {
+      "id": "de-scale",
+      "title": "Cost at Scale: Rows Read, Partitions and Summaries",
+      "description": "Why work grows with data, and the three standard ways to keep it flat",
+      "level": "advanced",
+      "prerequisites": [
+        "de-system-design"
+      ],
+      "estimated_min": 35,
+      "sort_order": 20,
+      "theory_md": "## Hook\nA pipeline that takes 3 minutes on a Monday can take 3 hours a year later, and nobody changed a line of code. The data just grew. This platform's own run history shows it: one pipeline spends **27 seconds for every 1,000 rows** it loads, while another spends **4**. By the end of this lesson you will be able to say what makes work grow with volume, and the three standard ways to stop it.\n\n## Predict\nBefore you read on, commit to a guess: if you ask for one day's events from a table holding 30 days, does the computer look at one day of rows, or at all 30 days?\n\n## Plain words\nThe cost of a query is mostly the number of rows it has to **read**, not the number it returns. A **scan** reads every row. Three standard defences keep the rows read small as data grows:\n\n- **Partitions** split a big table by something like date, so a query for one day reads only that day's part and skips the rest.\n- **Summary tables** store the answer to a question you ask again and again, such as events per day, so the report reads dozens of rows instead of millions.\n- **Incremental loads** touch only what is new, as you saw with watermarks, so each run costs the size of the change, not the size of the history.\n\nCost per row also differs between jobs. Measuring seconds per thousand rows tells you which job to fix first.\n\n## Diagram\n```diagram\n{\"title\": \"Keeping the rows read small\", \"nodes\": [{\"id\": \"g\", \"label\": \"Data grows every day\", \"side\": \"business\"}, {\"id\": \"s\", \"label\": \"A full scan reads all of it\", \"side\": \"tech\"}, {\"id\": \"p\", \"label\": \"Partition: read one day only\", \"side\": \"tech\"}, {\"id\": \"a\", \"label\": \"Summary table: read the answer\", \"side\": \"tech\"}, {\"id\": \"i\", \"label\": \"Incremental load: read only new rows\", \"side\": \"tech\"}, {\"id\": \"c\", \"label\": \"Cost stays flat as data grows\", \"side\": \"bridge\"}], \"edges\": [[\"g\", \"s\"], [\"s\", \"p\"], [\"s\", \"a\"], [\"s\", \"i\"], [\"p\", \"c\"], [\"a\", \"c\"], [\"i\", \"c\"]]}\n```\n\n## Worked example\nThe raw events table holds **3,240 events across 30 days**. The busiest day, 2025-01-15, has **134**. A report for that one day should read 134 rows. A query that cannot narrow by day reads all 3,240, which is about 24 times more work for the same answer. A daily summary has just **30 rows**, one per day.\n\nThe pipeline run history shows the other side. Adding up the rows loaded and the seconds taken for each pipeline over 60 days, `ml_feature_build` costs **27.41 seconds per 1,000 rows**, `finance_rollup` costs 18.98, and `customer_sync` only 4.47. A job that is six times more expensive per row is where tuning pays first. Be careful with what you claim: the figures say which job is costly, not why, so look at what that job does before you change it.\n\n## Case\n```evidence\ncase-aws-s3-2017\n```\nLarge systems fail and slow down in the parts nobody has measured lately. Measuring cost per unit of work is how you find the part to look at before it becomes the incident.\n\n## Bridge\n**Technology side:** reading fewer rows is the lever, through partitions, summary tables and incremental loads. **Business side:** time and cloud cost are paid for per row read, so a report that scans everything gets more expensive every month without anyone deciding it should.\n\n## Try it\nDo the practicals below. The first measures a day's load, the second prices one day's events against all of them, and the third measures how small a summary table is.\n\n## Say it back\nExplain in two or three sentences why a query's cost depends on the rows it reads, and name two ways to keep that number small as data grows. Use your own words: the app checks that the right ideas are there.\n\n## Use it\nPick one report you run often, in a spreadsheet or a database. Write down how many rows it reads and how many it shows. Say which of the three defences would shrink the rows read, and what you would have to store or change to use it.\n",
+      "quiz": [
+        {
+          "question": "What mostly decides how expensive a query is?",
+          "options": [
+            "The number of rows it has to read",
+            "The length of its text",
+            "The colour of the report",
+            "The name of the table"
+          ],
+          "correct_index": 0,
+          "explanation": "Cost follows rows read, so the goal is to read fewer."
+        },
+        {
+          "question": "A table is split by date and you ask for one day. What does partitioning let the engine do?",
+          "options": [
+            "Skip the other days' rows",
+            "Read every day twice",
+            "Delete the old days",
+            "Sort the result alphabetically"
+          ],
+          "correct_index": 0,
+          "explanation": "Partition pruning means only the matching part is read."
+        },
+        {
+          "question": "A dashboard asks for events per day all the time. Which defence fits best?",
+          "options": [
+            "A daily summary table",
+            "A bigger screen",
+            "Reading raw events each time",
+            "Deleting history"
+          ],
+          "correct_index": 0,
+          "explanation": "A summary stores the answer once, so the report reads dozens of rows."
+        },
+        {
+          "question": "One pipeline costs 27 seconds per 1,000 rows and another costs 4. What do the figures tell you?",
+          "options": [
+            "Which job to look at first, but not why it is slow",
+            "Why the job is slow",
+            "That the faster job is correct",
+            "That both jobs are broken"
+          ],
+          "correct_index": 0,
+          "explanation": "The measure points to where to look. The reason still has to be found."
+        },
+        {
+          "question": "What does an incremental load keep small?",
+          "options": [
+            "The work each run, which follows the size of the change",
+            "The size of the history",
+            "The number of pipelines",
+            "The size of the screen"
+          ],
+          "correct_index": 0,
+          "explanation": "Each run costs what is new, not everything that exists."
+        }
+      ],
+      "exercises": [
+        {
+          "id": "de-21-e1",
+          "title": "Measure One Day's Load",
+          "prompt": "How many rows did all the pipelines load on 2025-11-26 in total? Return one column named rows_loaded_today.",
+          "hint_1": "Add up rows_loaded for run_date = '2025-11-26'.",
+          "hint_2": "SELECT SUM(rows_loaded) AS rows_loaded_today FROM pipeline_runs WHERE run_date = '2025-11-26'.",
+          "hint_3": "SELECT SUM(rows_loaded) AS rows_loaded_today FROM pipeline_runs WHERE run_date = '2025-11-26'",
+          "solution": "SELECT SUM(rows_loaded) AS rows_loaded_today FROM pipeline_runs WHERE run_date = '2025-11-26'",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "de-21-e2",
+          "title": "Read One Day Only",
+          "prompt": "How many raw events happened on 2025-01-15? Compare it with the 3,240 rows in the whole table. Return one column named one_day_rows.",
+          "hint_1": "Filter on the date part of event_ts, which is its first 10 characters.",
+          "hint_2": "SELECT COUNT(*) AS one_day_rows FROM raw_events WHERE substr(event_ts, 1, 10) = '2025-01-15'.",
+          "hint_3": "SELECT COUNT(*) AS one_day_rows FROM raw_events WHERE substr(event_ts, 1, 10) = '2025-01-15'",
+          "solution": "SELECT COUNT(*) AS one_day_rows FROM raw_events WHERE substr(event_ts, 1, 10) = '2025-01-15'",
+          "evaluation_mode": "exact",
+          "points": 15
+        },
+        {
+          "id": "de-21-e3",
+          "title": "Size a Daily Summary",
+          "prompt": "How many rows would a summary table of raw_events with one row per day have? Return one column named summary_rows.",
+          "hint_1": "Count the distinct dates, taken from the first 10 characters of event_ts.",
+          "hint_2": "SELECT COUNT(DISTINCT substr(event_ts, 1, 10)) AS summary_rows FROM raw_events.",
+          "hint_3": "SELECT COUNT(DISTINCT substr(event_ts, 1, 10)) AS summary_rows FROM raw_events",
+          "solution": "SELECT COUNT(DISTINCT substr(event_ts, 1, 10)) AS summary_rows FROM raw_events",
+          "evaluation_mode": "exact",
+          "points": 15
+        }
+      ]
+    },
+    {
       "id": "de-capstone",
       "title": "Capstone: The Executive Data Platform Scorecard",
       "description": "Bring everything together: build the numbers a CEO reads on Monday morning",
       "level": "advanced",
       "prerequisites": [
-        "de-system-design"
+        "de-scale"
       ],
       "estimated_min": 50,
-      "sort_order": 20,
+      "sort_order": 21,
       "theory_md": "## Capstone: The Executive Data Platform Scorecard\n\nYou now have the full toolkit: profiling, deduplication, integrity checks, incremental loading, modeling, trend analysis, observability, AI data quality and governance. The capstone asks you to combine them the way a platform lead does when the CEO says: *\"Can I trust our numbers?\"*\n\n### The scorecard idea\nExecutives do not want fifty tables. They want a handful of **trust metrics** next to the headline numbers, so they know how much weight to put on each. A good scorecard answers:\n1. **Is the pipeline reliable?** success rate, average duration, volume.\n2. **Is the data clean?** duplicates removed, orphans found.\n3. **Is the headline number right?** revenue computed on clean, joined data.\n\n### Building blocks you will combine\n```sql\n-- dedupe first (Lesson 3), then aggregate\nWITH clean AS (\n  SELECT *, ROW_NUMBER() OVER (PARTITION BY event_id ORDER BY ingested_at DESC) AS rn\n  FROM raw_events\n)\nSELECT event_type, COUNT(*) FROM clean WHERE rn = 1 AND country IS NOT NULL GROUP BY event_type;\n```\n```sql\n-- several independent measures in one row using scalar subqueries\nSELECT\n  (SELECT COUNT(*) FROM pipeline_runs WHERE status = 'failed') AS failed_runs,\n  (SELECT COUNT(*) - COUNT(DISTINCT event_id) FROM raw_events) AS duplicate_events;\n```\nScalar subqueries each return one value, so they can sit side by side in a single result row: a classic way to build a KPI strip.\n\n### Working method\n1. Write the smallest query that returns the right shape.\n2. Check one number by hand (a small filter, a `LIMIT`).\n3. Combine, then re-check that the totals still make sense.\n\n### Executive lens\nThis is the job: turn a messy, multi-source, AI-hungry data estate into a few numbers the whole company trusts, and be able to explain every one of them. People who can do that are very hard to replace.",
       "quiz": [
         {

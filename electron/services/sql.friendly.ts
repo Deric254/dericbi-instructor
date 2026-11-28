@@ -38,7 +38,7 @@ function closest(word: string, options: string[]): string | null {
 }
 
 const list = (items: string[], max = 12) => items.slice(0, max).join(', ') + (items.length > max ? ', …' : '')
-const clean = (s: string) => s.replace(/^["'`\[]|["'`\]]$/g, '')
+const clean = (s: string) => s.replace(/^["'`[]|["'`\]]$/g, '')
 
 /** SQL functions that other databases have but SQLite does not, with what to use instead. */
 const FUNCTION_TIPS: Record<string, string> = {

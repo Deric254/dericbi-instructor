@@ -1,4 +1,5 @@
-import React, { useEffect, useState, type ReactNode } from 'react'
+import React, { useEffect, useState } from 'react'
+import BackupReminder from '../components/ui/BackupReminder'
 import {
   BookOpen, CheckCircle, Clock, TrendingUp,
   Award, ChevronRight, Database, FileSpreadsheet,
@@ -107,6 +108,7 @@ export default function Dashboard() {
 
   return (
     <div style={{ height: '100%', overflow: 'auto', padding: 24 }}>
+      <BackupReminder />
       {/* Hero / Welcome */}
       <div style={{
         display: 'flex',

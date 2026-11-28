@@ -1,7 +1,7 @@
 // Extends the global Window interface with the IPC bridge
 // exposed by Electron's preload script
 
-import type { PathData, JumpCheck, JumpResult, LadderData, EvidenceEntry, TutorModeInfo, TutorCheck } from './index'
+import type { PathData, JumpCheck, JumpResult, LadderData, EvidenceEntry, TutorModeInfo, TutorCheck, FreshnessReport } from './index'
 
 declare global {
   interface Window {
@@ -78,6 +78,9 @@ declare global {
       evidence: {
         list: () => Promise<EvidenceEntry[]>
       }
+      freshness: {
+        report: () => Promise<FreshnessReport>
+      }
       ladder: {
         get: (userId: string) => Promise<LadderData>
       }
@@ -138,6 +141,7 @@ declare global {
       progress_backup: {
         export: (userId: string) => Promise<{ success: boolean; cancelled?: boolean; savedTo?: string; error?: string }>
         import: (userId: string) => Promise<{ success: boolean; cancelled?: boolean; added?: number; skipped?: number; error?: string }>
+        status: (userId: string) => Promise<{ lessons_complete: number; last_saved: string | null; days_since: number | null; due: boolean }>
       }
       settings: {
         get: (key: string) => Promise<{ value: string | null }>

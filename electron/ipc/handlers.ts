@@ -4,7 +4,7 @@ import * as ProgressService from '../services/progress.service'
 import * as SqlService from '../services/sql.service'
 import * as AiService from '../services/ai.service'
 import { gradePythonOutput } from '../services/pygrade'
-import { exportProgress, importProgress, MAX_BACKUP_BYTES } from '../services/backup.service'
+import { exportProgress, importProgress, backupStatus, noteSaved, MAX_BACKUP_BYTES } from '../services/backup.service'
 import * as UserDb from '../services/userdb.service'
 import { registerPortfolioHandlers } from '../services/portfolio.service'
 import { getDb } from '../db/database'
@@ -15,6 +15,8 @@ import { getExplain, submitExplain, confirmExplain, aiUpgradeExplain, checkMarke
 import { getFieldTask, saveFieldTask, deleteFieldTask, listFieldTasks } from '../services/fieldwork'
 import { getPath, saveGate, setStrict, pathLocked, loadTrack } from '../services/path'
 import { jumpCheck, jumpGo, startLesson } from '../services/jump'
+import { resolveLessonId } from '../services/aliases'
+import { freshnessReport } from '../services/freshness'
 import { conceptLevels, loadLadder } from '../services/ladder'
 import { loadEvidence } from '../services/evidence'
 import { publicModes } from '../services/tutor'
@@ -148,7 +150,11 @@ export function registerLessonHandlers() {
     return rows.map((r) => (held.has(r.id) ? { ...r, user_status: 'locked', path_locked: 1 } : r))
   })
 
-  safeHandle('lessons:get', async (_, { userId, lessonId }) => {
+  /** A lesson id as the learner or a link wrote it, resolved to the lesson that exists (stat-/stats-, py-/python-). */
+  const lessonKey = (id: unknown) => resolveLessonId((x) => !!db.prepare('SELECT 1 FROM lessons WHERE id = ?').get(x), id)
+
+  safeHandle('lessons:get', async (_, { userId, lessonId: asked }) => {
+    const lessonId = lessonKey(asked) ?? asked
     const lesson = db.prepare('SELECT * FROM lessons WHERE id = ?').get(lessonId)
     if (!lesson) return null
 
@@ -168,7 +174,8 @@ export function registerLessonHandlers() {
     return { lesson, progress, exercises, quiz_best_pct: bestQuizPct(userId, lessonId) }
   })
 
-  safeHandle('lessons:start', async (_, { userId, lessonId }) => {
+  safeHandle('lessons:start', async (_, { userId, lessonId: asked }) => {
+    const lessonId = lessonKey(asked) ?? asked
     startLesson(userId, lessonId)
     return { success: true }
   })
@@ -194,16 +201,19 @@ export function registerLessonHandlers() {
   safeHandle('path:gate', async (_, { userId, phaseId, evidence }) => saveGate(userId, phaseId, evidence))
   safeHandle('path:strict', async (_, { userId, on }) => { setStrict(userId, on === true); return { success: true } })
   // Guided jumping: any lesson may be opened. A learner on the strict path still cannot open lessons of phases after the open one.
-  safeHandle('path:jump', async (_, { userId, lessonId }) => {
+  safeHandle('path:jump', async (_, { userId, lessonId: asked }) => {
+    const lessonId = lessonKey(asked) ?? asked
     const c = jumpCheck(userId, lessonId)
     return c ? { ...c, held: pathLocked(userId).has(lessonId) } : null
   })
-  safeHandle('path:jump-go', async (_, { userId, lessonId, answers, go }) => {
+  safeHandle('path:jump-go', async (_, { userId, lessonId: asked, answers, go }) => {
+    const lessonId = lessonKey(asked) ?? asked
     if (pathLocked(userId).has(lessonId)) return { success: false, reason: 'held' }
     return jumpGo(userId, lessonId, answers, go)
   })
   safeHandle('tutor:modes', async () => publicModes())
   safeHandle('tutor:selftest', async (_, userId: string) => checkTutor(userId))
+  safeHandle('freshness:report', async () => freshnessReport())
   safeHandle('evidence:list', async () => loadEvidence())
   safeHandle('ladder:get', async (_, userId: string) => {
     const phaseOf = new Map<string, string>()
@@ -557,8 +567,11 @@ export function registerBackupHandlers() {
     const pick = win ? await dialog.showSaveDialog(win, opts) : await dialog.showSaveDialog(opts)
     if (pick.canceled || !pick.filePath) return { success: false, cancelled: true }
     require('fs').writeFileSync(pick.filePath, JSON.stringify(data))
+    noteSaved(userId)
     return { success: true, savedTo: pick.filePath }
   })
+
+  safeHandle('progress:backup-status', async (_, { userId }) => backupStatus(userId))
 
   safeHandle('progress:import', async (_, { userId }) => {
     const opts = { title: 'Restore my progress', properties: ['openFile' as const], filters: [{ name: 'DericBI progress', extensions: ['json'] }] }

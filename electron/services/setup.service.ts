@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { DATAENG_DATASETS, generateDataEngDatasets } from './dataeng.datasets'
 import { SHOP_DATASETS, generateShopDatasets } from './shop.datasets'
 
-const SETUP_VERSION = 13 // increment to force re-seed on app update
+const SETUP_VERSION = 14 // increment to force re-seed on app update
 
 // Bump when the generated CSV *contents* change shape, so installs that already have older
 // CSVs on disk get them regenerated (generateDatasets() otherwise skips files that exist).
